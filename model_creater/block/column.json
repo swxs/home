@@ -1,0 +1,132 @@
+{
+    "name": "column",
+    "setting": [
+        {
+            "name": "alias",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+              "name": "col",
+              "type": "String",
+              "parmas": {
+                  "max_length": "50"
+              },
+              "setting": {
+                  "union": false,
+                  "editable": true,
+                  "indexes": true,
+                  "check": "all"
+              }
+          },
+        {
+            "name": "readablecol",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "visible",
+            "type": "Boolean",
+            "parmas": {
+                "default": "False"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dtype",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.DTYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dim_measure",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.DIM_MEASURE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "ttype",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.COLUMN_TYPE_LIST",
+                "default": "enum.COLUMN_TYPE_NORMAL"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "rspd_count",
+            "type": "Int",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "expression",
+            "type": "String",
+            "parmas": {
+                "max_length": "500"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "valgroup_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

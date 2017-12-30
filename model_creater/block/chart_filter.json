@@ -1,0 +1,117 @@
+{
+    "name": "chart_filter",
+    "setting": [
+        {
+            "name": "ttype",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.FILTER_TYPE_LIST"
+            },
+            "setting": {
+                "union": true,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "node_id",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "column",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+              "name": "reverse",
+              "type": "Boolean",
+              "parmas": {
+                  "default": false
+              },
+              "setting": {
+                  "union": false,
+                  "editable": true,
+                  "indexes": false,
+                  "check": "all"
+              }
+          },
+        {
+              "name": "value_list",
+              "type": "List",
+              "parmas": {},
+              "setting": {
+                  "union": false,
+                  "editable": true,
+                  "indexes": false,
+                  "check": "all"
+              }
+        },
+        {
+              "name": "cond_list",
+              "type": "List",
+              "parmas": {},
+              "setting": {
+                  "union": false,
+                  "editable": true,
+                  "indexes": false,
+                  "check": "all"
+              }
+        },
+        {
+              "name": "expression",
+              "type": "String",
+              "parmas": {},
+              "setting": {
+                  "union": false,
+                  "editable": true,
+                  "indexes": false,
+                  "check": "all"
+              }
+          },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,203 @@
+{
+    "name": "field",
+    "setting": [
+        {
+            "name": "name",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "disp_name",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "desc",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "column",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "unit",
+            "type": "String",
+            "parmas": {
+                "max_length": "10"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "agg_type",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.AGG_TYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "aggfunc_str",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.AGGFUNC_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dategroup",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.DATEGROUP_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dtype",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.DTYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "labelformat",
+            "type": "Dict",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "filter_str",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dim_measure",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.DIM_MEASURE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "ext_js",
+            "type": "Strng",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "stack",
+            "type": "Strng",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

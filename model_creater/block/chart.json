@@ -1,0 +1,380 @@
+{
+    "name": "chart",
+    "enum": [{
+        "name": "CHART_TYPE_LIST",
+        "choices": [
+            {
+                "name": "CHART_TYPE_TABLE",
+                "value": "\"table\"",
+                "disname": "表格"
+            },{
+                "name": "CHART_TYPE_CROSSTABLE",
+                "value": "\"crosstable\"",
+                "disname": "交叉表"
+            },{
+                "name": "CHART_TYPE_PIE",
+                "value": "\"pie\"",
+                "disname": "饼图"
+            },{
+                "name": "CHART_TYPE_BAR",
+                "value": "\"bar\"",
+                "disname": "柱状图"
+            },{
+                "name": "CHART_TYPE_HBAR",
+                "value": "\"hbar\"",
+                "disname": "条形图"
+            },{
+                "name": "CHART_TYPE_LINE",
+                "value": "\"line\"",
+                "disname": "折线图"
+            },{
+                "name": "CHART_TYPE_HLINE",
+                "value": "\"hline\"",
+                "disname": "横向折线图"
+            },{
+                "name": "CHART_TYPE_RADAR",
+                "value": "\"radar\"",
+                "disname": "雷达图"
+            },{
+                "name": "CHART_TYPE_SCATTER",
+                "value": "\"scatter\"",
+                "disname": "散点图"
+            },{
+                "name": "CHART_TYPE_TREEMAP",
+                "value": "\"treemap\"",
+                "disname": "矩形树图"
+            },{
+                "name": "CHART_TYPE_SUPERTREE",
+                "value": "\"supertree\"",
+                "disname": "聚合树"
+            },{
+                "name": "CHART_TYPE_RICHTEXT",
+                "value": "\"richtext\"",
+                "disname": "富文本"
+            }
+        ]
+    }],
+    "setting": [
+        {
+            "name": "name",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "title",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "ttype",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.CHART_TYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "show_legend",
+            "type": "Boolean",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "show_toolbox",
+            "type": "Boolean",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "show_title",
+            "type": "Boolean",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dfname",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "worktable",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "base_option",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "index_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "datax",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "datay",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "value_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "filter_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "innerfilter_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "sizetag",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "colortag",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "custom_attr",
+            "type": "Dict",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "drilldown",
+            "type": "Boolean",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "drill_level",
+            "type": "Int",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "ext_js",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "next_chart",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "prev_chart",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "combine_chart_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dim_measure_dict",
+            "type": "Dict",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

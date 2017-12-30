@@ -1,0 +1,96 @@
+{
+    "name": "survey",
+    "enum": [{
+        "name": "SURVEY_STATUS_LIST",
+        "choices": [
+            {
+                "name": "SURVEY_STATUS_DISABLED",
+                "value": 0,
+                "disname": "禁用"
+            },{
+                "name": "SURVEY_STATUS_ENABLED",
+                "value": 1,
+                "disname": "启用"
+            }
+        ]
+    }],
+    "setting": [
+        {
+            "name": "name",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": true,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "code",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": true,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "link",
+            "type": "String",
+            "parmas": {
+                "max_length": "100"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "status",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.SURVEY_STATUS_LIST",
+                "default": "enum.SURVEY_STATUS_ENABLED"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "rspd_count",
+            "type": "Int",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

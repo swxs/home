@@ -1,0 +1,66 @@
+{
+    "name": "daterange_filter",
+    "setting": [
+        {
+            "name": "ttype",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.FILTER_TYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "custom_attr",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "name",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

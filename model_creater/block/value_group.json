@@ -1,0 +1,192 @@
+{
+    "name": "value_group",
+    "enum": [{
+        "name": "OP_LIST",
+        "choices": [
+            {
+                "name": "OP_RANGE",
+                "value": 1,
+                "disname": "范围"
+            },{
+                "name": "OP_GT",
+                "value": 2,
+                "disname": "大于"
+            },{
+                "name": "OP_EQ",
+                "value": 3,
+                "disname": "等于"
+            },{
+                "name": "OP_LT",
+                "value": 4,
+                "disname": "小于"
+            },{
+                "name": "OP_GTE",
+                "value": 5,
+                "disname": "大于等于"
+            },{
+                "name": "OP_LTE",
+                "value": 6,
+                "disname": "小于等于"
+            },{
+                "name": "OP_NEQ",
+                "value": 7,
+                "disname": "不等于"
+            },{
+                "name": "OP_CONTAINS",
+                "value": 8,
+                "disname": "包含"
+            },{
+                "name": "OP_NOT_CONTAINS",
+                "value": 9,
+                "disname": "不包含"
+            },{
+                "name": "OP_IN",
+                "value": 10,
+                "disname": "属于"
+            },{
+                "name": "OP_NOT_IN",
+                "value": 11,
+                "disname": "不属于"
+            },{
+                "name": "OP_IS_NONE",
+                "value": 12,
+                "disname": "为空"
+            },{
+                "name": "OP_NOT_NONE",
+                "value": 13,
+                "disname": "不为空"
+            }
+        ]
+    },{
+        "name": "VALUE_TYPE_LIST",
+        "choices": [
+            {
+                "name": "VALUE_TYPE_STR",
+                "value": 1,
+                "disname": "字符串"
+            },{
+                "name": "VALUE_TYPE_INT",
+                "value": 2,
+                "disname": "整型"
+            },{
+                "name": "VALUE_TYPE_FLOAT",
+                "value": 3,
+                "disname": "浮点型"
+            },{
+                "name": "VALUE_TYPE_DECIMAL",
+                "value": 4,
+                "disname": "货币"
+            },{
+                "name": "VALUE_TYPE_STR_LIST",
+                "value": 5,
+                "disname": "字符串列表"
+            },{
+                "name": "VALUE_TYPE_INT_LIST",
+                "value": 6,
+                "disname": "数字列表"
+            }
+        ]
+    }],
+    "setting": [
+        {
+            "name": "name",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "expression",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "src_col",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "op",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.OP_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "value_str",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "vtype",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.VALUE_TYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

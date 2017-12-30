@@ -1,0 +1,97 @@
+{
+    "name": "publish",
+    "enum": [{
+        "name": "PUBLISH_TYPE_LIST",
+        "choices": [
+            {
+                "name": "PUBLISH_TYPE_REGION",
+                "value": 0,
+                "disname": "范围"
+            },{
+                "name": "PUBLISH_TYPE_USER",
+                "value": 1,
+                "disname": "人员"
+            }
+        ]
+    }],
+    "setting": [
+        {
+            "name": "name",
+            "type": "String",
+            "parmas": {
+                "max_length": "50"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "published_id",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "dashboard_id",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "type",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.PUBLISH_TYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

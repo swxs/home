@@ -1,0 +1,230 @@
+{
+    "name": "ticket_regulation",
+        "enum": [{
+            "name": "TICKET_PRIORITY_LIST",
+            "choices": [
+                {
+                    "name": "TICKET_PRIORITY_LOW",
+                    "value": 1,
+                    "disname": "低"
+                }, {
+                    "name": "TICKET_PRIORITY_MIDDLE",
+                    "value": 2,
+                    "disname": "中"
+                }, {
+                    "name": "TICKET_PRIORITY_HIGH",
+                    "value": 3,
+                    "disname": "高"
+                }, {
+                    "name": "TICKET_PRIORITY_URGENT",
+                    "value": 4,
+                    "disname": "紧急"
+                }
+            ]}, 
+            {
+            "name": "TICKET_TYPE_LIST",
+            "choices": [
+                {
+                    "name": "TICKET_TYPE_TASK",
+                    "value": 1,
+                    "disname": "任务"
+                }, {
+                    "name": "TICKET_TYPE_ALERT",
+                    "value": 2,
+                    "disname": "警报"
+                }]
+            },
+            {
+                "name": "EMAIL_NOTIFY_LIST",
+                "choices": [
+                    {
+                        "name": "NOT_NOTIFY",
+                        "value": 0,
+                        "disname": "邮件不通知"
+                    }, {
+                        "name": "NOTIFY",
+                        "value": 1,
+                        "disname": "邮件通知"
+                    }]
+            },
+            {
+                "name": "APPLICANT_LIST",
+                "choices": [
+                    {
+                        "name": "SURVEY",
+                        "value": 1,
+                        "disname": "问卷"
+                    }, {
+                        "name": "DASHBOARD",
+                        "value": 2,
+                        "disname": "图表"
+                    }
+                ]
+    }],
+    "setting": [
+        {
+            "name": "subject",
+            "type": "String",
+            "parmas": {
+                "max_length": "100"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "content",
+            "type": "String",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "priority",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.TICKET_PRIORITY_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "applicant",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.APPLICANT_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "email_notify",
+            "type": "Int",
+            "parmas": {
+                "choices": "enum.EMAIL_NOTIFY_LIST",
+                "default": "enum.NOT_NOTIFY"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "user_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "region_id",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "create_user",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "survey_id",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": true,
+                "check": "all"
+            }
+        },
+        {
+            "name": "regulation",
+            "type": "Dict",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "process_deadline",
+            "type": "Int",
+            "parmas": {
+                "max_length": "5"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "created",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "updated",
+            "type": "DateTime",
+            "parmas": {
+                "default": "datetime.datetime.now"
+            },
+            "setting": {
+                "union": false,
+                "editable": false,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}

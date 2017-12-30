@@ -1,0 +1,92 @@
+{
+    "name": "datamerge",
+    "enum": [{
+        "name": "MERGE_TYPE_LIST",
+        "choices": [
+            {
+                "name": "MERGE_TYPE_INNER",
+                "value": "\"inner\"",
+                "disname": "inner"
+            },{
+                "name": "MERGE_TYPE_LEFT",
+                "value": "\"left\"",
+                "disname": "left"
+            },{
+                "name": "MERGE_TYPE_RIGHT",
+                "value": "\"right\"",
+                "disname": "right"
+            },{
+                "name": "MERGE_TYPE_OUTER",
+                "value": "\"outer\"",
+                "disname": "outer"
+            },{
+                "name": "MERGE_TYPE_CONCAT",
+                "value": "\"concat\"",
+                "disname": "concat"
+            }
+        ]
+    }],
+    "setting": [
+        {
+            "name": "src_wt",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "src_column_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "remote_wt",
+            "type": "String",
+            "parmas": {
+                "max_length": "24"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "remote_column_list",
+            "type": "List",
+            "parmas": {},
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        },
+        {
+            "name": "how",
+            "type": "String",
+            "parmas": {
+                "choices": "enum.MERGE_TYPE_LIST"
+            },
+            "setting": {
+                "union": false,
+                "editable": true,
+                "indexes": false,
+                "check": "all"
+            }
+        }
+    ]
+}
