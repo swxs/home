@@ -1,0 +1,73 @@
+{
+  "name": "tag",
+  "enum": [
+    {
+      "name": "TAG_TTYPE_LIST",
+      "choices": [
+        {
+          "name": "ttype_news",
+          "disname": "新闻类",
+          "value": "1"
+        }
+      ]
+    }
+  ],
+  "setting": [
+    {
+      "name": "name",
+      "type": "String",
+      "parmas": {
+        "required": false,
+        "unique": true,
+        "max_length": "50"
+      },
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "create",
+      "type": "DateTime",
+      "parmas": {
+        "required": true
+      },
+      "setting": {
+        "editable": false,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "update",
+      "type": "DateTime",
+      "parmas": {
+        "unique": false,
+        "required": true
+      },
+      "setting": {
+        "editable": false,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "ttype",
+      "type": "Int",
+      "parmas": {
+        "required": true,
+        "choices": "TAG_TTYPE_LIST"
+      },
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    }
+  ]
+}

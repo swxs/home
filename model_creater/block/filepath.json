@@ -1,0 +1,59 @@
+{
+  "name": "filepath",
+  "enum": [],
+  "setting": [
+    {
+      "name": "name",
+      "type": "String",
+      "parmas": {
+        "max_length": "50",
+        "unique": true
+      },
+      "setting": {
+        "editable": true,
+        "indexes": true,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "path",
+      "type": "String",
+      "parmas": {
+        "max_length": "100"
+      },
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "create",
+      "type": "DateTime",
+      "parmas": {
+        "required": true
+      },
+      "setting": {
+        "editable": false,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "update",
+      "type": "DateTime",
+      "parmas": {
+        "required": true
+      },
+      "setting": {
+        "editable": false,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    }
+  ]
+}

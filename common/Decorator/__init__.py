@@ -12,9 +12,9 @@ import tornado
 # from company import enum, utils
 import const
 from base import BaseHandler
-from api.organization.permission import utils as permission_utils
-from api.organization.region import utils as region_utils
-from common.exception import NotLoginException, PermException
+# from api.organization.permission import utils as permission_utils
+# from api.organization.region import utils as region_utils
+# from common.exception import NotLoginException, PermException
 
 
 def with_permission(*perm_list):
@@ -25,15 +25,16 @@ def with_permission(*perm_list):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             ''''''
-            user = self.current_user
-            # user = utils.get_user('595f625c1d41c81b48f799e5')
-            if not user:
-                raise NotLoginException()
-            for permission in perm_list:
-                if not permission_utils.has_permission(user, permission):
-                    raise PermException()
-            else:
-                return method(self, *args, **kwargs)
+            # user = self.current_user
+            # # user = utils.get_user('595f625c1d41c81b48f799e5')
+            # if not user:
+            #     raise NotLoginException()
+            # for permission in perm_list:
+            #     if not permission_utils.has_permission(user, permission):
+            #         raise PermException()
+            # else:
+            #     return method(self, *args, **kwargs)
+            return True
         return wrapper
     return _decorator
 

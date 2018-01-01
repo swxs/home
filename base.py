@@ -14,11 +14,15 @@ from tornado.web import escape
 
 import const
 import settings
-from common.exception import *
-from common.validate import Validate
-from common import utils as common_utils
-from tools.mobile_utils import is_mobile_request
-from api.organization.user import utils as user_utils
+from common.Exceptions.CommonException import CommonException
+from common.Exceptions.ExistException import ExistException
+from common.Exceptions.NotExistException import NotExistException
+from common.Exceptions.NotLoginException import NotLoginException
+from common.Exceptions.PermException import PermException
+from common.Exceptions.ValidateException import ValidateException
+from common.Exceptions.LackOfFieldException import LackOfFieldException
+from common.Exceptions.DeleteInhibitException import DeleteInhibitException
+from common.Utils.validate import Validate
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
@@ -117,18 +121,19 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     def get_current_user(self):
         ''''''
-        if not hasattr(self, '_user'):
-            user_id = self.session.get('user_id')
-            if user_id is None:
-                raise NotLoginException()
-            self._user = user_utils.get_user(user_id=user_id)
-        return self._user
+        return None
+        # if not hasattr(self, '_user'):
+        #     user_id = self.session.get('user_id')
+        #     if user_id is None:
+        #         raise NotLoginException()
+        #     self._user = user_utils.get_user(user_id=user_id)
+        # return self._user
 
     def get_template_namespace(self):
         namespace = super(BaseHandler, self).get_template_namespace()
         namespace['escape'] = tornado.escape
         namespace['json'] = json
-        namespace['common_utils'] = common_utils
+        # namespace['common_utils'] = common_utils
         namespace['has_permission'] = self.has_permission
         namespace['const'] = const
         return namespace
@@ -187,10 +192,11 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             return getattr(self, '_client_type')
 
         agent = self.request.headers.get('USER-AGENT', '')
-        is_mobile = is_mobile_request(agent)
+        return False
+        # is_mobile = is_mobile_request(agent)
 
-        setattr(self, '_client_type', is_mobile)
-        return is_mobile
+        # setattr(self, '_client_type', is_mobile)
+        # return is_mobile
 
     @property
     def is_ajax(self):
@@ -226,7 +232,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except ValidateException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except MultException as e:
+            except ExistException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except NotExistException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
@@ -239,12 +245,12 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             except DeleteInhibitException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except Exception as e:
-                from common.log_utils import getLogger
+                # from common.log_utils import getLogger
                 import traceback
-                log = getLogger()
-                log.error(e)
+                # log = getLogger()
+                # log.error(e)
                 self.write_json(data=None, errcode=const.AJAX_FAIL_NORMAL,
-                                errmsg=const.ERRCODE_DICT[const.AJAX_FAIL_NORMAL], status=None)
+                                errmsg=u"未定义异常", status=None)
 
         return wrapper
 

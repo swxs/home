@@ -2,8 +2,8 @@
 import hashlib
 import os
 import time
-from common.log_utils import getLogger
-log = getLogger('mem_cache.py')
+# from common.log_utils import getLogger
+# log = getLogger('mem_cache.py')
 
 __all__ = ['get', 'set', 'memorize', 'memcache_client']
 
@@ -77,8 +77,8 @@ def start_memory_cleaner():
                 del OBJ_VERSION_DICT[key]
             except KeyError:
                 pass
-        log.debug('%s keys deleted, %s keys remain' %
-                  (len(keys_to_remove), len(OBJ_DICT)),)
+        # log.debug('%s keys deleted, %s keys remain' %
+        #           (len(keys_to_remove), len(OBJ_DICT)),)
 
 
 memory_cleaner_thread_started = False

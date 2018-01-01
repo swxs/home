@@ -4,64 +4,65 @@ import os
 import sys
 import shutil
 import ConfigParser
+
 if __name__ == "__main__":
     reload(sys)
     sys.setdefaultencoding("utf8")
+
 
 class Marker:
     def __init__(self, model_setting_filename):
         # todo 读取设置文件 初始化models_setting
         # self._get_setting()
-        self._get_setting_v2(model_setting_filename)
+        if self._get_setting_v2(model_setting_filename):
+            self.filename_list = ["models", "enum", "urls", "utils", "views"]
+            self.enum = self._init_enum()
+            print(self.enum)
+            print("-" * 40)
+            self.models = self._init_models()
+            print(self.models)
+            print("-" * 40)
+            self.utils = self._init_utils()
+            print(self.utils)
+            print("-" * 40)
+            self.views = self._init_views()
+            print(self.views)
+            print("-" * 40)
+            self.urls = self._init_urls()
+            print(self.urls)
 
-        self.filename_list = ["models", "enum", "urls", "utils", "views"]
-        self.enum = self._init_enum()
-        print(self.enum)
-        print("-" * 40)
-        self.models = self._init_models()
-        print(self.models)
-        print("-" * 40)
-        self.utils = self._init_utils()
-        print(self.utils)
-        print("-" * 40)
-        self.views = self._init_views()
-        print(self.views)
-        print("-" * 40)
-        self.urls = self._init_urls()
-        print(self.urls)
-
-        self._init_folder_and_file()
+            self._init_folder_and_file()
 
     def _get_setting(self):
         self.model_name = "user"
         self.pathname = self.model_name
         self.model_setting_list = [
             {"name": "company_id", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": False, "editable": False, "check": "all"}},
+             "setting": {"unique": False, "editable": False, "check": "all"}},
             {"name": "username", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": True, "editable": True, "check": "all"}},
+             "setting": {"unique": True, "editable": True, "check": "all"}},
             {"name": "password", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": False, "editable": True, "check": "password"}},
+             "setting": {"unique": False, "editable": True, "check": "password"}},
             {"name": "nickname", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": False, "editable": True, "check": "all"}},
+             "setting": {"unique": False, "editable": True, "check": "all"}},
             {"name": "email", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": True, "editable": True, "check": "email"}},
+             "setting": {"unique": True, "editable": True, "check": "email"}},
             {"name": "mobile", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": False, "editable": True, "check": "mobile"}},
+             "setting": {"unique": False, "editable": True, "check": "mobile"}},
             {"name": "actived", "type": "Int", "parmas": {"default": "0"},
-             "setting": {"union": False, "editable": True, "check": "all"}},
+             "setting": {"unique": False, "editable": True, "check": "all"}},
             {"name": "status", "type": "Int", "parmas": {"default": "1"},
-             "setting": {"union": False, "editable": True, "check": "all"}},
+             "setting": {"unique": False, "editable": True, "check": "all"}},
             {"name": "role_list", "type": "List", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": False, "editable": True, "check": "all"}},
+             "setting": {"unique": False, "editable": True, "check": "all"}},
             {"name": "created", "type": "DateTime", "parmas": {"default": "datetime.datetime.now"},
-             "setting": {"union": False, "editable": False, "check": "all"}},
+             "setting": {"unique": False, "editable": False, "check": "all"}},
             {"name": "updated", "type": "DateTime", "parmas": {"default": "datetime.datetime.now"},
-             "setting": {"union": False, "editable": False, "check": "all"}},
+             "setting": {"unique": False, "editable": False, "check": "all"}},
             {"name": "exp_time", "type": "DateTime", "parmas": {},
-             "setting": {"union": False, "editable": True, "check": "all"}},
+             "setting": {"unique": False, "editable": True, "check": "all"}},
             {"name": "description", "type": "String", "parmas": {"max_length": "\"50\""},
-             "setting": {"union": False, "editable": True, "check": "all"}}]
+             "setting": {"unique": False, "editable": True, "check": "all"}}]
         self._init_parmas()
 
     def _get_setting_v2(self, model_setting_filename):
@@ -69,13 +70,15 @@ class Marker:
         with open(path, "r") as f:
             data = json.load(f)
             f.close()
-        self.model_name = data["name"]
-        self.pathname = self.model_name
-        self.model_title = self._get_title(data["name"])
-        self.model_upper = self._get_upper(data["name"])
-        self.model_setting_list = data["setting"]
-        self.model_enum_list = data["enum"] if "enum" in data else []
+        self.model_name = self.pathname = data.get('name', None)
+        if self.model_name is None:
+            return False
+        self.model_title = self._get_title(self.model_name)
+        self.model_upper = self._get_upper(self.model_name)
+        self.model_setting_list = data.get('setting', [])
+        self.model_enum_list = data.get('enum', [])
         self._init_parmas()
+        return True
 
     def _get_title(self, name):
         if "_" in name:
@@ -98,19 +101,19 @@ class Marker:
             return name.upper()
 
     def _init_parmas(self):
-        self.union_parma_list = []
+        self.unique_parma_list = []
         self.edit_parma_list = []
         self.check_parma_dick = {}
         self.indexes_list = []
         for model_setting in self.model_setting_list:
-            if model_setting["setting"]["union"]:
-                self.union_parma_list.append(model_setting["name"])
-            if model_setting["setting"]["editable"]:
-                self.edit_parma_list.append(model_setting["name"])
-            if model_setting["setting"]["check"] and model_setting["setting"]["check"] != "all":
-                self.check_parma_dick[model_setting["name"]] = model_setting["setting"]["check"]
-            if model_setting["setting"]["indexes"]:
-                self.indexes_list.append("\"{0}\"".format(model_setting["name"]))
+            if model_setting.get('parms', {}).get('unique', False):
+                self.unique_parma_list.append(model_setting.get('name', ''))
+            if model_setting.get('settings', {}).get('editable', True):
+                self.edit_parma_list.append(model_setting.get('name', ''))
+            # if model_setting["setting"]["check"] and model_setting["setting"]["check"] != "all":
+            #     self.check_parma_dick[model_setting["name"]] = model_setting["setting"]["check"]
+            if model_setting.get('settings', {}).get('index', False):
+                self.indexes_list.append("\"{0}\"".format(model_setting.get('name', '')))
 
         edit_select_parmas_list = []
         edit_selected_parmas_list = []
@@ -118,28 +121,27 @@ class Marker:
             edit_select_parmas_list.append("{0}=undefined".format(parma))
             edit_selected_parmas_list.append("{0}={0}".format(parma))
 
-        union_select_parmas_list = []
-        union_selected_parmas_list = []
-        for parma in self.union_parma_list:
-            union_select_parmas_list.append("{0}=undefined".format(parma))
-            union_selected_parmas_list.append("{0}={0}".format(parma))
+        unique_select_parmas_list = []
+        unique_selected_parmas_list = []
+        for parma in self.unique_parma_list:
+            unique_select_parmas_list.append("{0}=undefined".format(parma))
+            unique_selected_parmas_list.append("{0}={0}".format(parma))
 
         self.edit_select_parmas = ", ".join(edit_select_parmas_list)
         self.edit_selected_parmas = ", ".join(edit_selected_parmas_list)
-        self.union_select_parmas = ", ".join(union_select_parmas_list)
-        self.union_selected_parmas = ", ".join(union_selected_parmas_list)
+        self.unique_select_parmas = ", ".join(unique_select_parmas_list)
+        self.unique_selected_parmas = ", ".join(unique_selected_parmas_list)
 
-        self.temp_union_select = ", " if self.union_select_parmas != "" else ""
+        self.temp_unique_select = ", " if self.unique_select_parmas != "" else ""
         self.temp_edit_select = ", " if self.edit_select_parmas != "" else ""
 
     def _get_module_type(self, parma):
         for model_setting in self.model_setting_list:
-            if model_setting["name"] == parma:
-                return model_setting["type"]
+            if model_setting.get('name') == parma:
+                return model_setting.get("type")
 
     def _get_parmas(self, model_type, model_parmas):
         parmas_list = []
-        # for model_parma in model_parmas:
         if "required" in model_parmas:
             parmas_list.append("required={0}".format(model_parmas["required"]))
             # todo create里必须包含该字段的参数
@@ -172,6 +174,8 @@ class Marker:
 
             for filename in self.filename_list:
                 self._create_file(filename)
+        else:
+            pass
 
     def _create_file(self, filename):
         with open(os.path.join(self.abs_pathname, "{0}.py".format(filename)), "w") as f:
@@ -180,7 +184,7 @@ class Marker:
 
     def _init_enum_string(self):
         str = ""
-        if self.model_enum_list != []:
+        if self.model_enum_list:
             for enum_setting in self.model_enum_list:
                 enum_key = ""
                 enum_key_value = ""
@@ -212,7 +216,7 @@ class Marker:
     def _init_model_string(self):
         model_string = ""
         for model_setting in self.model_setting_list:
-            model_string += """
+            model_string += """    
     %(name)s = models.%(model_type)sField(%(model_parmas)s)""" % {
                 "name": model_setting["name"],
                 "model_type": model_setting["type"],
@@ -245,8 +249,7 @@ from tornado.util import ObjectDict
 from basedoc import BaseDoc as BaseDoc
 
 
-class %(model_title)s(models.Document, BaseDoc):
-%(model_content)s
+class %(model_title)s(models.Document, BaseDoc):%(model_content)s
 %(model_indexes)s
 """ % {
             "model_title": self.model_title,
@@ -267,8 +270,8 @@ class %(model_title)s(models.Document, BaseDoc):
             str = ""
         return str
 
-    def _is_create_union(self, parma_type):
-        if parma_type in self.union_parma_list:
+    def _is_create_unique(self, parma_type):
+        if parma_type in self.unique_parma_list:
             print(parma_type, "_" * 40)
             str = """
         if get_%(model_name)s(%(parma_type)s=%(parma_type)s):
@@ -280,8 +283,8 @@ class %(model_title)s(models.Document, BaseDoc):
             str = ""
         return str
 
-    def _is_update_union(self, parma_type):
-        if parma_type in self.union_parma_list:
+    def _is_update_unique(self, parma_type):
+        if parma_type in self.unique_parma_list:
             str = """
         if %(parma_type)s != %(model_name)s.%(parma_type)s and get_%(model_name)s(%(parma_type)s=%(parma_type)s):
             raise MultException(u"%(parma_type)s")""" % {
@@ -294,7 +297,7 @@ class %(model_title)s(models.Document, BaseDoc):
 
     def _init_util_select(self):
         str = ""
-        for parma in self.union_parma_list:
+        for parma in self.unique_parma_list:
             str += """
         elif %(type)s != undefined:
             return get_%(model_name)s_by_%(type)s(%(type)s)""" % {
@@ -309,13 +312,9 @@ class %(model_title)s(models.Document, BaseDoc):
         for parma in self.edit_parma_list:
             str += """
     if %(type)s != undefined:
-        %(validate)s
-        %(union)s
         %(model_name)s.%(type)s = %(type)s""" % {
                 "model_name": self.model_name,
-                "type": parma,
-                "union": self._is_create_union(parma),
-                "validate": self._is_validate(parma),
+                "type": parma
             }
         return str
 
@@ -324,19 +323,15 @@ class %(model_title)s(models.Document, BaseDoc):
         for parma in self.edit_parma_list:
             str += """
     if %(type)s != undefined:
-        %(validate)s
-        %(union)s
         %(model_name)s.%(type)s = %(type)s""" % {
                 "model_name": self.model_name,
                 "type": parma,
-                "union": self._is_update_union(parma),
-                "validate": self._is_validate(parma),
             }
         return str
 
     def _init_util_refresh(self):
         str = ""
-        for parma in self.union_parma_list:
+        for parma in self.unique_parma_list:
             str += """
     get_%(model_name)s_by_%(type)s(%(model_name)s.%(type)s, refresh=1)""" % {
                 "model_name": self.model_name,
@@ -346,7 +341,7 @@ class %(model_title)s(models.Document, BaseDoc):
 
     def _init_util_refresh_list(self):
         str = ""
-        for parma in self.union_parma_list:
+        for parma in self.unique_parma_list:
             str += """
 @memorize
 def get_%(model_name)s_by_%(type)s(%(type)s):
@@ -380,7 +375,7 @@ def get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id):
 
 %(util_refresh_list)s
 
-def get_%(model_name)s(%(model_name)s_id=undefined%(temp_union_select)s%(union_select_parmas)s):
+def get_%(model_name)s(%(model_name)s_id=undefined%(temp_unique_select)s%(unique_select_parmas)s):
     ''''''
     try:
         if %(model_name)s_id != undefined:
@@ -398,15 +393,14 @@ def refresh_%(model_name)s(%(model_name)s):
     
 def create_%(model_name)s(%(edit_select_parmas)s):
     ''''''
-    %(model_name)s = models.%(model_title)s()
-    %(util_create)s
+    %(model_name)s = models.%(model_title)s()%(util_create)s
     %(model_name)s.save()
     refresh_%(model_name)s(%(model_name)s)
     return %(model_name)s
 
-def has_%(model_name)s(%(model_name)s_id=undefined%(temp_union_select)s%(union_select_parmas)s):
+def has_%(model_name)s(%(model_name)s_id=undefined%(temp_unique_select)s%(unique_select_parmas)s):
     try:
-        %(model_name)s = get_%(model_name)s(%(model_name)s_id=%(model_name)s_id%(temp_union_select)s%(union_selected_parmas)s)
+        %(model_name)s = get_%(model_name)s(%(model_name)s_id=%(model_name)s_id%(temp_unique_select)s%(unique_selected_parmas)s)
         if %(model_name)s is None:
             return False 
         else:
@@ -415,8 +409,7 @@ def has_%(model_name)s(%(model_name)s_id=undefined%(temp_union_select)s%(union_s
         return False
 
 def update_%(model_name)s(%(model_name)s%(temp_edit_select)s%(edit_select_parmas)s):
-    ''''''
-    %(util_update)s
+    ''''''%(util_update)s
     %(model_name)s.save()
     refresh_%(model_name)s(%(model_name)s)
     return %(model_name)s
@@ -432,11 +425,11 @@ def to_front(%(model_name)s):
 """ % {
             "model_name": self.model_name,
             "model_title": self.model_title,
-            "temp_union_select": self.temp_union_select,
+            "temp_unique_select": self.temp_unique_select,
             "edit_select_parmas": self.edit_select_parmas,
-            "union_select_parmas": self.union_select_parmas,
+            "unique_select_parmas": self.unique_select_parmas,
             "temp_edit_select": self.temp_edit_select,
-            "union_selected_parmas": self.union_selected_parmas,
+            "unique_selected_parmas": self.unique_selected_parmas,
             "util_select": self._init_util_select(),
             "util_create": self._init_util_create(),
             "util_update": self._init_util_update(),
@@ -567,7 +560,7 @@ if __name__ == "__main__":
     4.√utils和bil的权责分配
     5. create 中的问题：
     1）√字段合法性检查
-    2）√union字段的是否重复
+    2）√unique字段的是否重复
     3） 部分字段的自动默认取值, 
     6. get 中的问题：
     1） 多样化查询
@@ -575,7 +568,7 @@ if __name__ == "__main__":
     3） 添加get_and_create方法, 实现对某些对象自动创建
     7. update 中的问题：
     1）√字段合法性检查
-    2）√union字段的是否重复
+    2）√unique字段的是否重复
     3） 部分字段的自动修改, 如自增， 编辑时间等
     8. delete 中的问题：
     1） 删除是表示不可见还是彻底删除？ 正常不是错误数据不太会给予删除操作
@@ -591,5 +584,5 @@ if __name__ == "__main__":
 
     for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
         for file in files:
-            if file:
+            if file in ["tag.json"]:
                 marker = Marker(str(file))
