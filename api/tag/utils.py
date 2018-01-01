@@ -8,7 +8,7 @@ class utils(base_utils):
     def __init__(self, object):
         self.object = object
 
-    @base_utils.single_or_muliteple
+    @base_utils.single_or_multiple
     def update(self, name=undefined, ttype=undefined, object=None):
         ''''''
         try:
@@ -21,7 +21,7 @@ class utils(base_utils):
         except:
             return False
 
-    @base_utils.single_or_muliteple
+    @base_utils.single_or_multiple
     def delete(self, object=None):
         ''''''
         try:
@@ -30,7 +30,7 @@ class utils(base_utils):
         except:
             return False
 
-    @base_utils.single_or_muliteple
+    @base_utils.single_or_multiple
     def to_front(self, object=None):
         ''''''
         return object.to_dict()
