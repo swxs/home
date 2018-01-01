@@ -3,6 +3,5 @@
 ttype_news = 1
 
 TAG_TTYPE_LIST = [
-   (ttype_news, u'新闻类'),
+    (ttype_news, u'新闻类'),
 ]
-    

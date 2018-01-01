@@ -10,9 +10,9 @@ from tornado.netutil import bind_sockets
 import settings
 import urls
 from base import PageNotFoundHandler
-# from common.log_utils import getLogger
+from common.Utils.log_utils import getLogger
 
-# log = getLogger('main.py')
+log = getLogger('main.py')
 
 if len(sys.argv) > 1:
     MAIN_SITE_PORT = int(sys.argv[1])
@@ -28,6 +28,6 @@ if __name__ == "__main__":
     sockets = bind_sockets(MAIN_SITE_PORT)
     server = HTTPServer(application, xheaders=True)
     server.add_sockets(sockets)
-    # log.debug('Tornado server started on port %s.' % MAIN_SITE_PORT)
+    log.debug('Tornado server started on port %s.' % MAIN_SITE_PORT)
     tornado.ioloop.IOLoop.instance().start()
     print "start"

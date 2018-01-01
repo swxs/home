@@ -10,8 +10,6 @@ import re
 import tornado
 
 from base import BaseHandler
-import const
-import settings
 
 
 class IndexHandler(BaseHandler):

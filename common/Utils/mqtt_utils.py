@@ -2,7 +2,7 @@
 
 import hashlib
 import paho.mqtt.client as mqtt
-from common.log_utils import getLogger
+from common.Utils.log_utils import getLogger
 log = getLogger('mqtt_utils')
 
 # MQTT_HOST = '115.28.110.241'

@@ -245,10 +245,10 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             except DeleteInhibitException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except Exception as e:
-                # from common.log_utils import getLogger
+                from common.Utils.log_utils import getLogger
                 import traceback
-                # log = getLogger()
-                # log.error(e)
+                log = getLogger()
+                log.error(e)
                 self.write_json(data=None, errcode=const.AJAX_FAIL_NORMAL,
                                 errmsg=u"未定义异常", status=None)
 

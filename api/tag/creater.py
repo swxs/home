@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from bson import ObjectId
 import models
-from api.tag.utils import utils
-from common.Decorator.mem_cache import memorize
+from bson import ObjectId
 from const import undefined
+from utils import utils
+from common.Decorator.mem_cache import memorize
 
 
 class creater():
@@ -13,7 +13,7 @@ class creater():
 
     @classmethod
     @memorize
-    def get_tag_by_tag_id(tag_id):
+    def get_tag_by_tag_id(cls, tag_id):
         try:
             _id = ObjectId(tag_id)
             return utils(models.Tag.objects.get(id=_id))
@@ -21,12 +21,12 @@ class creater():
             return None
 
     @classmethod
-    def get_tag_list(tag_id):
+    def get_tag_list(cls):
         return utils(models.Tag.objects.filter())
 
-    @memorize
     @classmethod
-    def has_tag_by_tag_id(tag_id):
+    @memorize
+    def has_tag_by_tag_id(cls, tag_id):
         ''''''
         try:
             if creater.get_tag_by_tag_id(tag_id):

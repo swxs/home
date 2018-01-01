@@ -1,43 +1,36 @@
 # -*- coding: utf-8 -*-
 
-from bson import ObjectId
-import models as models
-from common.Decorator.single_or_multeple import single_or_muliteple
+from api.baseUtils import utils as base_utils
 from const import undefined
-from common.Decorator.mem_cache import memorize
-from common.Exceptions.CommonException import CommonException
-from common.Exceptions.ExistException import ExistException
-from common.Exceptions.NotExistException import NotExistException
 
-class utils():
+
+class utils(base_utils):
     def __init__(self, object):
         self.object = object
 
-    @single_or_muliteple
-    def update(self, name=undefined, ttype=undefined):
+    @base_utils.single_or_muliteple
+    def update(self, name=undefined, ttype=undefined, object=None):
         ''''''
         try:
             if name != undefined:
-                self.object.name = name
+                object.name = name
             if ttype != undefined:
-                self.object.ttype = ttype
-            self.object.save()
-            self.object = self.object.refresh()
-            return self.object
-        except:
-            return self.object
-
-    @single_or_muliteple
-    def delete(self):
-        ''''''
-        try:
-            self.object.delete()
-            self.object.refresh()
+                object.ttype = ttype
+            object.save()
             return True
         except:
             return False
 
-    @single_or_muliteple
-    def to_front(self):
+    @base_utils.single_or_muliteple
+    def delete(self, object=None):
         ''''''
-        return self.object.to_dict()
+        try:
+            object.delete()
+            return True
+        except:
+            return False
+
+    @base_utils.single_or_muliteple
+    def to_front(self, object=None):
+        ''''''
+        return object.to_dict()

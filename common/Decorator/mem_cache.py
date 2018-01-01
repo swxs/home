@@ -2,8 +2,8 @@
 import hashlib
 import os
 import time
-# from common.log_utils import getLogger
-# log = getLogger('mem_cache.py')
+from common.Utils.log_utils import getLogger
+log = getLogger('mem_cache.py')
 
 __all__ = ['get', 'set', 'memorize', 'memcache_client']
 
