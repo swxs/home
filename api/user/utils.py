@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from mongoengine.errors import *
 from bson import ObjectId
 from const import undefined
 import enums as enums
 import models as models
 from common.Decorator.mem_cache import memorize
+from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 
 def refresh(user):
@@ -42,7 +44,10 @@ def create(**kwargs):
         value = kwargs.get(attr, undefined)
         if value != undefined:
             user.__setattr__(attr, value)
-    user.save()
+    try:
+        user.save()
+    except NotUniqueError:
+        raise ExistException("User")
     return user
 
 
@@ -52,7 +57,10 @@ def update(user, **kwargs):
         if value != undefined:
             user.__setattr__(attr, value)
     user.updated = datetime.datetime.now()
-    user.save()
+    try:
+        user.save()
+    except NotUniqueError:
+        raise ExistException("User")
     refresh(user)
     return user
 
