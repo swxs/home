@@ -3,7 +3,9 @@
 import datetime
 from mongoengine.errors import *
 from bson import ObjectId
+from hashlib import md5
 from const import undefined
+import settings
 import enums as enums
 import models as models
 from common.Decorator.mem_cache import memorize
@@ -43,6 +45,8 @@ def create(**kwargs):
     for attr in user.__attrs__:
         value = kwargs.get(attr, undefined)
         if value != undefined:
+            if attr == "password":
+                value = md5(settings.SECRET_KEY + attr).hexdigest()
             user.__setattr__(attr, value)
     try:
         user.save()
@@ -55,6 +59,8 @@ def update(user, **kwargs):
     for attr in user.__attrs__:
         value = kwargs.get(attr, undefined)
         if value != undefined:
+            if attr == "password":
+                value = md5(settings.SECRET_KEY + attr).hexdigest()
             user.__setattr__(attr, value)
     user.updated = datetime.datetime.now()
     try:
