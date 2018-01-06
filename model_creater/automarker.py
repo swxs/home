@@ -241,6 +241,7 @@ from const import undefined
 import enums as enums
 import models as models
 from common.Decorator.mem_cache import memorize
+from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 
 def refresh(%(model_name)s):
