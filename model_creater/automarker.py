@@ -13,8 +13,8 @@ class Marker:
     def __init__(self, model_setting_filename):
         if self._get_setting(model_setting_filename):
             self.filename_list = ["models", "enums", "urls", "utils", "views"]
-            self.enum = self._init_enum()
-            print(self.enum)
+            self.enums = self._init_enums()
+            print(self.enums)
             print("-" * 40)
             self.models = self._init_models()
             print(self.models)
@@ -74,22 +74,21 @@ class Marker:
         self.model_upper = self._get_upper(self.model_name)
 
         self.model_enum_list = data.get('enum', None)
-        self.model_field_name_list = data.get('setting', None)
-        
         self.model_field_name_list = [field['name'] for field in data.get('setting', []) if field.get('name') is not None]
-        
+        self.model_field_dict = {field.get('name'):field for field in data.get('setting', [])}
+
         self.unique_field_list = []
         self.required_field_list= []
         self.editable_field_list = []
         self.indexes_field_list = []
         for field_name in self.model_field_name_list:
-            if data.get('setting', [])[field_name]['parms'].get('unique', False):
+            if self.model_field_dict[field_name]['parmas'].get('unique', False):
                 self.unique_field_list.append(field_name)
-            if data.get('setting', [])[field_name]['parms'].get('required', False):
+            if self.model_field_dict[field_name]['parmas'].get('required', False):
                 self.unique_field_list.append(field_name)
-            if data.get('setting', [])[field_name]['setting'].get('editable', True):
+            if self.model_field_dict[field_name]['setting'].get('editable', True):
                 self.editable_field_list.append(field_name)
-            if data.get('setting', [])[field_name]['setting'].get('indexes', True):
+            if self.model_field_dict[field_name]['setting'].get('indexes', True):
                 self.indexes_field_list.append(field_name)
         if len(self.editable_field_list)> 0:
             self.has_editable_selected = ", "
@@ -97,7 +96,7 @@ class Marker:
             self.has_editable_selected = ""
         self.editable_select_parmas = ", ".join(["{0}=undefined".format(field_name) for field_name in self.editable_field_list])
         self.editable_selected_parmas = ", ".join(["{0}={0}".format(field_name) for field_name in self.editable_field_list])
-        self.editable_attrs = ", ".join(["{0}".format(field_name) for field_name in self.editable_field_list])
+        self.editable_attrs = ", ".join(["'{0}'".format(field_name) for field_name in self.editable_field_list])
         return True
 
     def _get_title(self, name):
@@ -130,10 +129,8 @@ class Marker:
         else:
             return name.upper()
 
-    def _get_module_type(self, parma):
-        for model_setting in self.model_setting_list:
-            if model_setting.get('name') == parma:
-                return model_setting.get("type")
+    def _get_module_type(self, field):
+        return field.get("type")
 
     def _get_parmas(self, field):
         return ", ".join(["{0}={1}".format(key, value) for key, value in field.get('parmas', {}).iteritems()])
@@ -168,7 +165,7 @@ class Marker:
                 for choice in enum_setting["choices"]:
                     enum_key += """{0} = {1}
 """.format(choice["name"], choice["value"])
-                    enum_key_value += """   ({0}, u'{1}'),
+                    enum_key_value += """    ({0}, u'{1}'),
 """.format(choice["name"], choice["disname"])
                 str += """
 %(enum_key)s
@@ -182,7 +179,7 @@ class Marker:
                 }
         return str
 
-    def _init_enum(self):
+    def _init_enums(self):
         str = """# -*- coding: utf-8 -*-"
 %(enum_content)s
 """ % {
@@ -192,12 +189,12 @@ class Marker:
 
     def _init_model_string(self):
         model_string = ""
-        for field in self.model_setting_list:
+        for field_name in self.model_field_name_list:
             model_string += """    
     %(name)s = models.%(model_type)sField(%(model_parmas)s)""" % {
-                "name": field.get('name'),
-                "model_type": field.get('type'),
-                "model_parmas": self._get_parmas(field),
+                "name": self.model_field_dict[field_name].get('name'),
+                "model_type": self.model_field_dict[field_name].get('type'),
+                "model_parmas": self._get_parmas(self.model_field_dict[field_name]),
             }
         return model_string
 
@@ -311,21 +308,21 @@ def to_front(%(model_name)s):
 
     def _init_get_arguments(self):
         str = ""
-        for parma in self.editable_field_list:
+        for field_name in self.editable_field_list:
             str += """
-        %(type)s = self.%(get_argument)s('%(type)s', None)""" % {
-                "get_argument": "get_argument" if self._get_module_type(parma) != "List" else "get_arguments",
-                "type": parma
+        %(name)s = self.%(get_argument)s('%(name)s', None)""" % {
+                "get_argument": "get_argument" if self.model_field_dict[field_name].get('type') != "List" else "get_arguments",
+                "name": self.model_field_dict[field_name].get('name')
             }
         return str
 
     def _init_get_arguments_default(self):
         str = ""
-        for parma in self.editable_field_list:
+        for field_name in self.editable_field_list:
             str += """
-        %(type)s = self.%(get_argument)s('%(type)s', undefined)""" % {
-                "get_argument": "get_argument" if self._get_module_type(parma) != "List" else "get_arguments",
-                "type": parma
+        %(name)s = self.%(get_argument)s('%(name)s', undefined)""" % {
+                "get_argument": "get_argument" if self.model_field_dict[field_name].get('type') != "List" else "get_arguments",
+                "name": self.model_field_dict[field_name].get('name')
             }
         return str
 
@@ -386,11 +383,12 @@ class %(model_title)sHandler(BaseHandler):
         return str
 
     def _url_string(self):
-        url_string = """url(r"/api/%(model_name)s/select/(\w+)/", views.%(model_title)sHandler, name='api_select_%(model_name)s'),
-    url(r"/api/%(model_name)s/create/", views.%(model_title)sHandler, name='api_create_%(model_name)s'),
-    url(r"/api/%(model_name)s/update/(\w+)/", views.%(model_title)sHandler, name='api_update_%(model_name)s'),
-    url(r"/api/%(model_name)s/modify/(\w+)/", views.%(model_title)sHandler, name='api_modify_%(model_name)s'),
-    url(r"/api/%(model_name)s/delete/(\w+)/", views.%(model_title)sHandler, name='api_delete_%(model_name)s'),
+        url_string = """url(r"/api/%(model_name)s/(\w+)/", views.%(model_title)sHandler, name='api_select_%(model_name)s'),
+    url(r"/api/%(model_name)s/", views.%(model_title)sHandler, name='api_select_%(model_name)ss'),
+    url(r"/api/%(model_name)s/", views.%(model_title)sHandler, name='api_create_%(model_name)s'),
+    url(r"/api/%(model_name)s/(\w+)/", views.%(model_title)sHandler, name='api_update_%(model_name)s'),
+    url(r"/api/%(model_name)s/(\w+)/", views.%(model_title)sHandler, name='api_modify_%(model_name)s'),
+    url(r"/api/%(model_name)s/(\w+)/", views.%(model_title)sHandler, name='api_delete_%(model_name)s'),
 """ % {
             "model_name": self.model_name,
             "model_title": self.model_title
@@ -452,5 +450,6 @@ if __name__ == "__main__":
 
     for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
         for file in files:
-            if file in ["tag.json"]:
+            # if file in ["tag.json"]:
+            if file:
                 marker = Marker(str(file))
