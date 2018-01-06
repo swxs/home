@@ -205,7 +205,7 @@ class Marker:
         'indexes': [%(indexes_list)s]
     }
 """ % {
-                "indexes_list": ", ".join(self.indexes_field_list)
+                "indexes_list": ", ".join(["'{0}'".format(field_name) for field_name in self.indexes_field_list])
             }
         else:
             str = ""
