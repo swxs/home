@@ -19,7 +19,6 @@ class ArticalHandler(BaseHandler):
 
     @BaseHandler.ajax_base
     def post(self):
-        
         title = self.get_argument('title', None)
         author = self.get_argument('author', None)
         source = self.get_argument('source', None)
@@ -27,14 +26,11 @@ class ArticalHandler(BaseHandler):
         tag_id_list = self.get_arguments('tag_id_list', None)
         comment_id_list = self.get_arguments('comment_id_list', None)
         summary = self.get_argument('summary', None)
-        created = self.get_argument('created', None)
-        updated = self.get_argument('updated', None)
-        artical = utils.create(title=title, author=author, source=source, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list, summary=summary, created=created, updated=updated)
+        artical = utils.create(title=title, author=author, source=source, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list, summary=summary)
         return utils.to_front(artical)
     
     @BaseHandler.ajax_base
     def put(self, artical_id):
-        
         title = self.get_argument('title', None)
         author = self.get_argument('author', None)
         source = self.get_argument('source', None)
@@ -42,15 +38,12 @@ class ArticalHandler(BaseHandler):
         tag_id_list = self.get_arguments('tag_id_list', None)
         comment_id_list = self.get_arguments('comment_id_list', None)
         summary = self.get_argument('summary', None)
-        created = self.get_argument('created', None)
-        updated = self.get_argument('updated', None)
         artical = utils.get_artical_by_artical_id(artical_id)
-        artical = utils.update(artical, title=title, author=author, source=source, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list, summary=summary, created=created, updated=updated)
+        artical = utils.update(artical, title=title, author=author, source=source, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list, summary=summary)
         return utils.to_front(artical)
     
     @BaseHandler.ajax_base
     def patch(self, artical_id):
-        
         title = self.get_argument('title', undefined)
         author = self.get_argument('author', undefined)
         source = self.get_argument('source', undefined)
@@ -58,10 +51,8 @@ class ArticalHandler(BaseHandler):
         tag_id_list = self.get_arguments('tag_id_list', undefined)
         comment_id_list = self.get_arguments('comment_id_list', undefined)
         summary = self.get_argument('summary', undefined)
-        created = self.get_argument('created', undefined)
-        updated = self.get_argument('updated', undefined)
         artical = utils.get_artical_by_artical_id(artical_id)
-        artical = utils.update(artical, title=title, author=author, source=source, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list, summary=summary, created=created, updated=updated)
+        artical = utils.update(artical, title=title, author=author, source=source, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list, summary=summary)
         return utils.to_front(artical)
             
     @BaseHandler.ajax_base

@@ -14,6 +14,7 @@ BOT_NAME = 'model_spider'
 SPIDER_MODULES = ['model_spider.spiders']
 NEWSPIDER_MODULE = 'model_spider.spiders'
 
+CREATE_ARTICAL_URL = "http://127.0.0.1:8088/api/artical/"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'model_spider (+http://www.yourdomain.com)'

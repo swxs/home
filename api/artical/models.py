@@ -15,10 +15,10 @@ class Artical(models.Document, BaseDoc):
     comment_id_list = models.ListField()    
     summary = models.StringField()    
     created = models.DateTimeField(default=datetime.datetime.now)    
-    updated = models.StringField(default=datetime.datetime.now)
+    updated = models.DateTimeField(default=datetime.datetime.now)
 
     meta = {
         'indexes': ['title']
     }
 
-    __attrs__ = ['title', 'author', 'source', 'content', 'tag_id_list', 'comment_id_list', 'summary', 'created', 'updated']
+    __attrs__ = ['title', 'author', 'source', 'content', 'tag_id_list', 'comment_id_list', 'summary']

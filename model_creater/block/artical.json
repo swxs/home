@@ -36,6 +36,17 @@
       }
     },
     {
+      "name": "summary",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
       "name": "content",
       "type": "String",
       "parmas": {},
@@ -69,24 +80,13 @@
       }
     },
     {
-      "name": "summary",
-      "type": "String",
-      "parmas": {},
-      "setting": {
-        "editable": true,
-        "indexes": false,
-        "check": false,
-        "checkType": "all"
-      }
-    },
-    {
       "name": "created",
       "type": "DateTime",
       "parmas": {
         "default": "datetime.datetime.now"
       },
       "setting": {
-        "editable": true,
+        "editable": false,
         "indexes": false,
         "check": false,
         "checkType": "all"
@@ -94,12 +94,12 @@
     },
     {
       "name": "updated",
-      "type": "String",
+      "type": "DateTime",
       "parmas": {
         "default": "datetime.datetime.now"
       },
       "setting": {
-        "editable": true,
+        "editable": false,
         "indexes": false,
         "check": false,
         "checkType": "all"
