@@ -1,36 +1,67 @@
 # -*- coding: utf-8 -*-
-
-from api.baseUtils import utils as base_utils
+import datetime
+from bson import ObjectId
 from const import undefined
+import enums as enums
+import models as models
+from common.Decorator.mem_cache import memorize
+from common.Exceptions.NotExistException import NotExistException
+
+def refresh(tag):
+    get_tag_by_tag_id(tag.oid, refresh=1)
 
 
-class utils(base_utils):
-    def __init__(self, object):
-        self.object = object
+@memorize
+def get_tag_by_tag_id(tag_id):
+    try:
+        _id = ObjectId(tag_id)
+        return models.Tag.objects.get(id=_id)
+    except models.Tag.DoesNotExist:
+        raise NotExistException("Tag")
 
-    @base_utils.single_or_multiple
-    def update(self, name=undefined, ttype=undefined, object=None):
-        ''''''
-        try:
-            if name != undefined:
-                object.name = name
-            if ttype != undefined:
-                object.ttype = ttype
-            object.save()
+
+@memorize
+def has_tag_by_tag_id(tag_id):
+    try:
+        if get_tag_by_tag_id(tag_id):
             return True
-        except:
+        else:
             return False
+    except NotExistException:
+        return False
 
-    @base_utils.single_or_multiple
-    def delete(self, object=None):
-        ''''''
-        try:
-            object.delete()
-            return True
-        except:
-            return False
 
-    @base_utils.single_or_multiple
-    def to_front(self, object=None):
-        ''''''
-        return object.to_dict()
+def get_tag_list():
+    return models.Tag.objects.filter()
+
+
+def create(**kwargs):
+    tag = models.Tag()
+    for attr in tag.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            tag.__setattr__(attr, value)
+    tag.save()
+    return tag
+
+
+def update(tag, **kwargs):
+    for attr in tag.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            tag.__setattr__(attr, value)
+    tag.updated = datetime.datetime.now()
+    tag.save()
+    refresh(tag)
+    return tag
+
+
+def delete(tag):
+    tag.delete()
+    refresh(tag)
+    return None
+
+
+def to_front(tag):
+    if tag:
+        return tag.to_dict()

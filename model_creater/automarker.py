@@ -3,7 +3,6 @@ import json
 import os
 import sys
 import shutil
-import ConfigParser
 
 if __name__ == "__main__":
     reload(sys)
@@ -12,10 +11,8 @@ if __name__ == "__main__":
 
 class Marker:
     def __init__(self, model_setting_filename):
-        # todo 读取设置文件 初始化models_setting
-        # self._get_setting()
-        if self._get_setting_v2(model_setting_filename):
-            self.filename_list = ["models", "enum", "urls", "utils", "views"]
+        if self._get_setting(model_setting_filename):
+            self.filename_list = ["models", "enums", "urls", "utils", "views"]
             self.enum = self._init_enum()
             print(self.enum)
             print("-" * 40)
@@ -30,10 +27,9 @@ class Marker:
             print("-" * 40)
             self.urls = self._init_urls()
             print(self.urls)
-
             self._init_folder_and_file()
 
-    def _get_setting(self):
+    def _get_setting_test(self):
         self.model_name = "user"
         self.pathname = self.model_name
         self.model_setting_list = [
@@ -65,22 +61,51 @@ class Marker:
              "setting": {"unique": False, "editable": True, "check": "all"}}]
         self._init_parmas()
 
-    def _get_setting_v2(self, model_setting_filename):
+    def _get_setting(self, model_setting_filename):
         path = os.path.join(sys.path[0], "block", model_setting_filename)
         with open(path, "r") as f:
             data = json.load(f)
             f.close()
+            
         self.model_name = self.pathname = data.get('name', None)
         if self.model_name is None:
             return False
         self.model_title = self._get_title(self.model_name)
         self.model_upper = self._get_upper(self.model_name)
-        self.model_setting_list = data.get('setting', [])
-        self.model_enum_list = data.get('enum', [])
-        self._init_parmas()
+
+        self.model_enum_list = data.get('enum', None)
+        self.model_field_name_list = data.get('setting', None)
+        
+        self.model_field_name_list = [field['name'] for field in data.get('setting', []) if field.get('name') is not None]
+        
+        self.unique_field_list = []
+        self.required_field_list= []
+        self.editable_field_list = []
+        self.indexes_field_list = []
+        for field_name in self.model_field_name_list:
+            if data.get('setting', [])[field_name]['parms'].get('unique', False):
+                self.unique_field_list.append(field_name)
+            if data.get('setting', [])[field_name]['parms'].get('required', False):
+                self.unique_field_list.append(field_name)
+            if data.get('setting', [])[field_name]['setting'].get('editable', True):
+                self.editable_field_list.append(field_name)
+            if data.get('setting', [])[field_name]['setting'].get('indexes', True):
+                self.indexes_field_list.append(field_name)
+        if len(self.editable_field_list)> 0:
+            self.has_editable_selected = ", "
+        else:
+            self.has_editable_selected = ""
+        self.editable_select_parmas = ", ".join(["{0}=undefined".format(field_name) for field_name in self.editable_field_list])
+        self.editable_selected_parmas = ", ".join(["{0}={0}".format(field_name) for field_name in self.editable_field_list])
+        self.editable_attrs = ", ".join(["{0}".format(field_name) for field_name in self.editable_field_list])
         return True
 
     def _get_title(self, name):
+        """
+        驼峰表示: field_name=>FieldName
+        :param name: 
+        :return: 
+        """
         if "_" in name:
             str = ""
             name_part_list = name.split("_")
@@ -91,6 +116,11 @@ class Marker:
             return name.title()
 
     def _get_upper(self, name):
+        """
+        大写表示：field_name=>FIELDNAME
+        :param name: 
+        :return: 
+        """
         if "_" in name:
             str = ""
             name_part_list = name.split("_")
@@ -100,66 +130,13 @@ class Marker:
         else:
             return name.upper()
 
-    def _init_parmas(self):
-        self.unique_parma_list = []
-        self.edit_parma_list = []
-        self.check_parma_dick = {}
-        self.indexes_list = []
-        for model_setting in self.model_setting_list:
-            if model_setting.get('parms', {}).get('unique', False):
-                self.unique_parma_list.append(model_setting.get('name', ''))
-            if model_setting.get('settings', {}).get('editable', True):
-                self.edit_parma_list.append(model_setting.get('name', ''))
-            # if model_setting["setting"]["check"] and model_setting["setting"]["check"] != "all":
-            #     self.check_parma_dick[model_setting["name"]] = model_setting["setting"]["check"]
-            if model_setting.get('settings', {}).get('index', False):
-                self.indexes_list.append("\"{0}\"".format(model_setting.get('name', '')))
-
-        edit_select_parmas_list = []
-        edit_selected_parmas_list = []
-        for parma in self.edit_parma_list:
-            edit_select_parmas_list.append("{0}=undefined".format(parma))
-            edit_selected_parmas_list.append("{0}={0}".format(parma))
-
-        unique_select_parmas_list = []
-        unique_selected_parmas_list = []
-        for parma in self.unique_parma_list:
-            unique_select_parmas_list.append("{0}=undefined".format(parma))
-            unique_selected_parmas_list.append("{0}={0}".format(parma))
-
-        self.edit_select_parmas = ", ".join(edit_select_parmas_list)
-        self.edit_selected_parmas = ", ".join(edit_selected_parmas_list)
-        self.unique_select_parmas = ", ".join(unique_select_parmas_list)
-        self.unique_selected_parmas = ", ".join(unique_selected_parmas_list)
-
-        self.temp_unique_select = ", " if self.unique_select_parmas != "" else ""
-        self.temp_edit_select = ", " if self.edit_select_parmas != "" else ""
-
     def _get_module_type(self, parma):
         for model_setting in self.model_setting_list:
             if model_setting.get('name') == parma:
                 return model_setting.get("type")
 
-    def _get_parmas(self, model_type, model_parmas):
-        parmas_list = []
-        if "required" in model_parmas:
-            parmas_list.append("required={0}".format(model_parmas["required"]))
-            # todo create里必须包含该字段的参数
-        if "default" in model_parmas:
-            parmas_list.append("default={0}".format(model_parmas["default"]))
-            # todo create里默认为指定参数
-        if "choices" in model_parmas:
-            parmas_list.append("choices={0}".format(model_parmas["choices"]))
-        if model_type == "String":
-            if "max_length" in model_parmas:
-                parmas_list.append("max_length={0}".format(model_parmas["max_length"]))
-        elif model_type == "Int":
-            pass
-        elif model_type == "List":
-            pass
-        elif model_type == "DateTime":
-            pass
-        return ", ".join(parmas_list)
+    def _get_parmas(self, field):
+        return ", ".join(["{0}={1}".format(key, value) for key, value in field.get('parmas', {}).iteritems()])
 
     def _init_folder_and_file(self):
         local_path = sys.path[0]
@@ -215,155 +192,62 @@ class Marker:
 
     def _init_model_string(self):
         model_string = ""
-        for model_setting in self.model_setting_list:
+        for field in self.model_setting_list:
             model_string += """    
     %(name)s = models.%(model_type)sField(%(model_parmas)s)""" % {
-                "name": model_setting["name"],
-                "model_type": model_setting["type"],
-                "model_parmas": self._get_parmas(model_setting["type"], model_setting["parmas"]),
+                "name": field.get('name'),
+                "model_type": field.get('type'),
+                "model_parmas": self._get_parmas(field),
             }
         return model_string
 
     def _init_model_index_string(self):
-        print(self.indexes_list)
-        if self.indexes_list != []:
+        if self.indexes_field_list != []:
             str = """
     meta = {
         'indexes': [%(indexes_list)s]
     }
 """ % {
-                "indexes_list": ", ".join(self.indexes_list)
+                "indexes_list": ", ".join(self.indexes_field_list)
             }
         else:
             str = ""
         return str
 
     def _init_models(self):
-        str = """# -*- coding: utf-8 -*-
-        
-import json
+        str = """# -*- coding: utf-8 -*-'
+
 import datetime
-import enum as enum
 import mongoengine as models
-from tornado.util import ObjectDict
-from basedoc import BaseDoc as BaseDoc
+from api.basedoc import BaseDoc
+import enums as enums
 
 
 class %(model_title)s(models.Document, BaseDoc):%(model_content)s
 %(model_indexes)s
+    __attrs__ = [%(model_attrs)s]
 """ % {
             "model_title": self.model_title,
             "model_content": self._init_model_string(),
-            "model_indexes": self._init_model_index_string()
+            "model_indexes": self._init_model_index_string(),
+            "model_attrs": self.editable_attrs
         }
-        return str
-
-    def _is_validate(self, parma_type):
-        if parma_type in self.check_parma_dick:
-            str = """
-        if not Validate.check(%(parma_type)s, reg_type="%(check_type)s"):
-            raise ValidateException(u"%(parma_type)s")""" % {
-                "parma_type": parma_type,
-                "check_type": self.check_parma_dick[parma_type]
-            }
-        else:
-            str = ""
-        return str
-
-    def _is_create_unique(self, parma_type):
-        if parma_type in self.unique_parma_list:
-            print(parma_type, "_" * 40)
-            str = """
-        if get_%(model_name)s(%(parma_type)s=%(parma_type)s):
-            raise MultException(u"%(parma_type)s")""" % {
-                "model_name": self.model_name,
-                "parma_type": parma_type
-            }
-        else:
-            str = ""
-        return str
-
-    def _is_update_unique(self, parma_type):
-        if parma_type in self.unique_parma_list:
-            str = """
-        if %(parma_type)s != %(model_name)s.%(parma_type)s and get_%(model_name)s(%(parma_type)s=%(parma_type)s):
-            raise MultException(u"%(parma_type)s")""" % {
-                "model_name": self.model_name,
-                "parma_type": parma_type
-            }
-        else:
-            str = ""
-        return str
-
-    def _init_util_select(self):
-        str = ""
-        for parma in self.unique_parma_list:
-            str += """
-        elif %(type)s != undefined:
-            return get_%(model_name)s_by_%(type)s(%(type)s)""" % {
-                "model_name": self.model_name,
-                "type": parma
-            }
-        return str
-
-    def _init_util_create(self):
-        # [swxs] todo ask 这里的值传递感觉没什么意义了？
-        str = ""
-        for parma in self.edit_parma_list:
-            str += """
-    if %(type)s != undefined:
-        %(model_name)s.%(type)s = %(type)s""" % {
-                "model_name": self.model_name,
-                "type": parma
-            }
-        return str
-
-    def _init_util_update(self):
-        str = ""
-        for parma in self.edit_parma_list:
-            str += """
-    if %(type)s != undefined:
-        %(model_name)s.%(type)s = %(type)s""" % {
-                "model_name": self.model_name,
-                "type": parma,
-            }
-        return str
-
-    def _init_util_refresh(self):
-        str = ""
-        for parma in self.unique_parma_list:
-            str += """
-    get_%(model_name)s_by_%(type)s(%(model_name)s.%(type)s, refresh=1)""" % {
-                "model_name": self.model_name,
-                "type": parma,
-            }
-        return str
-
-    def _init_util_refresh_list(self):
-        str = ""
-        for parma in self.unique_parma_list:
-            str += """
-@memorize
-def get_%(model_name)s_by_%(type)s(%(type)s):
-    try:
-        return models.%(model_title)s.objects.get(%(type)s=%(type)s)
-    except models.%(model_title)s.DoesNotExist:
-        return None""" % {
-                "model_name": self.model_name,
-                "model_title": self.model_title,
-                "type": parma,
-            }
         return str
 
     def _init_utils(self):
         str = """# -*- coding: utf-8 -*-
 
+import datetime
 from bson import ObjectId
 from const import undefined
+import enums as enums
 import models as models
-from common.mem_cache import memorize
-from common.validate import Validate
-from common.exception import ValidateException, MultException
+from common.Decorator.mem_cache import memorize
+from common.Exceptions.NotExistException import NotExistException
+
+def refresh(%(model_name)s):
+    get_%(model_name)s_by_%(model_name)s_id(%(model_name)s.oid, refresh=1)
+
 
 @memorize
 def get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id):
@@ -371,76 +255,63 @@ def get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id):
         _id = ObjectId(%(model_name)s_id)
         return models.%(model_title)s.objects.get(id=_id)
     except models.%(model_title)s.DoesNotExist:
-        return None
+        raise NotExistException("%(model_title)s")
 
-%(util_refresh_list)s
 
-def get_%(model_name)s(%(model_name)s_id=undefined%(temp_unique_select)s%(unique_select_parmas)s):
-    ''''''
+@memorize
+def has_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id):
     try:
-        if %(model_name)s_id != undefined:
-            return get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id)
-        %(util_select)s
-        else:
-            return None
-    except models.%(model_title)s.DoesNotExist:
-        return None
-
-def refresh_%(model_name)s(%(model_name)s):
-    ''''''
-    get_%(model_name)s_by_%(model_name)s_id(str(%(model_name)s.id), refresh=1)
-    %(util_refresh)s
-    
-def create_%(model_name)s(%(edit_select_parmas)s):
-    ''''''
-    %(model_name)s = models.%(model_title)s()%(util_create)s
-    %(model_name)s.save()
-    refresh_%(model_name)s(%(model_name)s)
-    return %(model_name)s
-
-def has_%(model_name)s(%(model_name)s_id=undefined%(temp_unique_select)s%(unique_select_parmas)s):
-    try:
-        %(model_name)s = get_%(model_name)s(%(model_name)s_id=%(model_name)s_id%(temp_unique_select)s%(unique_selected_parmas)s)
-        if %(model_name)s is None:
-            return False 
-        else:
+        if get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id):
             return True
-    except models.%(model_title)s.DoesNotExist:
+        else:
+            return False
+    except NotExistException:
         return False
 
-def update_%(model_name)s(%(model_name)s%(temp_edit_select)s%(edit_select_parmas)s):
-    ''''''%(util_update)s
+
+def get_%(model_name)s_list():
+    return models.%(model_title)s.objects.filter()
+
+
+def create(**kwargs):
+    %(model_name)s = models.%(model_title)s()
+    for attr in %(model_name)s.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            %(model_name)s.__setattr__(attr, value)
     %(model_name)s.save()
-    refresh_%(model_name)s(%(model_name)s)
     return %(model_name)s
 
-def delete_%(model_name)s(%(model_name)s):
-    ''''''
+
+def update(%(model_name)s, **kwargs):
+    for attr in %(model_name)s.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            %(model_name)s.__setattr__(attr, value)
+    %(model_name)s.updated = datetime.datetime.now()
+    %(model_name)s.save()
+    refresh(%(model_name)s)
+    return %(model_name)s
+
+
+def delete(%(model_name)s):
     %(model_name)s.delete()
-    refresh_%(model_name)s(%(model_name)s)
-    
+    refresh(%(model_name)s)
+    return None
+
+
 def to_front(%(model_name)s):
-    ''''''
-    return %(model_name)s.to_dict()
+    if %(model_name)s:
+        return %(model_name)s.to_dict()
 """ % {
             "model_name": self.model_name,
             "model_title": self.model_title,
-            "temp_unique_select": self.temp_unique_select,
-            "edit_select_parmas": self.edit_select_parmas,
-            "unique_select_parmas": self.unique_select_parmas,
-            "temp_edit_select": self.temp_edit_select,
-            "unique_selected_parmas": self.unique_selected_parmas,
-            "util_select": self._init_util_select(),
-            "util_create": self._init_util_create(),
-            "util_update": self._init_util_update(),
-            "util_refresh": self._init_util_refresh(),
-            "util_refresh_list": self._init_util_refresh_list(),
         }
         return str
 
     def _init_get_arguments(self):
         str = ""
-        for parma in self.edit_parma_list:
+        for parma in self.editable_field_list:
             str += """
         %(type)s = self.%(get_argument)s('%(type)s', None)""" % {
                 "get_argument": "get_argument" if self._get_module_type(parma) != "List" else "get_arguments",
@@ -448,9 +319,9 @@ def to_front(%(model_name)s):
             }
         return str
 
-    def _init_get_argument_default(self):
+    def _init_get_arguments_default(self):
         str = ""
-        for parma in self.edit_parma_list:
+        for parma in self.editable_field_list:
             str += """
         %(type)s = self.%(get_argument)s('%(type)s', undefined)""" % {
                 "get_argument": "get_argument" if self._get_module_type(parma) != "List" else "get_arguments",
@@ -461,59 +332,56 @@ def to_front(%(model_name)s):
     def _init_views(self):
         str = """# -*- coding: utf-8 -*-
 
-import cem_decorator
-import enum as enum
-import utils as utils
-from base import BaseHandler
-# from permission import enum as permission_enum
 from const import undefined
-from common.exception import ValidateException, MultException
+from base import BaseHandler
+import enums as enums
+import utils as utils
 
 class %(model_title)sHandler(BaseHandler):
     @BaseHandler.ajax_base
-    # @cem_decorator.with_permission(permission_enum.PERM_%(model_upper)s_VIEW)
     def get(self, %(model_name)s_id=None):
         ''''''
-        %(model_name)s = utils.get_%(model_name)s(%(model_name)s_id)
-        return utils.to_front(%(model_name)s)
-    
+        if %(model_name)s_id:
+            %(model_name)s = utils.get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id)
+            return utils.to_front(%(model_name)s)
+        else:
+            %(model_name)s_list = utils.get_%(model_name)s_list()
+            return [utils.to_front(%(model_name)s) for %(model_name)s in %(model_name)s_list]
+
+
     @BaseHandler.ajax_base
-    # @cem_decorator.with_permission(permission_enum.PERM_%(model_upper)s_EDIT)
     def post(self):
         %(get_arguments)s
-        %(model_name)s = utils.create_%(model_name)s(%(edit_selected_parmas)s)
+        %(model_name)s = utils.create(%(editable_selected_parmas)s)
         return utils.to_front(%(model_name)s)
     
     @BaseHandler.ajax_base
-    # @cem_decorator.with_permission(permission_enum.PERM_%(model_upper)s_EDIT)
     def put(self, %(model_name)s_id):
         %(get_arguments)s
-        %(model_name)s = utils.get_%(model_name)s(%(model_name)s_id)
-        %(model_name)s = utils.update_%(model_name)s(%(model_name)s%(temp_edit_select)s%(edit_selected_parmas)s)
+        %(model_name)s = utils.get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id)
+        %(model_name)s = utils.update(%(model_name)s%(has_editable_selected)s%(editable_selected_parmas)s)
         return utils.to_front(%(model_name)s)
     
     @BaseHandler.ajax_base
-    # @cem_decorator.with_permission(permission_enum.PREM_%(model_upper)s_EDIT)
     def patch(self, %(model_name)s_id):
-        %(get_argument_default)s
-        %(model_name)s = utils.get_%(model_name)s(%(model_name)s_id)
-        %(model_name)s = utils.update_%(model_name)s(%(model_name)s%(temp_edit_select)s%(edit_selected_parmas)s)
+        %(get_arguments_default)s
+        %(model_name)s = utils.get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id)
+        %(model_name)s = utils.update(%(model_name)s%(has_editable_selected)s%(editable_selected_parmas)s)
         return utils.to_front(%(model_name)s)
             
     @BaseHandler.ajax_base
-    # @cem_decorator.with_permission(permission_enum.PERM_%(model_upper)s_EDIT)
     def delete(self, %(model_name)s_id):
-        %(model_name)s = utils.get_%(model_name)s(%(model_name)s_id)
-        utils.delete_%(model_name)s(%(model_name)s)
+        %(model_name)s = utils.get_%(model_name)s_by_%(model_name)s_id(%(model_name)s_id)
+        utils.delete(%(model_name)s)
         return None
 """ % {
             "model_name": self.model_name,
             "model_title": self.model_title,
             "model_upper": self.model_upper,
             "get_arguments": self._init_get_arguments(),
-            "get_argument_default": self._init_get_argument_default(),
-            "temp_edit_select": self.temp_edit_select,
-            "edit_selected_parmas": self.edit_selected_parmas,
+            "get_arguments_default": self._init_get_arguments_default(),
+            "has_editable_selected": self.has_editable_selected,
+            "editable_selected_parmas": self.editable_selected_parmas,
         }
         return str
 

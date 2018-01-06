@@ -30,4 +30,3 @@ if __name__ == "__main__":
     server.add_sockets(sockets)
     log.debug('Tornado server started on port %s.' % MAIN_SITE_PORT)
     tornado.ioloop.IOLoop.instance().start()
-    print "start"

@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-'
 
+import datetime
 import mongoengine as models
-
-import enum as enum
 from api.basedoc import BaseDoc
-
+import enums as enums
 
 class Tag(models.Document, BaseDoc):
     name = models.StringField(max_length=50)
-    ttype = models.IntField(required=True, choices=enum.TAG_TTYPE_LIST)
+    ttype = models.IntField(required=True, choices=enums.TAG_TTYPE_LIST)
+    created = models.DateTimeField(default=datetime.datetime.now)
+    updated = models.DateTimeField(default=datetime.datetime.now)
 
-    def refresh(self):
-        from creater import creater
-        creater.get_tag_by_tag_id(str(self.id), refresh=1)
+    __attrs__ = ["name", "ttype"]
