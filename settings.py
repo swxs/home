@@ -5,7 +5,7 @@ import os
 OS = 'linux'
 DEBUG = False
 DB_TRIGGER_FLAG = False
-SECRET_KEY = 'd96f097c-4b1b-4867-3859-375838cd69c4'
+SECRET_KEY = 'd96f097c-4b1b-4867-3859-375830cd69c4'
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_PROTOCOL = 'http'
