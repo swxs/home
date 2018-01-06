@@ -1,12 +1,11 @@
 {
-  "name": "filepath",
+  "name": "user",
   "enum": [],
   "setting": [
     {
-      "name": "name",
+      "name": "username",
       "type": "String",
       "parmas": {
-        "max_length": "50",
         "unique": true
       },
       "setting": {
@@ -17,10 +16,32 @@
       }
     },
     {
-      "name": "path",
+      "name": "nickname",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "password",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "userinfo_id",
       "type": "String",
       "parmas": {
-        "max_length": "100"
+        "max_length": "24"
       },
       "setting": {
         "editable": true,
@@ -30,10 +51,10 @@
       }
     },
     {
-      "name": "create",
+      "name": "created",
       "type": "DateTime",
       "parmas": {
-        "required": true
+        "default": "datetime.datetime.now"
       },
       "setting": {
         "editable": false,
@@ -43,10 +64,10 @@
       }
     },
     {
-      "name": "update",
+      "name": "updated",
       "type": "DateTime",
       "parmas": {
-        "required": true
+        "default": "datetime.datetime.now"
       },
       "setting": {
         "editable": false,

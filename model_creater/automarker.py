@@ -205,7 +205,7 @@ class Marker:
         'indexes': [%(indexes_list)s]
     }
 """ % {
-                "indexes_list": ", ".join(self.indexes_field_list)
+                "indexes_list": ", ".join(["'{0}'".format(field_name) for field_name in self.indexes_field_list])
             }
         else:
             str = ""
@@ -235,6 +235,7 @@ class %(model_title)s(models.Document, BaseDoc):%(model_content)s
         str = """# -*- coding: utf-8 -*-
 
 import datetime
+from mongoengine.errors import *
 from bson import ObjectId
 from const import undefined
 import enums as enums
@@ -276,7 +277,10 @@ def create(**kwargs):
         value = kwargs.get(attr, undefined)
         if value != undefined:
             %(model_name)s.__setattr__(attr, value)
-    %(model_name)s.save()
+    try:
+        %(model_name)s.save()
+    except NotUniqueError:
+        raise ExistException("%(model_title)s")
     return %(model_name)s
 
 
@@ -286,7 +290,10 @@ def update(%(model_name)s, **kwargs):
         if value != undefined:
             %(model_name)s.__setattr__(attr, value)
     %(model_name)s.updated = datetime.datetime.now()
-    %(model_name)s.save()
+    try:
+        %(model_name)s.save()
+    except NotUniqueError:
+        raise ExistException("%(model_title)s")
     refresh(%(model_name)s)
     return %(model_name)s
 
