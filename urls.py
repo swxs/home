@@ -11,6 +11,6 @@ url_mapping = [
      {"path": "%s/static" % settings.SITE_ROOT}),
 ]
 
-url_mapping.extend(api_urls.url_mapping)
+url_mapping.extend(api_urls.get_api_urls())
 
 application = tornado.web.Application(url_mapping, **settings.settings)
