@@ -9,12 +9,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'model_spider'
+BOT_NAME = 'model_spider.model_spider'
 
-SPIDER_MODULES = ['model_spider.spiders']
-NEWSPIDER_MODULE = 'model_spider.spiders'
-
-CREATE_ARTICAL_URL = "http://127.0.0.1:8088/api/artical/"
+SPIDER_MODULES = ['model_spider.model_spider.spiders']
+NEWSPIDER_MODULE = 'model_spider.model_spider.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'model_spider (+http://www.yourdomain.com)'

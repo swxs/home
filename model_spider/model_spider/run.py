@@ -3,7 +3,7 @@
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
-from spiders.JobboleSpider import JobboleSpider
+from model_spider.model_spider.spiders.JobboleSpider import JobboleSpider
 
 def run():
     # 获取settings.py模块的设置
