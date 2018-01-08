@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-"
 
+import sys
+import os
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.abspath(os.curdir))
+
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
