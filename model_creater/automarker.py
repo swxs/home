@@ -15,24 +15,31 @@ class Marker:
             self.filename_list = ["models", "enums", "utils", "collections", "creater", "views", "urls"]
             self.models = self._init_models()
             print(self.models)
+
             print("-" * 40)
             self.enums = self._init_enums()
             print(self.enums)
+
             print("-" * 40)
             self.utils = self._init_utils()
             print(self.utils)
+
             print("-" * 40)
             self.collections = self._init_collections()
             print(self.collections)
+
             print("-" * 40)
             self.creater = self._init_creater()
             print(self.creater)
+
             print("-" * 40)
             self.views = self._init_views()
             print(self.views)
+
             print("-" * 40)
             self.urls = self._init_urls()
             print(self.urls)
+
             self._init_folder_and_file()
 
     def _get_setting(self, model_setting_filename):
@@ -201,7 +208,7 @@ class {model_title}(models.Document, Utils):{model_content}
 {model_indexes}
     __attrs__ = [{model_attrs}]
     
-    def __setattr__(self, name, value):
+    def __updateattr__(self, name, value):
         super({model_title}, self).__setattr__(name, value)
 
     def __unicode__(self):
@@ -242,7 +249,7 @@ class Utils(BaseUtils):
         for attr in self.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                self.__setattr__(attr, value)
+                self.__updateattr__(attr, value)
         self.updated = datetime.datetime.now()
         try:
             self.save()
@@ -302,7 +309,7 @@ class Creater(object):
         for attr in {model_name}.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                {model_name}.__setattr__(attr, value)
+                {model_name}.__updateattr__(attr, value)
         try:
             {model_name}.save()
         except NotUniqueError:
@@ -335,7 +342,7 @@ class Creater(object):
 
     @classmethod
     def get_{model_name}_list(cls):
-        return Collections({model_title}.objects.filter())
+        return Collections({model_title}.objects.all())
 """.format(model_name=self.model_name, model_title=self.model_title)
         return str
 

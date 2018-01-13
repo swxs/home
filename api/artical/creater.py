@@ -26,7 +26,7 @@ class Creater(object):
         for attr in artical.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                artical.__setattr__(attr, value)
+                artical.__updateattr__(attr, value)
         try:
             artical.save()
         except NotUniqueError:
@@ -59,4 +59,4 @@ class Creater(object):
 
     @classmethod
     def get_artical_list(cls):
-        return Collections(Artical.objects.filter())
+        return Collections(Artical.objects.all())

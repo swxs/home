@@ -20,14 +20,14 @@ class User(models.Document, Utils):
 
     __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
 
-    def __setattr__(self, name, value):
+    def __updateattr__(self, name, value):
         if name == "password":
             value = self.get_real_password(value)
         super(User, self).__setattr__(name, value)
 
     def __unicode__(self):
         try:
-            return self.oid
+            return self.username
         except AttributeError:
             return self.oid
 
