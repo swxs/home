@@ -10,7 +10,6 @@ from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 from common.Exceptions.ValidateException import ValidateException
 
-
 class Utils(BaseUtils):
     def update_tag(self, **kwargs):
         for attr in self.__attrs__:
@@ -32,4 +31,3 @@ class Utils(BaseUtils):
 
     def to_front(self):
         return self.to_dict()
-

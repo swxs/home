@@ -4,11 +4,9 @@ from const import undefined
 from base import BaseHandler
 from creater import Creater
 
-
 class TagHandler(BaseHandler):
     @BaseHandler.ajax_base
     def get(self, tag_id=None):
-        ''''''
         if tag_id:
             tag = Creater.get_tag_by_tag_id(tag_id)
             return tag.to_front()
@@ -23,7 +21,7 @@ class TagHandler(BaseHandler):
         length = self.get_argument('length', None)
         tag = Creater.create_tag(name=name, color=color, length=length)
         return tag.to_front()
-
+    
     @BaseHandler.ajax_base
     def put(self, tag_id):
         name = self.get_argument('name', None)

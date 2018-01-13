@@ -5,7 +5,7 @@ from bson import ObjectId
 from mongoengine.errors import *
 import settings
 from const import undefined
-from models import User
+from models import Artical
 from collections import Collections
 from common.Decorator.mem_cache import memorize
 from common.Exceptions.ExistException import ExistException
@@ -21,36 +21,36 @@ class Creater(object):
         return singleton
 
     @classmethod
-    def create_user(cls, **kwargs):
-        user = User()
-        for attr in user.__attrs__:
+    def create_artical(cls, **kwargs):
+        artical = Artical()
+        for attr in artical.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                user.__setattr__(attr, value)
+                artical.__setattr__(attr, value)
         try:
-            user.save()
+            artical.save()
         except NotUniqueError:
-            raise ExistException("User")
-        return user
+            raise ExistException("Artical")
+        return artical
 
     @classmethod
-    def refresh(cls, user):
-        cls.get_user_by_user_id(user.oid, refresh=1)
-
-    @classmethod
-    @memorize
-    def get_user_by_user_id(cls, user_id):
-        try:
-            _id = ObjectId(user_id)
-            return User.objects.get(id=_id)
-        except User.DoesNotExist:
-            raise NotExistException("User")
+    def refresh(cls, artical):
+        cls.get_artical_by_artical_id(artical.oid, refresh=1)
 
     @classmethod
     @memorize
-    def has_user_by_user_id(cls, user_id):
+    def get_artical_by_artical_id(cls, artical_id):
         try:
-            if Creater.get_user_by_user_id(user_id):
+            _id = ObjectId(artical_id)
+            return Artical.objects.get(id=_id)
+        except Artical.DoesNotExist:
+            raise NotExistException("Artical")
+
+    @classmethod
+    @memorize
+    def has_artical_by_artical_id(cls, artical_id):
+        try:
+            if Creater.get_artical_by_artical_id(artical_id):
                 return True
             else:
                 return False
@@ -58,5 +58,5 @@ class Creater(object):
             return False
 
     @classmethod
-    def get_user_list(cls):
-        return Collections(User.objects.filter())
+    def get_artical_list(cls):
+        return Collections(Artical.objects.filter())

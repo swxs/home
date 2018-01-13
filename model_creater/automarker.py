@@ -201,6 +201,9 @@ class {model_title}(models.Document, Utils):{model_content}
 {model_indexes}
     __attrs__ = [{model_attrs}]
     
+    def __setattr__(self, name, value):
+        super({model_title}, self).__setattr__(name, value)
+
     def __unicode__(self):
         try:
             return self.oid
@@ -386,7 +389,7 @@ class {model_title}Handler(BaseHandler):
     @BaseHandler.ajax_base
     def delete(self, {model_name_id}):
         {model_name} = Creater.get_{model_name}_by_{model_name_id}({model_name_id})
-        {model_name}.delete()
+        {model_name}.delete_{model_name}()
         return None
 """.format(model_name=self.model_name,
            model_name_id=self.model_name + "_id",

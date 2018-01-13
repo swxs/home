@@ -10,14 +10,11 @@ from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 from common.Exceptions.ValidateException import ValidateException
 
-
 class Utils(BaseUtils):
     def update_user(self, **kwargs):
         for attr in self.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                if attr == "password":
-                    value = self.get_real_password(value)
                 self.__setattr__(attr, value)
         self.updated = datetime.datetime.now()
         try:

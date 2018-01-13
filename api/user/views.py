@@ -7,7 +7,6 @@ from creater import Creater
 class UserHandler(BaseHandler):
     @BaseHandler.ajax_base
     def get(self, user_id=None):
-        ''''''
         if user_id:
             user = Creater.get_user_by_user_id(user_id)
             return user.to_front()
@@ -23,7 +22,7 @@ class UserHandler(BaseHandler):
         userinfo_id = self.get_argument('userinfo_id', None)
         user = Creater.create_user(username=username, nickname=nickname, password=password, userinfo_id=userinfo_id)
         return user.to_front()
-
+    
     @BaseHandler.ajax_base
     def put(self, user_id):
         username = self.get_argument('username', None)
