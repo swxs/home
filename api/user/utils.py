@@ -1,82 +1,39 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from mongoengine.errors import *
-from bson import ObjectId
 from hashlib import md5
-from const import undefined
+from mongoengine.errors import *
 import settings
-import enums as enums
-import models as models
-from common.Decorator.mem_cache import memorize
+from const import undefined
+from api.base_utils import BaseUtils
 from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
+from common.Exceptions.ValidateException import ValidateException
 
-def refresh(user):
-    get_user_by_user_id(user.oid, refresh=1)
+class Utils(BaseUtils):
+    def update_user(self, **kwargs):
+        for attr in self.__attrs__:
+            value = kwargs.get(attr, undefined)
+            if value != undefined:
+                self.__setattr__(attr, value)
+        self.updated = datetime.datetime.now()
+        try:
+            self.save()
+        except NotUniqueError:
+            raise ExistException("User")
+        self.creater.refresh(self)
+        return self
 
+    def delete_user(self):
+        self.delete()
+        self.creater.refresh(self)
+        return None
 
-@memorize
-def get_user_by_user_id(user_id):
-    try:
-        _id = ObjectId(user_id)
-        return models.User.objects.get(id=_id)
-    except models.User.DoesNotExist:
-        raise NotExistException("User")
+    def to_front(self):
+        return self.to_dict()
 
-
-@memorize
-def has_user_by_user_id(user_id):
-    try:
-        if get_user_by_user_id(user_id):
-            return True
-        else:
-            return False
-    except NotExistException:
-        return False
-
-
-def get_user_list():
-    return models.User.objects.filter()
-
-
-def create(**kwargs):
-    user = models.User()
-    for attr in user.__attrs__:
-        value = kwargs.get(attr, undefined)
-        if value != undefined:
-            if attr == "password":
-                value = md5(settings.SECRET_KEY + attr).hexdigest()
-            user.__setattr__(attr, value)
-    try:
-        user.save()
-    except NotUniqueError:
-        raise ExistException("User")
-    return user
-
-
-def update(user, **kwargs):
-    for attr in user.__attrs__:
-        value = kwargs.get(attr, undefined)
-        if value != undefined:
-            if attr == "password":
-                value = md5(settings.SECRET_KEY + attr).hexdigest()
-            user.__setattr__(attr, value)
-    user.updated = datetime.datetime.now()
-    try:
-        user.save()
-    except NotUniqueError:
-        raise ExistException("User")
-    refresh(user)
-    return user
-
-
-def delete(user):
-    user.delete()
-    refresh(user)
-    return None
-
-
-def to_front(user):
-    if user:
-        return user.to_dict()
+    def get_real_password(self, password):
+        try:
+            return md5(settings.SECRET_KEY + password).hexdigest()
+        except:
+            raise ValidateException("password")
