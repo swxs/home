@@ -1,19 +1,19 @@
-# -*- coding: utf-8 -*-'
+# -*- coding: utf-8 -*-
 
 import datetime
 import mongoengine as models
-from api.basedoc import BaseDoc
-import enums as enums
+from enums import Enums
+from utils import Utils
 
 
-class Artical(models.Document, BaseDoc):    
+class Artical(models.Document, Utils):    
     title = models.StringField()    
     author = models.StringField()    
     source = models.StringField()    
+    summary = models.StringField()    
     content = models.StringField()    
     tag_id_list = models.ListField()    
     comment_id_list = models.ListField()    
-    summary = models.StringField()    
     created = models.DateTimeField(default=datetime.datetime.now)    
     updated = models.DateTimeField(default=datetime.datetime.now)
 
@@ -21,4 +21,22 @@ class Artical(models.Document, BaseDoc):
         'indexes': ['title']
     }
 
-    __attrs__ = ['title', 'author', 'source', 'content', 'tag_id_list', 'comment_id_list', 'summary']
+    __attrs__ = ['title', 'author', 'source', 'summary', 'content', 'tag_id_list', 'comment_id_list']
+    
+    def __updateattr__(self, name, value):
+        super(Artical, self).__setattr__(name, value)
+
+    def __unicode__(self):
+        try:
+            return self.title
+        except AttributeError:
+            return self.oid
+
+    @property
+    def oid(self):
+        return str(self.id)
+
+    @property
+    def creater(self):
+        from creater import Creater
+        return Creater()

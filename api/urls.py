@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from tornado.web import url
+
 import views as views
+from api.artical import urls as artical_urls
 from api.user import urls as user_urls
 from api.tag import urls as tag_urls
-from api.artical import urls as artical_urls
+
 
 def get_api_urls():
     url_mapping = [

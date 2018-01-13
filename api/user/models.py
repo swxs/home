@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-'
+# -*- coding: utf-8 -*-
 
 import datetime
 import mongoengine as models
-from api.basedoc import BaseDoc
-import enums as enums
+from enums import Enums
+from utils import Utils
 
 
-class User(models.Document, BaseDoc):
+class User(models.Document, Utils):
     username = models.StringField(unique=True)
     nickname = models.StringField()
     password = models.StringField()
@@ -19,3 +19,23 @@ class User(models.Document, BaseDoc):
     }
 
     __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
+
+    def __updateattr__(self, name, value):
+        if name == "password":
+            value = self.get_real_password(value)
+        super(User, self).__setattr__(name, value)
+
+    def __unicode__(self):
+        try:
+            return self.username
+        except AttributeError:
+            return self.oid
+
+    @property
+    def oid(self):
+        return str(self.id)
+
+    @property
+    def creater(self):
+        from creater import Creater
+        return Creater()
