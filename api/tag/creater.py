@@ -26,7 +26,7 @@ class Creater(object):
         for attr in tag.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                tag.__setattr__(attr, value)
+                tag.__updateattr__(attr, value)
         try:
             tag.save()
         except NotUniqueError:
@@ -59,4 +59,4 @@ class Creater(object):
 
     @classmethod
     def get_tag_list(cls):
-        return Collections(Tag.objects.filter())
+        return Collections(Tag.objects.all())

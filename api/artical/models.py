@@ -6,15 +6,15 @@ from enums import Enums
 from utils import Utils
 
 
-class Artical(models.Document, Utils):
-    title = models.StringField()
-    author = models.StringField()
-    source = models.StringField()
-    summary = models.StringField()
-    content = models.StringField()
-    tag_id_list = models.ListField()
-    comment_id_list = models.ListField()
-    created = models.DateTimeField(default=datetime.datetime.now)
+class Artical(models.Document, Utils):    
+    title = models.StringField()    
+    author = models.StringField()    
+    source = models.StringField()    
+    summary = models.StringField()    
+    content = models.StringField()    
+    tag_id_list = models.ListField()    
+    comment_id_list = models.ListField()    
+    created = models.DateTimeField(default=datetime.datetime.now)    
     updated = models.DateTimeField(default=datetime.datetime.now)
 
     meta = {
@@ -22,13 +22,13 @@ class Artical(models.Document, Utils):
     }
 
     __attrs__ = ['title', 'author', 'source', 'summary', 'content', 'tag_id_list', 'comment_id_list']
-
-    def __setattr__(self, name, value):
+    
+    def __updateattr__(self, name, value):
         super(Artical, self).__setattr__(name, value)
 
     def __unicode__(self):
         try:
-            return self.oid
+            return self.title
         except AttributeError:
             return self.oid
 

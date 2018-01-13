@@ -15,7 +15,7 @@ class Utils(BaseUtils):
         for attr in self.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                self.__setattr__(attr, value)
+                self.__updateattr__(attr, value)
         self.updated = datetime.datetime.now()
         try:
             self.save()

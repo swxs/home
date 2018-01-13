@@ -26,7 +26,7 @@ class Creater(object):
         for attr in user.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                user.__setattr__(attr, value)
+                user.__updateattr__(attr, value)
         try:
             user.save()
         except NotUniqueError:
@@ -59,4 +59,4 @@ class Creater(object):
 
     @classmethod
     def get_user_list(cls):
-        return Collections(User.objects.filter())
+        return Collections(User.objects.all())

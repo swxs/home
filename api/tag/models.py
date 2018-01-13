@@ -6,21 +6,21 @@ from enums import Enums
 from utils import Utils
 
 
-class Tag(models.Document, Utils):
-    name = models.StringField(unique=True)
-    color = models.StringField()
-    length = models.IntField(default=0)
-    created = models.DateTimeField(default=datetime.datetime.now)
+class Tag(models.Document, Utils):    
+    name = models.StringField(unique=True)    
+    color = models.StringField()    
+    length = models.IntField(default=0)    
+    created = models.DateTimeField(default=datetime.datetime.now)    
     updated = models.DateTimeField(default=datetime.datetime.now)
 
     __attrs__ = ['name', 'color', 'length']
-
-    def __setattr__(self, name, value):
+    
+    def __updateattr__(self, name, value):
         super(Tag, self).__setattr__(name, value)
 
     def __unicode__(self):
         try:
-            return self.oid
+            return self.name
         except AttributeError:
             return self.oid
 

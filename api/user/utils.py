@@ -15,7 +15,7 @@ class Utils(BaseUtils):
         for attr in self.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                self.__setattr__(attr, value)
+                self.__updateattr__(attr, value)
         self.updated = datetime.datetime.now()
         try:
             self.save()
@@ -34,6 +34,9 @@ class Utils(BaseUtils):
 
     def get_real_password(self, password):
         try:
-            return md5(settings.SECRET_KEY + password).hexdigest()
+            if password is None:
+                return None
+            else:
+                return md5(settings.SECRET_KEY + password).hexdigest()
         except:
             raise ValidateException("password")
