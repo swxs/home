@@ -2,11 +2,11 @@
 
 import datetime
 import mongoengine as models
-from api.basedoc import BaseDoc
+from api.base_utils import BaseUtils
 import enums as enums
 
 
-class Artical(models.Document, BaseDoc):    
+class Artical(models.Document, BaseUtils):
     title = models.StringField()    
     author = models.StringField()    
     source = models.StringField()    
