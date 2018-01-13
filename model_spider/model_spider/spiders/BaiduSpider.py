@@ -34,8 +34,11 @@ class BaiduSpider(scrapy.Spider):
 
     def start_requests(self):
         ''' 覆盖默认的方法(忽略start_urls)'''
-        yield Request('http://tieba.baidu.com/mo/', method="GET", headers=BaiduSpider.headers,
-                       cookies=BaiduSpider.getCookies(), callback=self.get_url_parser)
+        yield Request('http://tieba.baidu.com/mo/',
+                      method="GET",
+                      headers=BaiduSpider.headers,
+                      cookies=BaiduSpider.getCookies(),
+                      callback=self.get_url_parser)
         # 默认response处理函数
 
     def parse(self, response):
