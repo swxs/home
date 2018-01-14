@@ -11,9 +11,10 @@ import tornado.web
 import tornado.escape
 from tornado import locale
 from tornado.web import escape
-
 import const
 import settings
+from api.user.creater import Creater as user_creater
+from common.Utils.validate import Validate
 from common.Exceptions.CommonException import CommonException
 from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
@@ -22,7 +23,6 @@ from common.Exceptions.PermException import PermException
 from common.Exceptions.ValidateException import ValidateException
 from common.Exceptions.LackOfFieldException import LackOfFieldException
 from common.Exceptions.DeleteInhibitException import DeleteInhibitException
-from common.Utils.validate import Validate
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
@@ -119,32 +119,15 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             msg = "XSRF cookie does not match POST argument"
             # raise tornado.web.HTTPError(403, msg)
 
-    def get_current_user(self):
+    @property
+    def current_user(self):
         ''''''
-        return None
-        # if not hasattr(self, '_user'):
-        #     user_id = self.session.get('user_id')
-        #     if user_id is None:
-        #         raise NotLoginException()
-        #     self._user = user_utils.get_user(user_id=user_id)
-        # return self._user
-
-    def get_template_namespace(self):
-        namespace = super(BaseHandler, self).get_template_namespace()
-        namespace['escape'] = tornado.escape
-        namespace['json'] = json
-        # namespace['common_utils'] = common_utils
-        namespace['has_permission'] = self.has_permission
-        namespace['const'] = const
-        return namespace
-
-    def get_rubbish_key(self, rubbish_keys):
-        ''''''
-        result = set(['self'])
-        if hasattr(rubbish_keys, '__iter__'):
-            for key in rubbish_keys:
-                result.add(key)
-        return result
+        if not hasattr(self, '_user'):
+            user_id = self.session.get('user_id')
+            if user_id is None:
+                raise NotLoginException()
+            self._user = user_creater.get_user_by_user_id(user_id=user_id)
+        return self._user
 
     def get_user_locale(self):
         ''''''
@@ -153,14 +136,9 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def my_render(self, template, argus=None, rubbish_keys=None):
         ''''''
         if not isinstance(argus, dict):
-            argus = {}
-        else:
-            for key in self.get_rubbish_key(rubbish_keys):
-                if key in argus:
-                    del argus[key]
+            argus = dict()
 
         argus['xsrf_token'] = self.xsrf_token
-        argus['is_mobile'] = self.is_mobile
         argus['is_ajax'] = self.is_ajax
         argus['locale'] = self.locale
 
@@ -186,26 +164,13 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         return self._xsrf_token
 
     @property
-    def is_mobile(self):
-        ''''''
-        if hasattr(self, '_client_type'):
-            return getattr(self, '_client_type')
-
-        agent = self.request.headers.get('USER-AGENT', '')
-        return False
-        # is_mobile = is_mobile_request(agent)
-
-        # setattr(self, '_client_type', is_mobile)
-        # return is_mobile
-
-    @property
     def is_ajax(self):
         ''''''
         if not hasattr(self, '_is_ajax'):
             if self.request.headers.get('X-Requested-With'):
-                self._is_ajax = const.yes_or_no['yes']
+                self._is_ajax = True
             else:
-                self._is_ajax = 0
+                self._is_ajax = False
         return self._is_ajax
 
     @property
@@ -221,7 +186,6 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     @classmethod
     def ajax_base(cls, method):
-        ''''''
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             ''''''
@@ -249,8 +213,10 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 import traceback
                 log = getLogger()
                 log.error(e)
-                self.write_json(data=None, errcode=const.AJAX_FAIL_NORMAL,
-                                errmsg=u"未定义异常", status=None)
+                self.write_json(data=None,
+                                errcode=const.AJAX_FAIL_NORMAL,
+                                errmsg=u"未定义异常",
+                                status=None)
 
         return wrapper
 
@@ -258,14 +224,3 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 class CsrfExceptMixin():
     def check_xsrf_cookie(self):
         return True
-
-
-class PageNotFoundHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render("error.html", msg="page not found")
-
-    def post(self):
-        self.render("error.html", msg="page not found")
-
-    def initialize(self, status_code):
-        self.set_status(status_code)
