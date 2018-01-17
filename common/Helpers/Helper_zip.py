@@ -19,21 +19,21 @@ class ZipHelper(object):
             return new_arcname
 
     @classmethod
-    def zip(cls, src=None, dist=None, arcname=None):
+    def zip(cls, src, dest, arcname=None):
         if os.path.isdir(src):
             for root, filepath_list, filename_list in os.walk(src):
                 for filepath in filepath_list:
                     ZipHelper.zip(src=os.path.join(root, filepath),
-                                  dist=dist,
+                                  dest=dest,
                                   arcname=ZipHelper._get_arcname(arcname, filepath))
                 for filename in filename_list:
-                    with zipfile.ZipFile(dist, 'a', zipfile.ZIP_DEFLATED) as zf:
+                    with zipfile.ZipFile(dest, 'a', zipfile.ZIP_DEFLATED) as zf:
                         zf.write(os.path.join(root, filename),
                                  arcname=ZipHelper._get_arcname(arcname, filename))
                 break
         elif os.path.isfile(src):
             filepath, filename = os.path.split(src)
-            with zipfile.ZipFile(dist, 'a', zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(dest, 'a', zipfile.ZIP_DEFLATED) as zf:
                 zf.write(src, arcname=ZipHelper._get_arcname(arcname, filename))
 
     @classmethod
@@ -53,6 +53,7 @@ class ZipHelper(object):
             if zipname is None:
                 zipname = os.path.join(folder, "{0}.zip".format(filename_base))
             ZipHelper.zip(file, zipname, arcname=None)
+        return True
 
     @classmethod
     def zip_folder(cls, folder, zipname=None, exclude_parent=False):
@@ -68,32 +69,32 @@ class ZipHelper(object):
             ZipHelper.zip(folder, zipname, arcname=pathname)
         else:
             ZipHelper.zip(folder, zipname, arcname=None)
+        return True
 
 
-
-            # @classmethod
-            # def unzip(cls, zip_file_name, dest_dir):
-            #     """服务器端解压文件生成r_list.dat文件"""
-            #     zf = zipfile.ZipFile(zip_file_name, 'r')
-            #     dest_dir = dest_dir.replace('\\', '/')
-            #     if dest_dir.endswith('/'):
-            #         dest_dir = dest_dir[:-1]
-            #     for filename in zf.namelist():
-            #         fname = filename
-            #         new_file = u'%s/%s' % (dest_dir, fname)
-            #         if new_file.endswith('/') or new_file.endswith('\\'):
-            #             if not os.path.exists(new_file):
-            #                 os.makedirs(new_file)
-            #         else:
-            #             filepath = os.path.split(new_file)[0]
-            #             if not os.path.exists(filepath):
-            #                 os.makedirs(filepath)
-            #             try:
-            #                 f = open(new_file, 'wb')
-            #             except UnicodeEncodeError:
-            #                 f = open(new_file.encode('utf8'), 'wb')
-            #             f.write(zf.read(filename))
-            #             f.close()
+    @classmethod
+    def unzip(cls, zipname, dest=None):
+        """服务器端解压文件生成r_list.dat文件"""
+        zf = zipfile.ZipFile(zipname, 'r')
+        dest = dest.replace('\\', '/')
+        if dest.endswith('/'):
+            dest = dest[:-1]
+        for filename in zf.namelist():
+            fname = filename
+            new_file = u'%s/%s' % (dest, fname)
+            if new_file.endswith('/') or new_file.endswith('\\'):
+                if not os.path.exists(new_file):
+                    os.makedirs(new_file)
+            else:
+                filepath = os.path.split(new_file)[0]
+                if not os.path.exists(filepath):
+                    os.makedirs(filepath)
+                try:
+                    f = open(new_file, 'wb')
+                except UnicodeEncodeError:
+                    f = open(new_file.encode('utf8'), 'wb')
+                f.write(zf.read(filename))
+                f.close()
 
 
 class InMemoryZip(object):
@@ -137,7 +138,7 @@ class InMemoryZip(object):
 
 if __name__ == '__main__':
     src = os.path.join("C://", "Users", "user1", "Desktop", "user", "views.py")
-    dist = os.path.join("C:", "Users", "user1", "Desktop", "user.zip")
-    # ZipHelper.zip(src, dist)
+    dest = os.path.join("C:", "Users", "user1", "Desktop", "user.zip")
+    # ZipHelper.zip(src, dest)
     ZipHelper.zip_file(src, exclude_parent=False)
     # ZipHelper.zip_folder(src, exclude_parent=True)
