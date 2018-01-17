@@ -17,7 +17,7 @@ def run():
     process = CrawlerProcess(settings=settings)
 
     # 可以添加多个spider
-    # process.crawl(JobboleSpider)
+    process.crawl(JobboleSpider)
     process.crawl(BaiduSpider)
 
     # 启动爬虫，会阻塞，直到爬取完成

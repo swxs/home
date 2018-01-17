@@ -7,7 +7,7 @@ from scrapy import Selector
 
 class BaiduSpider(scrapy.Spider):
     # spider名字
-    name = "jobbole"
+    name = "baidu_tieba"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 UBrowser/6.1.2107.204 Safari/537.36",
@@ -38,15 +38,40 @@ class BaiduSpider(scrapy.Spider):
                       method="GET",
                       headers=BaiduSpider.headers,
                       cookies=BaiduSpider.getCookies(),
-                      callback=self.get_url_parser)
-        # 默认response处理函数
+                      callback=self.get_more_url_parser)
 
     def parse(self, response):
-        sel = Selector(text=response.body)
         pass
 
-    def get_url_parser(self, response):
+    def get_more_url_parser(self, response):
         sel = Selector(text=response.body)
-        for i in range(10):
-            yield Request('http://www.example.com/list/1?page={0}'.format(i))
-        pass
+        url = u'http://tieba.baidu.com{0}'.format(sel.re("\"([^\"]+tab=favorite)\"")[0].replace("&amp;", "&"))
+        yield Request(url,
+                      method="GET",
+                      headers=BaiduSpider.headers,
+                      meta=dict(url=url[:-21]),
+                      cookies=BaiduSpider.getCookies(),
+                      callback=self.get_kw_url_parser)
+
+    def get_kw_url_parser(self, response):
+        sel = Selector(text=response.body)
+        kw_url_list = sel.re("kw.+?\">")
+        for kw_url in kw_url_list:
+            url = u'{0}{1}'.format(response.meta.get('url'), kw_url[:-2])
+            yield Request(url,
+                          method="GET",
+                          headers=BaiduSpider.headers,
+                          cookies=BaiduSpider.getCookies(),
+                          callback=self.get_sign_url_parser)
+
+    def get_sign_url_parser(self, response):
+        sel = Selector(text=response.body)
+        sign_list = sel.re(u'mo\\/.+?\\">签到')
+        if len(sign_list) == 0:
+            yield
+        else:
+            url = u'http://tieba.baidu.com/{0}'.format(sign_list[0][:-4].replace("&amp;", "&"))
+            yield Request(url,
+                          method="GET",
+                          headers=BaiduSpider.headers,
+                          cookies=BaiduSpider.getCookies())
