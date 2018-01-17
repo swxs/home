@@ -36,6 +36,7 @@ class Creater(object):
     @classmethod
     def refresh(cls, user):
         cls.get_user_by_user_id(user.oid, refresh=1)
+        cls.get_user_by_username(user.username, refresh=1)
 
     @classmethod
     @memorize
@@ -43,6 +44,14 @@ class Creater(object):
         try:
             _id = ObjectId(user_id)
             return User.objects.get(id=_id)
+        except User.DoesNotExist:
+            raise NotExistException("User")
+
+    @classmethod
+    @memorize
+    def get_user_by_username(cls, username):
+        try:
+            return User.objects.get(username=username)
         except User.DoesNotExist:
             raise NotExistException("User")
 
