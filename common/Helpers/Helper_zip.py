@@ -1,12 +1,9 @@
-# encoding:utf-8
+# -*- coding: utf-8 -*-
 
-import zipfile
 import os
 import shutil
 import StringIO
-import datetime
-
-import settings
+import zipfile
 from common.Helpers.Helper_folder import get_path_split
 
 
@@ -46,12 +43,12 @@ class ZipHelper(object):
         if exclude_parent:
             base_path, pathname = get_path_split(folder)
             if zipname is None:
-                zipname = os.path.join(base_path, "{0}.zip".format(pathname))
+                zipname = os.path.join(base_path, u"{0}.zip".format(pathname))
             ZipHelper.zip(file, zipname, arcname=None)
         else:
             filename_base, filename_ext = os.path.splitext(filename)
             if zipname is None:
-                zipname = os.path.join(folder, "{0}.zip".format(filename_base))
+                zipname = os.path.join(folder, u"{0}.zip".format(filename_base))
             ZipHelper.zip(file, zipname, arcname=None)
 
     @classmethod
@@ -62,7 +59,7 @@ class ZipHelper(object):
         base_path, pathname = get_path_split(folder)
 
         if zipname is None:
-            zipname = os.path.join(base_path, "{0}.zip".format(pathname))
+            zipname = os.path.join(base_path, u"{0}.zip".format(pathname))
 
         if exclude_parent:
             ZipHelper.zip(folder, zipname, arcname=pathname)
@@ -136,8 +133,12 @@ class InMemoryZip(object):
 
 
 if __name__ == '__main__':
-    src = os.path.join("C://", "Users", "user1", "Desktop", "user", "views.py")
-    dist = os.path.join("C:", "Users", "user1", "Desktop", "user.zip")
-    # ZipHelper.zip(src, dist)
-    ZipHelper.zip_file(src, exclude_parent=False)
-    # ZipHelper.zip_folder(src, exclude_parent=True)
+    for root, path, file in os.walk(os.path.join(u"L://", u"1", u"3", u"U.R.C(桃屋しょう猫)", u"U.R.C(桃屋しょう猫)")):
+        if path != []:
+            continue
+        else:
+            ZipHelper.zip_folder(root)
+            # src = os.path.join("L://", "1", "1", "loli1", "0-Distance Love")
+            # # ZipHelper.zip(src, dist)
+            # # ZipHelper.zip_file(src, exclude_parent=False)
+            # ZipHelper.zip_folder(src)
