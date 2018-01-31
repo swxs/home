@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from hdfs3 import HDFileSystem
 
-class hdfs_helper():
+class HdfsHelper():
     def __init__(self, host=None, port=None):
         self.hdfs = HDFileSystem(host=host, port=port)
 

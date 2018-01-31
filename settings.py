@@ -14,6 +14,7 @@ SITE_PORT = 8088
 SITE_URL = '{0}://{1}:{2}'.format(SITE_PROTOCOL, SITE_DOMAIN, SITE_PORT)
 
 STATIC_PATH = os.path.join(SITE_ROOT, 'static')
+STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
 TEMPLATE_PATH = os.path.join(SITE_ROOT, 'template')
 
 MONGODB_ADDRESS = '127.0.0.1'
