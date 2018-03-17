@@ -13,7 +13,7 @@ from tornado import locale
 from tornado.web import escape
 import const
 import settings
-from api.user.creater import Creater as user_creater
+import api.user.utils as user_utils
 from common.Utils.validate import Validate
 from common.Exceptions.CommonException import CommonException
 from common.Exceptions.ExistException import ExistException
@@ -126,7 +126,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             user_id = self.session.get('user_id')
             if user_id is None:
                 raise NotLoginException()
-            self._user = user_creater.get_user_by_user_id(user_id=user_id)
+            self._user = user_utils.get_user_by_user_id(user_id=user_id)
         return self._user
 
     def get_user_locale(self):

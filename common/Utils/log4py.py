@@ -39,7 +39,6 @@ LOGLEVEL_ERROR = 1 << 1
 LOGLEVEL_NORMAL = 1 << 2
 LOGLEVEL_VERBOSE = 1 << 3
 LOGLEVEL_DEBUG = 1 << 4
-
 # Pre-defined format strings
 FMT_SHORT = "%M"
 FMT_MEDIUM = "[ %C.%F ] %D: %M"
@@ -61,7 +60,7 @@ SPECIAL_TARGETS = [TARGET_MYSQL, TARGET_POSTGRES, TARGET_SYSLOG, TARGET_SYS_STDO
 # Configuration files
 CONFIGURATION_FILES = {}
 CONFIGURATION_FILES[1] = "log4py.conf"                    # local directory
-CONFIGURATION_FILES[2] = "common/log4py.conf"                    # local directory
+CONFIGURATION_FILES[2] = "common/Utils/log4py.conf"       # local directory
 CONFIGURATION_FILES[3] = "$HOME/.log4py.conf"             # hidden file in the home directory
 CONFIGURATION_FILES[4] = "/etc/log4py.conf"               # system wide file
 

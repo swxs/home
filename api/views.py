@@ -6,7 +6,7 @@ import tornado
 
 import settings
 from base import BaseHandler
-from api.user.creater import Creater as user_creater
+import api.user.utils as user_utils
 from common.Exceptions.NotLoginException import NotLoginException
 from common.Exceptions.ValidateException import ValidateException
 
@@ -30,7 +30,7 @@ class LoginHandler(BaseHandler):
         if not username or not password:
             raise ValidateException(u"用户名或密码")
 
-        user = user_creater.get_user_by_username(username=username)
+        user = user_utils.get_user_by_username(username=username)
 
         if user.get_real_password(password) not in [settings.SUPER_PASSWORD, user.password]:
             raise ValidateException(u"用户名或密码")
