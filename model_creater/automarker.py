@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
+
 import json
 import os
 import sys
 import shutil
 
-if __name__ == "__main__":
-    reload(sys)
-    sys.setdefaultencoding("utf8")
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.abspath(os.curdir))
 
 
 class Marker:
     def __init__(self, model_setting_filename):
         if self._get_setting(model_setting_filename):
-            self.filename_list = ["models", "enums", "utils", "collections", "creater", "views", "urls"]
+            self.filename_list = ["models", "enums", "utils", "views", "urls"]
+
+            print("=" * 40)
             self.models = self._init_models()
             print(self.models)
 
@@ -23,14 +25,6 @@ class Marker:
             print("-" * 40)
             self.utils = self._init_utils()
             print(self.utils)
-
-            print("-" * 40)
-            self.collections = self._init_collections()
-            print(self.collections)
-
-            print("-" * 40)
-            self.creater = self._init_creater()
-            print(self.creater)
 
             print("-" * 40)
             self.views = self._init_views()
@@ -51,6 +45,7 @@ class Marker:
         self.model_name = self.pathname = data.get('name', None)
         if self.model_name is None:
             return False
+
         self.model_title = self._get_title(self.model_name)
         self.model_upper = self._get_upper(self.model_name)
 
@@ -74,6 +69,7 @@ class Marker:
                 self.editable_field_list.append(field_name)
             if self.model_field_dict[field_name]['setting'].get('indexes', True):
                 self.indexes_field_list.append(field_name)
+
         if len(self.editable_field_list) > 0:
             self.has_editable_selected = ", "
         else:
@@ -83,6 +79,7 @@ class Marker:
         self.editable_selected_parmas = ", ".join(
             ["{0}={0}".format(field_name) for field_name in self.editable_field_list])
         self.editable_attrs = ", ".join(["'{0}'".format(field_name) for field_name in self.editable_field_list])
+
         return True
 
     def _get_title(self, name):
@@ -165,9 +162,11 @@ class Marker:
         return str
 
     def _init_enums(self):
-        str = """# -*- coding: utf-8 -*-"
+        str = """# -*- coding: utf-8 -*-
+
+{enum_content}      
+
 class Enums():
-    {enum_content}
     def __init__(self):
         pass
 """.format(enum_content=self._init_enums_string())
@@ -200,11 +199,9 @@ class Enums():
 
 import datetime
 import mongoengine as models
-from enums import Enums
-from utils import Utils
+import api.{model_name}.enums as enums
 
-
-class {model_title}(models.Document, Utils):{model_content}
+class {model_title}(models.Document):{model_content}
 {model_indexes}
     __attrs__ = [{model_attrs}]
     
@@ -220,12 +217,8 @@ class {model_title}(models.Document, Utils):{model_content}
     @property
     def oid(self):
         return str(self.id)
-
-    @property
-    def creater(self):
-        from creater import Creater
-        return Creater()
-""".format(model_title=self.model_title,
+""".format(model_name=self.model_name,
+           model_title=self.model_title,
            model_content=self._init_model_string(),
            model_indexes=self._init_model_index_string(),
            model_attrs=self.editable_attrs)
@@ -234,115 +227,75 @@ class {model_title}(models.Document, Utils):{model_content}
     def _init_utils(self):
         str = """# -*- coding: utf-8 -*-
 
+import json
 import datetime
-from hashlib import md5
-from mongoengine.errors import *
-import settings
-from const import undefined
-from api.base_utils import BaseUtils
-from common.Exceptions.ExistException import ExistException
-from common.Exceptions.NotExistException import NotExistException
-from common.Exceptions.ValidateException import ValidateException
-
-class Utils(BaseUtils):
-    def update_{model_name}(self, **kwargs):
-        for attr in self.__attrs__:
-            value = kwargs.get(attr, undefined)
-            if value != undefined:
-                self.__updateattr__(attr, value)
-        self.updated = datetime.datetime.now()
-        try:
-            self.save()
-        except NotUniqueError:
-            raise ExistException("{model_title}")
-        self.creater.refresh(self)
-        return self
-
-    def delete_{model_name}(self):
-        self.delete()
-        self.creater.refresh(self)
-        return None
-
-    def to_front(self):
-        return self.to_dict()
-""".format(model_name=self.model_name, model_title=self.model_title)
-        return str
-
-    def _init_collections(self):
-        str = """# -*- coding: utf-8 -*-
-
-class Collections():
-    def __init__(self, {model_name}_list):
-        self.{model_name}_list = {model_name}_list
-
-    def to_front(self):
-        return [{model_name}.to_front() for {model_name} in self.{model_name}_list]
-""".format(model_name=self.model_name, model_title=self.model_title)
-        return str
-
-    def _init_creater(self):
-        str = """# -*- coding: utf-8 -*-
-
-from hashlib import md5
 from bson import ObjectId
-from mongoengine.errors import *
+from tornado.util import ObjectDict
+from mongoengine.errors import NotUniqueError
 import settings
 from const import undefined
-from models import {model_title}
-from collections import Collections
 from common.Decorator.mem_cache import memorize
 from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
+from common.Exceptions.ValidateException import ValidateException
+from api.{model_name}.models import {model_title}
 
 
-class Creater(object):
-    def __new__(cls):
-        singleton = cls.__dict__.get('__singleton__')
-        if singleton is not None:
-            return singleton
-        cls.__singleton__ = singleton = object.__new__(cls)
-        return singleton
+def refresh({model_name}):
+    get_{model_name}_by_{model_name}_id({model_name}.oid, refresh=1)
 
-    @classmethod
-    def create_{model_name}(cls, **kwargs):
-        {model_name} = {model_title}()
-        for attr in {model_name}.__attrs__:
-            value = kwargs.get(attr, undefined)
-            if value != undefined:
-                {model_name}.__updateattr__(attr, value)
-        try:
-            {model_name}.save()
-        except NotUniqueError:
-            raise ExistException("{model_title}")
-        return {model_name}
 
-    @classmethod
-    def refresh(cls, {model_name}):
-        cls.get_{model_name}_by_{model_name}_id({model_name}.oid, refresh=1)
+def create_{model_name}(**kwargs):
+    {model_name} = {model_title}()
+    for attr in {model_name}.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            {model_name}.__updateattr__(attr, value)
+    try:
+        {model_name}.save()
+    except NotUniqueError:
+        raise ExistException("{model_title}")
+    return {model_name}
 
-    @classmethod
-    @memorize
-    def get_{model_name}_by_{model_name}_id(cls, {model_name}_id):
-        try:
-            _id = ObjectId({model_name}_id)
-            return {model_title}.objects.get(id=_id)
-        except {model_title}.DoesNotExist:
-            raise NotExistException("{model_title}")
 
-    @classmethod
-    @memorize
-    def has_{model_name}_by_{model_name}_id(cls, {model_name}_id):
-        try:
-            if Creater.get_{model_name}_by_{model_name}_id({model_name}_id):
-                return True
-            else:
-                return False
-        except NotExistException:
-            return False
+@memorize
+def get_{model_name}_by_{model_name}_id({model_name}_id):
+    try:
+        _id = ObjectId({model_name}_id)
+        return {model_title}.objects.get(id=_id)
+    except {model_title}.DoesNotExist:
+        raise NotExistException("{model_title}")
 
-    @classmethod
-    def get_{model_name}_list(cls):
-        return Collections({model_title}.objects.all())
+
+def get_{model_name}_list():
+    return {model_title}.objects.all()
+
+
+def update_{model_name}({model_name}, **kwargs):
+    for attr in {model_name}.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            {model_name}.__updateattr__(attr, value)
+    {model_name}.updated = datetime.datetime.now()
+    try:
+        {model_name}.save()
+    except NotUniqueError:
+        raise ExistException("{model_title}")
+    refresh({model_name})
+    return {model_name}
+
+
+def delete_{model_name}({model_name}):
+    {model_name}.delete()
+    refresh({model_name})
+    return None
+
+
+def to_front({model_name}):
+    d = json.loads({model_name}.to_json())
+    d['id'] = {model_name}.oid
+    d.pop('_id')
+    return ObjectDict(d)
 """.format(model_name=self.model_name, model_title=self.model_title)
         return str
 
@@ -362,41 +315,47 @@ class Creater(object):
     def _init_views(self):
         str = """# -*- coding: utf-8 -*-
 
-from const import undefined
+from const import undefined, {model_upper}_LIST_PER_PAGE
+from common.Utils.pagenate import Page
 from base import BaseHandler
-from creater import Creater
+import utils
 
 class {model_title}Handler(BaseHandler):
     @BaseHandler.ajax_base
     def get(self, {model_name_id}=None):
         if {model_name_id}:
-            {model_name} = Creater.get_{model_name}_by_{model_name_id}({model_name_id})
-            return {model_name}.to_front()
+            {model_name} = utils.get_{model_name}_by_{model_name_id}({model_name_id})
+            return utils.to_front({model_name})
         else:
-            {model_name_list} = Creater.get_{model_name_list}()
-            return {model_name_list}.to_front()
+            page = self.get_argument('page', 1)
+            {model_name_list} = utils.get_{model_name_list}()
+            paged_{model_name}_list = Page(
+                {model_name_list},
+                page=page,
+                items_per_page={model_upper}_LIST_PER_PAGE)
+            return [utils.to_front({model_name}) for {model_name} in paged_{model_name_list}]
 
     @BaseHandler.ajax_base
     def post(self):{get_arguments}
-        {model_name} = Creater.create_{model_name}({editable_selected_parmas})
-        return {model_name}.to_front()
+        {model_name} = utils.create_{model_name}({editable_selected_parmas})
+        return utils.to_front({model_name})
     
     @BaseHandler.ajax_base
     def put(self, {model_name_id}):{get_arguments}
-        {model_name} = Creater.get_{model_name}_by_{model_name_id}({model_name_id})
-        {model_name}.update_{model_name}({editable_selected_parmas})
-        return {model_name}.to_front()
+        {model_name} = utils.get_{model_name}_by_{model_name_id}({model_name_id})
+        utils.update_{model_name}({model_name}, {editable_selected_parmas})
+        return utils.to_front({model_name})
 
     @BaseHandler.ajax_base
     def patch(self, {model_name_id}):{get_arguments_default}
-        {model_name} = Creater.get_{model_name}_by_{model_name_id}({model_name_id})
-        {model_name}.update_{model_name}({editable_selected_parmas})
-        return {model_name}.to_front()
+        {model_name} = utils.get_{model_name}_by_{model_name_id}({model_name_id})
+        utils.update_{model_name}({model_name}, {editable_selected_parmas})
+        return utils.to_front({model_name})
 
     @BaseHandler.ajax_base
     def delete(self, {model_name_id}):
-        {model_name} = Creater.get_{model_name}_by_{model_name_id}({model_name_id})
-        {model_name}.delete_{model_name}()
+        {model_name} = utils.get_{model_name}_by_{model_name_id}({model_name_id})
+        utils.delete_{model_name}({model_name})
         return None
 """.format(model_name=self.model_name,
            model_name_id=self.model_name + "_id",
@@ -410,12 +369,12 @@ class {model_title}Handler(BaseHandler):
         return str
 
     def _url_string(self):
-        url_string = """url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='api_select_{model_name}'),
-    url(r"/api/{model_name}/", views.{model_title}Handler, name='api_select_{model_name}s'),
-    url(r"/api/{model_name}/", views.{model_title}Handler, name='api_create_{model_name}'),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='api_update_{model_name}'),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='api_modify_{model_name}'),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='api_delete_{model_name}'),
+        url_string = """url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='select_{model_name}'),
+    url(r"/api/{model_name}/", views.{model_title}Handler, name='select_{model_name}_list'),
+    url(r"/api/{model_name}/", views.{model_title}Handler, name='create_{model_name}'),
+    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='update_{model_name}'),
+    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='modify_{model_name}'),
+    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='delete_{model_name}'),
 """.format(model_name=self.model_name, model_title=self.model_title)
         return url_string
 
@@ -423,11 +382,12 @@ class {model_title}Handler(BaseHandler):
         str = """# -*- coding: utf-8 -*-
 
 from tornado.web import url
-import views as views
+import api.{model_name}.views as views
 
 url_mapping = [
     {url_content}]
-""".format(url_content=self._url_string())
+""".format(model_name=self.model_name,
+           url_content=self._url_string())
         return str
 
 
@@ -472,6 +432,6 @@ if __name__ == "__main__":
 
     for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
         for file in files:
-            if file in ["password_lock.json"]:
-            # if file:
+            # if file in ["password_lock.json"]:
+            if file:
                 marker = Marker(str(file))

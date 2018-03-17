@@ -42,7 +42,7 @@ class ArticalHandler(BaseHandler):
         tag_id_list = self.get_arguments('tag_id_list', None)
         comment_id_list = self.get_arguments('comment_id_list', None)
         artical = utils.get_artical_by_artical_id(artical_id)
-        artical = utils.update_artical(artical, title=title, author=author, source=source, summary=summary, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list)
+        utils.update_artical(artical, title=title, author=author, source=source, summary=summary, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list)
         return utils.to_front(artical)
 
     @BaseHandler.ajax_base
@@ -55,11 +55,11 @@ class ArticalHandler(BaseHandler):
         tag_id_list = self.get_arguments('tag_id_list', undefined)
         comment_id_list = self.get_arguments('comment_id_list', undefined)
         artical = utils.get_artical_by_artical_id(artical_id)
-        artical = utils.update_artical(artical, title=title, author=author, source=source, summary=summary, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list)
+        utils.update_artical(artical, title=title, author=author, source=source, summary=summary, content=content, tag_id_list=tag_id_list, comment_id_list=comment_id_list)
         return utils.to_front(artical)
 
     @BaseHandler.ajax_base
     def delete(self, artical_id):
         artical = utils.get_artical_by_artical_id(artical_id)
-        artical.delete_artical()
+        utils.delete_artical(artical)
         return None

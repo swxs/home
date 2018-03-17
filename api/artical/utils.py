@@ -4,14 +4,18 @@ import json
 import datetime
 from bson import ObjectId
 from tornado.util import ObjectDict
-from mongoengine.errors import *
+from mongoengine.errors import NotUniqueError
 import settings
 from const import undefined
 from common.Decorator.mem_cache import memorize
 from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 from common.Exceptions.ValidateException import ValidateException
-from models import Artical
+from api.artical.models import Artical
+
+
+def refresh(artical):
+    get_artical_by_artical_id(artical.oid, refresh=1)
 
 
 def create_artical(**kwargs):
@@ -34,10 +38,6 @@ def get_artical_by_artical_id(artical_id):
         return Artical.objects.get(id=_id)
     except Artical.DoesNotExist:
         raise NotExistException("Artical")
-
-
-def refresh(artical):
-    get_artical_by_artical_id(artical.oid, refresh=1)
 
 
 def get_artical_list():

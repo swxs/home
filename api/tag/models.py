@@ -2,11 +2,9 @@
 
 import datetime
 import mongoengine as models
-from enums import Enums
-from utils import Utils
+import api.tag.enums as enums
 
-
-class Tag(models.Document, Utils):    
+class Tag(models.Document):    
     name = models.StringField(unique=True)    
     color = models.StringField()    
     length = models.IntField(default=0)    
@@ -27,8 +25,3 @@ class Tag(models.Document, Utils):
     @property
     def oid(self):
         return str(self.id)
-
-    @property
-    def creater(self):
-        from creater import Creater
-        return Creater()

@@ -1,42 +1,71 @@
 # -*- coding: utf-8 -*-
 
+import json
 import datetime
-from hashlib import md5
-from mongoengine.errors import *
+from bson import ObjectId
+from tornado.util import ObjectDict
+from mongoengine.errors import NotUniqueError
 import settings
 from const import undefined
-from api.base_utils import BaseUtils
+from common.Decorator.mem_cache import memorize
 from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 from common.Exceptions.ValidateException import ValidateException
+from api.user.models import User
 
-class Utils(BaseUtils):
-    def update_user(self, **kwargs):
-        for attr in self.__attrs__:
-            value = kwargs.get(attr, undefined)
-            if value != undefined:
-                self.__updateattr__(attr, value)
-        self.updated = datetime.datetime.now()
-        try:
-            self.save()
-        except NotUniqueError:
-            raise ExistException("User")
-        self.creater.refresh(self)
-        return self
 
-    def delete_user(self):
-        self.delete()
-        self.creater.refresh(self)
-        return None
+def refresh(user):
+    get_user_by_user_id(user.oid, refresh=1)
 
-    def to_front(self):
-        return self.to_dict()
 
-    def get_real_password(self, password):
-        try:
-            if password is None:
-                return None
-            else:
-                return md5(settings.SECRET_KEY + password).hexdigest()
-        except:
-            raise ValidateException("password")
+def create_user(**kwargs):
+    user = User()
+    for attr in user.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            user.__updateattr__(attr, value)
+    try:
+        user.save()
+    except NotUniqueError:
+        raise ExistException("User")
+    return user
+
+
+@memorize
+def get_user_by_user_id(user_id):
+    try:
+        _id = ObjectId(user_id)
+        return User.objects.get(id=_id)
+    except User.DoesNotExist:
+        raise NotExistException("User")
+
+
+def get_user_list():
+    return User.objects.all()
+
+
+def update_user(user, **kwargs):
+    for attr in user.__attrs__:
+        value = kwargs.get(attr, undefined)
+        if value != undefined:
+            user.__updateattr__(attr, value)
+    user.updated = datetime.datetime.now()
+    try:
+        user.save()
+    except NotUniqueError:
+        raise ExistException("User")
+    refresh(user)
+    return user
+
+
+def delete_user(user):
+    user.delete()
+    refresh(user)
+    return None
+
+
+def to_front(user):
+    d = json.loads(user.to_json())
+    d['id'] = user.oid
+    d.pop('_id')
+    return ObjectDict(d)

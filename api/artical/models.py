@@ -2,8 +2,7 @@
 
 import datetime
 import mongoengine as models
-from enums import Enums
-import utils
+import api.artical.enums as enums
 
 
 class Artical(models.Document):

@@ -24,12 +24,13 @@ MONGODB_DBNAME = 'home'
 MEMCACHE_SERVER = '127.0.0.1'
 MEMCACHE_PORT = 11211
 MEMCACHE_EXPIRE_TIME = 120
-MEMCACHE_HOSTS = ('{0}:{1}'.format(MEMCACHE_SERVER, MEMCACHE_PORT), )
+MEMCACHE_HOSTS = ('{0}:{1}'.format(MEMCACHE_SERVER, MEMCACHE_PORT),)
 
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = None
+REDIS_LOG_MAIL_LIST_NAME = []
 
 XSRF = '__xsrf'
 
@@ -58,14 +59,19 @@ else:
 
 # connect to mongodb
 DB_CONNECTED = False
+
+
 def connect_db(db_name=MONGODB_DBNAME):
     global DB_CONNECTED
     from mongoengine.connection import connect
     connect(db_name, host=MONGODB_ADDRESS, port=MONGODB_PORT, is_slave=False, slaves=None)
     DB_CONNECTED = True
+
+
 connect_db()
 if DB_TRIGGER_FLAG:
     from db.model_modify_trigger import bind_signals
+
     bind_signals()
 
 settings = dict(

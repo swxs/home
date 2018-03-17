@@ -2,16 +2,14 @@
 
 import datetime
 import mongoengine as models
-from enums import Enums
-from utils import Utils
+import api.user.enums as enums
 
-
-class User(models.Document, Utils):
-    username = models.StringField(unique=True)
-    nickname = models.StringField()
-    password = models.StringField()
-    userinfo_id = models.StringField(max_length=24)
-    created = models.DateTimeField(default=datetime.datetime.now)
+class User(models.Document):    
+    username = models.StringField(unique=True)    
+    nickname = models.StringField()    
+    password = models.StringField()    
+    userinfo_id = models.StringField(max_length=24)    
+    created = models.DateTimeField(default=datetime.datetime.now)    
     updated = models.DateTimeField(default=datetime.datetime.now)
 
     meta = {
@@ -19,10 +17,8 @@ class User(models.Document, Utils):
     }
 
     __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
-
+    
     def __updateattr__(self, name, value):
-        if name == "password":
-            value = self.get_real_password(value)
         super(User, self).__setattr__(name, value)
 
     def __unicode__(self):
@@ -34,8 +30,3 @@ class User(models.Document, Utils):
     @property
     def oid(self):
         return str(self.id)
-
-    @property
-    def creater(self):
-        from creater import Creater
-        return Creater()
