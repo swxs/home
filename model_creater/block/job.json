@@ -1,0 +1,149 @@
+{
+  "name": "job",
+  "enum": [],
+  "setting": [
+    {
+      "name": "job_type",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_pay",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_time",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_city",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_age",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_edu",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_company_name",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_company_type",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_company_kind",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_company_pn",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_company_add",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_desc",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    },
+    {
+      "name": "job_url",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false,
+        "check": false,
+        "checkType": "all"
+      }
+    }
+  ]
+}
