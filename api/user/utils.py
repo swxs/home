@@ -1,71 +1,55 @@
 # -*- coding: utf-8 -*-
+# @File    : utils.py
+# @AUTH    : swxs
+# @Time    : 2018/4/30 14:55
 
-import json
-import datetime
-from bson import ObjectId
+from pandas import json
 from tornado.util import ObjectDict
-from mongoengine.errors import NotUniqueError
-import settings
 from const import undefined
-from common.Decorator.mem_cache import memorize
-from common.Exceptions.ExistException import ExistException
-from common.Exceptions.NotExistException import NotExistException
-from common.Exceptions.ValidateException import ValidateException
-from api.user.models import User
+from models_manager.manager_mongoenginee import Manager
+from common.Utils import utils
 
 
-def refresh(user):
-    get_user_by_user_id(user.oid, refresh=1)
+class User():
+    __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
 
+    __get_one__ = [
+        ("username",),
+    ]
 
-def create_user(**kwargs):
-    user = User()
-    for attr in user.__attrs__:
-        value = kwargs.get(attr, undefined)
-        if value != undefined:
-            user.__updateattr__(attr, value)
-    try:
-        user.save()
-    except NotUniqueError:
-        raise ExistException("User")
-    return user
+    __get_list__ = [
+        (),
+        ("nickname",)
+    ]
 
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('username', undefined)
+        self.name = kwargs.get('nickname', undefined)
+        self.password = kwargs.get('password', undefined)
+        self.name = kwargs.get('userinfo_id', undefined)
 
-@memorize
-def get_user_by_user_id(user_id):
-    try:
-        _id = ObjectId(user_id)
-        return User.objects.get(id=_id)
-    except User.DoesNotExist:
-        raise NotExistException("User")
+    @property
+    def password(self):
+        return self.password
 
+    @password.setter
+    def password(self, password):
+        self.__dict__["password"] = utils.get_password(password)
 
-def get_user_list():
-    return User.objects.all()
+    def to_front(self):
+        d = json.loads(self.to_dict())
+        return ObjectDict(d)
 
+    @classmethod
+    def create(cls, **kwargs):
+        return Manager.create('User', cls, **kwargs)
 
-def update_user(user, **kwargs):
-    for attr in user.__attrs__:
-        value = kwargs.get(attr, undefined)
-        if value != undefined:
-            user.__updateattr__(attr, value)
-    user.updated = datetime.datetime.now()
-    try:
-        user.save()
-    except NotUniqueError:
-        raise ExistException("User")
-    refresh(user)
-    return user
+    @classmethod
+    def select(cls, **kwargs):
+        return Manager.select('User', cls, **kwargs)
 
+    def udpate(self):
+        return Manager.update('User', self)
 
-def delete_user(user):
-    user.delete()
-    refresh(user)
-    return None
-
-
-def to_front(user):
-    d = json.loads(user.to_json())
-    d['id'] = user.oid
-    d.pop('_id')
-    return ObjectDict(d)
+    def delete(self):
+        return Manager.delete('User', self)

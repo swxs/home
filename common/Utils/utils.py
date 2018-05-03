@@ -6,6 +6,9 @@ import os
 import tornado.template
 import codecs
 from tornado.util import ObjectDict
+
+import settings
+
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -283,3 +286,7 @@ def encode_unicode(string):
     if not string:
         return
     codecs.encode(string, 'raw_unicode_escape').decode('utf-8')
+
+
+def get_password(password):
+    return hashlib.md5(settings.SECRET_KEY + password).hexdigest()
