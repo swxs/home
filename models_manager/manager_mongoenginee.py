@@ -39,11 +39,7 @@ class Manager(object):
 
     @classmethod
     def select_list(cls, model, model_class):
-        while model.next():
-            kwargs = dict()
-            for attr in model_class.__attrs__:
-                kwargs[attr] = model.attr
-            yield model_class(kwargs)
+        return itertools.imap(model_class.get_instance, model)
 
     @classmethod
     def create(cls, model_name, model_class, **kwargs):

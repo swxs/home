@@ -16,15 +16,16 @@ class UserHandler(BaseHandler):
             user = User.select(id=user_id)
             return user.to_front()
         else:
-            page = self.get_argument('page', 1)
+            # page = self.get_argument('page', 1)
             #  TODO: 添加参数
             user_list = User.select()
-            paged_user_list = Page(
-                user_list,
-                page=page,
-                items_per_page=USER_LIST_PER_PAGE
-            )
-            return [user.to_front() for user in paged_user_list]
+            return [user.to_front() for user in user_list]
+            # paged_user_list = Page(
+            #     user_list,
+            #     page=page,
+            #     items_per_page=USER_LIST_PER_PAGE
+            # )
+            # return [user.to_front() for user in paged_user_list]
 
     @BaseHandler.ajax_base
     def post(self):
