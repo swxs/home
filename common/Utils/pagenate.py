@@ -216,6 +216,8 @@ class Page(list):
                 self.item_count = self.collection.count()
             except TypeError:
                 self.item_count = len(self.collection)
+            except:
+                self.item_count = len(self.collection)
         
         # Compute the number of the first and last available page
         if self.item_count > 0:

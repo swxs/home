@@ -26,7 +26,7 @@ class Manager(object):
 
     @classmethod
     def is_select_one(cls, model_class, **kwargs):
-        return True
+        return False
 
     @classmethod
     def select_single(cls, model, model_class):
@@ -64,9 +64,12 @@ class Manager(object):
             model = cls.__modules__.get(model_name).objects.get(**kwargs)
             return cls.select_single(model, model_class)
         else:
-            model = cls.__modules__.get(model_name).objects.filter(**kwargs)
-            return cls.select_list(model, model_class)
-
+            if kwargs:
+                model = cls.__modules__.get(model_name).objects.filter(**kwargs)
+                return cls.select_list(model, model_class)
+            else:
+                model = cls.__modules__.get(model_name).objects.all()
+                return cls.select_list(model, model_class)
 
     @classmethod
     def update(cls, model_name, model_class):

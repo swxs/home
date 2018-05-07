@@ -14,6 +14,7 @@ class User():
     __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
 
     __get_one__ = [
+        ("id",),
         ("username",),
     ]
 
@@ -23,10 +24,10 @@ class User():
     ]
 
     def __init__(self, **kwargs):
-        self.name = kwargs.get('username', undefined)
-        self.name = kwargs.get('nickname', undefined)
-        self.password = kwargs.get('password', undefined)
-        self.name = kwargs.get('userinfo_id', undefined)
+        self.__dict__["username"] = kwargs.get('username', undefined)
+        self.__dict__["nickname"] = kwargs.get('nickname', undefined)
+        self.__dict__["password"] = kwargs.get('password', undefined)
+        self.__dict__["userinfo_id"] = kwargs.get('userinfo_id', undefined)
 
     @property
     def password(self):
@@ -36,20 +37,22 @@ class User():
     def password(self, password):
         self.__dict__["password"] = utils.get_password(password)
 
-    def to_front(self):
-        d = json.loads(self.to_dict())
-        return ObjectDict(d)
-
     @classmethod
     def create(cls, **kwargs):
-        return Manager.create('User', cls, **kwargs)
+        return Manager.create('User', cls(**kwargs))
 
     @classmethod
     def select(cls, **kwargs):
         return Manager.select('User', cls, **kwargs)
 
-    def udpate(self):
+    def update(self):
         return Manager.update('User', self)
 
     def delete(self):
         return Manager.delete('User', self)
+
+    def to_front(self):
+        d = json.loads(self.to_dict())
+        return ObjectDict(d)
+
+
