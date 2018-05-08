@@ -9,6 +9,7 @@ from const import undefined
 from models.user import User
 from common.Exceptions.ExistException import ExistException
 
+
 class Manager(object):
     __modules__ = {
         "User": User
@@ -26,33 +27,23 @@ class Manager(object):
 
     @classmethod
     def is_select_one(cls, model_class, **kwargs):
+        for type in model_class.__get_type__:
+            if "id" in kwargs:
+                return True
+            if "username" in kwargs:
+                return True
+        for type in model_class.__filter_type__:
+            if "nickname" in kwargs:
+                return False
         return False
 
     @classmethod
     def select_single(cls, model, model_class):
-        if model is None:
-            return None
-        kwargs = dict()
-        for attr in model_class.__attrs__:
-            kwargs[attr] = model.attr
-        return model_class(**kwargs)
+        return model_class.get_instance(model)
 
     @classmethod
     def select_list(cls, model, model_class):
         return itertools.imap(model_class.get_instance, model)
-
-    @classmethod
-    def create(cls, model_name, model_class, **kwargs):
-        model = cls.__modules__.get(model_name)()
-        for attr in model_class.__attrs__:
-            value = kwargs.get(attr, undefined)
-            if value != undefined:
-                model.attr = value
-        try:
-            model.save()
-        except NotUniqueError:
-            raise ExistException(model_name)
-        return cls.select_single(model, model_class)
 
     @classmethod
     def select(cls, model_name, model_class, **kwargs):
@@ -68,12 +59,25 @@ class Manager(object):
                 return cls.select_list(model, model_class)
 
     @classmethod
-    def update(cls, model_name, model_class):
-        model = cls.__modules__.get(model_name).objects.get(id=model_class.id)
-        for attr in model.__attrs__:
-            value = model_class.__dict__.get(attr, undefined)
+    def create(cls, model_name, model_class, **kwargs):
+        model = cls.__modules__.get(model_name)()
+        for attr in model_class.__attrs__:
+            value = kwargs.get(attr, undefined)
             if value != undefined:
-                model.__updateattr__(attr, value)
+                model.__setattr__(attr, value)
+        try:
+            model.save()
+        except NotUniqueError:
+            raise ExistException(model_name)
+        return cls.select_single(model, model_class)
+
+    @classmethod
+    def update(cls, model_name, model_class, **kwargs):
+        model = cls.__modules__.get(model_name).objects.get(id=model_class.id)
+        for attr in model_class.__attrs__:
+            value = kwargs.get(attr, undefined)
+            if value != undefined:
+                model.__setattr__(attr, value)
         try:
             model.save()
         except NotUniqueError:

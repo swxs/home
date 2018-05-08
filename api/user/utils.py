@@ -10,14 +10,16 @@ from common.Utils import utils
 from BaseUtils import BaseUtils
 
 class User(BaseUtils):
+    __names__ = "User"
+
     __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
 
-    __get_one__ = [
+    __get_type__ = [
         ("id",),
         ("username",),
     ]
 
-    __get_list__ = [
+    __filter_type__ = [
         (),
         ("nickname",)
     ]
