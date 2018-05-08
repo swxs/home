@@ -1,27 +1,27 @@
 #encoding=utf8
-import hashlib
+
 import re
-import shutil
 import os
-import tornado.template
+import math
+import json
 import codecs
+import shutil
+import hashlib
+import datetime
 from tornado.util import ObjectDict
-
-import settings
-
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO
-import json
 import numpy as np
 import pandas as pd
-import math
+import tornado.template
 try:
     Period = pd._period.Period
 except AttributeError:
     Period = pd._libs.period.Period
-import datetime
+import settings
+from const import undefined
 
 tmpl_loader = tornado.template.Loader("./templates")
 def render_to_string(tmpl_file, **adict):

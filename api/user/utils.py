@@ -6,7 +6,6 @@
 from pandas import json
 from tornado.util import ObjectDict
 from const import undefined
-from common.Utils import utils
 from BaseUtils import BaseUtils
 
 class User(BaseUtils):
@@ -27,16 +26,9 @@ class User(BaseUtils):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
 
-    @property
-    def password(self):
-        return self.__dict__["password"]
-
-    @password.setter
-    def password(self, password):
-        self.__dict__["password"] = utils.get_password(password)
-
     def to_front(self):
         data = self.to_dict()
+        del data["password"]
         return data
 
 
