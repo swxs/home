@@ -19,10 +19,13 @@ class ProtoTestCase(unittest.TestCase):
     """
 
     def test_set(self):
-        addressbook_proto = addressbook_pb2.AddressBook()
-        person = addressbook_pb2.Person()
-        person.id = 1
-        person.name = "swxs"
-        print person.SerializeToString()
+        addressbook = addressbook_pb2.AddressBook()
+        person_1 = addressbook.person.add()
+        person_1.id = 1
+        person_1.name = "swxs"
+        phone_1 = person_1.phone.add()
+        phone_1.number = "13456789"
+        phone_1.type = 2
+        assert len(addressbook.person) == 1
 
 
