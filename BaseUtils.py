@@ -39,8 +39,12 @@ class BaseUtils(object):
     def select(cls, **kwargs):
         return Manager.select(cls.__name__, cls, **kwargs)
 
+    @classmethod
+    def filter(cls, **kwargs):
+        return Manager.filter(cls.__name__, cls, **kwargs)
+
     def update(self, **kwargs):
-        return Manager.update(self.__names__, self, **kwargs)
+        return Manager.update(self.__class__.__name__, self, **kwargs)
 
     def delete(self):
-        return Manager.delete(self.__names__, self)
+        return Manager.delete(self.__class__.__name__, self)

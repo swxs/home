@@ -5,13 +5,13 @@
 
 from mongoengine import StringField
 from common.Utils import utils
-from const import undefined
+from common.Utils.validate import Validate, RegType
 
 
 class PasswordField(StringField):
     def __set__(self, instance, value):
         if value is None:
             value = None
-        else:
+        elif not Validate.check(value, RegType.CHANGED_PASSWORD):
             value = utils.get_password(value)
         super(PasswordField, self).__set__(instance, value)

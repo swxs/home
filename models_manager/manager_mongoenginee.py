@@ -8,6 +8,7 @@ from mongoengine import NotUniqueError
 from const import undefined
 from models.user import User
 from common.Exceptions.ExistException import ExistException
+from common.Exceptions.DeleteInhibitException import DeleteInhibitException
 
 
 class Manager(object):
@@ -26,41 +27,22 @@ class Manager(object):
         pass
 
     @classmethod
-    def is_select_one(cls, model_class, **kwargs):
-        for type in model_class.__get_type__:
-            if "id" in kwargs:
-                return True
-            if "username" in kwargs:
-                return True
-        for type in model_class.__filter_type__:
-            if "nickname" in kwargs:
-                return False
-        return False
-
-    @classmethod
-    def select_single(cls, model, model_class):
-        return model_class.get_instance(model)
-
-    @classmethod
-    def select_list(cls, model, model_class):
-        return itertools.imap(model_class.get_instance, model)
+    def _get_model(cls, model_name):
+        return cls.__modules__.get(model_name)
 
     @classmethod
     def select(cls, model_name, model_class, **kwargs):
-        if cls.is_select_one(model_class, **kwargs):
-            model = cls.__modules__.get(model_name).objects.get(**kwargs)
-            return cls.select_single(model, model_class)
-        else:
-            if kwargs:
-                model = cls.__modules__.get(model_name).objects.filter(**kwargs)
-                return cls.select_list(model, model_class)
-            else:
-                model = cls.__modules__.get(model_name).objects.all()
-                return cls.select_list(model, model_class)
+        model = cls._get_model(model_name).objects.get(**kwargs)
+        return model_class.get_instance(model)
+
+    @classmethod
+    def filter(cls, model_name, model_class, **kwargs):
+        model = cls._get_model(model_name).objects.filter(**kwargs)
+        return itertools.imap(model_class.get_instance, model)
 
     @classmethod
     def create(cls, model_name, model_class, **kwargs):
-        model = cls.__modules__.get(model_name)()
+        model = cls._get_model(model_name)()
         for attr in model_class.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
@@ -69,11 +51,11 @@ class Manager(object):
             model.save()
         except NotUniqueError:
             raise ExistException(model_name)
-        return cls.select_single(model, model_class)
+        return cls.select(model, model_class)
 
     @classmethod
     def update(cls, model_name, model_class, **kwargs):
-        model = cls.__modules__.get(model_name).objects.get(id=model_class.id)
+        model = cls._get_model(model_name).objects.get(id=model_class.id)
         for attr in model_class.__attrs__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
@@ -82,12 +64,12 @@ class Manager(object):
             model.save()
         except NotUniqueError:
             raise ExistException(model_name)
-        return cls.select_single(model, model_class)
+        return model_class.get_instance(model)
 
     @classmethod
     def delete(cls, model_name, model_class):
-        model = cls.__modules__.get(model_name).objects.get(id=model_class.id)
+        model = cls._get_model(model_name).objects.get(id=model_class.id)
         try:
             model.delete()
         except:
-            pass
+            raise DeleteInhibitException()

@@ -16,10 +16,12 @@ class UserHandler(BaseHandler):
             user = User.select(id=user_id)
             return user.to_front()
         else:
-            # page = self.get_argument('page', 1)
-            #  TODO: 添加参数
-            user_list = User.select()
+            user_list = User.filter()
             return [user.to_front() for user in user_list]
+            #  TODO: 添加参数, 允许以不特定参数查找指定的数据
+            #  TODO: 支持分页
+            #  TODO: 支持按请求排序
+            # page = self.get_argument('page', 1)
             # paged_user_list = Page(
             #     user_list,
             #     page=page,
