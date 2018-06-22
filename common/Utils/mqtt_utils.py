@@ -2,8 +2,8 @@
 
 import hashlib
 import paho.mqtt.client as mqtt
-from common.Utils.log_utils import getLogger
-log = getLogger('mqtt_utils')
+# from common.Utils.log_utils import getLogger
+# log = getLogger('mqtt_utils')
 
 # MQTT_HOST = '115.28.110.241'
 MQTT_HOST = '120.55.95.153'
@@ -27,7 +27,7 @@ def send_msg(topic, msg):
 
 def watch_msg(topic, handler):
     def on_connect(client, userdata, flags, rc):
-        log.debug("Start watching topic {0} ...".format(topic))
+        # log.debug("Start watching topic {0} ...".format(topic))
         topic1 = topic_encode(topic)
         client.subscribe(topic1)
 

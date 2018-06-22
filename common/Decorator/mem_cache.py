@@ -2,8 +2,7 @@
 import hashlib
 import os
 import time
-from common.Utils.log_utils import getLogger
-log = getLogger('mem_cache.py')
+# log = getLogger('mem_cache.py')
 
 __all__ = ['get', 'set', 'memorize', 'memcache_client']
 
@@ -57,7 +56,7 @@ def start_memory_cleaner():
     while True:
         time.sleep(MEMORY_CLEANER_PERIOD)
         keys_to_remove = []
-        for key, value in OBJ_EXPIRE_DICT.iteritems():
+        for key, value in OBJ_EXPIRE_DICT.items():
             if OBJ_EXPIRE_DICT[key] < int(round(time.time())):
                 keys_to_remove.append(key)
         for key in keys_to_remove:
@@ -67,7 +66,7 @@ def start_memory_cleaner():
                 del OBJ_VERSION_DICT[key]
             except KeyError:
                 pass
-        for key, value in OBJ_EXPIRE_DICT2.iteritems():
+        for key, value in OBJ_EXPIRE_DICT2.items():
             if OBJ_EXPIRE_DICT2[key] < int(round(time.time())):
                 keys_to_remove.append(key)
         for key in keys_to_remove:
@@ -112,7 +111,7 @@ def memorize(function):
         # make cache key
         args_str = []
         for arg in args:
-            if isinstance(arg, unicode):
+            if isinstance(arg, str):
                 args_str.append(arg.encode('utf-8'))
             else:
                 args_str.append(str(arg))

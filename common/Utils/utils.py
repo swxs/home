@@ -7,9 +7,9 @@ import tornado.template
 import codecs
 from tornado.util import ObjectDict
 try:
-    import cStringIO as StringIO
+    import io as StringIO
 except ImportError:
-    import StringIO
+    import io
 import json
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ def render_to_string(tmpl_file, **adict):
     return tmpl_loader.load(tmpl_file).generate(**adict)
 
 
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
@@ -53,7 +53,7 @@ def cutstring(str='', width=10, charset='unicode', addchar='...', br_num=0, line
     oldstr = str
     oldaddchar = addchar
     if br_num != 0:
-        str_br = u'<br>'
+        str_br = '<br>'
     if type(oldstr).__name__ != 'unicode':
         try:
             oldstr = oldstr.decode(charset)
@@ -90,7 +90,7 @@ def cutstring(str='', width=10, charset='unicode', addchar='...', br_num=0, line
         #记录取到哪
         str_idx = 0
         line_count = 0
-        newstr = u''
+        newstr = ''
         #循环取每行数据并加上换行
         for idx in br_index_list:
             if line_count == line_num - 1:
@@ -139,14 +139,14 @@ def get_matrix_img_by_param(content, img_type='png', box_size=5, border=1, img_n
 
 def get_matrix_img_stream_by_param(content, img_type='png', box_size=5, border=1):
     img = get_matrix_img_by_param(content, img_type, box_size, border)
-    mstream = StringIO.StringIO()
+    mstream = io.StringIO()
     img.__name__ = "xjxjxj.png"
     img.save(mstream, img_type)
     return mstream
 
 
 def my_urlencode(astring):
-    from urllib import urlencode
+    from urllib.parse import urlencode
     return urlencode({'a': astring})[2:]
 
 
@@ -178,7 +178,7 @@ def get_verify_code(*args):
 def obj2objdict(obj):
     if isinstance(obj, dict):
         new_obj = ObjectDict()
-        for k, v in obj.iteritems():
+        for k, v in obj.items():
             new_obj[k] = obj2objdict(v)
         return new_obj
     elif isinstance(obj, (list, tuple)):
@@ -196,7 +196,7 @@ def obj2objdict(obj):
 
 
 def update_option(orig_option, new_option):
-    for key, value in new_option.iteritems():
+    for key, value in new_option.items():
         if key in orig_option:
             orig_value = orig_option[key]
             if isinstance(orig_value, dict):

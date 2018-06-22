@@ -28,5 +28,5 @@ else:
 now = datetime.datetime.now()
 fname = os.path.join(script_path, 'db_backup', now.strftime('%Y%m%d%H%M%S'))
 cmd = '%s --db=%s --out=%s --gzip' % (exe, settings.MONGODB_DBNAME, fname)
-print cmd
+print(cmd)
 os.system(cmd)

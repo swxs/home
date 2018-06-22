@@ -3,7 +3,7 @@
 from const import undefined, USER_LIST_PER_PAGE
 from common.Utils.pagenate import Page
 from base import BaseHandler
-import utils
+from . import utils
 
 class UserHandler(BaseHandler):
     @BaseHandler.ajax_base

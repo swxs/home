@@ -73,8 +73,8 @@ def _weak_callback(func):
         # doesn't test the 3.x code and vice versa.
         if sys.version_info[0] < 3:  # pragma: no cover
             # Python 2.x case
-            obj_ref = weakref.ref(func.im_self)
-            func_ref = weakref.ref(func.im_func)
+            obj_ref = weakref.ref(func.__self__)
+            func_ref = weakref.ref(func.__func__)
         else:  # pragma: no cover
             # Python 3.x case
             obj_ref = weakref.ref(func.__self__)
@@ -305,7 +305,7 @@ class Fysom(object):
         fn.__name__ = event
         fn.__doc__ = ("Event handler for an {event} event. This event can be " +
                       "fired if the machine is in {states} states.".format(
-                          event=event, states=self._map[event].keys()))
+                          event=event, states=list(self._map[event].keys())))
 
         return fn
 
@@ -365,7 +365,7 @@ class Fysom(object):
             Returns if the object is an instance of basestring.
         '''
         try:
-            return isinstance(object, basestring)
+            return isinstance(object, str)
         except NameError:
             return isinstance(object, str)
 

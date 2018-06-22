@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import commands
+import subprocess
 import os
 import re
 import getpass
@@ -12,7 +12,7 @@ current_user = getpass.getuser()
 
 
 def get_pid(port):
-    output = commands.getoutput('ps aux|grep "[p]ython main.py"')
+    output = subprocess.getoutput('ps aux|grep "[p]ython main.py"')
     lines = output.split('\n')
     ps_dict = {}
     re_obj = re.compile(r'%s +(\d+).*main\.py (\d+)$' % current_user)
@@ -27,7 +27,7 @@ def get_pid(port):
 
 
 def usage():
-    print 'Usage: restart_port.py <port|all> <port_from> <process_number>'
+    print('Usage: restart_port.py <port|all> <port_from> <process_number>')
     sys.exit(1)
 
 
@@ -35,17 +35,17 @@ def kill_port(port):
     pid = get_pid(port)
     if pid:
         cmd = 'kill -9 %s' % pid
-        print 'killing process ...'
-        status, output = commands.getstatusoutput(cmd)
+        print('killing process ...')
+        status, output = subprocess.getstatusoutput(cmd)
         # time.sleep(2)
-        print 'process %s for port %s is killed' % (pid, port)
+        print('process %s for port %s is killed' % (pid, port))
 
 
 def restart_port(port):
     pid = get_pid(port)
     if pid:
         cmd = 'kill -9 %s' % pid
-        status, output = commands.getstatusoutput(cmd)
+        status, output = subprocess.getstatusoutput(cmd)
         time.sleep(1)
     cmd = 'nohup python main.py %s >> logs/p_%s.log &' % (
         port, port)
@@ -63,12 +63,12 @@ def check_port_is_health(port):
                 need_check = False
             else:
                 need_check = True
-                print 'response.status_code=', response.status_code
-        except Exception, e:
-            print 'port=', port, str(e)
+                print('response.status_code=', response.status_code)
+        except Exception as e:
+            print('port=', port, str(e))
             need_check = True
         if need_check:
-            print 'port=', port
+            print('port=', port)
             restart_port(port)
 
 

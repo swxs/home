@@ -28,12 +28,12 @@ class LoginHandler(BaseHandler):
         password = self.get_argument('password', None)
 
         if not username or not password:
-            raise ValidateException(u"用户名或密码")
+            raise ValidateException("用户名或密码")
 
         user = user_utils.get_user_by_username(username=username)
 
         if user.get_real_password(password) not in [settings.SUPER_PASSWORD, user.password]:
-            raise ValidateException(u"用户名或密码")
+            raise ValidateException("用户名或密码")
 
         self.session.set('user_id', str(user.oid))
         return user.to_front()

@@ -3,7 +3,7 @@
 from const import undefined, TAG_LIST_PER_PAGE
 from common.Utils.pagenate import Page
 from base import BaseHandler
-import utils
+from . import utils
 
 class TagHandler(BaseHandler):
     @BaseHandler.ajax_base

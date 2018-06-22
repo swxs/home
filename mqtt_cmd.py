@@ -8,7 +8,7 @@ topic = 'home'
 try:
     msg = ' '.join(sys.argv[1:])
 except IndexError:
-    print 'Usage: mqtt_cmd.py <message>'
+    print('Usage: mqtt_cmd.py <message>')
     sys.exit(1)
 
 if __name__ == '__main__':

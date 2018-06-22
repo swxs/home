@@ -82,7 +82,7 @@ def to_front(job):
 def to_excel():
     job_list = get_job_list()
     work_book = openpyxl.Workbook(write_only=True)
-    sheet = work_book.create_sheet(u"BOSS直聘")
+    sheet = work_book.create_sheet("BOSS直聘")
     datas = [
         "job_type",
         "job_pay",

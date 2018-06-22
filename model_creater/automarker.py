@@ -14,25 +14,25 @@ class Marker:
         if self._get_setting(model_setting_filename):
             self.filename_list = ["models", "enums", "utils", "views", "urls"]
 
-            print("=" * 40)
+            print(("=" * 40))
             self.models = self._init_models()
-            print(self.models)
+            print((self.models))
 
-            print("-" * 40)
+            print(("-" * 40))
             self.enums = self._init_enums()
-            print(self.enums)
+            print((self.enums))
 
-            print("-" * 40)
+            print(("-" * 40))
             self.utils = self._init_utils()
-            print(self.utils)
+            print((self.utils))
 
-            print("-" * 40)
+            print(("-" * 40))
             self.views = self._init_views()
-            print(self.views)
+            print((self.views))
 
-            print("-" * 40)
+            print(("-" * 40))
             self.urls = self._init_urls()
-            print(self.urls)
+            print((self.urls))
 
             self._init_folder_and_file()
 
@@ -116,7 +116,7 @@ class Marker:
         return field.get("type")
 
     def _get_parmas(self, field):
-        return ", ".join(["{0}={1}".format(key, value) for key, value in field.get('parmas', {}).iteritems()])
+        return ", ".join(["{0}={1}".format(key, value) for key, value in field.get('parmas', {}).items()])
 
     def _init_folder_and_file(self):
         local_path = sys.path[0]

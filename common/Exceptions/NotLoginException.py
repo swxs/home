@@ -9,7 +9,7 @@ class NotLoginException(Exception):
 
     def __init__(self, errmsg=None, data=None):
         self.code = const.AJAX_FAIL_NOTLOGIN
-        self.message = errmsg or u"用户未登录"
+        self.message = errmsg or "用户未登录"
         self.data = data
 
     def __str__(self):

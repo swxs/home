@@ -102,7 +102,7 @@ class SessionManager(object):
         '''
 
         def change(session):
-            keys = session.keys()
+            keys = list(session.keys())
             names_in_common = [name for name in names if name in keys]
             for name in names_in_common:
                 del session[name]
@@ -111,7 +111,7 @@ class SessionManager(object):
 
     def keys(self):
         session = self.__get_session_from_db()
-        return session.keys()
+        return list(session.keys())
 
     def iterkeys(self):
         session = self.__get_session_from_db()

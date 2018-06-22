@@ -9,7 +9,7 @@ class PermException(Exception):
 
     def __init__(self, errmsg=None, data=None):
         self.code = const.AJAX_FAIL_AUTH
-        self.message = errmsg or u"权限错误"
+        self.message = errmsg or "权限错误"
         self.data = None
 
     def __str__(self):

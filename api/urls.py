@@ -2,7 +2,7 @@
 
 from tornado.web import url
 
-import views as views
+from . import views as views
 from api.artical import urls as artical_urls
 from api.user import urls as user_urls
 from api.tag import urls as tag_urls

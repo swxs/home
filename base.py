@@ -28,11 +28,11 @@ from common.Exceptions.DeleteInhibitException import DeleteInhibitException
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def prepare(self):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print '{} - {}:{} start'.format(now, self.request.remote_ip, self.request.uri)
+        print('{} - {}:{} start'.format(now, self.request.remote_ip, self.request.uri))
 
     def on_finish(self):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print '{} - {}:{} finished'.format(now, self.request.remote_ip, self.request.uri)
+        print('{} - {}:{} finished'.format(now, self.request.remote_ip, self.request.uri))
 
     def get_argument(self, argument, default=None, strip=True):
         if self.request.method == "GET" or Validate.has(str(self.request.headers), reg_type="json_header"):
@@ -209,13 +209,13 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             except DeleteInhibitException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except Exception as e:
-                from common.Utils.log_utils import getLogger
+                # from common.Utils.log_utils import getLogger
                 import traceback
-                log = getLogger()
-                log.error(e)
+                # log = getLogger()
+                # log.error(e)
                 self.write_json(data=None,
                                 errcode=const.AJAX_FAIL_NORMAL,
-                                errmsg=u"未定义异常",
+                                errmsg="未定义异常",
                                 status=None)
 
         return wrapper

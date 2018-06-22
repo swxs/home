@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from common.Utils.dir_path import get_dir_path
 
 OS = 'linux'
 DEBUG = False
@@ -13,10 +14,11 @@ SITE_DOMAIN = '127.0.0.1'
 SITE_PORT = 8088
 SITE_URL = '{0}://{1}:{2}'.format(SITE_PROTOCOL, SITE_DOMAIN, SITE_PORT)
 
-STATIC_PATH = os.path.join(SITE_ROOT, 'static')
+STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
+TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
+DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
+TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
 STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
-TEMPLATE_PATH = os.path.join(SITE_ROOT, 'template')
-DATAFILE_PATH = os.path.join(SITE_ROOT, 'data_file')
 
 MONGODB_ADDRESS = '127.0.0.1'
 MONGODB_PORT = 27017
@@ -51,7 +53,7 @@ MAIL_SENDER_NAME = ""
 try:
     from local_settings import *
 except:
-    print 'load local settings faild.'
+    print('load local settings faild.')
 
 if SITE_PORT == 80:
     SITE_URL = '%s://%s' % (SITE_PROTOCOL, SITE_DOMAIN)
@@ -72,7 +74,6 @@ def connect_db(db_name=MONGODB_DBNAME):
 connect_db()
 if DB_TRIGGER_FLAG:
     from db.model_modify_trigger import bind_signals
-
     bind_signals()
 
 settings = dict(
@@ -80,12 +81,12 @@ settings = dict(
     login_url="/login/",
     template_path=TEMPLATE_PATH,
     static_path=STATIC_PATH,
-    root_path=os.path.join(SITE_ROOT),
+    root_path=SITE_ROOT,
     xsrf_cookies=False,
     autoescape="xhtml_escape",
     debug=DEBUG,
     xheaders=True,
-    translations=os.path.join(SITE_ROOT, "translations"),
+    translations=TRANSLATIONS_PATH,
     # static_url_prefix='', #启用CDN后可修改此定义, 例如: "http://cdn.abc.com/static/"
     pycket={
         'engine': 'memcached',

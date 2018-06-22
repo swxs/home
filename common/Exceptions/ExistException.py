@@ -9,7 +9,7 @@ class ExistException(Exception):
 
     def __init__(self, errmsg, data=None):
         self.code = const.AJAX_FAIL_NORMAL
-        self.message = u"{0}已存在".format(errmsg)
+        self.message = "{0}已存在".format(errmsg)
         self.data = data
 
     def __str__(self):

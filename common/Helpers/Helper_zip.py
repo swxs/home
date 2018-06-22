@@ -2,7 +2,7 @@
 
 import os
 import shutil
-import StringIO
+import io
 import zipfile
 from common.Helpers.Helper_folder import get_path_split
 
@@ -43,12 +43,12 @@ class ZipHelper(object):
         if exclude_parent:
             base_path, pathname = get_path_split(folder)
             if zipname is None:
-                zipname = os.path.join(base_path, u"{0}.zip".format(pathname))
+                zipname = os.path.join(base_path, "{0}.zip".format(pathname))
             ZipHelper.zip(file, zipname, arcname=None)
         else:
             filename_base, filename_ext = os.path.splitext(filename)
             if zipname is None:
-                zipname = os.path.join(folder, u"{0}.zip".format(filename_base))
+                zipname = os.path.join(folder, "{0}.zip".format(filename_base))
             ZipHelper.zip(file, zipname, arcname=None)
         return True
 
@@ -60,7 +60,7 @@ class ZipHelper(object):
         base_path, pathname = get_path_split(folder)
 
         if zipname is None:
-            zipname = os.path.join(base_path, u"{0}.zip".format(pathname))
+            zipname = os.path.join(base_path, "{0}.zip".format(pathname))
 
         if exclude_parent:
             ZipHelper.zip(folder, zipname, arcname=pathname)
@@ -78,7 +78,7 @@ class ZipHelper(object):
             dest = dest[:-1]
         for filename in zf.namelist():
             fname = filename
-            new_file = u'%s/%s' % (dest, fname)
+            new_file = '%s/%s' % (dest, fname)
             if new_file.endswith('/') or new_file.endswith('\\'):
                 if not os.path.exists(new_file):
                     os.makedirs(new_file)
@@ -103,7 +103,7 @@ class InMemoryZip(object):
 
     def __init__(self):
         # Create the in-memory file-like object
-        self.in_memory_zip = StringIO.StringIO()
+        self.in_memory_zip = io.StringIO()
 
     def append(self, filename_in_zip, file_contents):
         '''Appends a file with name filename_in_zip and contents of
@@ -134,7 +134,7 @@ class InMemoryZip(object):
 
 
 if __name__ == '__main__':
-    for root, path, file in os.walk(os.path.join(u"L://", u"1", u"3", u"U.R.C(桃屋しょう猫)", u"U.R.C(桃屋しょう猫)")):
+    for root, path, file in os.walk(os.path.join("L://", "1", "3", "U.R.C(桃屋しょう猫)", "U.R.C(桃屋しょう猫)")):
         if path != []:
             continue
         else:

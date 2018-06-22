@@ -60,7 +60,7 @@ class BossZhipinSpider(scrapy.Spider):
                 job_company_type, job_company_kind, job_company_pn = company_info
             job_time = job_sel.css('p').extract()[2].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')[0]
             job_company_name = job_sel.css('a::text').extract()[-1]
-            job_url = u"https://www.zhipin.com" + job_sel.css('a::attr(href)').extract()[0]
+            job_url = "https://www.zhipin.com" + job_sel.css('a::attr(href)').extract()[0]
             job = job_utils.get_job_by_type_company_name(job_type, job_company_name)
             if job is None:
                 job_utils.create_job(

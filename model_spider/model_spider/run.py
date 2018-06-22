@@ -8,10 +8,10 @@ if __name__ == '__main__':
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
-from spiders.JobboleSpider import JobboleSpider
-from spiders.BaiduSpider import BaiduSpider
-from spiders.wklkenSpider import WklkenSpider
-from spiders.BossZhipinSpider import BossZhipinSpider
+from .spiders.JobboleSpider import JobboleSpider
+from .spiders.BaiduSpider import BaiduSpider
+from .spiders.wklkenSpider import WklkenSpider
+from .spiders.BossZhipinSpider import BossZhipinSpider
 
 def run():
     # 获取settings.py模块的设置

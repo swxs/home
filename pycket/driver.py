@@ -88,7 +88,7 @@ class DriverFactory(object):
         default_storage_identifier = RedisDriver.DEFAULT_STORAGE_IDENTIFIERS[storage_category]
         storage_settings['db'] = storage_settings.get(storage_category, default_storage_identifier)
         for storage_category in self.STORAGE_CATEGORIES:
-            if storage_category in storage_settings.keys():
+            if storage_category in list(storage_settings.keys()):
                 del storage_settings[storage_category]
 
         return RedisDriver(storage_settings)
