@@ -38,7 +38,8 @@ class Manager(object):
     @classmethod
     def filter(cls, model_name, model_class, **kwargs):
         model = cls._get_model(model_name).objects.filter(**kwargs)
-        return itertools.imap(model_class.get_instance, model)
+        return map(model_class.get_instance, model)
+
 
     @classmethod
     def create(cls, model_name, model_class, **kwargs):
