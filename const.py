@@ -6,6 +6,19 @@ import requests
 
 undefined = frozenset()
 
+# undefined 最好是一个类，单例， 支持json， print等方法， 定义eq等方法
+# class Undefined(object):
+#     def __new__(cls):
+#         pass
+#
+#     def __int__(self):
+#         return frozenset()
+#
+#     def __str__(self):
+#         pass
+
+# undefined = Undefined()
+
 AJAX_SUCCESS = 0
 AJAX_FAIL_NORMAL = 1
 AJAX_FAIL_AUTH = 2

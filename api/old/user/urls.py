@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @File    : urls.py
-# @AUTH    : swxs
-# @Time    : 2018/5/5 11:40
-
 
 from tornado.web import url
 import api.user.views as views
