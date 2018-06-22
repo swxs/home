@@ -8,10 +8,13 @@ import models_fields
 import mongoengine as models
 
 
+class Enum():
+    pass
+
 class User(models.Document):
     username = models.StringField(unique=True)
     nickname = models.StringField()
-    password = models_fields.PasswordField()
+    password = models.StringField()
     userinfo_id = models.StringField(max_length=24)
     created = models.DateTimeField(default=datetime.datetime.now)
     updated = models.DateTimeField(default=datetime.datetime.now)

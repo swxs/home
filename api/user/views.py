@@ -17,7 +17,13 @@ class UserHandler(BaseHandler):
             return user.to_front()
         else:
             user_list = User.filter()
-            return [user.to_front() for user in user_list]
+            try:
+                for user in user_list:
+                    print(user.username)
+            except Exception as e:
+                print(e)
+            return []
+            # return [user.to_front() for user in user_list]
             #  TODO: 添加参数, 允许以不特定参数查找指定的数据
             #  TODO: 支持分页
             #  TODO: 支持按请求排序

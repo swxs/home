@@ -6,20 +6,17 @@
 from tornado.util import ObjectDict
 from const import undefined
 from BaseUtils import BaseUtils
+import models_fields
 
 class User(BaseUtils):
-    __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
+    username = models_fields.StringField()
+    nickname = models_fields.StringField()
+    password = models_fields.StringField()
+    userinfo_id = models_fields.ModelIdField()
+    created = models_fields.DatetimeField()
+    updated = models_fields.DatetimeField()
 
-    # 校验参数是否可以使用select
-    # __get_type__ = [
-    #     ("id",),
-    #     ("username",),
-    # ]
-    # 校验参数是否可以适用filter
-    # __filter_type__ = [
-    #     (),
-    #     ("nickname",)
-    # ]
+    __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -29,5 +26,3 @@ class User(BaseUtils):
         data = self.to_dict()
         del data["password"]
         return data
-
-
