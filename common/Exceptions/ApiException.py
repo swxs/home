@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
+# @File    : ApiException.py
+# @AUTH    : swxs
+# @Time    : 2018/6/25 15:09
 
 import const
-from common.Exceptions import *
 
-
-class CommonException(ApiException):
-    '''
-        非常规错误, 自定义返回内容
-    '''
-
+class ApiException(Exception):
     def __init__(self, errmsg=None, data=None):
         self.code = const.AJAX_FAIL_NORMAL
         self.message = errmsg or ""

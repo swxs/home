@@ -32,6 +32,7 @@ class RegType:
     IPV4 = "IPV4"
     IPV6 = "IPV6"
 
+
 class Validate:
     reglist = {
         RegType.COLUMN_ID: r'[a-fA-F0-9]{24}',
@@ -72,23 +73,9 @@ class Validate:
             return False
 
     @classmethod
-    def has(cls, value, reg_type="all"):
+    def has(cls, value, reg_type=RegType.ALL):
         try:
             return re.search(r'{0}'.format(cls._find_reg(reg_type)), value, re.M) is not None
-        except TypeError:
-            return False
-
-    @classmethod
-    def check(cls, value, reg_type="all"):
-        try:
-            return re.match(r'^{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
-        except TypeError:
-            return False
-
-    @classmethod
-    def clear(cls, value, reg_type="all"):
-        try:
-            return re.sub(r'{0}'.format(cls._find_reg(reg_type)), "", value, re.M)
         except TypeError:
             return False
 
@@ -98,3 +85,45 @@ class Validate:
             return any(Validate.has(value, reg_type=reg_type) for reg_type in reg_type_list)
         except TypeError:
             return False
+
+    @classmethod
+    def start_with(cls, value, reg_type=RegType.ALL):
+        try:
+            return re.match(r'^{0}'.format(cls._find_reg(reg_type)), value, re.M) is not None
+        except TypeError:
+            return False
+
+    @classmethod
+    def end_with(cls, value, reg_type=RegType.ALL):
+        try:
+            return re.match(r'{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
+        except TypeError:
+            return False
+
+    @classmethod
+    def check(cls, value, reg_type=RegType.ALL):
+        try:
+            return re.match(r'^{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
+        except TypeError:
+            return False
+
+    @classmethod
+    def clear(cls, value, reg_type=RegType.ALL):
+        try:
+            return re.sub(r'{0}'.format(cls._find_reg(reg_type)), "", value, re.M)
+        except TypeError:
+            return False
+
+    @classmethod
+    def getall(cls, value, reg_type=RegType.ALL):
+        try:
+            result = re.findall(r'({0})+'.format(cls._find_reg(reg_type)), value, re.M)
+            if len(result) > 0 and isinstance(result[0], tuple):
+                return [value[0] for value in result]
+            return result
+        except TypeError:
+            return []
+
+
+if __name__ == "__main__":
+    print(Validate.getall("10ade", RegType.NUMBER))

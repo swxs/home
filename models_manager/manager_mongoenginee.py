@@ -28,7 +28,7 @@ class Manager(object):
 
     @classmethod
     def _get_model(cls, model_name):
-        return cls.__modules__.get(model_name)
+        return models.get(model_name)
 
     @classmethod
     def select(cls, model_name, model_class, **kwargs):
@@ -41,7 +41,7 @@ class Manager(object):
         try:
             return itertools.imap(model_class.get_instance, model)
         except Exception as e:
-            printe
+            print(e)
 
     @classmethod
     def create(cls, model_name, model_class, **kwargs):

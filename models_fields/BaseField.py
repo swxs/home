@@ -12,7 +12,6 @@ class BaseField(object):
     def __get__(self, instance, owner):
         if instance is None:
             return self
-        print(self.name)
         return instance._data.get(self.name)
 
     def __set__(self, instance, value):

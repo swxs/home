@@ -8,12 +8,18 @@ from models_manager.manager_mongoenginee import Manager
 
 
 class BaseUtils(object):
+    __page_number__ = 20
     __attrs__ = []
 
     def __init__(self, **kwargs):
         for attr in self.__attrs__:
             self.__dict__[attr] = kwargs.get(attr, undefined)
         self.__dict__["id"] = kwargs.get("_id", undefined)
+
+        self._data = {}
+
+        for key, value in kwargs.items():
+            self._data[key] = value
 
     @classmethod
     def get_instance(cls, model):

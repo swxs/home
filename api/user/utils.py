@@ -16,6 +16,7 @@ class User(BaseUtils):
     created = models_fields.DatetimeField()
     updated = models_fields.DatetimeField()
 
+
     __attrs__ = ['username', 'nickname', 'password', 'userinfo_id']
 
     def __init__(self, **kwargs):
