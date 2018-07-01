@@ -7,7 +7,7 @@ from tornado.util import ObjectDict
 from mongoengine.errors import NotUniqueError
 import settings
 from const import undefined
-from common.Decorator.mem_cache import memorize
+# from common.Decorator.mem_cache import memorize
 from common.Exceptions.ExistException import ExistException
 from common.Exceptions.NotExistException import NotExistException
 from common.Exceptions.ValidateException import ValidateException
@@ -31,7 +31,7 @@ def create_artical(**kwargs):
     return artical
 
 
-@memorize
+# @memorize
 def get_artical_by_artical_id(artical_id):
     try:
         _id = ObjectId(artical_id)
