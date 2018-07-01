@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-import re
 
+import re
+try:
+    from typing.re import Pattern
+except:
+    Pattern = re.compile(r"")
 
 class RegType:
     ALL = "all"
@@ -66,9 +70,13 @@ class Validate:
 
     @classmethod
     def _find_reg(self, reg_type):
+        if isinstance(reg_type, Pattern):
+            return reg_type.pattern
         if reg_type in self.reglist:
             return self.reglist[reg_type]
         else:
+            if isinstance(reg_type, str):
+                return reg_type
             # 如果未指定 则……
             return False
 
