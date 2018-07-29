@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-
-class LackOfFieldException(Exception):
+class LackOfFieldException(ApiException):
     """
         缺少字段
     """

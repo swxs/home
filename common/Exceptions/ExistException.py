@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-
-class ExistException(Exception):
+class ExistException(ApiException):
     '''
         字段已存在
     '''

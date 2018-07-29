@@ -4,12 +4,8 @@
 # @Time    : 2018/4/30 14:53
 
 import datetime
-import models_fields
 import mongoengine as models
 
-
-class Enum():
-    pass
 
 class User(models.Document):
     username = models.StringField(unique=True)

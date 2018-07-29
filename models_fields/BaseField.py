@@ -7,7 +7,8 @@ class BaseField(object):
     name = None
 
     def __init__(self, **kwargs):
-        pass
+        if "pre_update" in kwargs:
+            self.pre_update = kwargs["pre_update"]
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -15,6 +16,6 @@ class BaseField(object):
         return instance._data.get(self.name)
 
     def __set__(self, instance, value):
-        if value is None:
-            value = None
+        # if value is None:
+        #     value = None
         instance._data[self.name] = value

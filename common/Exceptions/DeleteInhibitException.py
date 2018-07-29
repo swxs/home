@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-class DeleteInhibitException(Exception):
+class DeleteInhibitException(ApiException):
     """
         禁止删除
     """

@@ -31,7 +31,6 @@ def create_user(**kwargs):
     return user
 
 
-@memorize
 def get_user_by_user_id(user_id):
     try:
         _id = ObjectId(user_id)

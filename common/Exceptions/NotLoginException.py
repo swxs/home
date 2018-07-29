@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-
-class NotLoginException(Exception):
+class NotLoginException(ApiException):
     '''
         用户未登录
     '''

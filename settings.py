@@ -5,39 +5,32 @@ from common.Utils.dir_path import get_dir_path
 
 OS = 'linux'
 DEBUG = False
-DB_TRIGGER_FLAG = False
+XSRF = '__xsrf'
+SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
 SECRET_KEY = 'd96f097c-4b1b-4867-3859-375830cd69c4'
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_PROTOCOL = 'http'
 SITE_DOMAIN = '127.0.0.1'
 SITE_PORT = 8088
-SITE_URL = '{0}://{1}:{2}'.format(SITE_PROTOCOL, SITE_DOMAIN, SITE_PORT)
 
-STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
-TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
-DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
-TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
-STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
-
-MONGODB_ADDRESS = '127.0.0.1'
-MONGODB_PORT = 27017
-MONGODB_DBNAME = 'home'
-
-MEMCACHE_SERVER = '127.0.0.1'
+MEMCACHE_HOST = '127.0.0.1'
 MEMCACHE_PORT = 11211
 MEMCACHE_EXPIRE_TIME = 120
-MEMCACHE_HOSTS = ('{0}:{1}'.format(MEMCACHE_SERVER, MEMCACHE_PORT),)
 
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = None
-REDIS_LOG_MAIL_LIST_NAME = []
 
-XSRF = '__xsrf'
+MONGODB_ADDRESS = '127.0.0.1'
+MONGODB_PORT = 27017
+MONGODB_DBNAME = 'home'
 
-SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
+MAIL_SERVER_IP = ""
+MAIL_SERVER_USER = ""
+MAIL_SERVER_USER_MAIL = ""
+MAIL_SENDER_NAME = ""
 
 WECHAT_ACCESS_TOKEN_URL = ""
 WECHAT_REFRESH_ACCESS_TOKEN_URL = ""
@@ -45,10 +38,11 @@ WECHAT_USERINFO_URL = ""
 WECHAT_APPID = ""
 WECHAT_SECRET = ""
 
-MAIL_SERVER_IP = ""
-MAIL_SERVER_USER = ""
-MAIL_SERVER_USER_MAIL = ""
-MAIL_SENDER_NAME = ""
+STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
+TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
+DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
+TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
+STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
 
 try:
     from local_settings import *
@@ -56,11 +50,11 @@ except:
     print('load local settings faild.')
 
 if SITE_PORT == 80:
-    SITE_URL = '%s://%s' % (SITE_PROTOCOL, SITE_DOMAIN)
+    SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}'
 else:
-    SITE_URL = '%s://%s:%s' % (SITE_PROTOCOL, SITE_DOMAIN, SITE_PORT)
+    SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}:{SITE_PORT}'
+MEMCACHE_HOSTS = (f'{MEMCACHE_HOST}:{MEMCACHE_PORT}',)
 
-# connect to mongodb
 DB_CONNECTED = False
 
 
@@ -72,9 +66,6 @@ def connect_db(db_name=MONGODB_DBNAME):
 
 
 connect_db()
-if DB_TRIGGER_FLAG:
-    from db.model_modify_trigger import bind_signals
-    bind_signals()
 
 settings = dict(
     cookie_secret=SECRET_KEY,

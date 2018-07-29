@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-
-class NotExistException(Exception):
+class NotExistException(ApiException):
     '''
         不存在
     '''

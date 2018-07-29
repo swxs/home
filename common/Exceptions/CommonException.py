@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import const
-from common.Exceptions import *
-
+from common.Exceptions.ApiException import ApiException
 
 class CommonException(ApiException):
     '''

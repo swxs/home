@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-
-class PermException(Exception):
+class PermException(ApiException):
     '''
         权限错误
     '''

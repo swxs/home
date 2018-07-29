@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import const
+from common.Exceptions.ApiException import ApiException
 
-
-class ValidateException(Exception):
+class ValidateException(ApiException):
     '''
         校验错误，字段错误
     '''

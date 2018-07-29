@@ -192,6 +192,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             try:
                 data = method(self, *args, **kwargs)
                 self.write_json(data=data, errcode=const.AJAX_SUCCESS, errmsg=None, status=None)
+                #  TODO: 考虑是否可以简单的切换到 类似proto的数据格式，也可能在最后的返回层级定
             except CommonException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except ValidateException as e:
