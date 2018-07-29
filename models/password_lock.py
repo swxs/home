@@ -4,7 +4,7 @@ import datetime
 import mongoengine as models
 
 class PasswordLock(models.Document):    
-    name = models.StringField(unique=True)    
+    name = models.StringField()
     key = models.StringField()    
     website = models.StringField()    
     user_id = models.StringField()    

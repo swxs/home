@@ -7,7 +7,7 @@ from common.Helpers.Helper_encryption import Encryption
 
 
 class PasswordLock(BaseDocument):
-    name = models_fields.StringField(unique=True)
+    name = models_fields.StringField()
     key = models_fields.StringField()
     website = models_fields.StringField()
     user_id = models_fields.StringField()
