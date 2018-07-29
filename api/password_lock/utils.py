@@ -24,3 +24,4 @@ class PasswordLock(BaseDocument):
     def to_front(self):
         data_dict = super(PasswordLock, self).to_front()
         data_dict["password"] = self.password
+        return data_dict

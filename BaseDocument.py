@@ -3,6 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2018/5/7 22:40
 # from common.Decorator.Memorize import memorize, upgrade, clear
+import datetime
 from const import undefined
 import models_fields
 from common.Decorator import Memorize
@@ -57,7 +58,10 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         data_dict = self.to_dict()
         for field_name, field_type in self.__fields__.items():
             if isinstance(field_type, models_fields.DateTimeField) and (field_name in data_dict):
-                data_dict[field_name] = data_dict[field_name].strftime("%Y-%m-%d %H:%M:%S")
+                if isinstance(data_dict[field_name], datetime.datetime):
+                    data_dict[field_name] = data_dict[field_name].strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    data_dict[field_name] = None
         return data_dict
 
     @classmethod
