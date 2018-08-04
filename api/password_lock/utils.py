@@ -19,7 +19,10 @@ class PasswordLock(BaseDocument):
 
     @property
     def password(self):
-        return Encryption.get_password(self.key)
+        if self.key:
+            return Encryption.get_password(self.key)
+        else:
+            return None
 
     def to_front(self):
         data_dict = super(PasswordLock, self).to_front()

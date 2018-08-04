@@ -29,7 +29,7 @@ class Manager(object):
         try:
             model.save()
         except NotUniqueError:
-            raise ExistException(model.__name__)
+            raise ExistException(model._class_name)
 
     @classmethod
     # @memorize
@@ -37,7 +37,7 @@ class Manager(object):
         try:
             model.delete()
         except DeleteInhibitException:
-            raise DeleteInhibitException(model.__name__)
+            raise DeleteInhibitException(model._class_name)
 
     @classmethod
     # @memorize
