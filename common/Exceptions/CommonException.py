@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-import const
+from api.consts.const import AJAX_FAIL_NORMAL
 from common.Exceptions.ApiException import ApiException
 
 class CommonException(ApiException):
@@ -9,7 +8,7 @@ class CommonException(ApiException):
     '''
 
     def __init__(self, errmsg=None, data=None):
-        self.code = const.AJAX_FAIL_NORMAL
+        self.code = AJAX_FAIL_NORMAL
         self.message = errmsg or ""
         self.data = data
 

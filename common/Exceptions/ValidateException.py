@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import const
+
+from api.consts.const import AJAX_FAIL_NORMAL
 from common.Exceptions.ApiException import ApiException
 
 class ValidateException(ApiException):
@@ -8,7 +9,7 @@ class ValidateException(ApiException):
     '''
 
     def __init__(self, errmsg, data=None):
-        self.code = const.AJAX_FAIL_NORMAL
+        self.code = AJAX_FAIL_NORMAL
         self.message = "{0}不合法".format(errmsg)
         self.data = data
 

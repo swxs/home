@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import const
+
+from api.consts.const import AJAX_FAIL_NORMAL
 from common.Exceptions.ApiException import ApiException
 
 class LackOfFieldException(ApiException):
@@ -8,7 +9,7 @@ class LackOfFieldException(ApiException):
     """
 
     def __init__(self, errmsg=None, data=None):
-        self.code = const.AJAX_FAIL_NORMAL
+        self.code = AJAX_FAIL_NORMAL
         self.message = "缺少{0}字段".format(errmsg)
         self.data = data
 

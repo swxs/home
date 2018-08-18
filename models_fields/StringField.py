@@ -9,8 +9,9 @@ from models_fields import BaseField
 
 
 class StringField(BaseField):
-    def __init__(self, validate=None, **kwargs):
-        self.validate = validate
+    def __init__(self, **kwargs):
+        if "validate" in kwargs:
+            self.validate = kwargs["validate"]
         super().__init__(**kwargs)
 
     def __set__(self, instance, value):

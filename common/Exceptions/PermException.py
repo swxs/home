@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import const
+
+from api.consts.const import AJAX_FAIL_AUTH
 from common.Exceptions.ApiException import ApiException
 
 class PermException(ApiException):
@@ -8,7 +9,7 @@ class PermException(ApiException):
     '''
 
     def __init__(self, errmsg=None, data=None):
-        self.code = const.AJAX_FAIL_AUTH
+        self.code = AJAX_FAIL_AUTH
         self.message = errmsg or "权限错误"
         self.data = None
 

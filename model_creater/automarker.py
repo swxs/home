@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import json
 import os
 import sys
+import json
 import shutil
-import textwrap
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.abspath(os.curdir))
@@ -13,7 +12,11 @@ if __name__ == '__main__':
 class Marker:
     def __init__(self, model_setting_filename):
         if self._get_setting(model_setting_filename):
-            self.filename_list = ["utils", "views", "urls"]
+            self.filename_list = ["consts", "models", "utils", "views", "urls"]
+
+            print(("=" * 40))
+            self.consts = self._init_consts()
+            print((self.consts))
 
             print(("=" * 40))
             self.models = self._init_models()
@@ -46,24 +49,16 @@ class Marker:
         self.model_title = self._get_title(self.model_name)
         self.model_upper = self._get_upper(self.model_name)
 
-        self.model_enums_list = data.get('enums', [])
+        self.model_enums_list = data.get('enum', [])
         self.model_field_name_list = [field['name']
                                       for field in data.get('setting', [])
                                       if field.get('name') is not None]
-        self.model_field_dict = {field.get('name'): field
-                                 for field in data.get('setting', [])}
-        self.utils_field_dict = {field.get('name'): field
-                                 for field in data.get('setting', [])}
+        self.model_field_dict = {field.get('name'): field for field in data.get('setting', [])}
+        self.utils_field_dict = {field.get('name'): field for field in data.get('setting', [])}
 
-        self.unique_field_list = []
-        self.required_field_list = []
         self.editable_field_list = []
         self.indexes_field_list = []
         for field_name in self.model_field_name_list:
-            if self.model_field_dict[field_name]['parmas'].get('unique', False):
-                self.unique_field_list.append(field_name)
-            if self.model_field_dict[field_name]['parmas'].get('required', False):
-                self.unique_field_list.append(field_name)
             if self.model_field_dict[field_name]['setting'].get('editable', True):
                 self.editable_field_list.append(field_name)
             if self.model_field_dict[field_name]['setting'].get('indexes', True):
@@ -73,10 +68,9 @@ class Marker:
             self.has_editable_selected = ", "
         else:
             self.has_editable_selected = ""
-        self.editable_select_parmas = ", ".join(
-            ["{0}=undefined".format(field_name) for field_name in self.editable_field_list])
-        self.editable_selected_parmas = ", ".join(
-            ["{0}={0}".format(field_name) for field_name in self.editable_field_list])
+
+        self.editable_select_parmas = ", ".join(["{0}=undefined".format(field_name) for field_name in self.editable_field_list])
+        self.editable_selected_parmas = ", ".join(["{0}={0}".format(field_name) for field_name in self.editable_field_list])
         self.editable_attrs = ", ".join(["'{0}'".format(field_name) for field_name in self.editable_field_list])
 
         return True
@@ -121,24 +115,18 @@ class Marker:
         local_path = sys.path[0]
         abs_dir = os.path.dirname(local_path)
 
-        self.abs_pathname = os.path.join(abs_dir, "api", "auto", self.pathname)
+        self.abs_pathname = os.path.join(abs_dir, "api", "auto")
         if not os.path.isdir(self.abs_pathname):
             os.mkdir(self.abs_pathname)
 
-            with open(os.path.join(self.abs_pathname, "__init__.py"), "w") as f:
-                f.close()
-
-            with open(os.path.join(self.abs_pathname, f"{self.model_name}.py"), "w") as f:
-                f.write(self.models)
-                f.close()
-
-            for filename in self.filename_list:
-                self._create_file(filename)
-        else:
-            pass
+        for filename in self.filename_list:
+            path = os.path.join(self.abs_pathname, filename)
+            if not os.path.isdir(path):
+                os.mkdir(path)
+            self._create_file(filename)
 
     def _create_file(self, filename):
-        with open(os.path.join(self.abs_pathname, "{0}.py".format(filename)), "w") as f:
+        with open(os.path.join(self.abs_pathname, filename, f"{self.model_name}.py"), "w") as f:
             f.write(self.__dict__[filename])
             f.close()
 
@@ -164,15 +152,12 @@ class Marker:
            enum_key_value=enum_key_value)
         return str
 
-    def _init_enums(self):
-        str = """# -*- coding: utf-8 -*-
-
-{enum_content}      
-
-class Enums():
-    def __init__(self):
-        pass
-""".format(enum_content=self._init_enums_string())
+    def _init_consts(self):
+        enum_content = self._init_enums_string()
+        str = f"""\
+# -*- coding: utf-8 -*-
+{enum_content}
+"""
         return str
 
     def _init_model_string(self):
@@ -181,7 +166,7 @@ class Enums():
             name = self.model_field_dict[field_name].get('name')
             model_type = self.model_field_dict[field_name].get('type')
             model_parmas = self._get_parmas(self.model_field_dict[field_name])
-            model_string += f"""    
+            model_string += f"""
     {name} = models.{model_type}Field({model_parmas})"""
         return model_string
 
@@ -206,7 +191,7 @@ class Enums():
 
 import datetime
 import mongoengine as models
-
+from api.consts.{model_name} import *
 
 class {model_title}(models.Document):{model_content}
 {model_indexes}
@@ -219,11 +204,12 @@ class {model_title}(models.Document):{model_content}
             name = self.model_field_dict[field_name].get('name')
             utils_type = self.utils_field_dict[field_name].get('type')
             model_parmas = self._get_parmas(self.model_field_dict[field_name])
-            utils_string += f"""    
+            utils_string += f"""
     {name} = models_fields.{utils_type}Field({model_parmas})"""
         return utils_string
 
     def _init_utils(self):
+        model_name = self.model_name
         model_title = self.model_title
         utils_content = self._init_utils_string()
 
@@ -231,8 +217,9 @@ class {model_title}(models.Document):{model_content}
 # -*- coding: utf-8 -*-
         
 import datetime
-from BaseDocument import BaseDocument
 import models_fields
+from api.consts.{model_name} import *
+from models_manager.BaseDocument import BaseDocument
 
 
 class {model_title}(BaseDocument):{utils_content}
@@ -266,9 +253,9 @@ class {model_title}(BaseDocument):{utils_content}
         str = f"""\
 # -*- coding: utf-8 -*-
 
-from const import undefined
 from base import BaseHandler
-from api.{model_name}.utils import {model_title}
+from api.consts.const import undefined
+from api.utils.{model_name} import {model_title}
     
     
 class {model_title}Handler(BaseHandler):
@@ -317,15 +304,11 @@ class {model_title}Handler(BaseHandler):
 # -*- coding: utf-8 -*-
 
 from tornado.web import url
-import api.{model_name}.views as views
+import api.views.{model_name} as views
 
 url_mapping = [
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='select_{model_name}'),
-    url(r"/api/{model_name}/", views.{model_title}Handler, name='select_{model_name}_list'),
-    url(r"/api/{model_name}/", views.{model_title}Handler, name='create_{model_name}'),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='update_{model_name}'),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='modify_{model_name}'),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler, name='delete_{model_name}'),
+    url(r"/api/{model_name}/", views.{model_title}Handler),
+    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler),
 ]
 """
         return str

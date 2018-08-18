@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import const
+
+from api.consts.const import AJAX_FAIL_NOTLOGIN
 from common.Exceptions.ApiException import ApiException
 
 class NotLoginException(ApiException):
@@ -8,7 +9,7 @@ class NotLoginException(ApiException):
     '''
 
     def __init__(self, errmsg=None, data=None):
-        self.code = const.AJAX_FAIL_NOTLOGIN
+        self.code = AJAX_FAIL_NOTLOGIN
         self.message = errmsg or "用户未登录"
         self.data = data
 

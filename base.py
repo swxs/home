@@ -9,57 +9,57 @@ import traceback
 from pycket.session import SessionMixin
 import tornado.web
 import tornado.escape
-from tornado import locale
+from tornado import locale, concurrent
 from tornado.web import escape
-import const
 import settings
-import api.user.utils as user_utils
-from common.Utils.validate import Validate
-from common.Exceptions.CommonException import CommonException
-from common.Exceptions.ExistException import ExistException
-from common.Exceptions.NotExistException import NotExistException
-from common.Exceptions.NotLoginException import NotLoginException
-from common.Exceptions.PermException import PermException
-from common.Exceptions.ValidateException import ValidateException
-from common.Exceptions.LackOfFieldException import LackOfFieldException
-from common.Exceptions.DeleteInhibitException import DeleteInhibitException
+from api.consts import const
+import api.utils.user as user_utils
+from common.Utils.validate import Validate, RegType
+from common.Exceptions import *
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def prepare(self):
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print('{} - {}:{} start'.format(now, self.request.remote_ip, self.request.uri))
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        print('{} - {}:[{}]{} start'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
 
     def on_finish(self):
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print('{} - {}:{} finished'.format(now, self.request.remote_ip, self.request.uri))
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        print('{} - {}:[{}]{} finished'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
+
+    def _is_normal_argumnet(self):
+        if not hasattr(self, "__normal_argumnet"):
+            self.__normal_argumnet = (self.request.method.upper() == const.HTTP_METHOD_GET
+                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET))
+        return self.__normal_argumnet
+
+    def _get_argument_as_dict(self):
+        if not hasattr(self, "__dict_args"):
+            self.__dict_args = json.loads(self.request.body)
+        return self.__dict_args
 
     def get_argument(self, argument, default=None, strip=True):
-        if self.request.method == "GET" or Validate.has(str(self.request.headers), reg_type="json_header"):
+        if self._is_normal_argumnet():
             return super(BaseHandler, self).get_argument(argument, default=default, strip=strip)
         else:
             try:
-                arguments = json.loads(self.request.body)
-                value = arguments.get(argument)
+                value = self._get_argument_as_dict().get(argument, default)
             except:
-                value = None
-            if value is None:
-                return default
+                value = default
             return value
 
     def get_arguments(self, argument, default=None, strip=True):
-        if self.request.method == "GET" or Validate.has(str(self.request.headers), reg_type="json_header"):
+        if self._is_normal_argumnet():
             value = super(BaseHandler, self).get_arguments(argument, strip=True)
             if value == []:
                 return default
             return value
         else:
             try:
-                arguments = json.loads(self.request.body)
-                value = arguments.get(argument)
+                value = self._get_argument_as_dict().get(argument)
             except:
-                value = None
-            if value is None:
+                value = []
+            if value is None or value == []:
                 return default
             return value
 
@@ -79,6 +79,28 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if errmsg:
             dic['errmsg'] = errmsg
         self.write(json.dumps(dic))
+
+    def _handle_request_exception(self, e):
+        if isinstance(e, ReturnException):
+            self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
+            self.finish()
+        elif isinstance(e, ApiException):
+            self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+            self.finish()
+        else:
+            try:
+                from common.Utils.log_utils import getLogger
+                import traceback
+                log = getLogger()
+                try:
+                    error_info = log.error(traceback.format_exc()).split('\n')
+                except:
+                    pass
+            except NotLoginException as e:
+                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+                self.finish()
+            else:
+                super(BaseHandler, self)._handle_request_exception(e)
 
     def write_error(self, status_code, **kwargs):
         if settings.DEBUG:
@@ -188,36 +210,28 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def ajax_base(cls, method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
-            ''''''
             try:
-                data = method(self, *args, **kwargs)
-                self.write_json(data=data, errcode=const.AJAX_SUCCESS, errmsg=None, status=None)
-                #  TODO: 考虑是否可以简单的切换到 类似proto的数据格式，也可能在最后的返回层级定
-            except CommonException as e:
+                result = method(self, *args, **kwargs)
+                if isinstance(result, concurrent.Future):
+                    return result
+                else:
+                    self.write_json(data=result, errcode=const.AJAX_SUCCESS, errmsg=None, status=None)
+            except ReturnException as e:
+                self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
+                self.finish()
+            except ApiException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except ValidateException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except ExistException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except NotExistException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except PermException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except NotLoginException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except LackOfFieldException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except DeleteInhibitException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except Exception as e:
-                # from common.Utils.log_utils import getLogger
+            except (Exception, NotImplementedError) as e:
+                from common.Utils.log_utils import getLogger
                 import traceback
-                # log = getLogger()
-                # log.error(e)
-                self.write_json(data=None,
-                                errcode=const.AJAX_FAIL_NORMAL,
-                                errmsg="未定义异常",
-                                status=None)
+                log = getLogger()
+                try:
+                    error_info = log.error(traceback.format_exc()).split('\n')
+                    self.captureMessage(str(e) + '\n' + '\n'.join(error_info))
+                except:
+                    pass
+                self.write_json(data=None, errcode=const.AJAX_FAIL_NORMAL, errmsg=const.AJAX_FAIL_NORMAL, status=None)
+            self.finish()
 
         return wrapper
 
