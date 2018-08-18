@@ -6,26 +6,29 @@ import binascii
 import datetime
 import functools
 import traceback
-from pycket.session import SessionMixin
 import tornado.web
 import tornado.escape
 from tornado import locale, concurrent
 from tornado.web import escape
 import settings
+from pycket.session import SessionMixin
 from api.consts import const
-import api.utils.user as user_utils
-from common.Utils.validate import Validate, RegType
+from api.utils.user import User
 from common.Exceptions import *
+from common.Utils.validate import Validate, RegType
+from common.Utils.log_utils import getLogger
+
+log = getLogger()
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def prepare(self):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        print('{} - {}:[{}]{} start'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
+        log.debug('{} - {}:[{}]{} start'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
 
     def on_finish(self):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        print('{} - {}:[{}]{} finished'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
+        log.debug('{} - {}:[{}]{} finished'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
 
     def _is_normal_argumnet(self):
         if not hasattr(self, "__normal_argumnet"):
@@ -89,13 +92,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             self.finish()
         else:
             try:
-                from common.Utils.log_utils import getLogger
-                import traceback
-                log = getLogger()
-                try:
-                    error_info = log.error(traceback.format_exc()).split('\n')
-                except:
-                    pass
+                log.error(traceback.format_exc()).split('\n')
             except NotLoginException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
                 self.finish()
@@ -148,7 +145,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             user_id = self.session.get('user_id')
             if user_id is None:
                 raise NotLoginException()
-            self._user = user_utils.get_user_by_user_id(user_id=user_id)
+            self._user = User.select(id=user_id)
         return self._user
 
     def get_user_locale(self):
@@ -189,10 +186,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def is_ajax(self):
         ''''''
         if not hasattr(self, '_is_ajax'):
-            if self.request.headers.get('X-Requested-With'):
-                self._is_ajax = True
-            else:
-                self._is_ajax = False
+            self._is_ajax = self.request.headers.get('X-Requested-With')
         return self._is_ajax
 
     @property
@@ -222,14 +216,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             except ApiException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
             except (Exception, NotImplementedError) as e:
-                from common.Utils.log_utils import getLogger
-                import traceback
-                log = getLogger()
-                try:
-                    error_info = log.error(traceback.format_exc()).split('\n')
-                    self.captureMessage(str(e) + '\n' + '\n'.join(error_info))
-                except:
-                    pass
+                log.error(traceback.format_exc()).split('\n')
                 self.write_json(data=None, errcode=const.AJAX_FAIL_NORMAL, errmsg=const.AJAX_FAIL_NORMAL, status=None)
             self.finish()
 

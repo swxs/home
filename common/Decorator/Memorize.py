@@ -8,10 +8,12 @@ import uuid
 import threading
 import hashlib
 import weakref
-import settings
 from common.Helpers.DBHelper_Memcache import MemcacheDBHelper
 from common.Metaclass.Singleton import Singleton
+from common.Utils.log_utils import getLogger
 from api.consts.const import undefined
+
+log = getLogger("memorize")
 
 __all__ = ["clear", "upgrade", "cache", "memorize"]
 

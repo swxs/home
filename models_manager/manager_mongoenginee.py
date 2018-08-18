@@ -51,7 +51,6 @@ class Manager(object):
             raise e
 
     @classmethod
-    # @memorize
     def _delete(cls, model):
         try:
             model.delete()
