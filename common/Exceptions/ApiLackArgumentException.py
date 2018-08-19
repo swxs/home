@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from api.consts.const import AJAX_FAIL_NORMAL
+from api.consts.const import AJAX_FAIL_ILLEGAL
 from common.Exceptions.ApiException import ApiException
 
-class LackOfFieldException(ApiException):
+class ApiLackArgumentException(ApiException):
     """
-        缺少字段
+        缺少必要参数
     """
-
     def __init__(self, errmsg=None, data=None):
-        self.code = AJAX_FAIL_NORMAL
-        self.message = "缺少{0}字段".format(errmsg)
+        self.code = AJAX_FAIL_ILLEGAL
+        self.message = "参数不合法"
         self.data = data
 
     def __str__(self):

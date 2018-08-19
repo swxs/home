@@ -34,7 +34,7 @@ class FTPS(FTP_TLS):
             self.file = self.sock.makefile('rb')
             self.welcome = self.getresp()
         except Exception as e:
-            print e
+            print(e)
         return self.welcome
     
     def storbinary(self, cmd, fp, blocksize=8192, callback=None, rest=None):

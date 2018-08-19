@@ -1,23 +1,23 @@
 from common.Exceptions.ApiException import ApiException
-from common.Exceptions.ReturnException import ReturnException
-from common.Exceptions.CommonException import CommonException
-from common.Exceptions.DeleteInhibitException import DeleteInhibitException
-from common.Exceptions.ExistException import ExistException
-from common.Exceptions.LackOfFieldException import LackOfFieldException
-from common.Exceptions.NotExistException import NotExistException
-from common.Exceptions.NotLoginException import NotLoginException
-from common.Exceptions.PermException import PermException
-from common.Exceptions.ValidateException import ValidateException
+from common.Exceptions.ApiReturnException import ApiReturnException
+from common.Exceptions.ApiCommonException import ApiCommonException
+from common.Exceptions.ApiLackArgumentException import ApiLackArgumentException
+from common.Exceptions.ApiValidateException import ApiValidateException
+from common.Exceptions.ApiExistException import ApiExistException
+from common.Exceptions.ApiNotExistException import ApiNotExistException
+from common.Exceptions.ApiDeleteInhibitException import ApiDeleteInhibitException
+from common.Exceptions.ApiNotLoginException import ApiNotLoginException
+from common.Exceptions.ApiPermException import ApiPermException
 
 __all__ = [
     "ApiException",
-    "ReturnException",
-    "CommonException",
-    "DeleteInhibitException",
-    "ExistException",
-    "LackOfFieldException",
-    "NotExistException",
-    "NotLoginException",
-    "PermException",
-    "ValidateException",
+    "ApiReturnException",
+    "ApiCommonException",
+    "ApiValidateException",
+    "ApiExistException",
+    "ApiNotExistException",
+    "ApiDeleteInhibitException",
+    "ApiLackArgumentException",
+    "ApiNotLoginException",
+    "ApiPermException",
 ]

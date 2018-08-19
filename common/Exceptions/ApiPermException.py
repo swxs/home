@@ -3,7 +3,7 @@
 from api.consts.const import AJAX_FAIL_AUTH
 from common.Exceptions.ApiException import ApiException
 
-class PermException(ApiException):
+class ApiPermException(ApiException):
     '''
         权限错误
     '''

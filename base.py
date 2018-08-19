@@ -84,7 +84,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         self.write(json.dumps(dic))
 
     def _handle_request_exception(self, e):
-        if isinstance(e, ReturnException):
+        if isinstance(e, ApiReturnException):
             self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
             self.finish()
         elif isinstance(e, ApiException):
@@ -93,7 +93,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         else:
             try:
                 log.error(traceback.format_exc()).split('\n')
-            except NotLoginException as e:
+            except ApiNotLoginException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
                 self.finish()
             else:
@@ -144,7 +144,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if not hasattr(self, '_user'):
             user_id = self.session.get('user_id')
             if user_id is None:
-                raise NotLoginException()
+                raise ApiNotLoginException()
             self._user = User.select(id=user_id)
         return self._user
 
@@ -210,7 +210,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                     return result
                 else:
                     self.write_json(data=result, errcode=const.AJAX_SUCCESS, errmsg=None, status=None)
-            except ReturnException as e:
+            except ApiReturnException as e:
                 self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
                 self.finish()
             except ApiException as e:

@@ -3,7 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:55
 
-from mongoengine import (NotUniqueError, DoesNotExist)
+from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from api import models
 from api.consts.const import undefined
 from common.Metaclass.Singleton import Singleton
@@ -45,8 +45,10 @@ class Manager(object):
     def _save(cls, model):
         try:
             model.save()
+        except ValidationError:
+            raise ApiValidateException(model._class_name)
         except NotUniqueError:
-            raise ExistException(model._class_name)
+            raise ApiExistException(model._class_name)
         except Exception as e:
             raise e
 
@@ -61,8 +63,8 @@ class Manager(object):
     def select(cls, model_class, **kwargs):
         try:
             model = cls._get_model(model_class).objects.get(**kwargs)
-        except DoesNotExist as e:
-            raise NotExistException(f"{model_class.__model_name__}")
+        except DoesNotExist:
+            raise ApiNotExistException(f"{model_class.__model_name__}")
         except Exception as e:
             raise e
         return model_class.get_instance(model)

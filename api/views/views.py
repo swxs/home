@@ -19,7 +19,7 @@ class LoginHandler(BaseHandler):
     @BaseHandler.ajax_base
     def get(self):
         ''''''
-        raise NotLoginException()
+        raise ApiNotLoginException()
 
     @BaseHandler.ajax_base
     def post(self):

@@ -3,7 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2018/6/22 17:25
 
-from common.Exceptions import ValidateException
+from common.Exceptions import ApiValidateException
 from common.Utils.validate import Validate
 from models_fields import BaseField
 
@@ -16,5 +16,5 @@ class StringField(BaseField):
 
     def __set__(self, instance, value):
         if Validate.check(value, self.validate):
-            raise ValidateException(self.name)
+            raise ApiValidateException(self.name)
         super().__set__(instance, value)

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-from api.consts.const import AJAX_FAIL_NORMAL
+
+from api.consts.const import AJAX_FAIL_NOTLOGIN
 from common.Exceptions.ApiException import ApiException
 
-class CommonException(ApiException):
+class ApiNotLoginException(ApiException):
     '''
-        非常规错误, 自定义返回内容
+        用户未登录
     '''
-
     def __init__(self, errmsg=None, data=None):
-        self.code = AJAX_FAIL_NORMAL
-        self.message = errmsg or ""
+        self.code = AJAX_FAIL_NOTLOGIN
+        self.message = errmsg or "用户未登录"
         self.data = data
 
     def __str__(self):
