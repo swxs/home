@@ -5,6 +5,7 @@
 
 from models_fields.BaseField import BaseField
 from models_fields.IntField import IntField
+from models_fields.BooleanField import BooleanField
 from models_fields.StringField import StringField
 from models_fields.ForeignIdField import ForeignIdField
 from models_fields.ListField import ListField
@@ -12,11 +13,12 @@ from models_fields.DictField import DictField
 from models_fields.DateTimeField import DateTimeField
 
 __all__ = [
-    BaseField,
-    IntField,
-    StringField,
-    ForeignIdField,
-    ListField,
-    DictField,
-    DateTimeField,
+    "BaseField",
+    "IntField",
+    "BooleanField",
+    "StringField",
+    "ForeignIdField",
+    "ListField",
+    "DictField",
+    "DateTimeField",
 ]

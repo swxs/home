@@ -8,8 +8,8 @@ import re
 import scrapy
 from scrapy import Request
 from scrapy import Selector
-from api.job import utils as job_utils
-from const import undefined
+from api.utils.job import Job
+from api.consts.const import undefined
 
 
 class BossZhipinSpider(scrapy.Spider):
@@ -61,9 +61,9 @@ class BossZhipinSpider(scrapy.Spider):
             job_time = job_sel.css('p').extract()[2].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')[0]
             job_company_name = job_sel.css('a::text').extract()[-1]
             job_url = "https://www.zhipin.com" + job_sel.css('a::attr(href)').extract()[0]
-            job = job_utils.get_job_by_type_company_name(job_type, job_company_name)
+            job = Job.select(job_type=job_type, job_company_name=job_company_name)
             if job is None:
-                job_utils.create_job(
+                Job.create(
                     job_type=job_type,
                     job_pay=job_pay,
                     job_time=job_time,

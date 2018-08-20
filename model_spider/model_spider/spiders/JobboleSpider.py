@@ -4,7 +4,7 @@ import scrapy
 from scrapy import Request
 from scrapy import Selector
 from model_spider.model_spider.items import ArticalItem
-from api.artical import utils as artical_utils
+from api.utils.artical import Artical
 
 
 class JobboleSpider(scrapy.Spider):
@@ -57,8 +57,8 @@ class JobboleSpider(scrapy.Spider):
             artical_item["source"] = artical_sel.css('div.copyright-area>a::attr(href)').extract_first()
             artical_item["content"] = artical_sel.css('div.entry').extract_first()
 
-            artical_utils.create_artical(**dict(author=artical_item["author"],
-                                                title=artical_item["title"],
-                                                source=artical_item["source"],
-                                                summary=artical_item["summary"],
-                                                content=artical_item["content"]))
+            Artical.create(**dict(author=artical_item["author"],
+                                  title=artical_item["title"],
+                                  source=artical_item["source"],
+                                  summary=artical_item["summary"],
+                                  content=artical_item["content"]))
