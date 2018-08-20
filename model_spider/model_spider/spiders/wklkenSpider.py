@@ -8,7 +8,7 @@ import scrapy
 from scrapy import Request
 from scrapy import Selector
 from model_spider.model_spider.items import ArticalItem
-from api.artical import utils as artical_utils
+from api.utils.artical import Artical
 
 
 class WklkenSpider(scrapy.Spider):
@@ -60,8 +60,8 @@ class WklkenSpider(scrapy.Spider):
         artical_item["source"] = response.url
         artical_item["content"] = artical_sel.css('article#article>section#content').extract_first()
 
-        artical_utils.create_artical(**dict(author=artical_item["author"],
-                                            title=artical_item["title"],
-                                            source=artical_item["source"],
-                                            summary=artical_item["summary"],
-                                            content=artical_item["content"]))
+        Artical.create(**dict(author=artical_item["author"],
+                              title=artical_item["title"],
+                              source=artical_item["source"],
+                              summary=artical_item["summary"],
+                              content=artical_item["content"]))

@@ -38,11 +38,13 @@ WECHAT_USERINFO_URL = ""
 WECHAT_APPID = ""
 WECHAT_SECRET = ""
 
+LOG_PATH = get_dir_path(SITE_ROOT, 'logs')
 STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
 TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
 DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
 TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
 STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
+SPIDER_LOG_PATH = os.path.join(SITE_ROOT, 'model_spider', 'model_spider', 'logs')
 
 try:
     from local_settings import *
