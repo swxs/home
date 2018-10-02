@@ -9,7 +9,7 @@ from api.utils.user import User
 
 
 class UserHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self, user_id=None):
         if user_id:
             user = User.select(id=user_id)
@@ -28,7 +28,7 @@ class UserHandler(BaseHandler):
             # )
             # return [user.to_front() for user in paged_user_list]
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):
         username = self.get_argument('username', None)
         nickname = self.get_argument('nickname', None)
@@ -37,7 +37,7 @@ class UserHandler(BaseHandler):
         user = User.create(username=username, nickname=nickname, password=password, userinfo_id=userinfo_id)
         return user.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def put(self, user_id):
         username = self.get_argument('username', None)
         nickname = self.get_argument('nickname', None)
@@ -47,7 +47,7 @@ class UserHandler(BaseHandler):
         user = user.update(username=username, nickname=nickname, password=password, userinfo_id=userinfo_id)
         return user.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def patch(self, user_id):
         username = self.get_argument('username', undefined)
         nickname = self.get_argument('nickname', undefined)
@@ -57,7 +57,7 @@ class UserHandler(BaseHandler):
         user = user.update(username=username, nickname=nickname, password=password, userinfo_id=userinfo_id)
         return user.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def delete(self, user_id):
         user = User.select(id=user_id)
         user.delete()

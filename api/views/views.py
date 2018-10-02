@@ -10,18 +10,18 @@ from api.utils.user import User
 
 
 class IndexHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self):
         return []
 
 
 class LoginHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self):
         ''''''
         raise ApiNotLoginException()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):
         username = self.get_argument('username', None)
         password = self.get_argument('password', None)
@@ -39,7 +39,7 @@ class LoginHandler(BaseHandler):
 
 
 class LogoutHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):
         self.session.delete('user_id')
         return None

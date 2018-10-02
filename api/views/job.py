@@ -6,7 +6,7 @@ from api.utils.job import Job
 
 
 class JobHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self, job_id=None):
         if job_id:
             job = Job.select(id=job_id)
@@ -15,7 +15,7 @@ class JobHandler(BaseHandler):
             job_list = Job.filter()
             return [job.to_front() for job in job_list]
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):
         job_type = self.get_argument('job_type', None)
         job_pay = self.get_argument('job_pay', None)
@@ -47,7 +47,7 @@ class JobHandler(BaseHandler):
         )
         return job.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def put(self, job_id):
         job_type = self.get_argument('job_type', None)
         job_pay = self.get_argument('job_pay', None)
@@ -80,7 +80,7 @@ class JobHandler(BaseHandler):
         )
         return job.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def patch(self, job_id):
         job_type = self.get_argument('job_type', undefined)
         job_pay = self.get_argument('job_pay', undefined)
@@ -113,7 +113,7 @@ class JobHandler(BaseHandler):
         )
         return job.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def delete(self, job_id):
         job = Job.select(id=job_id)
         job.delete()

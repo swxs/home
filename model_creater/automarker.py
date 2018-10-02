@@ -259,7 +259,7 @@ from api.utils.{model_name} import {model_title}
     
     
 class {model_title}Handler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self, {model_id}=None):
         if {model_id}:
             {model_name} = {model_title}.select(id={model_id})
@@ -268,24 +268,24 @@ class {model_title}Handler(BaseHandler):
             {model_name}_list = {model_title}.filter()
             return [{model_name}.to_front() for {model_name} in {model_name}_list]
     
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):{get_arguments}
         {model_name} = {model_title}.create({editable_selected_parmas})
         return {model_name}.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def put(self, {model_id}):{get_arguments}
         {model_name} = {model_title}.select(id={model_id})
         {model_name} = {model_name}.update({editable_selected_parmas})
         return {model_name}.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def patch(self, {model_id}):{get_arguments_default}
         {model_name} = {model_title}.select(id={model_id})
         {model_name} = {model_name}.update({editable_selected_parmas})
         return {model_name}.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def delete(self, {model_id}):
         {model_name} = {model_title}.select(id={model_id})
         {model_name}.delete()

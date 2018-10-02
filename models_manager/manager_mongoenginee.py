@@ -5,9 +5,13 @@
 
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from api import models
+from models_fields import DictField
 from api.consts.const import undefined
 from common.Metaclass.Singleton import Singleton
 from common.Exceptions import *
+from common.Utils.log_utils import getLogger
+
+log = getLogger("manager.mongoenginee")
 
 
 class ManagerQuerySet(object):
@@ -25,10 +29,20 @@ class ManagerQuerySet(object):
             return map(self.get_instance, self.model)
 
     def first(self):
-        return self.get_instance(self.model.first())
+        first_model = self.model.first()
+        if first_model is None:
+            return None
+        else:
+            return self.get_instance(first_model)
 
     def count(self):
         return self.model.count()
+
+    def order_by(self, *keys):
+        if self.model is None:
+            return list()
+        else:
+            return map(self.get_instance, self.model.order_by(*keys))
 
 
 class Manager(object):
@@ -89,15 +103,26 @@ class Manager(object):
 
     @classmethod
     def update(cls, model_class, **kwargs):
-        model = cls._get_model(model_class).objects.get(id=model_class.id)
+        model = model_class._raw_model
         for attr in model_class.__fields__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
-                model.__setattr__(attr, value)
+                if isinstance(model_class.__fields__[attr], DictField):
+                    model.__getitem__(attr).update(value)
+                    model.__setattr__(attr, model.__getitem__(attr))
+                else:
+                    model.__setattr__(attr, value)
         cls._save(model)
-        return model_class.get_instance(model)
+        return model_class.update_instance(model)
 
     @classmethod
     def delete(cls, model_class):
         model = cls._get_model(model_class).objects.get(id=model_class.id)
         cls._delete(model)
+
+    @classmethod
+    def remove(cls, model_class, *args, **kwargs):
+        try:
+            return cls._get_model(model_class).objects.delete(*args, **kwargs)
+        except Exception as e:
+            raise e

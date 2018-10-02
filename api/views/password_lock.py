@@ -6,7 +6,7 @@ from api.utils.password_lock import PasswordLock
 
 
 class PasswordLockHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self, password_lock_id=None):
         if password_lock_id:
             password_lock = PasswordLock.select(id=password_lock_id)
@@ -15,7 +15,7 @@ class PasswordLockHandler(BaseHandler):
             password_lock_list = PasswordLock.filter()
             return [password_lock.to_front() for password_lock in password_lock_list]
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):
         name = self.get_argument('name', None)
         key = self.get_argument('key', None)
@@ -24,7 +24,7 @@ class PasswordLockHandler(BaseHandler):
         password_lock = PasswordLock.create(name=name, key=key, website=website, user_id=user_id)
         return password_lock.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def put(self, password_lock_id):
         name = self.get_argument('name', None)
         key = self.get_argument('key', None)
@@ -34,7 +34,7 @@ class PasswordLockHandler(BaseHandler):
         password_lock = password_lock.update(name=name, key=key, website=website, user_id=user_id)
         return password_lock.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def patch(self, password_lock_id):
         name = self.get_argument('name', undefined)
         key = self.get_argument('key', undefined)
@@ -44,7 +44,7 @@ class PasswordLockHandler(BaseHandler):
         password_lock = password_lock.update(name=name, key=key, website=website, user_id=user_id)
         return password_lock.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def delete(self, password_lock_id):
         password_lock = PasswordLock.select(id=password_lock_id)
         password_lock.delete()

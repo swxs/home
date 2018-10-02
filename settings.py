@@ -6,6 +6,7 @@ from common.Utils.dir_path import get_dir_path
 OS = 'linux'
 DEBUG = False
 XSRF = '__xsrf'
+DEFAULT_LOCAL = 'zh_CN'
 SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
 SECRET_KEY = 'd96f097c-4b1b-4867-3859-375830cd69c4'
 

@@ -21,3 +21,6 @@ class RedisDBHelper(object):
         :param password: 
         '''
         self.client = redis.StrictRedis(host=host, port=port, db=dbbase, password=password)
+
+    def get_next_seq(self, key):
+        return self.client.incr(key, 1)

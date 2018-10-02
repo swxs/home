@@ -6,7 +6,7 @@ from api.utils.artical import Artical
 
 
 class ArticalHandler(BaseHandler):
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def get(self, artical_id=None):
         if artical_id:
             artical = Artical.select(id=artical_id)
@@ -15,7 +15,7 @@ class ArticalHandler(BaseHandler):
             artical_list = Artical.filter()
             return [artical.to_front() for artical in artical_list]
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def post(self):
         title = self.get_argument('title', None)
         author = self.get_argument('author', None)
@@ -35,7 +35,7 @@ class ArticalHandler(BaseHandler):
         )
         return artical.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def put(self, artical_id):
         title = self.get_argument('title', None)
         author = self.get_argument('author', None)
@@ -56,7 +56,7 @@ class ArticalHandler(BaseHandler):
         )
         return artical.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def patch(self, artical_id):
         title = self.get_argument('title', undefined)
         author = self.get_argument('author', undefined)
@@ -77,7 +77,7 @@ class ArticalHandler(BaseHandler):
         )
         return artical.to_front()
 
-    @BaseHandler.ajax_base
+    @BaseHandler.ajax_base()
     def delete(self, artical_id):
         artical = Artical.select(id=artical_id)
         artical.delete()

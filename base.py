@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 import uuid
 import binascii
 import datetime
 import functools
 import traceback
+from urllib.parse import quote
+
 import tornado.web
 import tornado.escape
 from tornado import locale, concurrent
 from tornado.web import escape
 import settings
 from pycket.session import SessionMixin
-from api.consts import const
+from api.consts.const import HTTP_METHOD, HTTP_STATUS
 from api.utils.user import User
 from common.Exceptions import *
 from common.Utils.validate import Validate, RegType
@@ -32,8 +35,9 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     def _is_normal_argumnet(self):
         if not hasattr(self, "__normal_argumnet"):
-            self.__normal_argumnet = (self.request.method.upper() == const.HTTP_METHOD_GET
-                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET))
+            self.__normal_argumnet = (self.request.method.upper() in (HTTP_METHOD.GET, HTTP_METHOD.DELETE)
+                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
+                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE))
         return self.__normal_argumnet
 
     def _get_argument_as_dict(self):
@@ -193,36 +197,110 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def locale(self):
         ''''''
         if not hasattr(self, '_locale'):
-            local_code = self.get_cookie('locale')
-            if not local_code:
-                local_code = "zh_CN"
-                self.set_cookie('local', local_code)
+            local_code = self.get_cookie('locale', default=settings.DEFAULT_LOCAL)
+            self.set_cookie('locale', local_code, expires_days=30)
             self._locale = locale.get(local_code)
         return self._locale
 
-    @classmethod
-    def ajax_base(cls, method):
-        @functools.wraps(method)
-        def wrapper(self, *args, **kwargs):
-            try:
-                result = method(self, *args, **kwargs)
-                if isinstance(result, concurrent.Future):
-                    return result
-                else:
-                    self.write_json(data=result, errcode=const.AJAX_SUCCESS, errmsg=None, status=None)
-            except ApiReturnException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
-                self.finish()
-            except ApiException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except (Exception, NotImplementedError) as e:
-                log.error(traceback.format_exc()).split('\n')
-                self.write_json(data=None, errcode=const.AJAX_FAIL_NORMAL, errmsg=const.AJAX_FAIL_NORMAL, status=None)
-            self.finish()
+    @locale.setter
+    def locale(self, local_code):
+        self.set_cookie('locale', local_code)
+        self._locale = locale.get(local_code)
 
-        return wrapper
+    def _do_filter(self, result, filter):
+        if len(filter) == 1:
+            if filter[0] in result:
+                result.pop(filter[0])
+            return result
+        else:
+            checked = result.get(filter[0])
+            if isinstance(checked, dict):
+                result[filter[0]] = self._do_filter(checked, filter[1:])
+            elif isinstance(checked, list):
+                result[filter[0]] = [self._do_filter(new_result, filter[1:]) for new_result in checked]
+            return result
+
+    def _filter_result(self, result):
+        if isinstance(result, dict):
+            filters = self.get_query_argument("filters", "").split("|")
+            for filter in filters:
+                f = filter.split(".")
+                result = self._do_filter(result, f)
+        return result
+
+    @classmethod
+    def ajax_base(cls, aio=False):
+
+        def function(method):
+
+            @functools.wraps(method)
+            async def wrapper(self, *args, **kwargs):
+                try:
+                    if aio:
+                        result = await method(self, *args, **kwargs)
+                    else:
+                        result = method(self, *args, **kwargs)
+                    if isinstance(result, concurrent.Future):
+                        return result
+                    else:
+                        self.write_json(data=result, errcode=HTTP_STATUS.AJAX_SUCCESS)
+                except ApiNotFoundException as e:
+                    self.write_json(data=e.data, errcode=e.code)
+                except ApiReturnException as e:
+                    self.write_json(data=e.data, errcode=e.code)
+                except ApiRedirectException as e:
+                    return self.redirect(e.url)
+                except ApiReturnFilePathException as e:
+                    self.write_json(data=e.data, errcode=e.code)
+                except ApiReturnFileException as e:
+                    path, filename = os.path.split(e.filepath)
+                    export_filename = f"filename={quote(filename)}"
+                    name, ext = os.path.splitext(filename)
+                    if ext in [".xlsx" ".xls"]:
+                        self.set_header("Content-Type", "application/vnd.ms-excel")
+                    self.set_header("Content-Type", "application/force-download")
+                    self.set_header("Content-Disposition", f"attachment; {export_filename}")
+                    with open(e.filepath, 'rb') as f:
+                        buf_size = 4096
+                        while 1:
+                            data = f.read(buf_size)
+                            if not data:
+                                break
+                            self.write(data)
+                except ApiException as e:
+                    self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+                except (Exception, NotImplementedError) as e:
+                    log.error(traceback.format_exc()).split('\n')
+                    self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL, status=None)
+                self.finish()
+
+            return wrapper
+
+        return function
 
 
 class CsrfExceptMixin():
     def check_xsrf_cookie(self):
         return True
+
+
+class PageNotFoundHandler(BaseHandler):
+    @BaseHandler.ajax_base()
+    def get(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def post(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def put(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def patch(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def delete(self):
+        raise ApiNotFoundException()

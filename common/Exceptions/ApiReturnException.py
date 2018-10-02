@@ -1,5 +1,6 @@
-from api.consts import const
+from api.consts.const import HTTP_STATUS
 from common.Exceptions.ApiException import ApiException
+
 
 class ApiReturnException(ApiException):
     def __init__(self, data=None):
@@ -8,9 +9,4 @@ class ApiReturnException(ApiException):
         :param errmsg:
         :param data:
         '''
-        self.code = const.AJAX_SUCCESS
-        self.message = ""
-        self.data = data
-
-    def __str__(self):
-        return self.message
+        super(ApiReturnException, self).__init__(code=HTTP_STATUS.AJAX_SUCCESS, data=data)

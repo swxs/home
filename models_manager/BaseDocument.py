@@ -4,10 +4,15 @@
 # @Time    : 2018/5/7 22:40
 
 import datetime
+from tornado.util import ObjectDict
 from api.consts.const import undefined
 import models_fields
+from common.Exceptions import *
 from models_manager.manager_mongoenginee import Manager
 from common.Decorator.Memorize import clear, upgrade, cache, memorize
+from common.Utils.log_utils import getLogger
+
+log = getLogger("BaseDocument")
 
 
 class BaseMetaDocuemnt(type):
@@ -30,6 +35,8 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     metaclass = BaseMetaDocuemnt
 
     def __init__(self, **kwargs):
+        self._raw_model = kwargs.get("_raw_model", undefined)
+
         for attr in self.__fields__:
             self.__dict__[attr] = kwargs.get(attr, undefined)
         self.__dict__["id"] = kwargs.get("_id", undefined)
@@ -44,18 +51,26 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         for attr in cls.__fields__:
             data[attr] = model.__getattribute__(attr)
         data["_id"] = str(model.__getattribute__("id"))
+        data["_raw_model"] = model
         return cls(**data)
 
-    def to_dict(self):
+    def update_instance(self, model):
         data = dict()
-        data["id"] = self.__dict__["id"]
         for attr in self.__fields__:
-            if self.__dict__[attr] != undefined:
-                data[attr] = self.__dict__[attr]
+            self.__setattr__(attr, model.__getattribute__(attr))
+            self.__dict__[attr] = model.__getattribute__(attr)
+        return self
+
+    def to_dict(self, dict_factory=ObjectDict):
+        data = dict_factory()
+        data["id"] = self.__dict__["id"]
+        for field_name, field_type in self.__fields__.items():
+            if self.__getattribute__(field_name) != undefined:
+                data[field_name] = self.__getattribute__(field_name)
         return data
 
-    def to_front(self):
-        data_dict = self.to_dict()
+    def to_front(self, dict_factory=ObjectDict):
+        data_dict = self.to_dict(dict_factory=dict_factory)
         for field_name, field_type in self.__fields__.items():
             if isinstance(field_type, models_fields.DateTimeField) and (field_name in data_dict):
                 if isinstance(data_dict[field_name], datetime.datetime):
@@ -65,17 +80,31 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return data_dict
 
     @classmethod
+    def is_exist(cls, *args, **kwargs):
+        try:
+            obj = Manager.select(cls, **kwargs)
+            return True
+        except ApiNotExistException:
+            return False
+        except Exception as e:
+            log.error(e)
+            return False
+
+    @classmethod
     @upgrade
     def create(cls, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{cls.__model_name__}>: kwargs - {str(kwargs)}".encode('utf8'))
         return Manager.create(cls, **kwargs)
 
     @classmethod
     @cache
     def select(cls, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{cls.__model_name__}>: kwargs - {str(kwargs)}".encode('utf8'))
         return Manager.select(cls, **kwargs)
 
     @classmethod
     def filter(cls, *args, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}".encode('utf8'))
         return Manager.filter(cls, *args, **kwargs)
 
     @upgrade
@@ -86,8 +115,15 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     kwargs[key] = self.__fields__[key].pre_update()
                 else:
                     kwargs[key] = self.__fields__[key].pre_update
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{self.__model_name__}>: kwargs - {str(kwargs)}".encode('utf8'))
         return Manager.update(self, **kwargs)
 
     @clear
     def delete(self):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{self.__model_name__}>: kwargs - {str(dict(id=self.id))}".encode('utf8'))
         return Manager.delete(self)
+
+    @classmethod
+    def remove(cls, *args, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [clear] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}".encode('utf8'))
+        return Manager.remove(cls, *args, **kwargs)

@@ -9,6 +9,12 @@ name = "pypi"
 tornado = "*"
 redis = "*"
 mongoengine = "*"
+requests = "*"
+python-memcached = "*"
+decorator = "*"
+qrcode = "*"
+pandas = "*"
+aiofiles = "*"
 
 [requires]
 python_version = "3.6"

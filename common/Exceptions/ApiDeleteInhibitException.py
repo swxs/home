@@ -4,9 +4,6 @@ from common.Exceptions.ApiException import ApiException
 
 
 class ApiDeleteInhibitException(ApiException):
-    def __init__(self, errmsg=None, data=None):
-        self.message = "{0}不可删除".format(errmsg)
-        self.data = data
-
-    def __str__(self):
-        return self.message
+    def __init__(self, message=None, data=None):
+        message_ = f"对象不可删除: {message}"
+        super(ApiDeleteInhibitException, self).__init__(message=message_, data=data)
