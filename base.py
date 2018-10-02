@@ -15,7 +15,7 @@ from tornado import locale, concurrent
 from tornado.web import escape
 import settings
 from pycket.session import SessionMixin
-from api.consts.const import HTTP_METHOD, HTTP_STATUS
+from api.consts.const import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
 from api.utils.user import User
 from common.Exceptions import *
 from common.Utils.validate import Validate, RegType

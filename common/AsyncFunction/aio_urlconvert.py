@@ -1,11 +1,11 @@
 import json
-from enum import Enum
+from enum import IntEnum
 import requests
 from common.AsyncFunction.aiohttp import aio_post
 from common.Exceptions.UrlConvertFailedException import UrlConvertFailedException
 
 
-class URL_CONVERT(Enum):
+class URL_CONVERT(IntEnum):
     LONG_TO_SHORT = 1
     SHORT_TO_LONG = 2
 

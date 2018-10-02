@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from enum import Enum
+from enum import IntEnum
 
 undefined = frozenset()
 
-
-class HTTP_METHOD(Enum):
-    GET = "GET"
-    DELETE = "DELETE"
+HTTP_METHOD_GET = "GET"
+HTTP_METHOD_DELETE = "DELETE"
 
 
-class HTTP_STATUS(Enum):
+class HTTP_STATUS(IntEnum):
     AJAX_SUCCESS = 0
     AJAX_FAIL_NORMAL = 1  # 常规操作出错
     AJAX_FAIL_AUTH = 2  # 权限问题
