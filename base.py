@@ -35,7 +35,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     def _is_normal_argumnet(self):
         if not hasattr(self, "__normal_argumnet"):
-            self.__normal_argumnet = (self.request.method.upper() in (HTTP_METHOD.GET, HTTP_METHOD.DELETE)
+            self.__normal_argumnet = (self.request.method.upper() in (HTTP_METHOD_GET, HTTP_METHOD_DELETE)
                                       or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
                                       or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE))
         return self.__normal_argumnet
@@ -270,7 +270,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 except ApiException as e:
                     self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
                 except (Exception, NotImplementedError) as e:
-                    log.error(traceback.format_exc()).split('\n')
+                    log.exception(repr(e))
                     self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL, status=None)
                 self.finish()
 
