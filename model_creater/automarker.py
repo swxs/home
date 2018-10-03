@@ -355,6 +355,6 @@ if __name__ == "__main__":
 
     for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
         for file in files:
-            # if file in ["job.json"]:
-            if file:
+            if file in ["movie.json"]:
+            # if file:
                 marker = Marker(str(file))
