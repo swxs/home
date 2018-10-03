@@ -9,6 +9,7 @@ from api.models.job import Job
 from api.models.password_lock import PasswordLock
 from api.models.tag import Tag
 from api.models.todo import Todo
+from api.models.movie import Movie
 
 __all__ = [
     "User",
@@ -16,5 +17,6 @@ __all__ = [
     "Job",
     "Tag",
     "PasswordLock",
-    "Todo"
+    "Todo",
+    "Movie"
 ]
