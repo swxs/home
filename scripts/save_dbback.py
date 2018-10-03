@@ -13,9 +13,9 @@ filepath = mongodb_backup_helper.dump()
 
 path, dir_name = os.path.split(filepath)
 filename = f"{dir_name}.tar.gz"
-
-os.system(f"tar -czvf {filename} {dir_name}")
+tar_filepath = os.path.join(path, filename)
+os.system(f"tar -czvf {tar_filepath} {filepath}")
 
 pan_helper = PCS("iamoom", "A1e35c6ee471")
-with open(os.path.join(settings.STATIC_DBBACK_PATH, filename), "rb") as f:
+with open(tar_filepath, "rb") as f:
     pan_helper.upload("/dbback/", f, filename)
