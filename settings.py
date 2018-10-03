@@ -27,6 +27,9 @@ REDIS_PASSWORD = None
 MONGODB_ADDRESS = '127.0.0.1'
 MONGODB_PORT = 27017
 MONGODB_DBNAME = 'home'
+MONGODB_USERNAME = None
+MONGODB_PASSWORD = None
+MONGODB_AUTHDB = None
 
 MAIL_SERVER_IP = ""
 MAIL_SERVER_USER = ""
@@ -45,7 +48,9 @@ TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
 DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
 TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
 STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
+STATIC_DBBACK_PATH = os.path.join(SITE_ROOT, 'static', 'dbback')
 SPIDER_LOG_PATH = os.path.join(SITE_ROOT, 'model_spider', 'model_spider', 'logs')
+
 
 try:
     from local_settings import *

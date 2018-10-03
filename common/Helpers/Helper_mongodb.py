@@ -9,7 +9,7 @@ import pymongo
 import datetime
 import subprocess
 import settings
-from common.metaclass_utils import Singleton
+from common.Metaclass.Singleton import Singleton
 
 
 class Helper_mongodb(object, metaclass=Singleton):
@@ -21,7 +21,7 @@ class Helper_mongodb(object, metaclass=Singleton):
         self.MONGODB_PASSWORD = settings.MONGODB_PASSWORD
         self.MONGODB_AUTHDB = settings.MONGODB_AUTHDB
         
-        self.MONGO_DUMP_DIR = os.path.join(settings.TMP_PATH, 'db_backup')
+        self.MONGO_DUMP_DIR = settings.STATIC_DBBACK_PATH
     
     def dump(self, gzip=True):
         if sys.platform == 'win32':
@@ -51,3 +51,5 @@ class Helper_mongodb(object, metaclass=Singleton):
         
         cmd = '{MONGODUMP_EXE} {MONGODUMP_ARGS}'.format(MONGODUMP_EXE=MONGODUMP_EXE, MONGODUMP_ARGS=" ".join(args))
         os.system(cmd)
+
+        return filename

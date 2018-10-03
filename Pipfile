@@ -15,6 +15,8 @@ decorator = "*"
 qrcode = "*"
 pandas = "*"
 aiofiles = "*"
+rsa = "*"
+requests-toolbelt = "*"
 
 [requires]
 python_version = "3.6"
