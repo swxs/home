@@ -28,7 +28,7 @@ of them, your custom value will override the default behaviour.
 
 from uuid import uuid4
 
-from pycket.driver import DriverFactory
+from common.Utils.pycket.driver import DriverFactory
 
 
 class SessionManager(object):

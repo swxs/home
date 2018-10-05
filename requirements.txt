@@ -1,6 +1,0 @@
-decorator
-requests
-tornado
-mongoengine
-python-memcached
-redis

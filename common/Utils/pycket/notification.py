@@ -8,7 +8,7 @@ with sessions. (You can change this setting with the "db_notifications" setting
 in the "storage" setting.)
 '''
 
-from pycket.session import create_mixin, SessionManager
+from common.Utils.pycket.session import create_mixin, SessionManager
 
 
 class NotificationManager(SessionManager):

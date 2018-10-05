@@ -17,6 +17,8 @@ pandas = "*"
 aiofiles = "*"
 rsa = "*"
 requests-toolbelt = "*"
+twisted = {path = "./whl/Twisted-18.7.0-cp36-cp36m-win_amd64.whl"}
+scrapy = "*"
 
 [requires]
 python_version = "3.6"
