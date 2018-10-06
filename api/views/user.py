@@ -10,6 +10,11 @@ from api.utils.user import User
 
 class UserHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": User.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+
+    @BaseHandler.ajax_base()
     def get(self, user_id=None):
         if user_id:
             user = User.select(id=user_id)

@@ -7,6 +7,10 @@ from api.utils.movie import Movie
     
 class MovieHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": Movie.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+    @BaseHandler.ajax_base()
     def get(self, movie_id=None):
         if movie_id:
             movie = Movie.select(id=movie_id)

@@ -7,6 +7,10 @@ from api.utils.job import Job
 
 class JobHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": Job.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+    @BaseHandler.ajax_base()
     def get(self, job_id=None):
         if job_id:
             job = Job.select(id=job_id)

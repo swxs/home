@@ -7,6 +7,10 @@ from api.utils.password_lock import PasswordLock
 
 class PasswordLockHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": PasswordLock.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+    @BaseHandler.ajax_base()
     def get(self, password_lock_id=None):
         if password_lock_id:
             password_lock = PasswordLock.select(id=password_lock_id)

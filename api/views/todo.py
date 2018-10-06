@@ -7,6 +7,10 @@ from api.utils.todo import Todo
 
 class TodoHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": Todo.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+    @BaseHandler.ajax_base()
     def get(self, todo_id=None):
         if todo_id:
             todo = Todo.select(id=todo_id)

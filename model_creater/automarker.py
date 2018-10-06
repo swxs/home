@@ -260,6 +260,10 @@ from api.utils.{model_name} import {model_title}
     
 class {model_title}Handler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {{"fields": {model_title}.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}}
+        
+    @BaseHandler.ajax_base()
     def get(self, {model_id}=None):
         if {model_id}:
             {model_name} = {model_title}.select(id={model_id})
@@ -356,5 +360,5 @@ if __name__ == "__main__":
     for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
         for file in files:
             if file in ["movie.json"]:
-            # if file:
+                # if file:
                 marker = Marker(str(file))

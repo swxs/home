@@ -7,6 +7,10 @@ from api.utils.tag import Tag
 
 class TagHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": Tag.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+    @BaseHandler.ajax_base()
     def get(self, tag_id=None):
         if tag_id:
             tag = Tag.select(id=tag_id)

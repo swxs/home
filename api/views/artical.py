@@ -7,6 +7,10 @@ from api.utils.artical import Artical
 
 class ArticalHandler(BaseHandler):
     @BaseHandler.ajax_base()
+    def head(self, *args, **kwargs):
+        return {"fields": Artical.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}
+
+    @BaseHandler.ajax_base()
     def get(self, artical_id=None):
         if artical_id:
             artical = Artical.select(id=artical_id)
