@@ -6,27 +6,11 @@ from itsdangerous import TimedJSONWebSignatureSerializer as jwt
 from itsdangerous import SignatureExpired, BadSignature
 import time
 import settings
+from common.Exceptions import *
 from common.Helpers.DBHelper_Redis import RedisDBHelper
+from common.Utils import log_utils
 
-REFRESH_TOKEN_EXPIRE = 24 * 3600
-ACCESS_TOKEN_EXPIRE = 3600
-
-
-class AuthCenterError(object):
-    E_NONE = 0x00  # indicates OK
-    E_TOKEN_EXPIRED = 0x01
-    E_TOKEN_BADSIGN = 0x02
-    E_TOKEN_INVALID = 0x03
-
-    errMap = dict()
-    errMap[E_NONE] = u"成功"
-    errMap[E_TOKEN_EXPIRED] = u"签名过期"
-    errMap[E_TOKEN_BADSIGN] = u"签名不正确"
-    errMap[E_TOKEN_INVALID] = u"Token无效"
-
-    @classmethod
-    def getErrorMsg(cls, errNo):
-        return cls.errMap.get(errNo, "无效错误码")
+log = log_utils.getLogger("TOKEN")
 
 
 class BlockTokenHelper(object):
@@ -35,7 +19,7 @@ class BlockTokenHelper(object):
 
     @classmethod
     def append_block_token(cls, token):
-        cls.client.set(f"token_{token}", True, ACCESS_TOKEN_EXPIRE)
+        cls.client.set(f"token_{token}", True, settings.ACCESS_TOKEN_EXPIRE)
 
     @classmethod
     def is_blocked(cls, token):
@@ -47,9 +31,10 @@ class AuthCenter(object):
     def _encode(self, **kwargs):
         secret_key = kwargs.get("secret_key")
         salt = kwargs.get("salt")
-        expireTime = kwargs.get("expire", None)
+        expire = kwargs.get("expire", None)
+        gen = jwt(secret_key=secret_key, salt=salt, expires_in=expire)
+
         data = kwargs.get("playload", {})
-        gen = jwt(secret_key=secret_key, salt=salt, expires_in=expireTime)
         data.update({"iat": time.time()})
         return gen.dumps(data)
 
@@ -57,45 +42,42 @@ class AuthCenter(object):
     def _decode(self, token, secret_key, salt):
         gen = jwt(secret_key=secret_key, salt=salt)
         try:
-            data = gen.loads(token)
+            return gen.loads(token)
         except SignatureExpired:
-            return [AuthCenterError.E_TOKEN_EXPIRED, None]
+            raise ApiTokenTimeOutException()
         except BadSignature:
-            return [AuthCenterError.E_TOKEN_BADSIGN, None]
+            raise ApiTokenIllegalException()
         except Exception as e:
-            return [AuthCenterError.E_TOKEN_INVALID, None]
-        return [AuthCenterError.E_NONE, data]
+            log.error(f"unknow error: {e}")
+            pass
+            raise ApiTokenIllegalException()
 
     @classmethod
     def gen_access_token(cls, **kwargs):
-        # use the default expire time(1 hour)
-        expire = kwargs.pop("expire", ACCESS_TOKEN_EXPIRE)
-        kwargs.update({"expire": expire})
-        old_token = kwargs.pop("token", None)
-        # push the old token into block list to disable it.
-        if old_token:
-            BlockTokenHelper.append_block_token(old_token)
+        kwargs.update(dict(expire=settings.ACCESS_TOKEN_EXPIRE))
+        # token = kwargs.pop("token", None)
+        # if token:
+        #     BlockTokenHelper.append_block_token(token)
         return cls._encode(**kwargs).decode()
 
     @classmethod
     def gen_refresh_token(cls, **kwargs):
-        kwargs.update({"expire": REFRESH_TOKEN_EXPIRE})
+        kwargs.update({"expire": settings.REFRESH_TOKEN_EXPIRE})
         return cls._encode(**kwargs).decode()
 
     @classmethod
     def identify(cls, token, secret_key=settings.SECRET_KEY, salt=settings.SALT):
         if BlockTokenHelper.is_blocked(token):
-            return [AuthCenterError.E_TOKEN_INVALID, None]
+            raise ApiTokenTimeOutException()
         return cls._decode(token, secret_key, salt)
 
     @classmethod
-    def authenticate(cls, username, password, authHandler):
-        if not callable(authHandler):
-            return [False, None, None]
-        handler_res = authHandler(username, password)
-        if not handler_res:
-            return [False, None, None]
-        user = handler_res.pop("user_data")
-        access_token = cls.gen_access_token(**handler_res)
-        refresh_token = cls.gen_refresh_token(**handler_res)
-        return [True, access_token, refresh_token, user]
+    def authenticate(cls, user):
+        data = {
+            "salt": settings.SALT,
+            "secret_key": settings.SECRET_KEY,
+            "playload": {"id": user.id},
+        }
+        access_token = cls.gen_access_token(**data)
+        refresh_token = cls.gen_refresh_token(**data)
+        return access_token, refresh_token

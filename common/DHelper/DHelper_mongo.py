@@ -11,11 +11,8 @@ import pymongo
 import numpy as np
 import settings
 
-from api.bi.field import enum as field_enum
-
 from common.DHelper.DHelper_base import DHelper_base
-from common.df_exception import NoDataException
-from common.exception import CommonException
+from common.Exceptions import *
 
 
 class DHelper_mongo(DHelper_base):
@@ -43,7 +40,7 @@ class DHelper_mongo(DHelper_base):
     
     def _do_filter(self):
         for filter in self._filter_list:
-            if filter.dtype == field_enum.DTYPE_DATETIME:
+            if filter.dtype == field_consts.DTYPE_DATETIME:
                 start_time, end_time = filter.value_list
                 filter_dict = {}
                 if start_time:
@@ -94,9 +91,9 @@ class DHelper_mongo(DHelper_base):
         self._do_drilldown()
     
     def get_aggfunc(self, pivot):
-        if pivot.func == field_enum.AGGFUNC_MEAN:
+        if pivot.func == field_consts.AGGFUNC_MEAN:
             return {pivot.new_column: {"$avg": pivot.new_column}}
-        elif pivot.func == field_enum.AGGFUNC_COUNT:
+        elif pivot.func == field_consts.AGGFUNC_COUNT:
             return {pivot.new_column: {"$sum": 1}}
         return {}
     
@@ -104,7 +101,7 @@ class DHelper_mongo(DHelper_base):
         SET_INDEX = False
         for pivot in self._pivot_main_list:
             if not pivot.aggable:
-                raise CommonException("NOT IMPLIMENTED NOW!")
+                raise ApiCommonException("NOT IMPLIMENTED NOW!")
             
             if not SET_INDEX:
                 group_dict = {}

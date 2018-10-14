@@ -14,6 +14,7 @@ import tornado.escape
 from tornado import locale, concurrent
 from tornado.web import escape
 import settings
+from common.Helpers.Helper_JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
 from api.consts.const import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
 from api.utils.user import User
@@ -27,11 +28,11 @@ log = getLogger()
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def prepare(self):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        log.debug('{} - {}:[{}]{} start'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
+        log.info(f'{now} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start')
 
     def on_finish(self):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        log.debug('{} - {}:[{}]{} finished'.format(now, self.request.remote_ip, self.request.method, self.request.uri))
+        log.info(f'{now} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished')
 
     def _is_normal_argumnet(self):
         if not hasattr(self, "__normal_argumnet"):
@@ -51,6 +52,11 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         else:
             try:
                 value = self._get_argument_as_dict().get(argument, default)
+                if strip:
+                    try:
+                        value = value.strip()
+                    except:
+                        pass
             except:
                 value = default
             return value
@@ -66,7 +72,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 value = self._get_argument_as_dict().get(argument)
             except:
                 value = []
-            if value is None or value == []:
+            if value is None:
                 return default
             return value
 
@@ -152,6 +158,13 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             self._user = User.select(id=user_id)
         return self._user
 
+    @current_user.setter
+    def current_user(self, user_id=None):
+        if not hasattr(self, '_user'):
+            if user_id is not None:
+                raise ApiNotLoginException()
+            self._user = User.select(id=user_id)
+
     def get_user_locale(self):
         ''''''
         return self.locale
@@ -194,6 +207,26 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         return self._is_ajax
 
     @property
+    def access_token(self):
+        if not hasattr(self, '_access_token'):
+            self._access_token = self.request.headers.get('access_token')
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, token):
+        self._headers.add('access_token', token)
+
+    @property
+    def refresh_token(self):
+        if not hasattr(self, '_refresh_token'):
+            self._refresh_token = self.request.headers.get('refresh_token')
+        return self._refresh_token
+
+    @refresh_token.setter
+    def refresh_token(self, token):
+        self._headers.add('refresh_token', token)
+
+    @property
     def locale(self):
         ''''''
         if not hasattr(self, '_locale'):
@@ -229,13 +262,16 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         return result
 
     @classmethod
-    def ajax_base(cls, aio=False):
+    def ajax_base(cls, login=False, aio=False):
 
         def function(method):
 
             @functools.wraps(method)
             async def wrapper(self, *args, **kwargs):
                 try:
+                    if not login:
+                        playload = AuthCenter.identify(self.access_token)
+                        self.current_user_id = playload.get("user_id")
                     if aio:
                         result = await method(self, *args, **kwargs)
                     else:
@@ -268,10 +304,10 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                                 break
                             self.write(data)
                 except ApiException as e:
-                    self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+                    self.write_json(data=e.data, errcode=e.code, errmsg=e.message)
                 except (Exception, NotImplementedError) as e:
-                    log.exception(repr(e))
-                    self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL, status=None)
+                    log.error(repr(e))
+                    self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL)
                 self.finish()
 
             return wrapper
@@ -285,6 +321,10 @@ class CsrfExceptMixin():
 
 
 class PageNotFoundHandler(BaseHandler):
+    @BaseHandler.ajax_base()
+    def head(self):
+        raise ApiNotFoundException()
+
     @BaseHandler.ajax_base()
     def get(self):
         raise ApiNotFoundException()

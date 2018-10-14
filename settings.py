@@ -7,8 +7,11 @@ OS = 'linux'
 DEBUG = False
 XSRF = '__xsrf'
 DEFAULT_LOCAL = 'zh_CN'
+ACCESS_TOKEN_EXPIRE = 3600
+REFRESH_TOKEN_EXPIRE = 24 * 3600
 SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
 SECRET_KEY = 'd96f097c-4b1b-4867-3859-375830cd69c4'
+SALT = 'cf70538d-46a6-47f7-bc99-51c3e45126ea'
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_PROTOCOL = 'http'
@@ -23,6 +26,7 @@ REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = None
+REDIS_TOKEN_BLOCK_DB = 3
 
 MONGODB_ADDRESS = '127.0.0.1'
 MONGODB_PORT = 27017
@@ -51,6 +55,7 @@ STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
 STATIC_DBBACK_PATH = os.path.join(SITE_ROOT, 'static', 'dbback')
 SPIDER_LOG_PATH = os.path.join(SITE_ROOT, 'model_spider', 'model_spider', 'logs')
 
+INIT_SETTINGS_FILE = os.path.join(SITE_ROOT, "init.yaml")
 
 try:
     from local_settings import *

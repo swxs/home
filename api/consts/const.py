@@ -16,3 +16,7 @@ class HTTP_STATUS(IntEnum):
     AJAX_FAIL_NOT_LOGIN = 3  # 用户未登录
 
     AJAX_FAIL_NOT_FOUND = 4  # 接口不存在
+
+    AJAX_TOKEN_TIMEOUT = 5  # token已过期， 或者用户登出， token被加入黑名单
+
+    AJAX_TOKEN_Illegal = 6  # token非法

@@ -4,8 +4,8 @@
 # @Time    : 2018/8/17 10:04
 
 import os
-from importlib import import_module
 from tornado.web import url
+from importlib import import_module
 import settings
 from api.views import views
 
@@ -29,7 +29,6 @@ def load_urls():
 
 def get_api_urls():
     url_mapping = [
-        url(r"/api/", views.IndexHandler, name='index'),
         url(r"/api/login/", views.LoginHandler, name='login'),
         url(r"/api/logout/", views.LogoutHandler, name='logout'),
     ]

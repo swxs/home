@@ -348,6 +348,17 @@ if __name__ == "__main__":
     8. delete 中的问题：
     1） 删除是表示不可见还是彻底删除？ 正常不是错误数据不太会给予删除操作
     9.√patch方法添加， get_argument方法可能存在问题
+    
+    #  TODO: 添加参数, 允许以不特定参数查找指定的数据
+    #  TODO: 支持分页
+    #  TODO: 支持按请求排序
+    # page = self.get_argument('page', 1)
+    # paged_user_list = Page(
+    #     user_list,
+    #     page=page,
+    #     items_per_page=USER_LIST_PER_PAGE
+    # )
+    # return [user.to_front() for user in paged_user_list]
     """
     local_path = sys.path[0]
     abs_dir = os.path.dirname(local_path)

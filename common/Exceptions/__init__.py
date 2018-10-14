@@ -17,6 +17,10 @@ from common.Exceptions.ApiNotLoginException import ApiNotLoginException
 
 from common.Exceptions.ApiNotFoundException import ApiNotFoundException
 
+from common.Exceptions.ApiTokenTimeOutException import ApiTokenTimeOutException
+
+from common.Exceptions.ApiTokenIllegalException import ApiTokenIllegalException
+
 __all__ = [
     "ApiException",
     #  0
@@ -36,4 +40,8 @@ __all__ = [
     "ApiNotLoginException",
     #  4
     "ApiNotFoundException",
+    #  5
+    "ApiTokenTimeOutException",
+    #  6
+    "ApiTokenIllegalException"
 ]

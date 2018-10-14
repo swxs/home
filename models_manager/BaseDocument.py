@@ -93,18 +93,18 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     @classmethod
     @upgrade
     def create(cls, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{cls.__model_name__}>: kwargs - {str(kwargs)}".encode('utf8'))
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{cls.__model_name__}>: kwargs - {str(kwargs)}")
         return Manager.create(cls, **kwargs)
 
     @classmethod
     @cache
     def select(cls, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{cls.__model_name__}>: kwargs - {str(kwargs)}".encode('utf8'))
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{cls.__model_name__}>: kwargs - {str(kwargs)}")
         return Manager.select(cls, **kwargs)
 
     @classmethod
     def filter(cls, *args, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}".encode('utf8'))
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}")
         return Manager.filter(cls, *args, **kwargs)
 
     @upgrade
@@ -115,15 +115,15 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     kwargs[key] = self.__fields__[key].pre_update()
                 else:
                     kwargs[key] = self.__fields__[key].pre_update
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{self.__model_name__}>: kwargs - {str(kwargs)}".encode('utf8'))
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{self.__model_name__}>: kwargs - {str(kwargs)}")
         return Manager.update(self, **kwargs)
 
     @clear
     def delete(self):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{self.__model_name__}>: kwargs - {str(dict(id=self.id))}".encode('utf8'))
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{self.__model_name__}>: kwargs - {str(dict(id=self.id))}")
         return Manager.delete(self)
 
     @classmethod
     def remove(cls, *args, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [clear] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}".encode('utf8'))
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [clear] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}")
         return Manager.remove(cls, *args, **kwargs)
