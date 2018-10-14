@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "69243ed4961ba2495754b73435c1a05756527cc11f7241a6c2d60168a793212c"
+            "sha256": "5004e67bca15f5f049b3c1cb7c113f300a2d7468bc8311a084b8e742f45d59b4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -509,7 +509,6 @@
                 "sha256:5de7b79b26aee64efe63319bb8f037af88c21287d1502b39706c818065b3d5a4",
                 "sha256:95ae985716e8107816d8d0df249d558dbaabb677987cc2ace45272c166b267e4"
             ],
-            "path": "./whl/Twisted-18.7.0-cp36-cp36m-win_amd64.whl",
             "version": "==18.7.0"
         },
         "urllib3": {

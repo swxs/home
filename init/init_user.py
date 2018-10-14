@@ -10,7 +10,7 @@ import settings
 from api.consts.const import undefined
 from api.utils.user import User
 
-def init_trade():
+def init_user():
     with open(settings.INIT_SETTINGS_FILE, "rb") as file:
         user_list = yaml.load(file).get("user")
 
@@ -24,5 +24,5 @@ def init_trade():
 
 
 if __name__ == "__main__":
-    fire.Fire(init_trade)
-    print("----------trade初始化完成----------")
+    fire.Fire(init_user)
+    print("----------user初始化完成----------")
