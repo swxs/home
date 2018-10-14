@@ -49,7 +49,6 @@ class AuthCenter(object):
             raise ApiTokenIllegalException()
         except Exception as e:
             log.error(f"unknow error: {e}")
-            pass
             raise ApiTokenIllegalException()
 
     @classmethod

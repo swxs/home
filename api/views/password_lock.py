@@ -16,7 +16,7 @@ class PasswordLockHandler(BaseHandler):
             password_lock = PasswordLock.select(id=password_lock_id)
             return password_lock.to_front()
         else:
-            password_lock_list = PasswordLock.filter()
+            password_lock_list = PasswordLock.filter(user_id=self.current_user_id)
             return [password_lock.to_front() for password_lock in password_lock_list]
 
     @BaseHandler.ajax_base()

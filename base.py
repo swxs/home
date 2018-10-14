@@ -271,7 +271,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 try:
                     if not login:
                         playload = AuthCenter.identify(self.access_token)
-                        self.current_user_id = playload.get("user_id")
+                        self.current_user_id = playload.get("id")
                     if aio:
                         result = await method(self, *args, **kwargs)
                     else:
