@@ -24,7 +24,7 @@ class PasswordLockHandler(BaseHandler):
         name = self.get_argument('name', None)
         key = self.get_argument('key', None)
         website = self.get_argument('website', None)
-        user_id = self.get_argument('user_id', None)
+        user_id = self.get_argument('user_id', self.current_user_id)
         password_lock = PasswordLock.create(name=name, key=key, website=website, user_id=user_id)
         return password_lock.to_front()
 
