@@ -23,3 +23,8 @@ class Encryption():
                 password = password[password_begin].upper() + password[password_begin + 1: password_begin + 12]
                 break
         return password
+
+    @classmethod
+    def get_verify_code(cls, *args, comp_salt):
+        args_str = ''.join([str(x) for x in (args + (comp_salt,))])
+        return hashlib.md5(args_str.encode('utf-8')).hexdigest()

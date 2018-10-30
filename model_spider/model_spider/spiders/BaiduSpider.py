@@ -45,7 +45,7 @@ class BaiduSpider(scrapy.Spider):
 
     def get_more_url_parser(self, response):
         sel = Selector(text=response.body)
-        url = u'http://tieba.baidu.com{0}'.format(sel.re("\"([^\"]+tab=favorite)\"")[0].replace("&amp;", "&"))
+        url = 'http://tieba.baidu.com{0}'.format(sel.re("\"([^\"]+tab=favorite)\"")[0].replace("&amp;", "&"))
         yield Request(url,
                       method="GET",
                       headers=BaiduSpider.headers,
@@ -57,7 +57,7 @@ class BaiduSpider(scrapy.Spider):
         sel = Selector(text=response.body)
         kw_url_list = sel.re("kw.+?\">")
         for kw_url in kw_url_list:
-            url = u'{0}{1}'.format(response.meta.get('url'), kw_url[:-2])
+            url = '{0}{1}'.format(response.meta.get('url'), kw_url[:-2])
             yield Request(url,
                           method="GET",
                           headers=BaiduSpider.headers,
@@ -66,11 +66,11 @@ class BaiduSpider(scrapy.Spider):
 
     def get_sign_url_parser(self, response):
         sel = Selector(text=response.body)
-        sign_list = sel.re(u'mo\\/.+?\\">签到')
+        sign_list = sel.re('mo\\/.+?\\">签到')
         if len(sign_list) == 0:
             yield
         else:
-            url = u'http://tieba.baidu.com/{0}'.format(sign_list[0][:-4].replace("&amp;", "&"))
+            url = 'http://tieba.baidu.com/{0}'.format(sign_list[0][:-4].replace("&amp;", "&"))
             yield Request(url,
                           method="GET",
                           headers=BaiduSpider.headers,

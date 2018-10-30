@@ -216,6 +216,8 @@ class Page(list):
                 self.item_count = self.collection.count()
             except TypeError:
                 self.item_count = len(self.collection)
+            except:
+                self.item_count = len(self.collection)
         
         # Compute the number of the first and last available page
         if self.item_count > 0:
@@ -542,7 +544,7 @@ def make_html_tag(tag, text=None, **params):
     params_string = ''
 
     # Parameters are passed. Turn the dict into a string like "a=1 b=2 c=3" string.
-    for key, value in params.items():
+    for key, value in list(params.items()):
         # Strip off a leading underscore from the attribute's key to allow attributes like '_class'
         # to be used as a CSS class specification instead of the reserved Python keyword 'class'.
         key = key.lstrip('_')

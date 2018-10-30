@@ -1,21 +1,17 @@
-# encoding=utf8
+import logging
+import logging.config
+import os
 
-import log4py
-import settings
+script_path = os.path.dirname(os.path.abspath(__file__))
+
+logging.config.fileConfig(os.path.join(script_path, 'logging.conf'))
+logging.getLogger('asyncio').setLevel(logging.WARNING)
 
 
-def getLogger(name=''):
-    log = log4py.Logger().get_instance(name)
-    return log
-
-
-def getRedisLogger(name=''):
-    '''将log推入redis队列等待邮件发送'''
-    log = log4py.Logger().get_instance(name)
-    log.add_target(log4py.TARGET_REDIS_LIST,
-                   settings.REDIS_HOST,
-                   settings.REDIS_PORT,
-                   settings.REDIS_DB,
-                   settings.REDIS_PASSWORD,
-                   settings.REDIS_LOG_MAIL_LIST_NAME)
-    return log
+def getLogger(name=None, console=False):
+    BASE = "root" if console else "main"
+    if name:
+        logger = logging.getLogger(f"{BASE}.{name}")
+    else:
+        logger = logging.getLogger(BASE)
+    return logger

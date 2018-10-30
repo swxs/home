@@ -1,5 +1,7 @@
 # ignore
 api/auto/
+logs/
+data_file/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,86 @@
+{
+  "name": "movie",
+  "enum": [],
+  "setting": [
+    {
+      "name": "name",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false
+      }
+    },
+    {
+      "name": "nickname",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false
+      }
+    },
+    {
+      "name": "year",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false
+      }
+    },
+    {
+      "name": "type_id",
+      "type": "String",
+      "parmas": {
+        "max_length": "24"
+      },
+      "setting": {
+        "editable": true,
+        "indexes": false
+      }
+    },
+    {
+      "name": "tag_id_list",
+      "type": "List",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false
+      }
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "parmas": {},
+      "setting": {
+        "editable": true,
+        "indexes": false
+      }
+    },
+    {
+      "name": "created",
+      "type": "DateTime",
+      "parmas": {
+        "default": "datetime.datetime.now"
+      },
+      "setting": {
+        "editable": false,
+        "indexes": false,
+        "pre_update": ""
+      }
+    },
+    {
+      "name": "updated",
+      "type": "DateTime",
+      "parmas": {
+        "default": "datetime.datetime.now"
+      },
+      "setting": {
+        "editable": false,
+        "indexes": false,
+        "pre_update": "datetime.datetime.now"
+      }
+    }
+  ]
+}

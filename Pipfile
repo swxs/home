@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+
+[packages]
+tornado = "*"
+redis = "*"
+mongoengine = "*"
+requests = "*"
+python-memcached = "*"
+decorator = "*"
+qrcode = "*"
+pandas = "*"
+aiofiles = "*"
+rsa = "*"
+requests-toolbelt = "*"
+scrapy = "*"
+itsdangerous = "*"
+fire = "*"
+pyyaml = "*"
+
+[requires]
+python_version = "3.6"

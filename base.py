@@ -1,64 +1,77 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 import uuid
 import binascii
 import datetime
 import functools
 import traceback
-from pycket.session import SessionMixin
+from urllib.parse import quote
+
 import tornado.web
 import tornado.escape
-from tornado import locale
+from tornado import locale, concurrent
 from tornado.web import escape
-import const
 import settings
-import api.user.utils as user_utils
-from common.Utils.validate import Validate
-from common.Exceptions.CommonException import CommonException
-from common.Exceptions.ExistException import ExistException
-from common.Exceptions.NotExistException import NotExistException
-from common.Exceptions.NotLoginException import NotLoginException
-from common.Exceptions.PermException import PermException
-from common.Exceptions.ValidateException import ValidateException
-from common.Exceptions.LackOfFieldException import LackOfFieldException
-from common.Exceptions.DeleteInhibitException import DeleteInhibitException
+from common.Helpers.Helper_JWT import AuthCenter
+from common.Utils.pycket.session import SessionMixin
+from api.consts.const import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
+from api.utils.user import User
+from common.Exceptions import *
+from common.Utils.validate import Validate, RegType
+from common.Utils.log_utils import getLogger
+
+log = getLogger()
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def prepare(self):
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print '{} - {}:{} start'.format(now, self.request.remote_ip, self.request.uri)
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        log.info(f'{now} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start')
 
     def on_finish(self):
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print '{} - {}:{} finished'.format(now, self.request.remote_ip, self.request.uri)
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        log.info(f'{now} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished')
+
+    def _is_normal_argumnet(self):
+        if not hasattr(self, "__normal_argumnet"):
+            self.__normal_argumnet = (self.request.method.upper() in (HTTP_METHOD_GET, HTTP_METHOD_DELETE)
+                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
+                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE))
+        return self.__normal_argumnet
+
+    def _get_argument_as_dict(self):
+        if not hasattr(self, "__dict_args"):
+            self.__dict_args = json.loads(self.request.body)
+        return self.__dict_args
 
     def get_argument(self, argument, default=None, strip=True):
-        if self.request.method == "GET" or Validate.has(str(self.request.headers), reg_type="json_header"):
+        if self._is_normal_argumnet():
             return super(BaseHandler, self).get_argument(argument, default=default, strip=strip)
         else:
             try:
-                arguments = json.loads(self.request.body)
-                value = arguments.get(argument)
+                value = self._get_argument_as_dict().get(argument, default)
+                if strip:
+                    try:
+                        value = value.strip()
+                    except:
+                        pass
             except:
-                value = None
-            if value is None:
-                return default
+                value = default
             return value
 
     def get_arguments(self, argument, default=None, strip=True):
-        if self.request.method == "GET" or Validate.has(str(self.request.headers), reg_type="json_header"):
+        if self._is_normal_argumnet():
             value = super(BaseHandler, self).get_arguments(argument, strip=True)
             if value == []:
                 return default
             return value
         else:
             try:
-                arguments = json.loads(self.request.body)
-                value = arguments.get(argument)
+                value = self._get_argument_as_dict().get(argument)
             except:
-                value = None
+                value = []
             if value is None:
                 return default
             return value
@@ -79,6 +92,22 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if errmsg:
             dic['errmsg'] = errmsg
         self.write(json.dumps(dic))
+
+    def _handle_request_exception(self, e):
+        if isinstance(e, ApiReturnException):
+            self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
+            self.finish()
+        elif isinstance(e, ApiException):
+            self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+            self.finish()
+        else:
+            try:
+                log.error(traceback.format_exc()).split('\n')
+            except ApiNotLoginException as e:
+                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+                self.finish()
+            else:
+                super(BaseHandler, self)._handle_request_exception(e)
 
     def write_error(self, status_code, **kwargs):
         if settings.DEBUG:
@@ -125,9 +154,16 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if not hasattr(self, '_user'):
             user_id = self.session.get('user_id')
             if user_id is None:
-                raise NotLoginException()
-            self._user = user_utils.get_user_by_user_id(user_id=user_id)
+                raise ApiNotLoginException()
+            self._user = User.select(id=user_id)
         return self._user
+
+    @current_user.setter
+    def current_user(self, user_id=None):
+        if not hasattr(self, '_user'):
+            if user_id is not None:
+                raise ApiNotLoginException()
+            self._user = User.select(id=user_id)
 
     def get_user_locale(self):
         ''''''
@@ -167,60 +203,144 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def is_ajax(self):
         ''''''
         if not hasattr(self, '_is_ajax'):
-            if self.request.headers.get('X-Requested-With'):
-                self._is_ajax = True
-            else:
-                self._is_ajax = False
+            self._is_ajax = self.request.headers.get('X-Requested-With')
         return self._is_ajax
+
+    @property
+    def access_token(self):
+        if not hasattr(self, '_access_token'):
+            self._access_token = self.request.headers.get('access_token')
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, token):
+        self._headers.add('access_token', token)
+
+    @property
+    def refresh_token(self):
+        if not hasattr(self, '_refresh_token'):
+            self._refresh_token = self.request.headers.get('refresh_token')
+        return self._refresh_token
+
+    @refresh_token.setter
+    def refresh_token(self, token):
+        self._headers.add('refresh_token', token)
 
     @property
     def locale(self):
         ''''''
         if not hasattr(self, '_locale'):
-            local_code = self.get_cookie('locale')
-            if not local_code:
-                local_code = "zh_CN"
-                self.set_cookie('local', local_code)
+            local_code = self.get_cookie('locale', default=settings.DEFAULT_LOCAL)
+            self.set_cookie('locale', local_code, expires_days=30)
             self._locale = locale.get(local_code)
         return self._locale
 
-    @classmethod
-    def ajax_base(cls, method):
-        @functools.wraps(method)
-        def wrapper(self, *args, **kwargs):
-            ''''''
-            try:
-                data = method(self, *args, **kwargs)
-                self.write_json(data=data, errcode=const.AJAX_SUCCESS, errmsg=None, status=None)
-            except CommonException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except ValidateException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except ExistException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except NotExistException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except PermException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except NotLoginException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except LackOfFieldException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except DeleteInhibitException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
-            except Exception as e:
-                from common.Utils.log_utils import getLogger
-                import traceback
-                log = getLogger()
-                log.error(e)
-                self.write_json(data=None,
-                                errcode=const.AJAX_FAIL_NORMAL,
-                                errmsg=u"未定义异常",
-                                status=None)
+    @locale.setter
+    def locale(self, local_code):
+        self.set_cookie('locale', local_code)
+        self._locale = locale.get(local_code)
 
-        return wrapper
+    def _do_filter(self, result, filter):
+        if len(filter) == 1:
+            if filter[0] in result:
+                result.pop(filter[0])
+            return result
+        else:
+            checked = result.get(filter[0])
+            if isinstance(checked, dict):
+                result[filter[0]] = self._do_filter(checked, filter[1:])
+            elif isinstance(checked, list):
+                result[filter[0]] = [self._do_filter(new_result, filter[1:]) for new_result in checked]
+            return result
+
+    def _filter_result(self, result):
+        if isinstance(result, dict):
+            filters = self.get_query_argument("filters", "").split("|")
+            for filter in filters:
+                f = filter.split(".")
+                result = self._do_filter(result, f)
+        return result
+
+    @classmethod
+    def ajax_base(cls, login=False, aio=False):
+
+        def function(method):
+
+            @functools.wraps(method)
+            async def wrapper(self, *args, **kwargs):
+                try:
+                    if not login:
+                        playload = AuthCenter.identify(self.access_token)
+                        self.current_user_id = playload.get("id")
+                    if aio:
+                        result = await method(self, *args, **kwargs)
+                    else:
+                        result = method(self, *args, **kwargs)
+                    if isinstance(result, concurrent.Future):
+                        return result
+                    else:
+                        self.write_json(data=result, errcode=HTTP_STATUS.AJAX_SUCCESS)
+                except ApiNotFoundException as e:
+                    self.write_json(data=e.data, errcode=e.code)
+                except ApiReturnException as e:
+                    self.write_json(data=e.data, errcode=e.code)
+                except ApiRedirectException as e:
+                    return self.redirect(e.url)
+                except ApiReturnFilePathException as e:
+                    self.write_json(data=e.data, errcode=e.code)
+                except ApiReturnFileException as e:
+                    path, filename = os.path.split(e.filepath)
+                    export_filename = f"filename={quote(filename)}"
+                    name, ext = os.path.splitext(filename)
+                    if ext in [".xlsx" ".xls"]:
+                        self.set_header("Content-Type", "application/vnd.ms-excel")
+                    self.set_header("Content-Type", "application/force-download")
+                    self.set_header("Content-Disposition", f"attachment; {export_filename}")
+                    with open(e.filepath, 'rb') as f:
+                        buf_size = 4096
+                        while 1:
+                            data = f.read(buf_size)
+                            if not data:
+                                break
+                            self.write(data)
+                except ApiException as e:
+                    self.write_json(data=e.data, errcode=e.code, errmsg=e.message)
+                except (Exception, NotImplementedError) as e:
+                    log.error(repr(e))
+                    self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL)
+                self.finish()
+
+            return wrapper
+
+        return function
 
 
 class CsrfExceptMixin():
     def check_xsrf_cookie(self):
         return True
+
+
+class PageNotFoundHandler(BaseHandler):
+    @BaseHandler.ajax_base()
+    def head(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def get(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def post(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def put(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def patch(self):
+        raise ApiNotFoundException()
+
+    @BaseHandler.ajax_base()
+    def delete(self):
+        raise ApiNotFoundException()

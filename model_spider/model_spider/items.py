@@ -7,10 +7,12 @@
 
 from scrapy import Item, Field
 
+
 class ModelSpiderItem(Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
 
 class ArticalItem(Item):
     source = Field()

@@ -1,40 +1,44 @@
 # -*- coding: utf-8 -*-
 
 import os
+from common.Utils.dir_path import get_dir_path
 
 OS = 'linux'
 DEBUG = False
-DB_TRIGGER_FLAG = False
+XSRF = '__xsrf'
+DEFAULT_LOCAL = 'zh_CN'
+ACCESS_TOKEN_EXPIRE = 3600
+REFRESH_TOKEN_EXPIRE = 24 * 3600
+SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
 SECRET_KEY = 'd96f097c-4b1b-4867-3859-375830cd69c4'
+SALT = 'cf70538d-46a6-47f7-bc99-51c3e45126ea'
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_PROTOCOL = 'http'
 SITE_DOMAIN = '127.0.0.1'
 SITE_PORT = 8088
-SITE_URL = '{0}://{1}:{2}'.format(SITE_PROTOCOL, SITE_DOMAIN, SITE_PORT)
 
-STATIC_PATH = os.path.join(SITE_ROOT, 'static')
-STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
-TEMPLATE_PATH = os.path.join(SITE_ROOT, 'template')
-
-MONGODB_ADDRESS = '127.0.0.1'
-MONGODB_PORT = 27017
-MONGODB_DBNAME = 'home'
-
-MEMCACHE_SERVER = '127.0.0.1'
+MEMCACHE_HOST = '127.0.0.1'
 MEMCACHE_PORT = 11211
 MEMCACHE_EXPIRE_TIME = 120
-MEMCACHE_HOSTS = ('{0}:{1}'.format(MEMCACHE_SERVER, MEMCACHE_PORT),)
 
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = None
-REDIS_LOG_MAIL_LIST_NAME = []
+REDIS_TOKEN_BLOCK_DB = 3
 
-XSRF = '__xsrf'
+MONGODB_ADDRESS = '127.0.0.1'
+MONGODB_PORT = 27017
+MONGODB_DBNAME = 'home'
+MONGODB_USERNAME = None
+MONGODB_PASSWORD = None
+MONGODB_AUTHDB = None
 
-SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
+MAIL_SERVER_IP = ""
+MAIL_SERVER_USER = ""
+MAIL_SERVER_USER_MAIL = ""
+MAIL_SENDER_NAME = ""
 
 WECHAT_ACCESS_TOKEN_URL = ""
 WECHAT_REFRESH_ACCESS_TOKEN_URL = ""
@@ -42,22 +46,28 @@ WECHAT_USERINFO_URL = ""
 WECHAT_APPID = ""
 WECHAT_SECRET = ""
 
-MAIL_SERVER_IP = ""
-MAIL_SERVER_USER = ""
-MAIL_SERVER_USER_MAIL = ""
-MAIL_SENDER_NAME = ""
+LOG_PATH = get_dir_path(SITE_ROOT, 'logs')
+STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
+TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
+DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
+TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
+STATIC_ZIPFILE_PATH = os.path.join(SITE_ROOT, 'static', 'zipfile')
+STATIC_DBBACK_PATH = os.path.join(SITE_ROOT, 'static', 'dbback')
+SPIDER_LOG_PATH = os.path.join(SITE_ROOT, 'model_spider', 'model_spider', 'logs')
+
+INIT_SETTINGS_FILE = os.path.join(SITE_ROOT, "init.yaml")
 
 try:
     from local_settings import *
 except:
-    print 'load local settings faild.'
+    print('load local settings faild.')
 
 if SITE_PORT == 80:
-    SITE_URL = '%s://%s' % (SITE_PROTOCOL, SITE_DOMAIN)
+    SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}'
 else:
-    SITE_URL = '%s://%s:%s' % (SITE_PROTOCOL, SITE_DOMAIN, SITE_PORT)
+    SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}:{SITE_PORT}'
+MEMCACHE_HOSTS = (f'{MEMCACHE_HOST}:{MEMCACHE_PORT}',)
 
-# connect to mongodb
 DB_CONNECTED = False
 
 
@@ -69,22 +79,18 @@ def connect_db(db_name=MONGODB_DBNAME):
 
 
 connect_db()
-if DB_TRIGGER_FLAG:
-    from db.model_modify_trigger import bind_signals
-
-    bind_signals()
 
 settings = dict(
     cookie_secret=SECRET_KEY,
     login_url="/login/",
     template_path=TEMPLATE_PATH,
     static_path=STATIC_PATH,
-    root_path=os.path.join(SITE_ROOT),
+    root_path=SITE_ROOT,
     xsrf_cookies=False,
     autoescape="xhtml_escape",
     debug=DEBUG,
     xheaders=True,
-    translations=os.path.join(SITE_ROOT, "translations"),
+    translations=TRANSLATIONS_PATH,
     # static_url_prefix='', #启用CDN后可修改此定义, 例如: "http://cdn.abc.com/static/"
     pycket={
         'engine': 'memcached',
