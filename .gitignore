@@ -2,6 +2,7 @@
 api/auto/
 logs/
 data_file/
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

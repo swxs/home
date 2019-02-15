@@ -1,81 +1,136 @@
 # -*- coding: utf-8 -*-
 
+import json
 import os
 import sys
-import json
 import shutil
+import textwrap
+import copy
+from functools import lru_cache
+from collections import OrderedDict
+from typing import *
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.abspath(os.curdir))
 
+ALL_MODEL = [
+
+]
+
+
+def run():
+    local_path = sys.path[0]
+    abs_dir = os.path.dirname(local_path)
+    base_path = os.path.join(abs_dir, "api", "auto")
+    if os.path.isdir(base_path):
+        shutil.rmtree(base_path)
+
+    os.mkdir(base_path)
+
+    for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
+        for file in files:
+            if not (ALL_MODEL is not None and file not in ALL_MODEL):
+                marker = Marker(str(file))
+                marker.save()
+
+
+def _get_data_from_model_file(filename: str) -> Any:
+    path = os.path.join(sys.path[0], "block", filename)
+    with open(path, "r") as f:
+        data = json.load(f)
+        f.close()
+    return data
+
 
 class Marker:
-    def __init__(self, model_setting_filename):
-        if self._get_setting(model_setting_filename):
-            self.filename_list = ["consts", "models", "utils", "views", "urls"]
+    def __init__(self, model_setting_filename: str):
+        self.info_dict = self._get_settings(model_setting_filename)
+        self.model_name = self.info_dict.get("model_name", None)
+        self.parent_name_list = self.info_dict.get("parent_name_list", [])
+        self.model_enums_list = self.info_dict.get("model_enums_list", [])
+        self.field_dict = self.info_dict.get("field_dict", {})
+        self.info = self.info_dict.get('info', {})
 
-            print(("=" * 40))
+        self.all_field_dict = self._get_all_field_dict()
+
+        self.consts = ""
+        self.models = ""
+        self.utils = ""
+        self.views = ""
+        self.urls = ""
+        self.docs = ""
+
+    def save(self) -> None:
+        if self.model_name:
+            self.filename_list = [
+                "consts.py",
+                "models.py",
+                "utils.py",
+                "views.py",
+                "urls.py",
+                "docs.md"
+            ]
+
+            print("=" * 40)
             self.consts = self._init_consts()
-            print((self.consts))
+            print(self.consts)
 
-            print(("=" * 40))
+            print("-" * 40)
             self.models = self._init_models()
-            print((self.models))
+            print(self.models)
 
-            print(("-" * 40))
+            print("-" * 40)
             self.utils = self._init_utils()
-            print((self.utils))
+            print(self.utils)
 
-            print(("-" * 40))
+            print("-" * 40)
             self.views = self._init_views()
-            print((self.views))
+            print(self.views)
 
-            print(("-" * 40))
+            print("-" * 40)
             self.urls = self._init_urls()
-            print((self.urls))
+            print(self.urls)
+
+            print("-" * 40)
+            self.docs = self._init_docs()
+            print(self.docs)
 
             self._init_folder_and_file()
 
-    def _get_setting(self, model_setting_filename):
-        path = os.path.join(sys.path[0], "block", model_setting_filename)
-        with open(path, "r") as f:
-            data = json.load(f)
-            f.close()
+    def _get_settings(self, model_setting_filename: str) -> Dict[str, Any]:
+        data = _get_data_from_model_file(model_setting_filename)
 
-        self.model_name = self.pathname = data.get('name', None)
-        if self.model_name is None:
-            return False
-
-        self.model_title = self._get_title(self.model_name)
-        self.model_upper = self._get_upper(self.model_name)
-
-        self.model_enums_list = data.get('enum', [])
-        self.model_field_name_list = [field['name']
-                                      for field in data.get('setting', [])
-                                      if field.get('name') is not None]
-        self.model_field_dict = {field.get('name'): field for field in data.get('setting', [])}
-        self.utils_field_dict = {field.get('name'): field for field in data.get('setting', [])}
-
-        self.editable_field_list = []
-        self.indexes_field_list = []
-        for field_name in self.model_field_name_list:
-            if self.model_field_dict[field_name]['setting'].get('editable', True):
-                self.editable_field_list.append(field_name)
-            if self.model_field_dict[field_name]['setting'].get('indexes', True):
-                self.indexes_field_list.append(field_name)
-
-        if len(self.editable_field_list) > 0:
-            self.has_editable_selected = ", "
+        name_list = data.get('name', None).split(".")
+        if name_list[-1] == "":
+            model_name = None
+            parent_name_list = []
         else:
-            self.has_editable_selected = ""
+            model_name = name_list[-1]
+            parent_name_list = name_list[0:-1]
 
-        self.editable_select_parmas = ", ".join(["{0}=undefined".format(field_name) for field_name in self.editable_field_list])
-        self.editable_selected_parmas = ", ".join(["{0}={0}".format(field_name) for field_name in self.editable_field_list])
-        self.editable_attrs = ", ".join(["'{0}'".format(field_name) for field_name in self.editable_field_list])
+        info = data.get('info', {})
+        model_enums_list = data.get('enum', [])
+        field_dict = {
+            field.get('name'): field
+            for field in data.get('settings', [])
+            if field.get('name') is not None
+        }
+        return {
+            "model_name": model_name,
+            "parent_name_list": parent_name_list,
+            "model_enums_list": model_enums_list,
+            "field_dict": field_dict,
+            "info": info
+        }
 
-        return True
+    def _get_all_field_dict(self) -> Dict[str, Any]:
+        info_dict_list = [self._get_settings(f"{name}.json") for name in self.parent_name_list]
+        all_field_dict = copy.deepcopy(self.field_dict)
+        [all_field_dict.update(info_dict.get('field_dict')) for info_dict in info_dict_list]
+        return all_field_dict
 
-    def _get_title(self, name):
+    @lru_cache()
+    def _get_title(self, name: str) -> str:
         """
         驼峰表示: field_name=>FieldName
         :param name: 
@@ -90,7 +145,8 @@ class Marker:
         else:
             return name.title()
 
-    def _get_upper(self, name):
+    @lru_cache()
+    def _get_upper(self, name: str) -> str:
         """
         大写表示：field_name=>FIELDNAME
         :param name: 
@@ -105,11 +161,57 @@ class Marker:
         else:
             return name.upper()
 
-    def _get_module_type(self, field):
+    def _get_module_type(self, field: Dict[str, Any]) -> str:
         return field.get("type")
 
-    def _get_parmas(self, field):
-        return ", ".join(["{0}={1}".format(key, value) for key, value in field.get('parmas', {}).items()])
+    def _get_editable_field_name_list(self, field_dict: Dict[str, Dict[str, Any]]) -> List[str]:
+        return [
+            field_name
+            for field_name, field in field_dict.items()
+            if field.get("settings", {}).get("editable", True)
+        ]
+
+    def _get_index_field_name_list(self, field_dict: Dict[str, Dict[str, Any]]) -> List[str]:
+        return [
+            field_name
+            for field_name, field in field_dict.items()
+            if field.get("settings", {}).get("indexes", False)
+        ]
+
+    def _get_list_type_field_name_list(self, field_dict: Dict[str, Dict[str, Any]]) -> List[str]:
+        return [
+            field_name
+            for field_name, field in field_dict.items()
+            if field.get("type") == "List"
+        ]
+
+    def _get_params(self, field: Dict[str, Any]) -> str:
+        """
+        设置字段model的参数列表
+        :param field:
+        :return:
+        """
+        return ", ".join(
+            [
+                "{0}={1}".format(key, value)
+                for key, value in field.get('params', {}).items()
+            ]
+        )
+
+    def _get_has_editable_selected(self, field_name_list: List[str]) -> str:
+        return ", " if len(field_name_list) > 0 else ""
+
+    def _concat_field_name_undefined_with_comma(self, field_name_list: List[str]) -> str:
+        return ", ".join(f"{field_name}=undefined" for field_name in field_name_list)
+
+    def _concat_field_selected_name_with_comma(self, field_name_list: List[str]) -> str:
+        return ", ".join(f"{field_name}={field_name}" for field_name in field_name_list)
+
+    def _concat_field_readable_name_with_comma(self, field_name_list: List[str]) -> str:
+        return ", ".join(f"'{field_name}'" for field_name in field_name_list)
+
+    def _concat_field_name_with_comma(self, field_name_list: List[str]) -> str:
+        return ", ".join(field_name_list)
 
     def _init_folder_and_file(self):
         local_path = sys.path[0]
@@ -120,149 +222,157 @@ class Marker:
             os.mkdir(self.abs_pathname)
 
         for filename in self.filename_list:
-            path = os.path.join(self.abs_pathname, filename)
+            file_name, file_type = os.path.splitext(filename)
+            path = os.path.join(self.abs_pathname, file_name)
             if not os.path.isdir(path):
                 os.mkdir(path)
-            self._create_file(filename)
+            self._create_file(file_name, file_type)
 
-    def _create_file(self, filename):
-        with open(os.path.join(self.abs_pathname, filename, f"{self.model_name}.py"), "w") as f:
-            f.write(self.__dict__[filename])
+    def _create_file(self, file_name, file_type):
+        with open(os.path.join(self.abs_pathname, file_name, f"{self.model_name}{file_type}"), "w", encoding="utf8") as f:
+            f.write(self.__dict__[file_name])
             f.close()
 
     def _init_enums_string(self):
-        str = ""
+        _str = ""
         if self.model_enums_list:
             for enum_setting in self.model_enums_list:
                 enum_key = ""
                 enum_key_value = ""
                 for choice in enum_setting["choices"]:
-                    enum_key += """{0} = {1}
-""".format(choice["name"], choice["value"])
-                    enum_key_value += """    ({0}, u'{1}'),
-""".format(choice["name"], choice["disname"])
+                    choice_name = choice["name"]
+                    choice_value = choice["value"]
+                    choice_dispname = choice["disname"]
+                    enum_key += """\
+{choice_name} = {choice_value}
+"""
+                    enum_key_value += f"""\
+    ({choice_name}, '{choice_dispname}'),
+"""
 
-                str += """
+                _str += f"""\
 {enum_key}
-{enum_name} = [
+{enum_setting["name"]} = [
 {enum_key_value}
 ]
-""".format(enum_key=enum_key,
-           enum_name=enum_setting["name"],
-           enum_key_value=enum_key_value)
-        return str
+"""
+        return _str
 
     def _init_consts(self):
         enum_content = self._init_enums_string()
-        str = f"""\
+        _str = f"""\
 # -*- coding: utf-8 -*-
+
 {enum_content}
 """
-        return str
+        return _str
 
     def _init_model_string(self):
         model_string = ""
-        for field_name in self.model_field_name_list:
-            name = self.model_field_dict[field_name].get('name')
-            model_type = self.model_field_dict[field_name].get('type')
-            model_parmas = self._get_parmas(self.model_field_dict[field_name])
-            model_string += f"""
-    {name} = models.{model_type}Field({model_parmas})"""
+        for field_name, field in self.field_dict.items():
+            field_name = field.get('name')
+            field_type = field.get('type')
+            field_params = self._get_params(field)
+            model_string += f"""\
+    {field_name} = models.{field_type}Field({field_params})
+"""
         return model_string
 
     def _init_model_index_string(self):
-        if self.indexes_field_list != []:
-            str = """
+        _str = ""
+        indexes_list = self._get_index_field_name_list(self.field_dict)
+        if indexes_list:
+            _str += f"""\
     meta = {{
         'indexes': [{indexes_list}]
-    }}
-""".format(indexes_list=", ".join(["'{0}'".format(field_name) for field_name in self.indexes_field_list]))
+    }}\
+"""
         else:
-            str = ""
-        return str
+            _str += ""
+        return _str
 
     def _init_models(self):
-        model_name = self.model_name
-        model_title = self.model_title
-        model_content = self._init_model_string()
-        model_indexes = self._init_model_index_string()
-        str = f"""\
+        _str = f"""\
 # -*- coding: utf-8 -*-
 
 import datetime
 import mongoengine as models
-from api.consts.{model_name} import *
+from common.Utils.log_utils import getLogger
 
-class {model_title}(models.Document):{model_content}
-{model_indexes}
+log = getLogger("models/{self.model_name}")
+
+
+class {self._get_title(self.model_name)}(models.Document):
+{self._init_model_string()}
+{self._init_model_index_string()}
 """
-        return str
+        return _str
 
     def _init_utils_string(self):
         utils_string = ""
-        for field_name in self.model_field_name_list:
-            name = self.model_field_dict[field_name].get('name')
-            utils_type = self.utils_field_dict[field_name].get('type')
-            model_parmas = self._get_parmas(self.model_field_dict[field_name])
-            utils_string += f"""
-    {name} = models_fields.{utils_type}Field({model_parmas})"""
+        for field_name, field in self.field_dict.items():
+            field_type = field.get('type')
+            field_param = self._get_params(field)
+            utils_string += f"""\
+    {field_name} = models_fields.{field_type}Field({field_param})
+"""
         return utils_string
 
     def _init_utils(self):
-        model_name = self.model_name
-        model_title = self.model_title
-        utils_content = self._init_utils_string()
-
-        str = f"""\
+        _str = f"""\
 # -*- coding: utf-8 -*-
         
 import datetime
 import models_fields
-from api.consts.{model_name} import *
-from models_manager.BaseDocument import BaseDocument
+from BaseDocument import BaseDocument
+from common.Utils.log_utils import getLogger
+
+log = getLogger("utils/{self.model_name}")
 
 
-class {model_title}(BaseDocument):{utils_content}
-
+class {self._get_title(self.model_name)}(BaseDocument):
+{self._init_utils_string()}
     def __init__(self, **kwargs):
-        super({model_title}, self).__init__(**kwargs)
+        super({self._get_title(self.model_name)}, self).__init__(**kwargs)
 """
-        return str
+        return _str
 
-    def _init_get_argumnet_type(self, field_name):
-        return "get_argument" if self.model_field_dict[field_name].get('type') != "List" else "get_arguments"
+    def _get_argument_type(self, field_name, list_field_list):
+        return "get_argument" if field_name in list_field_list else "get_arguments"
 
     def _init_get_arguments(self, default=None):
-        str = ""
-        for field_name in self.editable_field_list:
-            name = self.model_field_dict[field_name].get('name')
-            get_argument = self._init_get_argumnet_type(field_name)
-            str += f"""
-        {name} = self.{get_argument}('{name}', {default})"""
-        return str
+        _str = ""
+        for field_name in self._get_editable_field_name_list(self.all_field_dict):
+            field = self.all_field_dict[field_name]
+            field_name = field.get('name')
+            argument_type = self._get_argument_type(field_name, self._get_list_type_field_name_list(self.all_field_dict))
+
+            _str += f"""\
+        {field_name} = self.{argument_type}('{field_name}', {default})
+"""
+        return _str
 
     def _init_views(self):
         model_name = self.model_name
-        model_title = self.model_title
+        model_title = self._get_title(self.model_name)
         model_id = f"{model_name}_id"
         get_arguments = self._init_get_arguments(default="None")
         get_arguments_default = self._init_get_arguments(default="undefined")
-        has_editable_selected = self.has_editable_selected
-        editable_selected_parmas = self.editable_selected_parmas
+        editable_selected_params = self._concat_field_selected_name_with_comma(self._get_editable_field_name_list(self.all_field_dict))
+        version = self.info.get('version', 1)
 
-        str = f"""\
+        _str = f"""\
 # -*- coding: utf-8 -*-
 
 from base import BaseHandler
 from api.consts.const import undefined
 from api.utils.{model_name} import {model_title}
-    
-    
+from common.Utils.log_utils import getLogger
+
+log = getLogger("views/{model_name}")
+
+
 class {model_title}Handler(BaseHandler):
-    @BaseHandler.ajax_base()
-    def head(self, *args, **kwargs):
-        return {{"fields": {model_title}.__fields__, "methods": ["head", "get", "post", "put", "patch", "delete"]}}
-        
     @BaseHandler.ajax_base()
     def get(self, {model_id}=None):
         if {model_id}:
@@ -273,20 +383,23 @@ class {model_title}Handler(BaseHandler):
             return [{model_name}.to_front() for {model_name} in {model_name}_list]
     
     @BaseHandler.ajax_base()
-    def post(self):{get_arguments}
-        {model_name} = {model_title}.create({editable_selected_parmas})
+    def post(self):
+{get_arguments}
+        {model_name} = {model_title}.create({editable_selected_params})
         return {model_name}.to_front()
 
     @BaseHandler.ajax_base()
-    def put(self, {model_id}):{get_arguments}
+    def put(self, {model_id}):
+{get_arguments}
         {model_name} = {model_title}.select(id={model_id})
-        {model_name} = {model_name}.update({editable_selected_parmas})
+        {model_name} = {model_name}.update({editable_selected_params})
         return {model_name}.to_front()
 
     @BaseHandler.ajax_base()
-    def patch(self, {model_id}):{get_arguments_default}
+    def patch(self, {model_id}):
+{get_arguments_default}
         {model_name} = {model_title}.select(id={model_id})
-        {model_name} = {model_name}.update({editable_selected_parmas})
+        {model_name} = {model_name}.update({editable_selected_params})
         return {model_name}.to_front()
 
     @BaseHandler.ajax_base()
@@ -296,26 +409,135 @@ class {model_title}Handler(BaseHandler):
         return None
 
     def set_default_headers(self):
-        self._headers.add("version", "1")
+        self._headers.add("version", "{version}")
 """
-        return str
+        return _str
 
     def _init_urls(self):
         model_name = self.model_name
-        model_title = self.model_title
+        model_title = self._get_title(self.model_name)
 
-        str = f"""\
+        _str = f"""\
 # -*- coding: utf-8 -*-
 
 from tornado.web import url
 import api.views.{model_name} as views
 
 url_mapping = [
-    url(r"/api/{model_name}/", views.{model_title}Handler),
-    url(r"/api/{model_name}/(\w+)/", views.{model_title}Handler),
+    url(r"/api/{model_name}/create/", views.{model_title}Handler),
+    url(r"/api/{model_name}/list/", views.{model_title}Handler),
+    url(r"/api/{model_name}/select/([a-zA-Z0-9&%\.~-]+)/", views.{model_title}Handler),
+    url(r"/api/{model_name}/update/([a-zA-Z0-9&%\.~-]+)/", views.{model_title}Handler),
+    url(r"/api/{model_name}/delete/([a-zA-Z0-9&%\.~-]+)/", views.{model_title}Handler),
 ]
 """
-        return str
+        return _str
+
+    def _init_info_dict(self):
+        _str = ""
+        for field_name in self._get_editable_field_name_list(self.all_field_dict):
+            field = self.all_field_dict[field_name]
+            field_name = field.get('name')
+            field_type = field.get('type')
+
+            _str += f"""\
+|{field_name}|{field_type}||
+"""
+        return _str
+
+    def _init_docs(self):
+        model_name = self.model_name
+        model_title = self._get_title(self.model_name)
+        info_dict = self._init_info_dict()
+
+        _str = f"""\
+***
+
+### **简要描述：**
+
+创建{model_name}
+
+### **请求URL：**
+
+`/api/{model_name}/create/`
+
+### **请求方式：**
+
+POST
+
+### **类型：**
+
+### **请求参数：**
+
+|参数名|参数类型|备注|
+|:--|:--|:--|
+{info_dict}
+
+***
+
+### **简要描述：**
+
+更新{model_name}
+
+### **请求URL：**
+
+`/api/{model_name}/update/<{model_name}_id>`
+
+### **请求方式：**
+
+PATCH
+
+### **类型：**
+
+### **请求参数：**
+
+|参数名|参数类型|备注|
+|:--|:--|:--|
+{info_dict}
+
+***
+
+### **简要描述：**
+
+删除{model_name}
+
+### **请求URL：**
+
+`/api/{model_name}/delete/<{model_name}_id>`
+
+### **请求方式：**
+
+DELETE
+
+### **类型：**
+
+### **请求参数：**
+
+|参数名|参数类型|备注|
+|:--|:--|:--|
+
+***
+
+### **简要描述：**
+
+获取{model_name}
+
+### **请求URL：**
+
+`/api/{model_name}/select/<{model_name}_id>`
+
+### **请求方式：**
+
+GET
+
+### **类型：**
+
+### **请求参数：**
+
+|参数名|参数类型|备注|
+|:--|:--|:--|
+        """
+        return _str
 
 
 if __name__ == "__main__":
@@ -348,28 +570,5 @@ if __name__ == "__main__":
     8. delete 中的问题：
     1） 删除是表示不可见还是彻底删除？ 正常不是错误数据不太会给予删除操作
     9.√patch方法添加， get_argument方法可能存在问题
-    
-    #  TODO: 添加参数, 允许以不特定参数查找指定的数据
-    #  TODO: 支持分页
-    #  TODO: 支持按请求排序
-    # page = self.get_argument('page', 1)
-    # paged_user_list = Page(
-    #     user_list,
-    #     page=page,
-    #     items_per_page=USER_LIST_PER_PAGE
-    # )
-    # return [user.to_front() for user in paged_user_list]
     """
-    local_path = sys.path[0]
-    abs_dir = os.path.dirname(local_path)
-    base_path = os.path.join(abs_dir, "api", "auto")
-    if os.path.isdir(base_path):
-        shutil.rmtree(base_path)
-
-    os.mkdir(base_path)
-
-    for root, path, files in os.walk(os.path.join(os.getcwd(), "block")):
-        for file in files:
-            if file in ["movie.json"]:
-                # if file:
-                marker = Marker(str(file))
+    run()
