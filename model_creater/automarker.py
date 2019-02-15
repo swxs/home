@@ -191,9 +191,15 @@ class Marker:
         :param field:
         :return:
         """
+        def get_value(value):
+            if isinstance(value, (int, float)):
+                return f"{value}"
+            else:
+                return f"\"{value}\""
+
         return ", ".join(
             [
-                "{0}={1}".format(key, value)
+                "{0}={1}".format(key, get_value(value))
                 for key, value in field.get('params', {}).items()
             ]
         )
