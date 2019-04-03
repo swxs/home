@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+# @File    : Datamerge.py
+# @AUTH    : model_creater
+# @Time    : 2019-04-03 15:07:20
+
+DATAMERGE_HOW_INNER = 1
+DATAMERGE_HOW_LEFT = 2
+DATAMERGE_HOW_RIGHT = 3
+DATAMERGE_HOW_OUTER = 4
+DATAMERGE_HOW_CONCAT = 5
+
+DATAMERGE_HOW_LIST = [
+    (DATAMERGE_HOW_INNER, '内联'),
+    (DATAMERGE_HOW_LEFT, '左联'),
+    (DATAMERGE_HOW_RIGHT, '右联'),
+    (DATAMERGE_HOW_OUTER, '外联'),
+    (DATAMERGE_HOW_CONCAT, '上下'),
+]

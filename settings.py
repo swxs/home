@@ -59,7 +59,7 @@ INIT_SETTINGS_FILE = os.path.join(SITE_ROOT, "init.yaml")
 
 try:
     from local_settings import *
-except:
+except Exception:
     print('load local settings faild.')
 
 if SITE_PORT == 80:

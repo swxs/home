@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+# @File    : Worktable.py
+# @AUTH    : model_creater
+# @Time    : 2019-04-03 15:07:20
+
+WORKTABLE_ENGINE_PANDAS = 1
+WORKTABLE_ENGINE_KYLIN = 2
+
+WORKTABLE_ENGINE_LIST = [
+    (WORKTABLE_ENGINE_PANDAS, 'pandas引擎'),
+    (WORKTABLE_ENGINE_KYLIN, 'Kylin引擎'),
+]
+
+WORKTABLE_STATUS_NO_USE = 1
+WORKTABLE_STATUS_USE = 2
+
+WORKTABLE_STATUS_LIST = [
+    (WORKTABLE_STATUS_NO_USE, '停用'),
+    (WORKTABLE_STATUS_USE, '启用'),
+]

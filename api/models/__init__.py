@@ -10,6 +10,7 @@ from api.models.password_lock import PasswordLock
 from api.models.tag import Tag
 from api.models.todo import Todo
 from api.models.movie import Movie
+from api.bi.models.CacheChart import Cachechart
 
 __all__ = [
     "User",
@@ -18,5 +19,6 @@ __all__ = [
     "Tag",
     "PasswordLock",
     "Todo",
-    "Movie"
+    "Movie",
+    "Cachechart",
 ]
