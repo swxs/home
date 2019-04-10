@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Movie.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.Movie import Movie
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.Movie import Movie
 
 log = getLogger("views/Movie")
 
@@ -17,33 +15,42 @@ class MovieHandler(BaseHandler):
     def get(self, movie_id=None):
         if movie_id:
             movie = Movie.select(id=movie_id)
-            return Movie.to_front()
+            return movie.to_front()
         else:
             movie_list = Movie.filter()
             return [movie.to_front() for movie in movie_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        movie = Movie.create(params)
-        return movie.to_front()
+    def post(self, movie_id=None):
+        params = dict()
+        params['title'] = self.get_argument('title', None)
+        params['year'] = self.get_argument('year', None)
+        params['summary'] = self.get_argument('summary', None)
+        movie = Movie.create(**params)
+        return movie.id
 
     @BaseHandler.ajax_base()
-    def put(self, movie_id):
-        params = self.get_all_arguments()
+    def put(self, movie_id=None):
+        params = dict()
+        params['title'] = self.get_argument('title', None)
+        params['year'] = self.get_argument('year', None)
+        params['summary'] = self.get_argument('summary', None)
         movie = Movie.select(id=movie_id)
-        movie = movie.update(params)
-        return movie.to_front()
+        movie = movie.update(**params)
+        return movie.id
 
     @BaseHandler.ajax_base()
-    def patch(self, movie_id):
-        params = self.get_all_arguments()
+    def patch(self, movie_id=None):
+        params = dict()
+        params['title'] = self.get_argument('title', undefined)
+        params['year'] = self.get_argument('year', undefined)
+        params['summary'] = self.get_argument('summary', undefined)
         movie = Movie.select(id=movie_id)
-        movie = movie.update(params)
-        return movie.to_front()
+        movie = movie.update(**params)
+        return movie.id
 
     @BaseHandler.ajax_base()
-    def delete(self, movie_id):
+    def delete(self, movie_id=None):
         movie = Movie.select(id=movie_id)
         movie.delete()
         return None

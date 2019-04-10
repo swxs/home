@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Artical.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 import datetime
 import mongoengine_utils as model
@@ -26,3 +24,4 @@ class Artical(BaseUtils):
 
     def __init__(self, **kwargs):
         super(Artical, self).__init__(**kwargs)
+

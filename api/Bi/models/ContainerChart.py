@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 # @File    : ContainerChart.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:19
 
 import datetime
 import mongoengine as model
 from ..consts.ContainerChart import *
-from ...BaseModel import BaseModelDocument
+from .Container import Container
 from mongoengine_utils import NAME_DICT
 
 
-class ContainerChart(BaseModelDocument):
+class ContainerChart(Container):
     chart_id = model.ObjectIdField(helper_text='图表id')
 
     meta = {
-        'indexes': [
-        ]
     }
+
 
 NAME_DICT["ContainerChart"] = ContainerChart

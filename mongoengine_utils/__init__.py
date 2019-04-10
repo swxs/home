@@ -5,5 +5,6 @@
 
 from .models_fields import *
 from .BaseDocument import BaseDocument
+from .manager_mongoenginee import NAME_DICT
 
-NAME_DICT = {}
+

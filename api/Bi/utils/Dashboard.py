@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Dashboard.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:20
 
 import datetime
 import mongoengine_utils as model
@@ -26,3 +24,4 @@ class Dashboard(BaseUtils):
 
     def __init__(self, **kwargs):
         super(Dashboard, self).__init__(**kwargs)
+

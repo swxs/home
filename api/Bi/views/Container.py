@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Container.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.Container import Container
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.Container import Container
 
 log = getLogger("views/Container")
 
@@ -17,33 +15,39 @@ class ContainerHandler(BaseHandler):
     def get(self, container_id=None):
         if container_id:
             container = Container.select(id=container_id)
-            return Container.to_front()
+            return container.to_front()
         else:
             container_list = Container.filter()
             return [container.to_front() for container in container_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        container = Container.create(params)
-        return container.to_front()
+    def post(self, container_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['show_name'] = self.get_argument('show_name', None)
+        container = Container.create(**params)
+        return container.id
 
     @BaseHandler.ajax_base()
-    def put(self, container_id):
-        params = self.get_all_arguments()
+    def put(self, container_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['show_name'] = self.get_argument('show_name', None)
         container = Container.select(id=container_id)
-        container = container.update(params)
-        return container.to_front()
+        container = container.update(**params)
+        return container.id
 
     @BaseHandler.ajax_base()
-    def patch(self, container_id):
-        params = self.get_all_arguments()
+    def patch(self, container_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', undefined)
+        params['show_name'] = self.get_argument('show_name', undefined)
         container = Container.select(id=container_id)
-        container = container.update(params)
-        return container.to_front()
+        container = container.update(**params)
+        return container.id
 
     @BaseHandler.ajax_base()
-    def delete(self, container_id):
+    def delete(self, container_id=None):
         container = Container.select(id=container_id)
         container.delete()
         return None

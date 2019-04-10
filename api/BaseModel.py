@@ -14,14 +14,6 @@ class BaseModelDocument(model.Document):
     meta = {
         'abstract': True,
         'ordering': ['-created'],
-        'indexes': [
-            {
-                'fields': ['created'],
-            },
-            {
-                'fields': ['updated'],
-            },
-        ]
     }
 
     def __init__(self, **kwargs):

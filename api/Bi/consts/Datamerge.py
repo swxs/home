@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Datamerge.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 DATAMERGE_HOW_INNER = 1
 DATAMERGE_HOW_LEFT = 2

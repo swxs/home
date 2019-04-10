@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Chart.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:20
 
 import datetime
 import mongoengine_utils as model
@@ -28,3 +26,4 @@ class Chart(BaseUtils):
 
     def __init__(self, **kwargs):
         super(Chart, self).__init__(**kwargs)
+

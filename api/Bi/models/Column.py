@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Column.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 import datetime
 import mongoengine as model
@@ -15,7 +14,7 @@ class Column(BaseModelDocument):
     realcol = model.StringField(helper_text='原始未处理的列名')
     readablecol = model.StringField(helper_text='展示的列名')
     worktable_id = model.ObjectIdField(helper_text='工作表id')
-    is_visible = model.BooleanField(default=true, helper_text='是否可见')
+    is_visible = model.BooleanField(default=True, helper_text='是否可见')
     is_unique = model.BooleanField(default=False, helper_text='是否唯一字段')
     dtype = model.IntField(enums=COLUMN_DTYPE_LIST)
     ttype = model.IntField(enums=COLUMN_TTYPE_LIST, default=COLUMN_TTYPE_NORMAL)
@@ -32,7 +31,8 @@ class Column(BaseModelDocument):
                 'fields': ['readablecol', 'worktable_id'],
                 'unique ': True,
             },
-        ]
+        ],
     }
+
 
 NAME_DICT["Column"] = Column

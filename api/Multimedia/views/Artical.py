@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Artical.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.Artical import Artical
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.Artical import Artical
 
 log = getLogger("views/Artical")
 
@@ -17,33 +15,60 @@ class ArticalHandler(BaseHandler):
     def get(self, artical_id=None):
         if artical_id:
             artical = Artical.select(id=artical_id)
-            return Artical.to_front()
+            return artical.to_front()
         else:
             artical_list = Artical.filter()
             return [artical.to_front() for artical in artical_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        artical = Artical.create(params)
-        return artical.to_front()
+    def post(self, artical_id=None):
+        params = dict()
+        params['title'] = self.get_argument('title', None)
+        params['author'] = self.get_argument('author', None)
+        params['year'] = self.get_argument('year', None)
+        params['source'] = self.get_argument('source', None)
+        params['summary'] = self.get_argument('summary', None)
+        params['content'] = self.get_argument('content', None)
+        params['ttype_id_list'] = self.get_argument('ttype_id_list', None)
+        params['tag_id_list'] = self.get_argument('tag_id_list', None)
+        params['comment_id_list'] = self.get_argument('comment_id_list', None)
+        artical = Artical.create(**params)
+        return artical.id
 
     @BaseHandler.ajax_base()
-    def put(self, artical_id):
-        params = self.get_all_arguments()
+    def put(self, artical_id=None):
+        params = dict()
+        params['title'] = self.get_argument('title', None)
+        params['author'] = self.get_argument('author', None)
+        params['year'] = self.get_argument('year', None)
+        params['source'] = self.get_argument('source', None)
+        params['summary'] = self.get_argument('summary', None)
+        params['content'] = self.get_argument('content', None)
+        params['ttype_id_list'] = self.get_argument('ttype_id_list', None)
+        params['tag_id_list'] = self.get_argument('tag_id_list', None)
+        params['comment_id_list'] = self.get_argument('comment_id_list', None)
         artical = Artical.select(id=artical_id)
-        artical = artical.update(params)
-        return artical.to_front()
+        artical = artical.update(**params)
+        return artical.id
 
     @BaseHandler.ajax_base()
-    def patch(self, artical_id):
-        params = self.get_all_arguments()
+    def patch(self, artical_id=None):
+        params = dict()
+        params['title'] = self.get_argument('title', undefined)
+        params['author'] = self.get_argument('author', undefined)
+        params['year'] = self.get_argument('year', undefined)
+        params['source'] = self.get_argument('source', undefined)
+        params['summary'] = self.get_argument('summary', undefined)
+        params['content'] = self.get_argument('content', undefined)
+        params['ttype_id_list'] = self.get_argument('ttype_id_list', undefined)
+        params['tag_id_list'] = self.get_argument('tag_id_list', undefined)
+        params['comment_id_list'] = self.get_argument('comment_id_list', undefined)
         artical = Artical.select(id=artical_id)
-        artical = artical.update(params)
-        return artical.to_front()
+        artical = artical.update(**params)
+        return artical.id
 
     @BaseHandler.ajax_base()
-    def delete(self, artical_id):
+    def delete(self, artical_id=None):
         artical = Artical.select(id=artical_id)
         artical.delete()
         return None

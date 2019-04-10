@@ -4,12 +4,13 @@
 # @Time    : 2018/4/30 14:55
 
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
-from api.consts.const import undefined
+from api.BaseConsts import undefined
 from .models_fields import DictField
-from . import NAME_DICT
 from common.Metaclass.Singleton import Singleton
 from common.Exceptions import *
 from common.Utils.log_utils import getLogger
+
+NAME_DICT = {}
 
 log = getLogger("manager.mongoenginee")
 

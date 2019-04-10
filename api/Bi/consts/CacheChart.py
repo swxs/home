@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : CacheChart.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 CACHE_CHART_TTYPE_SHOW = 1
 CACHE_CHART_TTYPE_DOWNLOAD = 2

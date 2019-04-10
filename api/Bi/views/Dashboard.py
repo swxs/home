@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Dashboard.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:20
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.Dashboard import Dashboard
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.Dashboard import Dashboard
 
 log = getLogger("views/Dashboard")
 
@@ -17,33 +15,60 @@ class DashboardHandler(BaseHandler):
     def get(self, dashboard_id=None):
         if dashboard_id:
             dashboard = Dashboard.select(id=dashboard_id)
-            return Dashboard.to_front()
+            return dashboard.to_front()
         else:
             dashboard_list = Dashboard.filter()
             return [dashboard.to_front() for dashboard in dashboard_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        dashboard = Dashboard.create(params)
-        return dashboard.to_front()
+    def post(self, dashboard_id=None):
+        params = dict()
+        params['user_id'] = self.get_argument('user_id', None)
+        params['usage'] = self.get_argument('usage', None)
+        params['container_id'] = self.get_argument('container_id', None)
+        params['worktable_id'] = self.get_argument('worktable_id', None)
+        params['index'] = self.get_argument('index', None)
+        params['name'] = self.get_argument('name', None)
+        params['description'] = self.get_argument('description', None)
+        params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
+        params['parent_id'] = self.get_argument('parent_id', None)
+        dashboard = Dashboard.create(**params)
+        return dashboard.id
 
     @BaseHandler.ajax_base()
-    def put(self, dashboard_id):
-        params = self.get_all_arguments()
+    def put(self, dashboard_id=None):
+        params = dict()
+        params['user_id'] = self.get_argument('user_id', None)
+        params['usage'] = self.get_argument('usage', None)
+        params['container_id'] = self.get_argument('container_id', None)
+        params['worktable_id'] = self.get_argument('worktable_id', None)
+        params['index'] = self.get_argument('index', None)
+        params['name'] = self.get_argument('name', None)
+        params['description'] = self.get_argument('description', None)
+        params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
+        params['parent_id'] = self.get_argument('parent_id', None)
         dashboard = Dashboard.select(id=dashboard_id)
-        dashboard = dashboard.update(params)
-        return dashboard.to_front()
+        dashboard = dashboard.update(**params)
+        return dashboard.id
 
     @BaseHandler.ajax_base()
-    def patch(self, dashboard_id):
-        params = self.get_all_arguments()
+    def patch(self, dashboard_id=None):
+        params = dict()
+        params['user_id'] = self.get_argument('user_id', undefined)
+        params['usage'] = self.get_argument('usage', undefined)
+        params['container_id'] = self.get_argument('container_id', undefined)
+        params['worktable_id'] = self.get_argument('worktable_id', undefined)
+        params['index'] = self.get_argument('index', undefined)
+        params['name'] = self.get_argument('name', undefined)
+        params['description'] = self.get_argument('description', undefined)
+        params['simulate_region_id'] = self.get_argument('simulate_region_id', undefined)
+        params['parent_id'] = self.get_argument('parent_id', undefined)
         dashboard = Dashboard.select(id=dashboard_id)
-        dashboard = dashboard.update(params)
-        return dashboard.to_front()
+        dashboard = dashboard.update(**params)
+        return dashboard.id
 
     @BaseHandler.ajax_base()
-    def delete(self, dashboard_id):
+    def delete(self, dashboard_id=None):
         dashboard = Dashboard.select(id=dashboard_id)
         dashboard.delete()
         return None

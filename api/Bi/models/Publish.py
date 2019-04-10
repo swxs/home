@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Publish.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 import datetime
 import mongoengine as model
@@ -29,7 +28,8 @@ class Publish(BaseModelDocument):
             {
                 'fields': ['dashboard_id'],
             },
-        ]
+        ],
     }
+
 
 NAME_DICT["Publish"] = Publish

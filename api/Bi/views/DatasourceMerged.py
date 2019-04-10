@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : DatasourceMerged.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:20
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.DatasourceMerged import DatasourceMerged
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.DatasourceMerged import DatasourceMerged
 
 log = getLogger("views/DatasourceMerged")
 
@@ -17,33 +15,39 @@ class DatasourceMergedHandler(BaseHandler):
     def get(self, datasource_merged_id=None):
         if datasource_merged_id:
             datasource_merged = DatasourceMerged.select(id=datasource_merged_id)
-            return DatasourceMerged.to_front()
+            return datasource_merged.to_front()
         else:
             datasource_merged_list = DatasourceMerged.filter()
             return [datasource_merged.to_front() for datasource_merged in datasource_merged_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        datasource_merged = DatasourceMerged.create(params)
-        return datasource_merged.to_front()
+    def post(self, datasource_merged_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['datamerge_id'] = self.get_argument('datamerge_id', None)
+        datasource_merged = DatasourceMerged.create(**params)
+        return datasource_merged.id
 
     @BaseHandler.ajax_base()
-    def put(self, datasource_merged_id):
-        params = self.get_all_arguments()
+    def put(self, datasource_merged_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['datamerge_id'] = self.get_argument('datamerge_id', None)
         datasource_merged = DatasourceMerged.select(id=datasource_merged_id)
-        datasource_merged = datasource_merged.update(params)
-        return datasource_merged.to_front()
+        datasource_merged = datasource_merged.update(**params)
+        return datasource_merged.id
 
     @BaseHandler.ajax_base()
-    def patch(self, datasource_merged_id):
-        params = self.get_all_arguments()
+    def patch(self, datasource_merged_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', undefined)
+        params['datamerge_id'] = self.get_argument('datamerge_id', undefined)
         datasource_merged = DatasourceMerged.select(id=datasource_merged_id)
-        datasource_merged = datasource_merged.update(params)
-        return datasource_merged.to_front()
+        datasource_merged = datasource_merged.update(**params)
+        return datasource_merged.id
 
     @BaseHandler.ajax_base()
-    def delete(self, datasource_merged_id):
+    def delete(self, datasource_merged_id=None):
         datasource_merged = DatasourceMerged.select(id=datasource_merged_id)
         datasource_merged.delete()
         return None

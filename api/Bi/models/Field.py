@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Field.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 import datetime
 import mongoengine as model
@@ -33,9 +32,10 @@ class Field(BaseModelDocument):
                 'fields': ['chart_id'],
             },
             {
-                'fields': ['chart_id', ' stype'],
+                'fields': ['chart_id', 'stype'],
             },
-        ]
+        ],
     }
+
 
 NAME_DICT["Field"] = Field

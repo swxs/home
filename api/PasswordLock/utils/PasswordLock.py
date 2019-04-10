@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : PasswordLock.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 import datetime
 import mongoengine_utils as model
@@ -21,3 +19,4 @@ class PasswordLock(BaseUtils):
 
     def __init__(self, **kwargs):
         super(PasswordLock, self).__init__(**kwargs)
+

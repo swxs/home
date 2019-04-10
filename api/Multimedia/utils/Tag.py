@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Tag.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 import datetime
 import mongoengine_utils as model
@@ -19,3 +17,4 @@ class Tag(BaseUtils):
 
     def __init__(self, **kwargs):
         super(Tag, self).__init__(**kwargs)
+

@@ -7,7 +7,7 @@ import datetime
 
 from bson import ObjectId
 from tornado.util import ObjectDict
-from api.consts.const import undefined
+from api.BaseConsts import undefined
 from common.Exceptions import *
 from common.Utils.log_utils import getLogger
 from .manager_mongoenginee import Manager

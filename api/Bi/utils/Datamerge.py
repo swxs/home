@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Datamerge.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:20
 
 import datetime
 import mongoengine_utils as model
@@ -22,3 +20,4 @@ class Datamerge(BaseUtils):
 
     def __init__(self, **kwargs):
         super(Datamerge, self).__init__(**kwargs)
+

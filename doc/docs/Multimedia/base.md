@@ -1,0 +1,22 @@
+# Multimedia
+
+- Artical
+    - [查询Artical](Artical/select.md)
+    - [创建Artical](Artical/create.md)
+    - [更新Artical](Artical/update.md)
+    - [删除Artical](Artical/delete.md)
+- Movie
+    - [查询Movie](Movie/select.md)
+    - [创建Movie](Movie/create.md)
+    - [更新Movie](Movie/update.md)
+    - [删除Movie](Movie/delete.md)
+- Tag
+    - [查询Tag](Tag/select.md)
+    - [创建Tag](Tag/create.md)
+    - [更新Tag](Tag/update.md)
+    - [删除Tag](Tag/delete.md)
+- Ttype
+    - [查询Ttype](Ttype/select.md)
+    - [创建Ttype](Ttype/create.md)
+    - [更新Ttype](Ttype/update.md)
+    - [删除Ttype](Ttype/delete.md)

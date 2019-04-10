@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : ContainerChart.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.ContainerChart import ContainerChart
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.ContainerChart import ContainerChart
 
 log = getLogger("views/ContainerChart")
 
@@ -17,33 +15,42 @@ class ContainerChartHandler(BaseHandler):
     def get(self, container_chart_id=None):
         if container_chart_id:
             container_chart = ContainerChart.select(id=container_chart_id)
-            return ContainerChart.to_front()
+            return container_chart.to_front()
         else:
             container_chart_list = ContainerChart.filter()
             return [container_chart.to_front() for container_chart in container_chart_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        container_chart = ContainerChart.create(params)
-        return container_chart.to_front()
+    def post(self, container_chart_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['show_name'] = self.get_argument('show_name', None)
+        params['chart_id'] = self.get_argument('chart_id', None)
+        container_chart = ContainerChart.create(**params)
+        return container_chart.id
 
     @BaseHandler.ajax_base()
-    def put(self, container_chart_id):
-        params = self.get_all_arguments()
+    def put(self, container_chart_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['show_name'] = self.get_argument('show_name', None)
+        params['chart_id'] = self.get_argument('chart_id', None)
         container_chart = ContainerChart.select(id=container_chart_id)
-        container_chart = container_chart.update(params)
-        return container_chart.to_front()
+        container_chart = container_chart.update(**params)
+        return container_chart.id
 
     @BaseHandler.ajax_base()
-    def patch(self, container_chart_id):
-        params = self.get_all_arguments()
+    def patch(self, container_chart_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', undefined)
+        params['show_name'] = self.get_argument('show_name', undefined)
+        params['chart_id'] = self.get_argument('chart_id', undefined)
         container_chart = ContainerChart.select(id=container_chart_id)
-        container_chart = container_chart.update(params)
-        return container_chart.to_front()
+        container_chart = container_chart.update(**params)
+        return container_chart.id
 
     @BaseHandler.ajax_base()
-    def delete(self, container_chart_id):
+    def delete(self, container_chart_id=None):
         container_chart = ContainerChart.select(id=container_chart_id)
         container_chart.delete()
         return None

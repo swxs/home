@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Datasource.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 import datetime
 import mongoengine_utils as model
@@ -18,3 +16,4 @@ class Datasource(BaseUtils):
 
     def __init__(self, **kwargs):
         super(Datasource, self).__init__(**kwargs)
+

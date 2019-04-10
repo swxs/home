@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Column.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 COLUMN_DTYPE_INT = 1
 COLUMN_DTYPE_STRING = 2

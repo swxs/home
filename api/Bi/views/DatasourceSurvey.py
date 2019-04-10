@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : DatasourceSurvey.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:20
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.DatasourceSurvey import DatasourceSurvey
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.DatasourceSurvey import DatasourceSurvey
 
 log = getLogger("views/DatasourceSurvey")
 
@@ -17,33 +15,39 @@ class DatasourceSurveyHandler(BaseHandler):
     def get(self, datasource_survey_id=None):
         if datasource_survey_id:
             datasource_survey = DatasourceSurvey.select(id=datasource_survey_id)
-            return DatasourceSurvey.to_front()
+            return datasource_survey.to_front()
         else:
             datasource_survey_list = DatasourceSurvey.filter()
             return [datasource_survey.to_front() for datasource_survey in datasource_survey_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        datasource_survey = DatasourceSurvey.create(params)
-        return datasource_survey.to_front()
+    def post(self, datasource_survey_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['survey_id'] = self.get_argument('survey_id', None)
+        datasource_survey = DatasourceSurvey.create(**params)
+        return datasource_survey.id
 
     @BaseHandler.ajax_base()
-    def put(self, datasource_survey_id):
-        params = self.get_all_arguments()
+    def put(self, datasource_survey_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['survey_id'] = self.get_argument('survey_id', None)
         datasource_survey = DatasourceSurvey.select(id=datasource_survey_id)
-        datasource_survey = datasource_survey.update(params)
-        return datasource_survey.to_front()
+        datasource_survey = datasource_survey.update(**params)
+        return datasource_survey.id
 
     @BaseHandler.ajax_base()
-    def patch(self, datasource_survey_id):
-        params = self.get_all_arguments()
+    def patch(self, datasource_survey_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', undefined)
+        params['survey_id'] = self.get_argument('survey_id', undefined)
         datasource_survey = DatasourceSurvey.select(id=datasource_survey_id)
-        datasource_survey = datasource_survey.update(params)
-        return datasource_survey.to_front()
+        datasource_survey = datasource_survey.update(**params)
+        return datasource_survey.id
 
     @BaseHandler.ajax_base()
-    def delete(self, datasource_survey_id):
+    def delete(self, datasource_survey_id=None):
         datasource_survey = DatasourceSurvey.select(id=datasource_survey_id)
         datasource_survey.delete()
         return None

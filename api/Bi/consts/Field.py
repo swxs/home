@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Field.py
 # @AUTH    : model_creater
-# @Time    : 2019-04-03 15:07:20
 
 FIELD_AGG_TYPE_COUNT = 1
 FIELD_AGG_TYPE_NUNIQ = 2

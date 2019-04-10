@@ -15,8 +15,7 @@ from tornado.web import escape
 import settings
 from common.Helpers.Helper_JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
-from api.consts.const import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
-from api.utils.user import User
+from api.BaseConsts import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
 from common.Exceptions import *
 from common.Utils.validate import Validate, RegType
 from common.Utils.log_utils import getLogger
@@ -154,7 +153,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             user_id = self.session.get('user_id')
             if user_id is None:
                 raise ApiNotLoginException()
-            self._user = User.select(id=user_id)
+            self._user = None
         return self._user
 
     @current_user.setter
@@ -162,7 +161,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if not hasattr(self, '_user'):
             if user_id is not None:
                 raise ApiNotLoginException()
-            self._user = User.select(id=user_id)
+            self._user = None
 
     def get_user_locale(self):
         ''''''
@@ -261,14 +260,14 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         return result
 
     @classmethod
-    def ajax_base(cls, login=False, aio=False):
+    def ajax_base(cls, auth=False, aio=False):
 
         def function(method):
 
             @functools.wraps(method)
             async def wrapper(self, *args, **kwargs):
                 try:
-                    if not login:
+                    if auth:
                         playload = AuthCenter.identify(self.access_token)
                         self.current_user_id = playload.get("id")
                     if aio:

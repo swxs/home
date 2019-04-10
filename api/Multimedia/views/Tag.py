@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : Tag.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.Tag import Tag
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.Tag import Tag
 
 log = getLogger("views/Tag")
 
@@ -17,33 +15,39 @@ class TagHandler(BaseHandler):
     def get(self, tag_id=None):
         if tag_id:
             tag = Tag.select(id=tag_id)
-            return Tag.to_front()
+            return tag.to_front()
         else:
             tag_list = Tag.filter()
             return [tag.to_front() for tag in tag_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        tag = Tag.create(params)
-        return tag.to_front()
+    def post(self, tag_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['color'] = self.get_argument('color', None)
+        tag = Tag.create(**params)
+        return tag.id
 
     @BaseHandler.ajax_base()
-    def put(self, tag_id):
-        params = self.get_all_arguments()
+    def put(self, tag_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['color'] = self.get_argument('color', None)
         tag = Tag.select(id=tag_id)
-        tag = tag.update(params)
-        return tag.to_front()
+        tag = tag.update(**params)
+        return tag.id
 
     @BaseHandler.ajax_base()
-    def patch(self, tag_id):
-        params = self.get_all_arguments()
+    def patch(self, tag_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', undefined)
+        params['color'] = self.get_argument('color', undefined)
         tag = Tag.select(id=tag_id)
-        tag = tag.update(params)
-        return tag.to_front()
+        tag = tag.update(**params)
+        return tag.id
 
     @BaseHandler.ajax_base()
-    def delete(self, tag_id):
+    def delete(self, tag_id=None):
         tag = Tag.select(id=tag_id)
         tag.delete()
         return None

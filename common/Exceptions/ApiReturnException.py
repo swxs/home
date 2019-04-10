@@ -1,4 +1,4 @@
-from api.consts.const import HTTP_STATUS
+from api.BaseConsts import HTTP_STATUS
 from common.Exceptions.ApiException import ApiException
 
 

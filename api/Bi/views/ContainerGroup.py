@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # @File    : ContainerGroup.py
 # @AUTH    : model
-# @Time    : 2019-04-03 15:07:19
 
 from base import BaseHandler
-from api.consts.const import undefined
-from ..utils.ContainerGroup import ContainerGroup
 from common.Utils.log_utils import getLogger
+from ...BaseConsts import *
+from ..utils.ContainerGroup import ContainerGroup
 
 log = getLogger("views/ContainerGroup")
 
@@ -17,33 +15,45 @@ class ContainerGroupHandler(BaseHandler):
     def get(self, container_group_id=None):
         if container_group_id:
             container_group = ContainerGroup.select(id=container_group_id)
-            return ContainerGroup.to_front()
+            return container_group.to_front()
         else:
             container_group_list = ContainerGroup.filter()
             return [container_group.to_front() for container_group in container_group_list]
 
     @BaseHandler.ajax_base()
-    def post(self):
-        params = self.get_all_arguments()
-        container_group = ContainerGroup.create(params)
-        return container_group.to_front()
+    def post(self, container_group_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['show_name'] = self.get_argument('show_name', None)
+        params['container_id_list'] = self.get_arguments('container_id_list', [])
+        params['layout_list'] = self.get_arguments('layout_list', [])
+        container_group = ContainerGroup.create(**params)
+        return container_group.id
 
     @BaseHandler.ajax_base()
-    def put(self, container_group_id):
-        params = self.get_all_arguments()
+    def put(self, container_group_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', None)
+        params['show_name'] = self.get_argument('show_name', None)
+        params['container_id_list'] = self.get_arguments('container_id_list', [])
+        params['layout_list'] = self.get_arguments('layout_list', [])
         container_group = ContainerGroup.select(id=container_group_id)
-        container_group = container_group.update(params)
-        return container_group.to_front()
+        container_group = container_group.update(**params)
+        return container_group.id
 
     @BaseHandler.ajax_base()
-    def patch(self, container_group_id):
-        params = self.get_all_arguments()
+    def patch(self, container_group_id=None):
+        params = dict()
+        params['name'] = self.get_argument('name', undefined)
+        params['show_name'] = self.get_argument('show_name', undefined)
+        params['container_id_list'] = self.get_arguments('container_id_list', undefined)
+        params['layout_list'] = self.get_arguments('layout_list', undefined)
         container_group = ContainerGroup.select(id=container_group_id)
-        container_group = container_group.update(params)
-        return container_group.to_front()
+        container_group = container_group.update(**params)
+        return container_group.id
 
     @BaseHandler.ajax_base()
-    def delete(self, container_group_id):
+    def delete(self, container_group_id=None):
         container_group = ContainerGroup.select(id=container_group_id)
         container_group.delete()
         return None
