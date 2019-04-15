@@ -22,10 +22,17 @@ class DatasourceHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, datasource_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        datasource = Datasource.create(**params)
-        return datasource.id
+        if datasource_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            datasource = Datasource.select(id=datasource_id)
+            datasource = datasource.copy(**params)
+            return datasource.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            datasource = Datasource.create(**params)
+            return datasource.id
 
     @BaseHandler.ajax_base()
     def put(self, datasource_id=None):

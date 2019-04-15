@@ -22,18 +22,33 @@ class ArticalHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, artical_id=None):
-        params = dict()
-        params['title'] = self.get_argument('title', None)
-        params['author'] = self.get_argument('author', None)
-        params['year'] = self.get_argument('year', None)
-        params['source'] = self.get_argument('source', None)
-        params['summary'] = self.get_argument('summary', None)
-        params['content'] = self.get_argument('content', None)
-        params['ttype_id_list'] = self.get_argument('ttype_id_list', None)
-        params['tag_id_list'] = self.get_argument('tag_id_list', None)
-        params['comment_id_list'] = self.get_argument('comment_id_list', None)
-        artical = Artical.create(**params)
-        return artical.id
+        if artical_id:
+            params = dict()
+            params['title'] = self.get_argument('title', undefined)
+            params['author'] = self.get_argument('author', undefined)
+            params['year'] = self.get_argument('year', undefined)
+            params['source'] = self.get_argument('source', undefined)
+            params['summary'] = self.get_argument('summary', undefined)
+            params['content'] = self.get_argument('content', undefined)
+            params['ttype_id_list'] = self.get_argument('ttype_id_list', undefined)
+            params['tag_id_list'] = self.get_argument('tag_id_list', undefined)
+            params['comment_id_list'] = self.get_argument('comment_id_list', undefined)
+            artical = Artical.select(id=artical_id)
+            artical = artical.copy(**params)
+            return artical.id
+        else:
+            params = dict()
+            params['title'] = self.get_argument('title', None)
+            params['author'] = self.get_argument('author', None)
+            params['year'] = self.get_argument('year', None)
+            params['source'] = self.get_argument('source', None)
+            params['summary'] = self.get_argument('summary', None)
+            params['content'] = self.get_argument('content', None)
+            params['ttype_id_list'] = self.get_argument('ttype_id_list', None)
+            params['tag_id_list'] = self.get_argument('tag_id_list', None)
+            params['comment_id_list'] = self.get_argument('comment_id_list', None)
+            artical = Artical.create(**params)
+            return artical.id
 
     @BaseHandler.ajax_base()
     def put(self, artical_id=None):

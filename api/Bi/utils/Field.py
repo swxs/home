@@ -31,3 +31,17 @@ class Field(BaseUtils):
     def __init__(self, **kwargs):
         super(Field, self).__init__(**kwargs)
 
+    @property
+    def chart(self):
+        from .Chart import Chart
+        return Chart.get_chart_by_chart_id(self.chart_id)
+
+    @property
+    def column(self):
+        from .Column import Column
+        return Column.get_column_by_column_id(self.column_id)
+
+    @classmethod
+    def get_field_by_field_id(cls, field_id):
+        return cls.select(id=field_id)
+

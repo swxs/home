@@ -22,12 +22,21 @@ class ContainerGroupDatafilterHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, container_group_datafilter_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['show_name'] = self.get_argument('show_name', None)
-        params['container_id_list'] = self.get_arguments('container_id_list', [])
-        container_group_datafilter = ContainerGroupDatafilter.create(**params)
-        return container_group_datafilter.id
+        if container_group_datafilter_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['show_name'] = self.get_argument('show_name', undefined)
+            params['container_id_list'] = self.get_arguments('container_id_list', undefined)
+            container_group_datafilter = ContainerGroupDatafilter.select(id=container_group_datafilter_id)
+            container_group_datafilter = container_group_datafilter.copy(**params)
+            return container_group_datafilter.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['show_name'] = self.get_argument('show_name', None)
+            params['container_id_list'] = self.get_arguments('container_id_list', [])
+            container_group_datafilter = ContainerGroupDatafilter.create(**params)
+            return container_group_datafilter.id
 
     @BaseHandler.ajax_base()
     def put(self, container_group_datafilter_id=None):

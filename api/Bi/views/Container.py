@@ -22,11 +22,19 @@ class ContainerHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, container_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['show_name'] = self.get_argument('show_name', None)
-        container = Container.create(**params)
-        return container.id
+        if container_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['show_name'] = self.get_argument('show_name', undefined)
+            container = Container.select(id=container_id)
+            container = container.copy(**params)
+            return container.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['show_name'] = self.get_argument('show_name', None)
+            container = Container.create(**params)
+            return container.id
 
     @BaseHandler.ajax_base()
     def put(self, container_id=None):

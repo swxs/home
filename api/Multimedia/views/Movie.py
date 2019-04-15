@@ -22,12 +22,21 @@ class MovieHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, movie_id=None):
-        params = dict()
-        params['title'] = self.get_argument('title', None)
-        params['year'] = self.get_argument('year', None)
-        params['summary'] = self.get_argument('summary', None)
-        movie = Movie.create(**params)
-        return movie.id
+        if movie_id:
+            params = dict()
+            params['title'] = self.get_argument('title', undefined)
+            params['year'] = self.get_argument('year', undefined)
+            params['summary'] = self.get_argument('summary', undefined)
+            movie = Movie.select(id=movie_id)
+            movie = movie.copy(**params)
+            return movie.id
+        else:
+            params = dict()
+            params['title'] = self.get_argument('title', None)
+            params['year'] = self.get_argument('year', None)
+            params['summary'] = self.get_argument('summary', None)
+            movie = Movie.create(**params)
+            return movie.id
 
     @BaseHandler.ajax_base()
     def put(self, movie_id=None):

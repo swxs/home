@@ -22,10 +22,17 @@ class TtypeHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, ttype_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        ttype = Ttype.create(**params)
-        return ttype.id
+        if ttype_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            ttype = Ttype.select(id=ttype_id)
+            ttype = ttype.copy(**params)
+            return ttype.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            ttype = Ttype.create(**params)
+            return ttype.id
 
     @BaseHandler.ajax_base()
     def put(self, ttype_id=None):

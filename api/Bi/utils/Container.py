@@ -18,3 +18,7 @@ class Container(BaseUtils):
     def __init__(self, **kwargs):
         super(Container, self).__init__(**kwargs)
 
+    @classmethod
+    def get_container_by_container_id(cls, container_id):
+        return cls.select(id=container_id)
+

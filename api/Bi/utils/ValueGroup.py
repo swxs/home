@@ -19,3 +19,7 @@ class ValueGroup(BaseUtils):
     def __init__(self, **kwargs):
         super(ValueGroup, self).__init__(**kwargs)
 
+    @classmethod
+    def get_value_group_by_value_group_id(cls, value_group_id):
+        return cls.select(id=value_group_id)
+

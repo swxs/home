@@ -22,3 +22,12 @@ class Publish(BaseUtils):
     def __init__(self, **kwargs):
         super(Publish, self).__init__(**kwargs)
 
+    @property
+    def dashboard(self):
+        from .Dashboard import Dashboard
+        return Dashboard.get_dashboard_by_dashboard_id(self.dashboard_id)
+
+    @classmethod
+    def get_publish_by_publish_id(cls, publish_id):
+        return cls.select(id=publish_id)
+

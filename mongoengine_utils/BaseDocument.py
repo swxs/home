@@ -114,6 +114,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     @classmethod
     @upgrade
     def create(cls, **kwargs):
+        for key in cls.__fields__:
+            if not getattr(cls.__fields__[key], "create"):
+                del kwargs[key]
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{cls.__model_name__}>: kwargs - {str(kwargs)}")
         return Manager.create(cls, **kwargs)
 
@@ -138,6 +141,17 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     kwargs[key] = self.__fields__[key].pre_update
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{self.__model_name__}>: kwargs - {str(kwargs)}")
         return Manager.update(self, **kwargs)
+
+    def copy(self, **kwargs):
+        params = self.to_dict(dict_factory=dict)
+        for attr in self.__fields__:
+            value = kwargs.get(attr, undefined)
+            if value != undefined:
+                if isinstance(self.__fields__[attr], DictField):
+                    params[attr].update(value)
+                else:
+                    params[attr] = value
+        return self.__class__.create(**params)
 
     @clear
     def delete(self):

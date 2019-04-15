@@ -18,3 +18,7 @@ class ContainerGroup(Container):
     def __init__(self, **kwargs):
         super(ContainerGroup, self).__init__(**kwargs)
 
+    @classmethod
+    def get_container_group_by_container_group_id(cls, container_group_id):
+        return cls.select(id=container_group_id)
+

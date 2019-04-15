@@ -17,3 +17,7 @@ class DatasourceSurvey(Datasource):
     def __init__(self, **kwargs):
         super(DatasourceSurvey, self).__init__(**kwargs)
 
+    @classmethod
+    def get_datasource_survey_by_datasource_survey_id(cls, datasource_survey_id):
+        return cls.select(id=datasource_survey_id)
+

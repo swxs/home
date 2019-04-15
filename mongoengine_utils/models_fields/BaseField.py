@@ -7,6 +7,7 @@ class BaseField(object):
     name = None
 
     def __init__(self, **kwargs):
+        self.create = kwargs.get("create", True)
         self.pre_update = kwargs.get("pre_update", None)
 
     def __get__(self, instance, owner):

@@ -22,15 +22,27 @@ class PublishHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, publish_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['region_id'] = self.get_argument('region_id', None)
-        params['region_type_id'] = self.get_argument('region_type_id', None)
-        params['user_id'] = self.get_argument('user_id', None)
-        params['dashboard_id'] = self.get_argument('dashboard_id', None)
-        params['ttype'] = self.get_argument('ttype', None)
-        publish = Publish.create(**params)
-        return publish.id
+        if publish_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['region_id'] = self.get_argument('region_id', undefined)
+            params['region_type_id'] = self.get_argument('region_type_id', undefined)
+            params['user_id'] = self.get_argument('user_id', undefined)
+            params['dashboard_id'] = self.get_argument('dashboard_id', undefined)
+            params['ttype'] = self.get_argument('ttype', undefined)
+            publish = Publish.select(id=publish_id)
+            publish = publish.copy(**params)
+            return publish.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['region_id'] = self.get_argument('region_id', None)
+            params['region_type_id'] = self.get_argument('region_type_id', None)
+            params['user_id'] = self.get_argument('user_id', None)
+            params['dashboard_id'] = self.get_argument('dashboard_id', None)
+            params['ttype'] = self.get_argument('ttype', None)
+            publish = Publish.create(**params)
+            return publish.id
 
     @BaseHandler.ajax_base()
     def put(self, publish_id=None):

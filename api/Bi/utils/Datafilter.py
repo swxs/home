@@ -21,3 +21,17 @@ class Datafilter(BaseUtils):
     def __init__(self, **kwargs):
         super(Datafilter, self).__init__(**kwargs)
 
+    @property
+    def column(self):
+        from .Column import Column
+        return Column.get_column_by_column_id(self.column_id)
+
+    @property
+    def worktable(self):
+        from .Worktable import Worktable
+        return Worktable.get_worktable_by_worktable_id(self.worktable_id)
+
+    @classmethod
+    def get_datafilter_by_datafilter_id(cls, datafilter_id):
+        return cls.select(id=datafilter_id)
+

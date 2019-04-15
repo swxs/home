@@ -17,3 +17,7 @@ class ContainerGroupDatafilter(Container):
     def __init__(self, **kwargs):
         super(ContainerGroupDatafilter, self).__init__(**kwargs)
 
+    @classmethod
+    def get_container_group_datafilter_by_container_group_datafilter_id(cls, container_group_datafilter_id):
+        return cls.select(id=container_group_datafilter_id)
+

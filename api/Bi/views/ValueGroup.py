@@ -22,12 +22,21 @@ class ValueGroupHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, value_group_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['value'] = self.get_argument('value', None)
-        params['expression'] = self.get_argument('expression', None)
-        value_group = ValueGroup.create(**params)
-        return value_group.id
+        if value_group_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['value'] = self.get_argument('value', undefined)
+            params['expression'] = self.get_argument('expression', undefined)
+            value_group = ValueGroup.select(id=value_group_id)
+            value_group = value_group.copy(**params)
+            return value_group.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['value'] = self.get_argument('value', None)
+            params['expression'] = self.get_argument('expression', None)
+            value_group = ValueGroup.create(**params)
+            return value_group.id
 
     @BaseHandler.ajax_base()
     def put(self, value_group_id=None):

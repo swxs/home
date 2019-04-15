@@ -26,3 +26,12 @@ class Column(BaseUtils):
     def __init__(self, **kwargs):
         super(Column, self).__init__(**kwargs)
 
+    @property
+    def worktable(self):
+        from .Worktable import Worktable
+        return Worktable.get_worktable_by_worktable_id(self.worktable_id)
+
+    @classmethod
+    def get_column_by_column_id(cls, column_id):
+        return cls.select(id=column_id)
+

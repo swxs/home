@@ -19,3 +19,7 @@ class Movie(BaseUtils):
     def __init__(self, **kwargs):
         super(Movie, self).__init__(**kwargs)
 
+    @classmethod
+    def get_movie_by_movie_id(cls, movie_id):
+        return cls.select(id=movie_id)
+

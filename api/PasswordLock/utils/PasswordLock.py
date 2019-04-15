@@ -20,3 +20,7 @@ class PasswordLock(BaseUtils):
     def __init__(self, **kwargs):
         super(PasswordLock, self).__init__(**kwargs)
 
+    @classmethod
+    def get_password_lock_by_password_lock_id(cls, password_lock_id):
+        return cls.select(id=password_lock_id)
+

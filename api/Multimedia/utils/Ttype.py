@@ -17,3 +17,7 @@ class Ttype(BaseUtils):
     def __init__(self, **kwargs):
         super(Ttype, self).__init__(**kwargs)
 
+    @classmethod
+    def get_ttype_by_ttype_id(cls, ttype_id):
+        return cls.select(id=ttype_id)
+

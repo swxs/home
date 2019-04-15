@@ -22,14 +22,25 @@ class DatamergeHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, datamerge_id=None):
-        params = dict()
-        params['source_worktable_id'] = self.get_argument('source_worktable_id', None)
-        params['source_column_id_list'] = self.get_arguments('source_column_id_list', [])
-        params['remote_worktable_id'] = self.get_argument('remote_worktable_id', None)
-        params['remote_column_id_list'] = self.get_arguments('remote_column_id_list', [])
-        params['how'] = self.get_argument('how', None)
-        datamerge = Datamerge.create(**params)
-        return datamerge.id
+        if datamerge_id:
+            params = dict()
+            params['source_worktable_id'] = self.get_argument('source_worktable_id', undefined)
+            params['source_column_id_list'] = self.get_arguments('source_column_id_list', undefined)
+            params['remote_worktable_id'] = self.get_argument('remote_worktable_id', undefined)
+            params['remote_column_id_list'] = self.get_arguments('remote_column_id_list', undefined)
+            params['how'] = self.get_argument('how', undefined)
+            datamerge = Datamerge.select(id=datamerge_id)
+            datamerge = datamerge.copy(**params)
+            return datamerge.id
+        else:
+            params = dict()
+            params['source_worktable_id'] = self.get_argument('source_worktable_id', None)
+            params['source_column_id_list'] = self.get_arguments('source_column_id_list', [])
+            params['remote_worktable_id'] = self.get_argument('remote_worktable_id', None)
+            params['remote_column_id_list'] = self.get_arguments('remote_column_id_list', [])
+            params['how'] = self.get_argument('how', None)
+            datamerge = Datamerge.create(**params)
+            return datamerge.id
 
     @BaseHandler.ajax_base()
     def put(self, datamerge_id=None):

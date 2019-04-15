@@ -25,3 +25,7 @@ class Dashboard(BaseUtils):
     def __init__(self, **kwargs):
         super(Dashboard, self).__init__(**kwargs)
 
+    @classmethod
+    def get_dashboard_by_dashboard_id(cls, dashboard_id):
+        return cls.select(id=dashboard_id)
+

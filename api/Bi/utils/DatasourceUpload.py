@@ -17,3 +17,7 @@ class DatasourceUpload(Datasource):
     def __init__(self, **kwargs):
         super(DatasourceUpload, self).__init__(**kwargs)
 
+    @classmethod
+    def get_datasource_upload_by_datasource_upload_id(cls, datasource_upload_id):
+        return cls.select(id=datasource_upload_id)
+

@@ -18,3 +18,7 @@ class Tag(BaseUtils):
     def __init__(self, **kwargs):
         super(Tag, self).__init__(**kwargs)
 
+    @classmethod
+    def get_tag_by_tag_id(cls, tag_id):
+        return cls.select(id=tag_id)
+

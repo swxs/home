@@ -22,13 +22,23 @@ class ContainerGroupSwitchHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, container_group_switch_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['show_name'] = self.get_argument('show_name', None)
-        params['container_id_list'] = self.get_arguments('container_id_list', [])
-        params['switch_list'] = self.get_arguments('switch_list', [])
-        container_group_switch = ContainerGroupSwitch.create(**params)
-        return container_group_switch.id
+        if container_group_switch_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['show_name'] = self.get_argument('show_name', undefined)
+            params['container_id_list'] = self.get_arguments('container_id_list', undefined)
+            params['switch_list'] = self.get_arguments('switch_list', undefined)
+            container_group_switch = ContainerGroupSwitch.select(id=container_group_switch_id)
+            container_group_switch = container_group_switch.copy(**params)
+            return container_group_switch.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['show_name'] = self.get_argument('show_name', None)
+            params['container_id_list'] = self.get_arguments('container_id_list', [])
+            params['switch_list'] = self.get_arguments('switch_list', [])
+            container_group_switch = ContainerGroupSwitch.create(**params)
+            return container_group_switch.id
 
     @BaseHandler.ajax_base()
     def put(self, container_group_switch_id=None):

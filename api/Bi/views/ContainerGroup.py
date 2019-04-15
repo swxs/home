@@ -22,13 +22,23 @@ class ContainerGroupHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, container_group_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['show_name'] = self.get_argument('show_name', None)
-        params['container_id_list'] = self.get_arguments('container_id_list', [])
-        params['layout_list'] = self.get_arguments('layout_list', [])
-        container_group = ContainerGroup.create(**params)
-        return container_group.id
+        if container_group_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['show_name'] = self.get_argument('show_name', undefined)
+            params['container_id_list'] = self.get_arguments('container_id_list', undefined)
+            params['layout_list'] = self.get_arguments('layout_list', undefined)
+            container_group = ContainerGroup.select(id=container_group_id)
+            container_group = container_group.copy(**params)
+            return container_group.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['show_name'] = self.get_argument('show_name', None)
+            params['container_id_list'] = self.get_arguments('container_id_list', [])
+            params['layout_list'] = self.get_arguments('layout_list', [])
+            container_group = ContainerGroup.create(**params)
+            return container_group.id
 
     @BaseHandler.ajax_base()
     def put(self, container_group_id=None):

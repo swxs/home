@@ -22,15 +22,27 @@ class CacheChartHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, cache_chart_id=None):
-        params = dict()
-        params['chart_id'] = self.get_argument('chart_id', None)
-        params['data_filter_id'] = self.get_argument('data_filter_id', None)
-        params['ttype'] = self.get_argument('ttype', None)
-        params['key'] = self.get_argument('key', None)
-        params['value'] = self.get_argument('value', None)
-        params['status'] = self.get_argument('status', None)
-        cache_chart = CacheChart.create(**params)
-        return cache_chart.id
+        if cache_chart_id:
+            params = dict()
+            params['chart_id'] = self.get_argument('chart_id', undefined)
+            params['data_filter_id'] = self.get_argument('data_filter_id', undefined)
+            params['ttype'] = self.get_argument('ttype', undefined)
+            params['key'] = self.get_argument('key', undefined)
+            params['value'] = self.get_argument('value', undefined)
+            params['status'] = self.get_argument('status', undefined)
+            cache_chart = CacheChart.select(id=cache_chart_id)
+            cache_chart = cache_chart.copy(**params)
+            return cache_chart.id
+        else:
+            params = dict()
+            params['chart_id'] = self.get_argument('chart_id', None)
+            params['data_filter_id'] = self.get_argument('data_filter_id', None)
+            params['ttype'] = self.get_argument('ttype', None)
+            params['key'] = self.get_argument('key', None)
+            params['value'] = self.get_argument('value', None)
+            params['status'] = self.get_argument('status', None)
+            cache_chart = CacheChart.create(**params)
+            return cache_chart.id
 
     @BaseHandler.ajax_base()
     def put(self, cache_chart_id=None):

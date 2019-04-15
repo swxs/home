@@ -21,3 +21,12 @@ class Worktable(BaseUtils):
     def __init__(self, **kwargs):
         super(Worktable, self).__init__(**kwargs)
 
+    @property
+    def datasource(self):
+        from .Datasource import Datasource
+        return Datasource.get_datasource_by_datasource_id(self.datasource_id)
+
+    @classmethod
+    def get_worktable_by_worktable_id(cls, worktable_id):
+        return cls.select(id=worktable_id)
+

@@ -17,3 +17,12 @@ class ContainerDatafilter(Container):
     def __init__(self, **kwargs):
         super(ContainerDatafilter, self).__init__(**kwargs)
 
+    @property
+    def datafilter(self):
+        from .Datafilter import Datafilter
+        return Datafilter.get_datafilter_by_datafilter_id(self.data_filter_id)
+
+    @classmethod
+    def get_container_datafilter_by_container_datafilter_id(cls, container_datafilter_id):
+        return cls.select(id=container_datafilter_id)
+

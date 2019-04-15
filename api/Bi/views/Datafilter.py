@@ -22,14 +22,25 @@ class DatafilterHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, datafilter_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['column_id'] = self.get_argument('column_id', None)
-        params['worktable_id'] = self.get_argument('worktable_id', None)
-        params['dtype'] = self.get_argument('dtype', None)
-        params['custom_attr'] = self.get_argument('custom_attr', None)
-        datafilter = Datafilter.create(**params)
-        return datafilter.id
+        if datafilter_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['column_id'] = self.get_argument('column_id', undefined)
+            params['worktable_id'] = self.get_argument('worktable_id', undefined)
+            params['dtype'] = self.get_argument('dtype', undefined)
+            params['custom_attr'] = self.get_argument('custom_attr', undefined)
+            datafilter = Datafilter.select(id=datafilter_id)
+            datafilter = datafilter.copy(**params)
+            return datafilter.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['column_id'] = self.get_argument('column_id', None)
+            params['worktable_id'] = self.get_argument('worktable_id', None)
+            params['dtype'] = self.get_argument('dtype', None)
+            params['custom_attr'] = self.get_argument('custom_attr', None)
+            datafilter = Datafilter.create(**params)
+            return datafilter.id
 
     @BaseHandler.ajax_base()
     def put(self, datafilter_id=None):

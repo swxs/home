@@ -25,3 +25,7 @@ class Artical(BaseUtils):
     def __init__(self, **kwargs):
         super(Artical, self).__init__(**kwargs)
 
+    @classmethod
+    def get_artical_by_artical_id(cls, artical_id):
+        return cls.select(id=artical_id)
+

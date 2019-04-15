@@ -17,3 +17,7 @@ class DatasourceRegion(Datasource):
     def __init__(self, **kwargs):
         super(DatasourceRegion, self).__init__(**kwargs)
 
+    @classmethod
+    def get_datasource_region_by_datasource_region_id(cls, datasource_region_id):
+        return cls.select(id=datasource_region_id)
+

@@ -22,11 +22,19 @@ class TagHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, tag_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['color'] = self.get_argument('color', None)
-        tag = Tag.create(**params)
-        return tag.id
+        if tag_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['color'] = self.get_argument('color', undefined)
+            tag = Tag.select(id=tag_id)
+            tag = tag.copy(**params)
+            return tag.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['color'] = self.get_argument('color', None)
+            tag = Tag.create(**params)
+            return tag.id
 
     @BaseHandler.ajax_base()
     def put(self, tag_id=None):

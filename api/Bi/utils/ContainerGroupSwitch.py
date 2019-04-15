@@ -18,3 +18,7 @@ class ContainerGroupSwitch(Container):
     def __init__(self, **kwargs):
         super(ContainerGroupSwitch, self).__init__(**kwargs)
 
+    @classmethod
+    def get_container_group_switch_by_container_group_switch_id(cls, container_group_switch_id):
+        return cls.select(id=container_group_switch_id)
+

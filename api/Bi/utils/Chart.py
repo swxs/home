@@ -27,3 +27,12 @@ class Chart(BaseUtils):
     def __init__(self, **kwargs):
         super(Chart, self).__init__(**kwargs)
 
+    @property
+    def worktable(self):
+        from .Worktable import Worktable
+        return Worktable.get_worktable_by_worktable_id(self.worktable_id)
+
+    @classmethod
+    def get_chart_by_chart_id(cls, chart_id):
+        return cls.select(id=chart_id)
+

@@ -17,3 +17,7 @@ class Datasource(BaseUtils):
     def __init__(self, **kwargs):
         super(Datasource, self).__init__(**kwargs)
 
+    @classmethod
+    def get_datasource_by_datasource_id(cls, datasource_id):
+        return cls.select(id=datasource_id)
+

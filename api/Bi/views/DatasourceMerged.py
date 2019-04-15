@@ -22,11 +22,19 @@ class DatasourceMergedHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, datasource_merged_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['datamerge_id'] = self.get_argument('datamerge_id', None)
-        datasource_merged = DatasourceMerged.create(**params)
-        return datasource_merged.id
+        if datasource_merged_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['datamerge_id'] = self.get_argument('datamerge_id', undefined)
+            datasource_merged = DatasourceMerged.select(id=datasource_merged_id)
+            datasource_merged = datasource_merged.copy(**params)
+            return datasource_merged.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['datamerge_id'] = self.get_argument('datamerge_id', None)
+            datasource_merged = DatasourceMerged.create(**params)
+            return datasource_merged.id
 
     @BaseHandler.ajax_base()
     def put(self, datasource_merged_id=None):

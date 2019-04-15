@@ -17,3 +17,12 @@ class DatasourceMerged(Datasource):
     def __init__(self, **kwargs):
         super(DatasourceMerged, self).__init__(**kwargs)
 
+    @property
+    def datamerge(self):
+        from .Datamerge import Datamerge
+        return Datamerge.get_datamerge_by_datamerge_id(self.datamerge_id)
+
+    @classmethod
+    def get_datasource_merged_by_datasource_merged_id(cls, datasource_merged_id):
+        return cls.select(id=datasource_merged_id)
+

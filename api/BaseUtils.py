@@ -8,5 +8,5 @@ import mongoengine_utils as model
 
 
 class BaseUtils(model.BaseDocument):
-    created = model.DateTimeField()
-    updated = model.DateTimeField(pre_update=datetime.datetime.now)
+    created = model.DateTimeField(create=False)
+    updated = model.DateTimeField(create=False, pre_update=datetime.datetime.now)

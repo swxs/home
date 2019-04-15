@@ -22,11 +22,19 @@ class DatasourceSurveyHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, datasource_survey_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['survey_id'] = self.get_argument('survey_id', None)
-        datasource_survey = DatasourceSurvey.create(**params)
-        return datasource_survey.id
+        if datasource_survey_id:
+            params = dict()
+            params['name'] = self.get_argument('name', undefined)
+            params['survey_id'] = self.get_argument('survey_id', undefined)
+            datasource_survey = DatasourceSurvey.select(id=datasource_survey_id)
+            datasource_survey = datasource_survey.copy(**params)
+            return datasource_survey.id
+        else:
+            params = dict()
+            params['name'] = self.get_argument('name', None)
+            params['survey_id'] = self.get_argument('survey_id', None)
+            datasource_survey = DatasourceSurvey.create(**params)
+            return datasource_survey.id
 
     @BaseHandler.ajax_base()
     def put(self, datasource_survey_id=None):
