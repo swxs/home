@@ -57,6 +57,9 @@ SPIDER_LOG_PATH = os.path.join(SITE_ROOT, 'model_spider', 'model_spider', 'logs'
 
 INIT_SETTINGS_FILE = os.path.join(SITE_ROOT, "init.yaml")
 
+RPC_SERVER_HOST = '127.0.0.1'
+RPC_SERVER_PORT = 6000
+
 try:
     from local_settings import *
 except Exception:

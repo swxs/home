@@ -1,6 +1,7 @@
 # ignore
-api/auto/
 logs/
+docs/
+api/auto/
 data_file/
 .vscode/
 
