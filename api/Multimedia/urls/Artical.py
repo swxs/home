@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Artical.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.Artical import ArticalHandler

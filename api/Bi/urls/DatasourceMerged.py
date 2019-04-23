@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : DatasourceMerged.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.DatasourceMerged import DatasourceMergedHandler

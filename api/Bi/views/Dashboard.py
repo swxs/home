@@ -22,18 +22,33 @@ class DashboardHandler(BaseHandler):
 
     @BaseHandler.ajax_base()
     def post(self, dashboard_id=None):
-        params = dict()
-        params['user_id'] = self.get_argument('user_id', None)
-        params['usage'] = self.get_argument('usage', None)
-        params['container_id'] = self.get_argument('container_id', None)
-        params['worktable_id'] = self.get_argument('worktable_id', None)
-        params['index'] = self.get_argument('index', None)
-        params['name'] = self.get_argument('name', None)
-        params['description'] = self.get_argument('description', None)
-        params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
-        params['parent_id'] = self.get_argument('parent_id', None)
-        dashboard = Dashboard.create(**params)
-        return dashboard.id
+        if dashboard_id:
+            params = dict()
+            params['user_id'] = self.get_argument('user_id', undefined)
+            params['usage'] = self.get_argument('usage', undefined)
+            params['container_id'] = self.get_argument('container_id', undefined)
+            params['worktable_id'] = self.get_argument('worktable_id', undefined)
+            params['index'] = self.get_argument('index', undefined)
+            params['name'] = self.get_argument('name', undefined)
+            params['description'] = self.get_argument('description', undefined)
+            params['simulate_region_id'] = self.get_argument('simulate_region_id', undefined)
+            params['parent_id'] = self.get_argument('parent_id', undefined)
+            dashboard = Dashboard.select(id=dashboard_id)
+            dashboard = dashboard.copy(**params)
+            return dashboard.id
+        else:
+            params = dict()
+            params['user_id'] = self.get_argument('user_id', None)
+            params['usage'] = self.get_argument('usage', None)
+            params['container_id'] = self.get_argument('container_id', None)
+            params['worktable_id'] = self.get_argument('worktable_id', None)
+            params['index'] = self.get_argument('index', None)
+            params['name'] = self.get_argument('name', None)
+            params['description'] = self.get_argument('description', None)
+            params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
+            params['parent_id'] = self.get_argument('parent_id', None)
+            dashboard = Dashboard.create(**params)
+            return dashboard.id
 
     @BaseHandler.ajax_base()
     def put(self, dashboard_id=None):

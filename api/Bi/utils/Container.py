@@ -1,24 +1,10 @@
 # -*- coding: utf-8 -*-
 # @File    : Container.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
-import datetime
-import mongoengine_utils as model
-from ..models.Container import Container as _
-from ...BaseUtils import BaseUtils
-from common.Utils.log_utils import getLogger
-
-log = getLogger("utils/{self.model_name}")
+from ..commons.Container import Container as BaseContainer
 
 
-class Container(BaseUtils):
-    name = model.StringField()
-    show_name = model.BooleanField()
-
+class Container(BaseContainer):
     def __init__(self, **kwargs):
         super(Container, self).__init__(**kwargs)
-
-    @classmethod
-    def get_container_by_container_id(cls, container_id):
-        return cls.select(id=container_id)
-

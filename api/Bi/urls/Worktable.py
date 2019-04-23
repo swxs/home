@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Worktable.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.Worktable import WorktableHandler

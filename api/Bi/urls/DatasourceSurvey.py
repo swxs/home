@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : DatasourceSurvey.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.DatasourceSurvey import DatasourceSurveyHandler

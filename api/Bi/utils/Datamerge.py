@@ -1,37 +1,10 @@
 # -*- coding: utf-8 -*-
 # @File    : Datamerge.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
-import datetime
-import mongoengine_utils as model
-from ..models.Datamerge import Datamerge as _
-from ...BaseUtils import BaseUtils
-from common.Utils.log_utils import getLogger
-
-log = getLogger("utils/{self.model_name}")
+from ..commons.Datamerge import Datamerge as BaseDatamerge
 
 
-class Datamerge(BaseUtils):
-    source_worktable_id = model.ObjectIdField()
-    source_column_id_list = model.ListField()
-    remote_worktable_id = model.ObjectIdField()
-    remote_column_id_list = model.ListField()
-    how = model.IntField()
-
+class Datamerge(BaseDatamerge):
     def __init__(self, **kwargs):
         super(Datamerge, self).__init__(**kwargs)
-
-    @property
-    def worktable(self):
-        from .Worktable import Worktable
-        return Worktable.get_worktable_by_worktable_id(self.source_worktable_id)
-
-    @property
-    def worktable(self):
-        from .Worktable import Worktable
-        return Worktable.get_worktable_by_worktable_id(self.remote_worktable_id)
-
-    @classmethod
-    def get_datamerge_by_datamerge_id(cls, datamerge_id):
-        return cls.select(id=datamerge_id)
-

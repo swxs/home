@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Dashboard.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.Dashboard import DashboardHandler

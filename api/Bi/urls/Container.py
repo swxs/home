@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : Container.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.Container import ContainerHandler

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File    : ContainerGroupDatafilter.py
-# @AUTH    : model
+# @AUTH    : model_creater
 
 from tornado.web import url
 from ..views.ContainerGroupDatafilter import ContainerGroupDatafilterHandler
