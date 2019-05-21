@@ -19,6 +19,7 @@ class ManagerQuerySet(object):
     def __init__(self, get_instance, model):
         self.get_instance = get_instance
         self.model = model
+        self._filter = dict()
 
     def __len__(self):
         return self.model.count()
@@ -27,23 +28,34 @@ class ManagerQuerySet(object):
         if self.model is None:
             return list()
         else:
-            return map(self.get_instance, self.model)
+            return map(lambda model: self.get_instance(model, _filter=self._filter), self.model)
 
     def first(self):
         first_model = self.model.first()
         if first_model is None:
             return None
         else:
-            return self.get_instance(first_model)
+            return self.get_instance(first_model, _filter=self._filter)
 
     def count(self):
         return self.model.count()
 
+    def only(self, *keys):
+        if self.model is not None:
+            self._filter["only"] = list(keys)
+            self.model.only(*keys)
+        return self
+
+    def exclude(self, *keys):
+        if self.model is not None:
+            self._filter["exclude"] = list(keys)
+            self.model.exclude(*keys)
+        return self
+
     def order_by(self, *keys):
-        if self.model is None:
-            return list()
-        else:
-            return map(self.get_instance, self.model.order_by(*keys))
+        if self.model is not None:
+            self.model.order_by(*keys)
+        return self
 
 
 class Manager(object):

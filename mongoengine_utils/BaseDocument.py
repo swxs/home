@@ -4,7 +4,7 @@
 # @Time    : 2018/5/7 22:40
 
 import datetime
-
+import functools
 from bson import ObjectId
 from tornado.util import ObjectDict
 from api.BaseConsts import undefined
@@ -66,9 +66,24 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             self._data[key] = value
 
     @classmethod
-    def get_instance(cls, model):
+    @functools.lru_cache(4)
+    def get_all_fields(cls, _filter=None):
+        if _filter is None:
+            _filter = dict()
+        if "only" in _filter:
+            all_fields = _filter["only"][:]
+        else:
+            all_fields = cls.__fields__[:]
+        if "exclude" in _filter:
+            for field in _filter["exclude"]:
+                all_fields.pop(field)
+        return all_fields
+
+    @classmethod
+    def get_instance(cls, model, _filter=None):
         data = dict()
-        for attr in cls.__fields__:
+        all_fields = cls.get_all_fields(_filter)
+        for attr in all_fields:
             data[attr] = model.__getattribute__(attr)
         data["_oid"] = model.__getattribute__("id")
         data["_id"] = str(model.__getattribute__("id"))
