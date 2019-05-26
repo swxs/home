@@ -2,9 +2,8 @@
 # @File    : PasswordLock.py
 # @AUTH    : model_creater
 
-from ..commons.PasswordLock import PasswordLock as BasePasswordLock
+from ..dao.PasswordLock import PasswordLock as BasePasswordLock
 from common.Helpers.Helper_encryption import Encryption
-
 
 
 class PasswordLock(BasePasswordLock):

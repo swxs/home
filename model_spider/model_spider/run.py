@@ -8,7 +8,7 @@ if __name__ == '__main__':
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
-from model_spider.model_spider.spiders.JobboleSpider import JobboleSpider
+# from model_spider.model_spider.spiders.JobboleSpider import JobboleSpider
 from model_spider.model_spider.spiders.BaiduSpider import BaiduSpider
 # from model_spider.model_spider.spiders.wklkenSpider import WklkenSpider
 # from model_spider.model_spider.spiders.BossZhipinSpider import BossZhipinSpider
@@ -19,7 +19,7 @@ def run():
     process = CrawlerProcess(settings=settings)
 
     # 可以添加多个spider
-    process.crawl(JobboleSpider)
+    # process.crawl(JobboleSpider)
     process.crawl(BaiduSpider)
     # process.crawl(WklkenSpider)  # not daily
     # process.crawl(BossZhipinSpider) # not daily

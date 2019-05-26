@@ -5,7 +5,6 @@
 
 include "model.thrift"
 
-
-service PasswordLockService extends model.PasswordLockService {
+service UserService extends model.UserService {
 
 }

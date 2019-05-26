@@ -25,19 +25,19 @@ log = getLogger()
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def prepare(self):
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        log.info(f'{now} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start')
+        log.info(f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start')
 
     def on_finish(self):
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        log.info(f'{now} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished')
+        log.info(f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished')
 
     def _is_normal_argumnet(self):
-        if not hasattr(self, "__normal_argumnet"):
-            self.__normal_argumnet = (self.request.method.upper() in (HTTP_METHOD_GET, HTTP_METHOD_DELETE)
-                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
-                                      or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE))
-        return self.__normal_argumnet
+        if not hasattr(self, "__normal_argument"):
+            self.__normal_argument = (
+                    self.request.method.upper() in (HTTP_METHOD_GET, HTTP_METHOD_DELETE)
+                    or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
+                    or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE)
+            )
+        return self.__normal_argument
 
     def _get_argument_as_dict(self):
         if not hasattr(self, "__dict_args"):
@@ -55,7 +55,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                         value = value.strip()
                     except:
                         pass
-            except:
+            except Exception:
                 value = default
             return value
 
@@ -68,7 +68,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         else:
             try:
                 value = self._get_argument_as_dict().get(argument)
-            except:
+            except Exception:
                 value = []
             if value is None:
                 return default
@@ -82,7 +82,6 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             return default
 
     def write_json(self, data=None, errcode=0, errmsg=None, status=None):
-        ''''''
         self.set_header('Content-Type', 'text/json')
         if isinstance(status, int):
             self.set_status(status)
@@ -133,7 +132,6 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             self.render("error.html", msg=status_code)
 
     def check_xsrf_cookie(self):
-        ''''''
         token = self.get_cookie(settings.XSRF, None) or \
                 self.get_argument(settings.XSRF, None) or \
                 self.request.headers.get("X-Xsrftoken") or \
@@ -148,7 +146,6 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     @property
     def current_user(self):
-        ''''''
         if not hasattr(self, '_user'):
             user_id = self.session.get('user_id')
             if user_id is None:
@@ -161,14 +158,11 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if not hasattr(self, '_user'):
             if user_id is not None:
                 raise ApiNotLoginException()
-            self._user = None
 
     def get_user_locale(self):
-        ''''''
         return self.locale
 
     def my_render(self, template, argus=None, rubbish_keys=None):
-        ''''''
         if not isinstance(argus, dict):
             argus = dict()
 
@@ -178,16 +172,14 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
         self.render(template, **argus)
 
-    def xsrf_form_html(self):
-        ''''''
-        xsrf_key = settings.XSRF
-        xsrf_val = escape.xhtml_escape(self.xsrf_token)
-        t = '<input type="hidden" id="{0}" name="{0}" value="{1}"/>'
-        return t.format(xsrf_key, xsrf_val)
+    @property
+    def is_ajax(self):
+        if not hasattr(self, '_is_ajax'):
+            self._is_ajax = self.request.headers.get('X-Requested-With')
+        return self._is_ajax
 
     @property
     def xsrf_token(self):
-        ''''''
         if not hasattr(self, "_xsrf_token"):
             token = self.get_cookie(settings.XSRF)
             if not token:
@@ -197,36 +189,14 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             self._xsrf_token = token
         return self._xsrf_token
 
-    @property
-    def is_ajax(self):
-        ''''''
-        if not hasattr(self, '_is_ajax'):
-            self._is_ajax = self.request.headers.get('X-Requested-With')
-        return self._is_ajax
-
-    @property
-    def access_token(self):
-        if not hasattr(self, '_access_token'):
-            self._access_token = self.request.headers.get('access_token')
-        return self._access_token
-
-    @access_token.setter
-    def access_token(self, token):
-        self._headers.add('access_token', token)
-
-    @property
-    def refresh_token(self):
-        if not hasattr(self, '_refresh_token'):
-            self._refresh_token = self.request.headers.get('refresh_token')
-        return self._refresh_token
-
-    @refresh_token.setter
-    def refresh_token(self, token):
-        self._headers.add('refresh_token', token)
+    def xsrf_form_html(self):
+        xsrf_key = settings.XSRF
+        xsrf_val = escape.xhtml_escape(self.xsrf_token)
+        t = '<input type="hidden" id="{0}" name="{0}" value="{1}"/>'
+        return t.format(xsrf_key, xsrf_val)
 
     @property
     def locale(self):
-        ''''''
         if not hasattr(self, '_locale'):
             local_code = self.get_cookie('locale', default=settings.DEFAULT_LOCAL)
             self.set_cookie('locale', local_code, expires_days=30)
@@ -237,6 +207,26 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def locale(self, local_code):
         self.set_cookie('locale', local_code)
         self._locale = locale.get(local_code)
+
+    @property
+    def access_token(self):
+        if not hasattr(self, '_access_token'):
+            self._access_token = self.request.headers.get('access_token').replace("Bearer ", "")
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, token):
+        self._headers.add('access_token', f"Bearer {token}")
+
+    @property
+    def refresh_token(self):
+        if not hasattr(self, '_refresh_token'):
+            self._refresh_token = self.request.headers.get('refresh_token').replace("Bearer ", "")
+        return self._refresh_token
+
+    @refresh_token.setter
+    def refresh_token(self, token):
+        self._headers.add('refresh_token', f"Bearer {token}")
 
     def _do_filter(self, result, filter):
         if len(filter) == 1:
@@ -258,6 +248,9 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 f = filter.split(".")
                 result = self._do_filter(result, f)
         return result
+
+    def set_default_headers(self):
+        self._headers.add("version", "1")
 
     @classmethod
     def ajax_base(cls, auth=False, aio=False):
@@ -302,9 +295,10 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                                 break
                             self.write(data)
                 except ApiException as e:
+                    log.exception(repr(e))
                     self.write_json(data=e.data, errcode=e.code, errmsg=e.message)
                 except (Exception, NotImplementedError) as e:
-                    log.error(repr(e))
+                    log.exception(repr(e))
                     self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL)
                 self.finish()
 

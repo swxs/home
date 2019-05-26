@@ -58,8 +58,8 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
         for attr in self.__fields__:
             self.__dict__[attr] = kwargs.get(attr, undefined)
-        self.__dict__["id"] = kwargs.get("_id", undefined)
-        self.__dict__["oid"] = kwargs.get("_oid", undefined)
+        self.id = kwargs.get("_id", undefined)
+        self.oid = kwargs.get("_oid", undefined)
 
         self._data = {}
         for key, value in kwargs.items():
@@ -68,25 +68,16 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     @classmethod
     @functools.lru_cache(4)
     def get_all_fields(cls, _filter=None):
-        if _filter is None:
-            _filter = dict()
-        if "only" in _filter:
-            all_fields = _filter["only"][:]
-        else:
-            all_fields = cls.__fields__[:]
-        if "exclude" in _filter:
-            for field in _filter["exclude"]:
-                all_fields.pop(field)
-        return all_fields
+        return cls.__fields__
 
     @classmethod
     def get_instance(cls, model, _filter=None):
         data = dict()
-        all_fields = cls.get_all_fields(_filter)
+        all_fields = cls.__fields__
         for attr in all_fields:
             data[attr] = model.__getattribute__(attr)
-        data["_oid"] = model.__getattribute__("id")
         data["_id"] = str(model.__getattribute__("id"))
+        data["_oid"] = model.__getattribute__("id")
         data["_raw_model"] = model
         return cls(**data)
 
@@ -131,7 +122,8 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     def create(cls, **kwargs):
         for key in cls.__fields__:
             if not getattr(cls.__fields__[key], "create"):
-                del kwargs[key]
+                if key in kwargs:
+                    del kwargs[key]
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{cls.__model_name__}>: kwargs - {str(kwargs)}")
         return Manager.create(cls, **kwargs)
 
