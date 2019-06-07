@@ -10,8 +10,8 @@ from mongoengine_utils import NAME_DICT
 
 
 class ContainerGroup(Container):
-    container_id_list = model.ListField(helper_text='容器id')
-    layout_list = model.ListField(helper_text='容器布局信息')
+    container_id_list = model.ListField()
+    layout_list = model.ListField()
 
     meta = {
     }

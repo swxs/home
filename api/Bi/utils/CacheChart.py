@@ -2,7 +2,7 @@
 # @File    : CacheChart.py
 # @AUTH    : model_creater
 
-from ..commons.CacheChart import CacheChart as BaseCacheChart
+from ..dao.CacheChart import CacheChart as BaseCacheChart
 
 
 class CacheChart(BaseCacheChart):

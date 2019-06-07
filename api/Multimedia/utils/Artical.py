@@ -2,7 +2,7 @@
 # @File    : Artical.py
 # @AUTH    : model_creater
 
-from ..commons.Artical import Artical as BaseArtical
+from ..dao.Artical import Artical as BaseArtical
 
 
 class Artical(BaseArtical):

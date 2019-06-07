@@ -2,7 +2,7 @@
 # @File    : Ttype.py
 # @AUTH    : model_creater
 
-from ..commons.Ttype import Ttype as BaseTtype
+from ..dao.Ttype import Ttype as BaseTtype
 
 
 class Ttype(BaseTtype):

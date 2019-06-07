@@ -2,7 +2,7 @@
 # @File    : Column.py
 # @AUTH    : model_creater
 
-from ..commons.Column import Column as BaseColumn
+from ..dao.Column import Column as BaseColumn
 
 
 class Column(BaseColumn):

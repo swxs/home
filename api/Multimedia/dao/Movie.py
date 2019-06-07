@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Movie import Movie as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Movie(BaseUtils):
+class Movie(BaseDAO):
     title = model.StringField()
     year = model.StringField()
     summary = model.StringField()

@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Datamerge import Datamerge as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Datamerge(BaseUtils):
+class Datamerge(BaseDAO):
     source_worktable_id = model.ObjectIdField()
     source_column_id_list = model.ListField()
     remote_worktable_id = model.ObjectIdField()

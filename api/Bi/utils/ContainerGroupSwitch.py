@@ -2,7 +2,7 @@
 # @File    : ContainerGroupSwitch.py
 # @AUTH    : model_creater
 
-from ..commons.ContainerGroupSwitch import ContainerGroupSwitch as BaseContainerGroupSwitch
+from ..dao.ContainerGroupSwitch import ContainerGroupSwitch as BaseContainerGroupSwitch
 
 
 class ContainerGroupSwitch(BaseContainerGroupSwitch):

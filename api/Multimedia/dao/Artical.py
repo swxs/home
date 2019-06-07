@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Artical import Artical as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Artical(BaseUtils):
+class Artical(BaseDAO):
     title = model.StringField()
     author = model.StringField()
     year = model.StringField()

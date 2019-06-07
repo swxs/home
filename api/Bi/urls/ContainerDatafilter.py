@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.ContainerDatafilter import ContainerDatafilterHandler
 
 url_mapping = [
-    url(r"/api/bi/ContainerDatafilter/(?:([a-zA-Z0-9&%\.~-]+)/)?", ContainerDatafilterHandler),
+    url(r"/api/bi/container_datafilter/(?:([a-zA-Z0-9&%\.~-]+)/)?", ContainerDatafilterHandler),
 ]

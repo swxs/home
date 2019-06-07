@@ -20,7 +20,59 @@ from common.Exceptions import *
 from common.Utils.validate import Validate, RegType
 from common.Utils.log_utils import getLogger
 
-log = getLogger()
+log = getLogger("views.Base")
+
+
+class ResultData(object):
+    """
+    数据结果
+    """
+
+    def __init__(self, code=0, **kwargs):
+        self.code = code
+        self.kwargs = kwargs
+
+    @property
+    def data(self):
+        result = {}
+        result.update(vars(self))
+        result.update(self.kwargs)
+        result.__delitem__('kwargs')
+        return result
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+    def __repr__(self):
+        return str(self.data)
+
+    def __str__(self):
+        return str(self.data)
+
+    def to_json(self):
+        return json.dumps(self.data)
+
+
+class ExceptionData(ResultData):
+    """
+    异常返回的结果
+    """
+
+    def __init__(self, e):
+        super(ExceptionData, self).__init__(code=e.code, data=e.data)
+
+
+class SuccessData(ResultData):
+    """
+    成功返回的结果
+    """
+
+    def __init__(self, data, **kwargs):
+        kwargs.update({'data': data})
+        super(SuccessData, self).__init__(code=0, data=kwargs)
+
+    def __setitem__(self, key, value):
+        self.kwargs['data'][key] = value
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
@@ -81,21 +133,15 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         else:
             return default
 
-    def write_json(self, data=None, errcode=0, errmsg=None, status=None):
+    def write_json(self, data, status=200):
         self.set_header('Content-Type', 'text/json')
         if isinstance(status, int):
             self.set_status(status)
-        dic = {'errcode': errcode, 'data': data or []}
-        if errmsg:
-            dic['errmsg'] = errmsg
-        self.write(json.dumps(dic))
+        self.write(data)
 
     def _handle_request_exception(self, e):
-        if isinstance(e, ApiReturnException):
-            self.write_json(data=e.data, errcode=e.code, errmsg=None, status=None)
-            self.finish()
-        elif isinstance(e, ApiException):
-            self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+        if isinstance(e, ApiException):
+            self.write_json(ExceptionResult(e).to_json(), status=200)
             self.finish()
         else:
             try:
@@ -270,15 +316,9 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                     if isinstance(result, concurrent.Future):
                         return result
                     else:
-                        self.write_json(data=result, errcode=HTTP_STATUS.AJAX_SUCCESS)
-                except ApiNotFoundException as e:
-                    self.write_json(data=e.data, errcode=e.code)
-                except ApiReturnException as e:
-                    self.write_json(data=e.data, errcode=e.code)
+                        self.write_json(result.to_json())
                 except ApiRedirectException as e:
                     return self.redirect(e.url)
-                except ApiReturnFilePathException as e:
-                    self.write_json(data=e.data, errcode=e.code)
                 except ApiReturnFileException as e:
                     path, filename = os.path.split(e.filepath)
                     export_filename = f"filename={quote(filename)}"
@@ -305,11 +345,6 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             return wrapper
 
         return function
-
-
-class CsrfExceptMixin():
-    def check_xsrf_cookie(self):
-        return True
 
 
 class PageNotFoundHandler(BaseHandler):

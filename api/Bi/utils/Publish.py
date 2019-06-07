@@ -2,7 +2,7 @@
 # @File    : Publish.py
 # @AUTH    : model_creater
 
-from ..commons.Publish import Publish as BasePublish
+from ..dao.Publish import Publish as BasePublish
 
 
 class Publish(BasePublish):

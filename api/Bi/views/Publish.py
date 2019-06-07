@@ -2,9 +2,11 @@
 # @File    : Publish.py
 # @AUTH    : model
 
-from base import BaseHandler
+import json
 from common.Utils.log_utils import getLogger
+from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
+from ...BaseViews import BaseHandler, SuccessData
 from ..utils.Publish import Publish
 
 log = getLogger("views/Publish")
@@ -15,10 +17,20 @@ class PublishHandler(BaseHandler):
     def get(self, publish_id=None):
         if publish_id:
             publish = Publish.select(id=publish_id)
-            return publish.to_front()
+            return SuccessData(
+                publish.to_front()
+            )
         else:
-            publish_list = Publish.filter()
-            return [publish.to_front() for publish in publish_list]
+            search_params = json.loads(self.get_argument("search", '{}'))
+            page = self.get_argument("page", 1)
+            items_per_page = self.get_argument("items_per_page", 20)
+            pager = self.get_argument("pager", 1)
+            publish_list = Publish.search(**search_params).order_by()
+            pager = Page(publish_list, pager=pager, page=page, items_per_page=items_per_page)
+            return SuccessData(
+                [item.to_front() for item in pager.items],
+                info=pager.info,
+            )
 
     @BaseHandler.ajax_base()
     def post(self, publish_id=None):
@@ -32,7 +44,9 @@ class PublishHandler(BaseHandler):
             params['ttype'] = self.get_argument('ttype', undefined)
             publish = Publish.select(id=publish_id)
             publish = publish.copy(**params)
-            return publish.id
+            return SuccessData(
+                publish.id
+            )
         else:
             params = dict()
             params['name'] = self.get_argument('name', None)
@@ -42,7 +56,9 @@ class PublishHandler(BaseHandler):
             params['dashboard_id'] = self.get_argument('dashboard_id', None)
             params['ttype'] = self.get_argument('ttype', None)
             publish = Publish.create(**params)
-            return publish.id
+            return SuccessData(
+                publish.id
+            )
 
     @BaseHandler.ajax_base()
     def put(self, publish_id=None):
@@ -55,7 +71,9 @@ class PublishHandler(BaseHandler):
         params['ttype'] = self.get_argument('ttype', None)
         publish = Publish.select(id=publish_id)
         publish = publish.update(**params)
-        return publish.id
+        return SuccessData(
+            publish.id
+        )
 
     @BaseHandler.ajax_base()
     def patch(self, publish_id=None):
@@ -68,13 +86,17 @@ class PublishHandler(BaseHandler):
         params['ttype'] = self.get_argument('ttype', undefined)
         publish = Publish.select(id=publish_id)
         publish = publish.update(**params)
-        return publish.id
+        return SuccessData(
+            publish.id
+        )
 
     @BaseHandler.ajax_base()
     def delete(self, publish_id=None):
         publish = Publish.select(id=publish_id)
         publish.delete()
-        return None
+        return SuccessData(
+            None
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

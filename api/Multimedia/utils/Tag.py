@@ -2,7 +2,7 @@
 # @File    : Tag.py
 # @AUTH    : model_creater
 
-from ..commons.Tag import Tag as BaseTag
+from ..dao.Tag import Tag as BaseTag
 
 
 class Tag(BaseTag):

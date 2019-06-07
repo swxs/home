@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Chart import Chart as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Chart(BaseUtils):
+class Chart(BaseDAO):
     name = model.StringField()
     title = model.StringField()
     worktable_id = model.ObjectIdField()

@@ -2,7 +2,7 @@
 # @File    : Field.py
 # @AUTH    : model_creater
 
-from ..commons.Field import Field as BaseField
+from ..dao.Field import Field as BaseField
 
 
 class Field(BaseField):

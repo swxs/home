@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.DatasourceUpload import DatasourceUploadHandler
 
 url_mapping = [
-    url(r"/api/bi/DatasourceUpload/(?:([a-zA-Z0-9&%\.~-]+)/)?", DatasourceUploadHandler),
+    url(r"/api/bi/datasource_upload/(?:([a-zA-Z0-9&%\.~-]+)/)?", DatasourceUploadHandler),
 ]

@@ -2,7 +2,7 @@
 # @File    : DatasourceMerged.py
 # @AUTH    : model_creater
 
-from ..commons.DatasourceMerged import DatasourceMerged as BaseDatasourceMerged
+from ..dao.DatasourceMerged import DatasourceMerged as BaseDatasourceMerged
 
 
 class DatasourceMerged(BaseDatasourceMerged):

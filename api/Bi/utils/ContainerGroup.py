@@ -2,7 +2,7 @@
 # @File    : ContainerGroup.py
 # @AUTH    : model_creater
 
-from ..commons.ContainerGroup import ContainerGroup as BaseContainerGroup
+from ..dao.ContainerGroup import ContainerGroup as BaseContainerGroup
 
 
 class ContainerGroup(BaseContainerGroup):

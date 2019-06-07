@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.ValueGroup import ValueGroup as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class ValueGroup(BaseUtils):
+class ValueGroup(BaseDAO):
     name = model.StringField()
     value = model.IntField()
     expression = model.StringField()

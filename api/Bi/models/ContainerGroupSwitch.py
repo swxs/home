@@ -10,8 +10,8 @@ from mongoengine_utils import NAME_DICT
 
 
 class ContainerGroupSwitch(Container):
-    container_id_list = model.ListField(helper_text='容器id')
-    switch_list = model.ListField(helper_text='容器切换条件信息')
+    container_id_list = model.ListField()
+    switch_list = model.ListField()
 
     meta = {
     }

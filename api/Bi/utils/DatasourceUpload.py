@@ -2,7 +2,7 @@
 # @File    : DatasourceUpload.py
 # @AUTH    : model_creater
 
-from ..commons.DatasourceUpload import DatasourceUpload as BaseDatasourceUpload
+from ..dao.DatasourceUpload import DatasourceUpload as BaseDatasourceUpload
 
 
 class DatasourceUpload(BaseDatasourceUpload):

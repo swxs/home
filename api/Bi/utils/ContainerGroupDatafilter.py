@@ -2,7 +2,7 @@
 # @File    : ContainerGroupDatafilter.py
 # @AUTH    : model_creater
 
-from ..commons.ContainerGroupDatafilter import ContainerGroupDatafilter as BaseContainerGroupDatafilter
+from ..dao.ContainerGroupDatafilter import ContainerGroupDatafilter as BaseContainerGroupDatafilter
 
 
 class ContainerGroupDatafilter(BaseContainerGroupDatafilter):

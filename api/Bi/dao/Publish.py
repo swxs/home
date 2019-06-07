@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Publish import Publish as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Publish(BaseUtils):
+class Publish(BaseDAO):
     name = model.StringField()
     region_id = model.ObjectIdField()
     region_type_id = model.ObjectIdField()

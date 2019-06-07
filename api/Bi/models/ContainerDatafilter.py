@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class ContainerDatafilter(Container):
-    data_filter_id = model.ObjectIdField(helper_text='筛选器id')
+    data_filter_id = model.ObjectIdField()
 
     meta = {
     }

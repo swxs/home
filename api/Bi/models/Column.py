@@ -10,16 +10,16 @@ from mongoengine_utils import NAME_DICT
 
 
 class Column(BaseModelDocument):
-    col = model.StringField(helper_text='真正的列名')
-    realcol = model.StringField(helper_text='原始未处理的列名')
-    readablecol = model.StringField(helper_text='展示的列名')
-    worktable_id = model.ObjectIdField(helper_text='工作表id')
-    is_visible = model.BooleanField(default=True, helper_text='是否可见')
-    is_unique = model.BooleanField(default=False, helper_text='是否唯一字段')
+    col = model.StringField()
+    realcol = model.StringField()
+    readablecol = model.StringField()
+    worktable_id = model.ObjectIdField()
+    is_visible = model.BooleanField(default=True)
+    is_unique = model.BooleanField(default=False)
     dtype = model.IntField(enums=COLUMN_DTYPE_LIST)
     ttype = model.IntField(enums=COLUMN_TTYPE_LIST, default=COLUMN_TTYPE_NORMAL)
-    expression = model.StringField(helper_text='表达式')
-    value_group_id_list = model.StringField(helper_text='分组字段id')
+    expression = model.StringField()
+    value_group_id_list = model.StringField()
 
     meta = {
         'indexes': [

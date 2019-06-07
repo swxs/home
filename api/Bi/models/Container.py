@@ -10,8 +10,8 @@ from mongoengine_utils import NAME_DICT
 
 
 class Container(BaseModelDocument):
-    name = model.StringField(helper_text='标题')
-    show_name = model.BooleanField(default=False, helper_text='是否显示标题')
+    name = model.StringField()
+    show_name = model.BooleanField(default=False)
 
     meta = {
         'allow_inheritance': True,

@@ -2,9 +2,11 @@
 # @File    : Field.py
 # @AUTH    : model
 
-from base import BaseHandler
+import json
 from common.Utils.log_utils import getLogger
+from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
+from ...BaseViews import BaseHandler, SuccessData
 from ..utils.Field import Field
 
 log = getLogger("views/Field")
@@ -15,10 +17,20 @@ class FieldHandler(BaseHandler):
     def get(self, field_id=None):
         if field_id:
             field = Field.select(id=field_id)
-            return field.to_front()
+            return SuccessData(
+                field.to_front()
+            )
         else:
-            field_list = Field.filter()
-            return [field.to_front() for field in field_list]
+            search_params = json.loads(self.get_argument("search", '{}'))
+            page = self.get_argument("page", 1)
+            items_per_page = self.get_argument("items_per_page", 20)
+            pager = self.get_argument("pager", 1)
+            field_list = Field.search(**search_params).order_by()
+            pager = Page(field_list, pager=pager, page=page, items_per_page=items_per_page)
+            return SuccessData(
+                [item.to_front() for item in pager.items],
+                info=pager.info,
+            )
 
     @BaseHandler.ajax_base()
     def post(self, field_id=None):
@@ -41,7 +53,9 @@ class FieldHandler(BaseHandler):
             params['custom_attr'] = self.get_argument('custom_attr', undefined)
             field = Field.select(id=field_id)
             field = field.copy(**params)
-            return field.id
+            return SuccessData(
+                field.id
+            )
         else:
             params = dict()
             params['chart_id'] = self.get_argument('chart_id', None)
@@ -60,7 +74,9 @@ class FieldHandler(BaseHandler):
             params['range_region_type_id'] = self.get_argument('range_region_type_id', None)
             params['custom_attr'] = self.get_argument('custom_attr', None)
             field = Field.create(**params)
-            return field.id
+            return SuccessData(
+                field.id
+            )
 
     @BaseHandler.ajax_base()
     def put(self, field_id=None):
@@ -82,7 +98,9 @@ class FieldHandler(BaseHandler):
         params['custom_attr'] = self.get_argument('custom_attr', None)
         field = Field.select(id=field_id)
         field = field.update(**params)
-        return field.id
+        return SuccessData(
+            field.id
+        )
 
     @BaseHandler.ajax_base()
     def patch(self, field_id=None):
@@ -104,13 +122,17 @@ class FieldHandler(BaseHandler):
         params['custom_attr'] = self.get_argument('custom_attr', undefined)
         field = Field.select(id=field_id)
         field = field.update(**params)
-        return field.id
+        return SuccessData(
+            field.id
+        )
 
     @BaseHandler.ajax_base()
     def delete(self, field_id=None):
         field = Field.select(id=field_id)
         field.delete()
-        return None
+        return SuccessData(
+            None
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

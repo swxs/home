@@ -2,7 +2,7 @@
 # @File    : Movie.py
 # @AUTH    : model_creater
 
-from ..commons.Movie import Movie as BaseMovie
+from ..dao.Movie import Movie as BaseMovie
 
 
 class Movie(BaseMovie):

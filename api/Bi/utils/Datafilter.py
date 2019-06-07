@@ -2,7 +2,7 @@
 # @File    : Datafilter.py
 # @AUTH    : model_creater
 
-from ..commons.Datafilter import Datafilter as BaseDatafilter
+from ..dao.Datafilter import Datafilter as BaseDatafilter
 
 
 class Datafilter(BaseDatafilter):

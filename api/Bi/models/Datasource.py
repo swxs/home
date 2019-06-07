@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class Datasource(BaseModelDocument):
-    name = model.StringField(helper_text='名称')
+    name = model.StringField()
 
     meta = {
         'allow_inheritance': True,

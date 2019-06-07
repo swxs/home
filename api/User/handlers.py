@@ -4,7 +4,7 @@
 
 from tornado.web import url
 import settings
-from base import BaseHandler
+from ..BaseViews import BaseHandler
 from ..BaseConsts import *
 from .utils.User import User
 from common.Exceptions import *

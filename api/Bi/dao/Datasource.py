@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Datasource import Datasource as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Datasource(BaseUtils):
+class Datasource(BaseDAO):
     name = model.StringField()
 
     def __init__(self, **kwargs):

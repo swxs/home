@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class DatasourceSurvey(Datasource):
-    survey_id = model.ObjectIdField(helper_text='问卷id')
+    survey_id = model.ObjectIdField()
 
     meta = {
         'indexes': [

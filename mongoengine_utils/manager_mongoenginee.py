@@ -20,6 +20,10 @@ class ManagerQuerySet(object):
         self.get_instance = get_instance
         self.model = model
         self._filter = dict()
+        self.a = list((1, 2, 3))[:]
+
+    def __getitem__(self, slice):
+        return map(lambda model: self.get_instance(model, _filter=self._filter), self.model.__getitem__(slice))
 
     def __len__(self):
         return self.model.count()
@@ -97,7 +101,7 @@ class Manager(object):
         return model_class.get_instance(model)
 
     @classmethod
-    def filter(cls, model_class, *args, **kwargs):
+    def filter(cls, model_class, **kwargs):
         model = cls._get_model(model_class).objects.filter(**kwargs)
         try:
             return ManagerQuerySet(model_class.get_instance, model)

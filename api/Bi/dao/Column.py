@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Column import Column as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Column(BaseUtils):
+class Column(BaseDAO):
     col = model.StringField()
     realcol = model.StringField()
     readablecol = model.StringField()

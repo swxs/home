@@ -2,7 +2,7 @@
 # @File    : Worktable.py
 # @AUTH    : model_creater
 
-from ..commons.Worktable import Worktable as BaseWorktable
+from ..dao.Worktable import Worktable as BaseWorktable
 
 
 class Worktable(BaseWorktable):

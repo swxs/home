@@ -5,6 +5,8 @@
 
 import datetime
 import functools
+import hashlib
+
 from bson import ObjectId
 from tornado.util import ObjectDict
 from api.BaseConsts import undefined
@@ -22,7 +24,7 @@ class BaseMetaDocuemnt(type):
         __fields__ = {}
         parent = None
         for base in bases:
-            if isinstance(base, cls) and (base.__model_name__ != 'BaseDocument'):
+            if isinstance(base, cls) and (getattr(base, "__model_name__") != 'BaseDocument'):
                 parent = base
                 for key, value in base.__fields__.items():
                     __fields__[key] = value
@@ -34,6 +36,7 @@ class BaseMetaDocuemnt(type):
             __fields__[attr_name] = attr_value
         attrs["__fields__"] = __fields__
 
+        attrs["__search__"] = dict()
         attrs["__subclass__"] = dict()
         attrs["__model_name__"] = name
         if 'meta' in attrs:
@@ -44,7 +47,7 @@ class BaseMetaDocuemnt(type):
 
         current_class = super(BaseMetaDocuemnt, cls).__new__(cls, name, bases, attrs)
         if parent is not None:
-            parent.__subclass__[name] = current_class
+            getattr(parent, "__subclass__")[name] = current_class
         return current_class
 
 
@@ -54,7 +57,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     metaclass = BaseMetaDocuemnt
 
     def __init__(self, **kwargs):
-        self._raw_model = kwargs.get("_raw_model", undefined)
+        self.__raw_model__ = kwargs.get("__raw_model__", undefined)
 
         for attr in self.__fields__:
             self.__dict__[attr] = kwargs.get(attr, undefined)
@@ -66,19 +69,13 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             self._data[key] = value
 
     @classmethod
-    @functools.lru_cache(4)
-    def get_all_fields(cls, _filter=None):
-        return cls.__fields__
-
-    @classmethod
     def get_instance(cls, model, _filter=None):
         data = dict()
-        all_fields = cls.__fields__
-        for attr in all_fields:
+        for attr in cls.__fields__:
             data[attr] = model.__getattribute__(attr)
         data["_id"] = str(model.__getattribute__("id"))
         data["_oid"] = model.__getattribute__("id")
-        data["_raw_model"] = model
+        data["__raw_model__"] = model
         return cls(**data)
 
     def update_instance(self, model):
@@ -107,7 +104,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return data_dict
 
     @classmethod
-    def is_exist(cls, *args, **kwargs):
+    def is_exist(cls, **kwargs):
         try:
             obj = Manager.select(cls, **kwargs)
             return True
@@ -117,6 +114,12 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             log.error(e)
             return False
 
+    @staticmethod
+    def get_key_with_params(**kwargs):
+        params = list(kwargs.keys())
+        params.sort()
+        return hashlib.md5(b"".join(p.encode("utf8") for p in params)).hexdigest()
+
     @classmethod
     @upgrade
     def create(cls, **kwargs):
@@ -124,19 +127,28 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             if not getattr(cls.__fields__[key], "create"):
                 if key in kwargs:
                     del kwargs[key]
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{cls.__model_name__}>: kwargs - {str(kwargs)}")
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
         return Manager.create(cls, **kwargs)
 
     @classmethod
     @cache
     def select(cls, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{cls.__model_name__}>: kwargs - {str(kwargs)}")
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
         return Manager.select(cls, **kwargs)
 
     @classmethod
-    def filter(cls, *args, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{cls.__model_name__}>: args - {str(args)} kwargs - {str(kwargs)}")
-        return Manager.filter(cls, *args, **kwargs)
+    def filter(cls, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
+        return Manager.filter(cls, **kwargs)
+
+    @classmethod
+    def search(cls, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
+        key = cls.get_key_with_params(**kwargs)
+        if key in getattr(cls, '__search__'):
+            return getattr(cls, '__search__')[key](**kwargs)
+        else:
+            return cls.filter(**kwargs)
 
     @upgrade
     def update(self, **kwargs):
@@ -146,7 +158,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     kwargs[key] = self.__fields__[key].pre_update()
                 else:
                     kwargs[key] = self.__fields__[key].pre_update
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{self.__model_name__}>: kwargs - {str(kwargs)}")
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: kwargs - {str(kwargs)}")
         return Manager.update(self, **kwargs)
 
     def copy(self, **kwargs):
@@ -162,5 +174,5 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
     @clear
     def delete(self):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{self.__model_name__}>: kwargs - {str(dict(id=self.id))}")
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
         return Manager.delete(self)

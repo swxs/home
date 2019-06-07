@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Dashboard import Dashboard as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Dashboard(BaseUtils):
+class Dashboard(BaseDAO):
     user_id = model.ObjectIdField()
     usage = model.StringField()
     container_id = model.ObjectIdField()

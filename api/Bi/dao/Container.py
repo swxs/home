@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.Container import Container as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class Container(BaseUtils):
+class Container(BaseDAO):
     name = model.StringField()
     show_name = model.BooleanField()
 
