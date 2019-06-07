@@ -6,7 +6,7 @@
 import datetime
 import functools
 import hashlib
-
+from functools import wraps
 from bson import ObjectId
 from tornado.util import ObjectDict
 from api.BaseConsts import undefined
@@ -115,10 +115,14 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             return False
 
     @staticmethod
-    def get_key_with_params(**kwargs):
-        params = list(kwargs.keys())
+    def get_key_with_list(params):
         params.sort()
         return hashlib.md5(b"".join(p.encode("utf8") for p in params)).hexdigest()
+
+    @staticmethod
+    def get_key_with_params(**kwargs):
+        params = list(kwargs.keys())
+        return BaseDocument.get_key_with_list(params)
 
     @classmethod
     @upgrade
@@ -146,7 +150,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
         key = cls.get_key_with_params(**kwargs)
         if key in getattr(cls, '__search__'):
-            return getattr(cls, '__search__')[key](**kwargs)
+            return getattr(cls, '__search__')[key](cls, **kwargs)
         else:
             return cls.filter(**kwargs)
 
@@ -176,3 +180,19 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     def delete(self):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
         return Manager.delete(self)
+
+    @classmethod
+    def add_search(cls, *args):
+        key = cls.get_key_with_list(list(args))
+        if key not in cls.__search__:
+            def wrapper(function):
+                @wraps(function)
+                def inner_wrapper(*args, **kwargs):
+                    return function(*args, **kwargs)
+
+                cls.__search__[key] = inner_wrapper
+                return inner_wrapper
+
+            return wrapper
+        else:
+            return cls.__search__[key]
