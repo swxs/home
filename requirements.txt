@@ -11,3 +11,4 @@ pandas==0.23.4
 qrcode==6.0
 redis==2.10.6
 msgpack==0.6.1
+python-memcached==1.59
