@@ -7,7 +7,7 @@ from itsdangerous import SignatureExpired, BadSignature
 import time
 import settings
 from common.Exceptions import *
-from common.Helpers.DBHelper_Redis import RedisDBHelper
+from common.Helpers.DBHelper_Redis import redis_helper
 from common.Utils import log_utils
 
 log = log_utils.getLogger("TOKEN")
@@ -15,15 +15,14 @@ log = log_utils.getLogger("TOKEN")
 
 class BlockTokenHelper(object):
     block_list = []
-    client = RedisDBHelper(dbbase=settings.REDIS_TOKEN_BLOCK_DB).client
 
     @classmethod
     def append_block_token(cls, token):
-        cls.client.set(f"token_{token}", True, settings.ACCESS_TOKEN_EXPIRE)
+        redis_helper.set(f"token_{token}", True, settings.ACCESS_TOKEN_EXPIRE)
 
     @classmethod
     def is_blocked(cls, token):
-        return cls.client.get(f"token_{token}") != None
+        return redis_helper.get(f"token_{token}") != None
 
 
 class AuthCenter(object):

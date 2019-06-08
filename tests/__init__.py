@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 
+
+import os
+import sys
+import datetime
 import unittest
-from functools import cmp_to_key as _CmpToKey
+import functools
+from mongoengine.connection import connect
 
 
 class MyLoader(unittest.TestLoader):
@@ -9,40 +14,69 @@ class MyLoader(unittest.TestLoader):
         """Return a sorted sequence of method names found within testCaseClass
         """
 
-        def isTestMethod(attrname, testCaseClass=testCaseClass,
-                         prefix=self.testMethodPrefix):
-            return attrname.startswith(prefix) and \
-                   callable(getattr(testCaseClass, attrname))
+        def isTestMethod(attrname, testCaseClass=testCaseClass, prefix=self.testMethodPrefix):
+            return attrname.startswith(prefix) and callable(getattr(testCaseClass, attrname))
 
         testFnNames = list(filter(isTestMethod, dir(testCaseClass)))
 
         def ln(f):
-            return getattr(testCaseClass, f).im_func.func_code.co_firstlineno
+            return getattr(testCaseClass, f).__code__.co_firstlineno
+
+        def ln_cmp(a, b):
+            return (ln(a) > ln(b)) - (ln(a) < ln(b))
 
         if self.sortTestMethodsUsing:
-            testFnNames.sort(key=_CmpToKey(lambda a, b: ln(a) - ln(b)))
+            testFnNames.sort(key=functools.cmp_to_key(ln_cmp))
         return testFnNames
 
-"""
-√1. 如何自动设置test运行顺序，不同文件按文件名，相同文件按行号
 
-2. 如何动态切换mongodb
+def report_to_shell(suite):
+    runner = unittest.TextTestRunner()
 
-3. 如何测试/api/
-main时运行mock的数据库
-基于requests Cookie留存登录信息
+    # 执行测试
+    runner.run(suite)
 
-4. 如何生成一部分测试代码
-自动化
-批量
 
-5. 如何组织参数等信息
-"""
+def report_to_html(suite):
+    import HTMLTestRunner
+
+    now = datetime.datetime.now()
+    path = ""
+    report_file = os.path.join(path, f"{now:%Y_%m_%d_%H_%M_%S}_report.html")
+
+    # 执行测试
+    with open(report_file, "wb") as report:
+        runner = HTMLTestRunner.HTMLTestRunner(stream=report, title=f"{now}_report")
+        runner.run(suite)
+
+
+REPORT_TARGET_DICT = {
+    "html": report_to_html,
+    "shell": report_to_shell
+}
+
+
+def run_tests(target="shell"):
+    # 定义测试集合
+    suite = unittest.TestSuite()
+
+    # 构建测试用例集
+    loader = MyLoader()
+    all_case = loader.discover('./', pattern='*_tests.py')
+    for case in all_case:
+        # 循环添加case到测试集合里面
+        suite.addTests(case)
+
+    try:
+        REPORT_TARGET_DICT[target](suite)
+    except Exception as e:
+        print(f"{target} is failed!")
+        REPORT_TARGET_DICT["shell"](suite)
+
+
+def main(target):
+    run_tests(target)
+
 
 if __name__ == "__main__":
-    loader = MyLoader()
-    # 构建测试用例集
-    discover = loader.discover('./', pattern='*_tests.py')
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    main(target="shell")

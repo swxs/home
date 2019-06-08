@@ -17,7 +17,7 @@ from common.Helpers.Helper_JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
 from api.BaseConsts import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
 from common.Exceptions import *
-from common.Utils.validate import Validate, RegType
+from common.Helpers.Helper_validate import Validate, RegType
 from common.Utils.log_utils import getLogger
 
 log = getLogger("views.Base")
@@ -59,7 +59,7 @@ class ExceptionData(ResultData):
     """
 
     def __init__(self, e):
-        super(ExceptionData, self).__init__(code=e.code, data=e.data)
+        super(ExceptionData, self).__init__(code=e.code, data=e.data, message=e.message)
 
 
 class SuccessData(ResultData):
@@ -105,7 +105,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                 if strip:
                     try:
                         value = value.strip()
-                    except:
+                    except Exception:
                         pass
             except Exception:
                 value = default
@@ -141,13 +141,13 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     def _handle_request_exception(self, e):
         if isinstance(e, ApiException):
-            self.write_json(ExceptionResult(e).to_json(), status=200)
+            self.write_json(ExceptionData(e).to_json(), status=200)
             self.finish()
         else:
             try:
-                log.error(traceback.format_exc()).split('\n')
+                log.exception()
             except ApiNotLoginException as e:
-                self.write_json(data=e.data, errcode=e.code, errmsg=e.message, status=None)
+                self.write_json(ExceptionData(e).to_json(), status=e.status)
                 self.finish()
             else:
                 super(BaseHandler, self)._handle_request_exception(e)
@@ -301,14 +301,14 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     @classmethod
     def ajax_base(cls, auth=False, aio=False):
 
-        def function(method):
+        def wrapper(method):
 
             @functools.wraps(method)
-            async def wrapper(self, *args, **kwargs):
+            async def inner_wrapper(self, *args, **kwargs):
                 try:
                     if auth:
-                        playload = AuthCenter.identify(self.access_token)
-                        self.current_user_id = playload.get("id")
+                        payload = AuthCenter.identify(self.access_token)
+                        self.current_user_id = payload.get("id")
                     if aio:
                         result = await method(self, *args, **kwargs)
                     else:
@@ -316,7 +316,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                     if isinstance(result, concurrent.Future):
                         return result
                     else:
-                        self.write_json(result.to_json())
+                        self.write_json(result.to_json(), status=200)
                 except ApiRedirectException as e:
                     return self.redirect(e.url)
                 except ApiReturnFileException as e:
@@ -336,15 +336,15 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                             self.write(data)
                 except ApiException as e:
                     log.exception(repr(e))
-                    self.write_json(data=e.data, errcode=e.code, errmsg=e.message)
+                    self.write_json(ExceptionData(e).to_json(), status=e.status)
                 except (Exception, NotImplementedError) as e:
                     log.exception(repr(e))
-                    self.write_json(data=None, errcode=HTTP_STATUS.AJAX_FAIL_NORMAL)
+                    self.write_json(ResultData(code=HTTP_STATUS.AJAX_FAIL_NORMAL, data=None).to_json(), status=200)
                 self.finish()
 
-            return wrapper
+            return inner_wrapper
 
-        return function
+        return wrapper
 
 
 class PageNotFoundHandler(BaseHandler):

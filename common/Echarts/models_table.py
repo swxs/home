@@ -5,7 +5,7 @@ from api.utils.bi.field import Field
 from common.Exceptions import NoDataException
 from common.Utils.log_utils import getLogger
 from common.Echarts.models_base import BaseChart, Vtype
-from common.Utils.validate import Validate, RegType
+from common.Helpers.Helper_validate import Validate, RegType
 
 log = getLogger('models')
 

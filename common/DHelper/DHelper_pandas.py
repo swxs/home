@@ -2,8 +2,6 @@
 
 import os
 import datetime
-import string
-import itertools
 import numpy as np
 import pandas as pd
 import settings
@@ -13,7 +11,7 @@ from api.utils.organization.region_type import RegionType
 from common.Exceptions import NoDataException
 from common.Utils import df_utils
 from common.Utils.log_utils import getLogger
-from common.Utils.validate import Validate, RegType
+from common.Helpers.Helper_validate import Validate, RegType
 from common.Utils.DateUtils import date_range
 from common.DHelper.DHelper_base import DHelper_base
 

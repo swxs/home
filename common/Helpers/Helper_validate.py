@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+
 try:
     from typing.re import Pattern
 except:
     Pattern = re.compile(r"")
+
 
 class RegType:
     ALL = r'.*'
@@ -38,10 +40,9 @@ class RegType:
     IPV6 = r'[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})'
 
 
-
-class Validate:
+class Validate(object):
     @classmethod
-    def _find_reg(self, reg_type):
+    def _find_reg(cls, reg_type):
         if reg_type in RegType.__dict__:
             return reg_type
         if isinstance(reg_type, Pattern):
@@ -73,7 +74,7 @@ class Validate:
     @classmethod
     def end_with(cls, value, reg_type=RegType.ALL):
         try:
-            return re.match(r'{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
+            return re.match(r'.*{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
         except TypeError:
             return False
 
@@ -92,7 +93,7 @@ class Validate:
             return False
 
     @classmethod
-    def getall(cls, value, reg_type=RegType.ALL):
+    def get_all(cls, value, reg_type=RegType.ALL):
         try:
             result = re.findall(r'({0})+'.format(cls._find_reg(reg_type)), value, re.M)
             if len(result) > 0 and isinstance(result[0], tuple):
@@ -100,7 +101,3 @@ class Validate:
             return result
         except TypeError:
             return []
-
-
-if __name__ == "__main__":
-    print(Validate.getall("10ade", RegType.NUMBER))

@@ -31,7 +31,7 @@ from common.Echarts.option_serie import get_base_serie_option
 from common.DHelper import DHelper_factory
 from common.DHelper.DHelper_base import Pivot_main
 from common.Utils.translation import get_translate_and_code
-from common.Utils.validate import Validate, RegType
+from common.Helpers.Helper_validate import Validate, RegType
 from common.Utils.log_utils import getLogger
 
 log = getLogger("echarts")

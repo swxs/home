@@ -74,10 +74,14 @@ MEMCACHE_HOSTS = (f'{MEMCACHE_HOST}:{MEMCACHE_PORT}',)
 DB_CONNECTED = False
 
 
-def connect_db(db_name=MONGODB_DBNAME):
+def connect_db(db_name=MONGODB_DBNAME, mock=False):
     global DB_CONNECTED
     from mongoengine.connection import connect
-    connect(db_name, host=MONGODB_ADDRESS, port=MONGODB_PORT, is_slave=False, slaves=None)
+    if mock:
+        host = f"{MONGODB_ADDRESS}:mock"
+    else:
+        host = MONGODB_ADDRESS
+    connect(db_name, host=host, port=MONGODB_PORT, is_slave=False, slaves=None)
     DB_CONNECTED = True
 
 

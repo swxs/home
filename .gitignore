@@ -4,6 +4,7 @@ docs/
 api/auto/
 data_file/
 .vscode/
+.tox
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
