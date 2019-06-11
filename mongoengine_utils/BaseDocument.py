@@ -70,8 +70,18 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
     @classmethod
     def get_instance(cls, model, _filter=None):
+        if _filter is None:
+            _filter = dict()
+
         data = dict()
-        for attr in cls.__fields__:
+        if "only" in _filter:
+            all_fields = _filter["only"]
+        else:
+            all_fields = cls.__fields__
+
+        for attr in all_fields:
+            if ("exclude" in _filter) and (attr in _filter["exclude"]):
+                continue
             data[attr] = model.__getattribute__(attr)
         data["_id"] = str(model.__getattribute__("id"))
         data["_oid"] = model.__getattribute__("id")
