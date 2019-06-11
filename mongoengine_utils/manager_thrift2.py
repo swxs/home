@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# @File    : manager_mongoenginee.py
+# @File    : manager_thrift2.py
 # @AUTH    : swxs
-# @Time    : 2018/4/30 14:55
+# @Time    : 2019/6/11 18:03
 
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from api.BaseConsts import undefined
