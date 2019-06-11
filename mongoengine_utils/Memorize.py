@@ -8,6 +8,7 @@ import uuid
 import threading
 import hashlib
 import weakref
+from functools import wraps
 from common.Helpers.DBHelper_Memcache import MemcacheDBHelper
 from common.Metaclass.Singleton import Singleton
 from common.Utils.log_utils import getLogger
@@ -121,6 +122,7 @@ memorize_helper = MemorizeHelper()
 
 
 def clear(function):
+    @wraps(function)
     def helper(*args, **kwargs):
         obj = args[0]
         key = memorize_helper.make_model_main_key(obj.__model_name__, obj.id)
@@ -136,6 +138,7 @@ def clear(function):
 
 
 def upgrade(function):
+    @wraps(function)
     def helper(*args, **kwargs):
         try:
             obj = function(*args, **kwargs)
@@ -151,6 +154,7 @@ def upgrade(function):
 
 
 def cache(function):
+    @wraps(function)
     def helper(*args, **kwargs):
         if "id" in kwargs:
             key = memorize_helper.make_model_main_key(args[0].__model_name__, kwargs.get("id"))  # 获取key
@@ -212,6 +216,7 @@ def cache(function):
 
 
 def memorize(function):
+    @wraps(function)
     def helper(*args, **kwargs):
         key = memorize_helper.make_memcache_key(function, *args)  # 获取key
         remote_version = memorize_helper.get_remote_obj_version(key)  # 获取当前版本号

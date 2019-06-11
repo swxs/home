@@ -2,9 +2,11 @@
 # @File    : Ttype.py
 # @AUTH    : model
 
-from base import BaseHandler
+import json
 from common.Utils.log_utils import getLogger
+from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
+from ...BaseViews import BaseHandler, SuccessData
 from ..utils.Ttype import Ttype
 
 log = getLogger("views/Ttype")
@@ -15,10 +17,20 @@ class TtypeHandler(BaseHandler):
     def get(self, ttype_id=None):
         if ttype_id:
             ttype = Ttype.select(id=ttype_id)
-            return ttype.to_front()
+            return SuccessData(
+                ttype.to_front()
+            )
         else:
-            ttype_list = Ttype.filter()
-            return [ttype.to_front() for ttype in ttype_list]
+            search_params = json.loads(self.get_argument("search", '{}'))
+            page = self.get_argument("page", 1)
+            items_per_page = self.get_argument("items_per_page", 20)
+            pager = self.get_argument("pager", 1)
+            ttype_list = Ttype.search(**search_params).order_by()
+            pager = Page(ttype_list, pager=pager, page=page, items_per_page=items_per_page)
+            return SuccessData(
+                [item.to_front() for item in pager.items],
+                info=pager.info,
+            )
 
     @BaseHandler.ajax_base()
     def post(self, ttype_id=None):
@@ -27,12 +39,16 @@ class TtypeHandler(BaseHandler):
             params['name'] = self.get_argument('name', undefined)
             ttype = Ttype.select(id=ttype_id)
             ttype = ttype.copy(**params)
-            return ttype.id
+            return SuccessData(
+                ttype.id
+            )
         else:
             params = dict()
             params['name'] = self.get_argument('name', None)
             ttype = Ttype.create(**params)
-            return ttype.id
+            return SuccessData(
+                ttype.id
+            )
 
     @BaseHandler.ajax_base()
     def put(self, ttype_id=None):
@@ -40,7 +56,9 @@ class TtypeHandler(BaseHandler):
         params['name'] = self.get_argument('name', None)
         ttype = Ttype.select(id=ttype_id)
         ttype = ttype.update(**params)
-        return ttype.id
+        return SuccessData(
+            ttype.id
+        )
 
     @BaseHandler.ajax_base()
     def patch(self, ttype_id=None):
@@ -48,13 +66,17 @@ class TtypeHandler(BaseHandler):
         params['name'] = self.get_argument('name', undefined)
         ttype = Ttype.select(id=ttype_id)
         ttype = ttype.update(**params)
-        return ttype.id
+        return SuccessData(
+            ttype.id
+        )
 
     @BaseHandler.ajax_base()
     def delete(self, ttype_id=None):
         ttype = Ttype.select(id=ttype_id)
         ttype.delete()
-        return None
+        return SuccessData(
+            None
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

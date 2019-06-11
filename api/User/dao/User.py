@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.User import User as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class User(BaseUtils):
+class User(BaseDAO):
     username = model.StringField()
     nickname = model.StringField()
     password = model.StringField()

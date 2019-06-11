@@ -2,7 +2,7 @@
 # @File    : Datamerge.py
 # @AUTH    : model_creater
 
-from ..commons.Datamerge import Datamerge as BaseDatamerge
+from ..dao.Datamerge import Datamerge as BaseDatamerge
 
 
 class Datamerge(BaseDatamerge):

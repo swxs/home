@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.CacheChart import CacheChartHandler
 
 url_mapping = [
-    url(r"/api/bi/CacheChart/(?:([a-zA-Z0-9&%\.~-]+)/)?", CacheChartHandler),
+    url(r"/api/bi/cache_chart/(?:([a-zA-Z0-9&%\.~-]+)/)?", CacheChartHandler),
 ]

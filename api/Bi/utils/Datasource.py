@@ -2,7 +2,7 @@
 # @File    : Datasource.py
 # @AUTH    : model_creater
 
-from ..commons.Datasource import Datasource as BaseDatasource
+from ..dao.Datasource import Datasource as BaseDatasource
 
 
 class Datasource(BaseDatasource):

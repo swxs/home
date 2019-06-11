@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.ValueGroup import ValueGroupHandler
 
 url_mapping = [
-    url(r"/api/bi/ValueGroup/(?:([a-zA-Z0-9&%\.~-]+)/)?", ValueGroupHandler),
+    url(r"/api/bi/value_group/(?:([a-zA-Z0-9&%\.~-]+)/)?", ValueGroupHandler),
 ]

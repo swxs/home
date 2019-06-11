@@ -5,13 +5,13 @@
 import datetime
 import mongoengine_utils as model
 from ..models.PasswordLock import PasswordLock as _
-from ...BaseUtils import BaseUtils
+from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
 log = getLogger("utils/{self.model_name}")
 
 
-class PasswordLock(BaseUtils):
+class PasswordLock(BaseDAO):
     name = model.StringField()
     key = model.StringField()
     website = model.StringField()
@@ -23,4 +23,3 @@ class PasswordLock(BaseUtils):
     @classmethod
     def get_password_lock_by_password_lock_id(cls, password_lock_id):
         return cls.select(id=password_lock_id)
-

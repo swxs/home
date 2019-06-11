@@ -2,9 +2,11 @@
 # @File    : Dashboard.py
 # @AUTH    : model
 
-from base import BaseHandler
+import json
 from common.Utils.log_utils import getLogger
+from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
+from ...BaseViews import BaseHandler, SuccessData
 from ..utils.Dashboard import Dashboard
 
 log = getLogger("views/Dashboard")
@@ -15,10 +17,20 @@ class DashboardHandler(BaseHandler):
     def get(self, dashboard_id=None):
         if dashboard_id:
             dashboard = Dashboard.select(id=dashboard_id)
-            return dashboard.to_front()
+            return SuccessData(
+                dashboard.to_front()
+            )
         else:
-            dashboard_list = Dashboard.filter()
-            return [dashboard.to_front() for dashboard in dashboard_list]
+            search_params = json.loads(self.get_argument("search", '{}'))
+            page = self.get_argument("page", 1)
+            items_per_page = self.get_argument("items_per_page", 20)
+            pager = self.get_argument("pager", 1)
+            dashboard_list = Dashboard.search(**search_params).order_by()
+            pager = Page(dashboard_list, pager=pager, page=page, items_per_page=items_per_page)
+            return SuccessData(
+                [item.to_front() for item in pager.items],
+                info=pager.info,
+            )
 
     @BaseHandler.ajax_base()
     def post(self, dashboard_id=None):
@@ -35,7 +47,9 @@ class DashboardHandler(BaseHandler):
             params['parent_id'] = self.get_argument('parent_id', undefined)
             dashboard = Dashboard.select(id=dashboard_id)
             dashboard = dashboard.copy(**params)
-            return dashboard.id
+            return SuccessData(
+                dashboard.id
+            )
         else:
             params = dict()
             params['user_id'] = self.get_argument('user_id', None)
@@ -48,7 +62,9 @@ class DashboardHandler(BaseHandler):
             params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
             params['parent_id'] = self.get_argument('parent_id', None)
             dashboard = Dashboard.create(**params)
-            return dashboard.id
+            return SuccessData(
+                dashboard.id
+            )
 
     @BaseHandler.ajax_base()
     def put(self, dashboard_id=None):
@@ -64,7 +80,9 @@ class DashboardHandler(BaseHandler):
         params['parent_id'] = self.get_argument('parent_id', None)
         dashboard = Dashboard.select(id=dashboard_id)
         dashboard = dashboard.update(**params)
-        return dashboard.id
+        return SuccessData(
+            dashboard.id
+        )
 
     @BaseHandler.ajax_base()
     def patch(self, dashboard_id=None):
@@ -80,13 +98,17 @@ class DashboardHandler(BaseHandler):
         params['parent_id'] = self.get_argument('parent_id', undefined)
         dashboard = Dashboard.select(id=dashboard_id)
         dashboard = dashboard.update(**params)
-        return dashboard.id
+        return SuccessData(
+            dashboard.id
+        )
 
     @BaseHandler.ajax_base()
     def delete(self, dashboard_id=None):
         dashboard = Dashboard.select(id=dashboard_id)
         dashboard.delete()
-        return None
+        return SuccessData(
+            None
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.Ttype import TtypeHandler
 
 url_mapping = [
-    url(r"/api/multimedia/Ttype/(?:([a-zA-Z0-9&%\.~-]+)/)?", TtypeHandler),
+    url(r"/api/multimedia/ttype/(?:([a-zA-Z0-9&%\.~-]+)/)?", TtypeHandler),
 ]

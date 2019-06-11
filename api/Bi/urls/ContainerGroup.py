@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.ContainerGroup import ContainerGroupHandler
 
 url_mapping = [
-    url(r"/api/bi/ContainerGroup/(?:([a-zA-Z0-9&%\.~-]+)/)?", ContainerGroupHandler),
+    url(r"/api/bi/container_group/(?:([a-zA-Z0-9&%\.~-]+)/)?", ContainerGroupHandler),
 ]

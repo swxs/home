@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.Dashboard import DashboardHandler
 
 url_mapping = [
-    url(r"/api/bi/Dashboard/(?:([a-zA-Z0-9&%\.~-]+)/)?", DashboardHandler),
+    url(r"/api/bi/dashboard/(?:([a-zA-Z0-9&%\.~-]+)/)?", DashboardHandler),
 ]

@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class ContainerGroupDatafilter(Container):
-    container_id_list = model.ListField(helper_text='容器id')
+    container_id_list = model.ListField()
 
     meta = {
     }

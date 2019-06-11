@@ -2,7 +2,7 @@
 # @File    : DatasourceSurvey.py
 # @AUTH    : model_creater
 
-from ..commons.DatasourceSurvey import DatasourceSurvey as BaseDatasourceSurvey
+from ..dao.DatasourceSurvey import DatasourceSurvey as BaseDatasourceSurvey
 
 
 class DatasourceSurvey(BaseDatasourceSurvey):

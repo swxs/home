@@ -11,6 +11,7 @@ class ApiException(Exception):
         self.code = code
         self.message = message or ""
         self.data = data
+        self.status = 200
 
     def __str__(self):
         return self.message

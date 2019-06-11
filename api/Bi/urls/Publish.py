@@ -6,5 +6,5 @@ from tornado.web import url
 from ..views.Publish import PublishHandler
 
 url_mapping = [
-    url(r"/api/bi/Publish/(?:([a-zA-Z0-9&%\.~-]+)/)?", PublishHandler),
+    url(r"/api/bi/publish/(?:([a-zA-Z0-9&%\.~-]+)/)?", PublishHandler),
 ]

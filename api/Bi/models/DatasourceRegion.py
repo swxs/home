@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class DatasourceRegion(Datasource):
-    region_type_id = model.ObjectIdField(helper_text='层级id')
+    region_type_id = model.ObjectIdField()
 
     meta = {
         'indexes': [

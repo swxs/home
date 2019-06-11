@@ -8,6 +8,7 @@ import thriftpy2
 from thriftpy2.rpc import make_server
 from rpc.utils import render_thrift
 from api.User.utils.User import User
+from api.User.utils.User import User
 
 
 rpc_dir = os.path.abspath(os.path.dirname(__file__))

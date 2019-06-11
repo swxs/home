@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class DatasourceUpload(Datasource):
-    filename = model.StringField(helper_text='文件名')
+    filename = model.StringField()
 
     meta = {
     }

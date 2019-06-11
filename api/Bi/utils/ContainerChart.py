@@ -2,7 +2,7 @@
 # @File    : ContainerChart.py
 # @AUTH    : model_creater
 
-from ..commons.ContainerChart import ContainerChart as BaseContainerChart
+from ..dao.ContainerChart import ContainerChart as BaseContainerChart
 
 
 class ContainerChart(BaseContainerChart):

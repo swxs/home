@@ -2,7 +2,7 @@
 # @File    : ValueGroup.py
 # @AUTH    : model_creater
 
-from ..commons.ValueGroup import ValueGroup as BaseValueGroup
+from ..dao.ValueGroup import ValueGroup as BaseValueGroup
 
 
 class ValueGroup(BaseValueGroup):

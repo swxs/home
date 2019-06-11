@@ -2,7 +2,7 @@
 # @File    : Dashboard.py
 # @AUTH    : model_creater
 
-from ..commons.Dashboard import Dashboard as BaseDashboard
+from ..dao.Dashboard import Dashboard as BaseDashboard
 
 
 class Dashboard(BaseDashboard):

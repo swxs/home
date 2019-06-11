@@ -2,7 +2,7 @@
 # @File    : DatasourceRegion.py
 # @AUTH    : model_creater
 
-from ..commons.DatasourceRegion import DatasourceRegion as BaseDatasourceRegion
+from ..dao.DatasourceRegion import DatasourceRegion as BaseDatasourceRegion
 
 
 class DatasourceRegion(BaseDatasourceRegion):

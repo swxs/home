@@ -2,9 +2,11 @@
 # @File    : Worktable.py
 # @AUTH    : model
 
-from base import BaseHandler
+import json
 from common.Utils.log_utils import getLogger
+from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
+from ...BaseViews import BaseHandler, SuccessData
 from ..utils.Worktable import Worktable
 
 log = getLogger("views/Worktable")
@@ -15,10 +17,20 @@ class WorktableHandler(BaseHandler):
     def get(self, worktable_id=None):
         if worktable_id:
             worktable = Worktable.select(id=worktable_id)
-            return worktable.to_front()
+            return SuccessData(
+                worktable.to_front()
+            )
         else:
-            worktable_list = Worktable.filter()
-            return [worktable.to_front() for worktable in worktable_list]
+            search_params = json.loads(self.get_argument("search", '{}'))
+            page = self.get_argument("page", 1)
+            items_per_page = self.get_argument("items_per_page", 20)
+            pager = self.get_argument("pager", 1)
+            worktable_list = Worktable.search(**search_params).order_by()
+            pager = Page(worktable_list, pager=pager, page=page, items_per_page=items_per_page)
+            return SuccessData(
+                [item.to_front() for item in pager.items],
+                info=pager.info,
+            )
 
     @BaseHandler.ajax_base()
     def post(self, worktable_id=None):
@@ -31,7 +43,9 @@ class WorktableHandler(BaseHandler):
             params['description'] = self.get_argument('description', undefined)
             worktable = Worktable.select(id=worktable_id)
             worktable = worktable.copy(**params)
-            return worktable.id
+            return SuccessData(
+                worktable.id
+            )
         else:
             params = dict()
             params['name'] = self.get_argument('name', None)
@@ -40,7 +54,9 @@ class WorktableHandler(BaseHandler):
             params['status'] = self.get_argument('status', None)
             params['description'] = self.get_argument('description', None)
             worktable = Worktable.create(**params)
-            return worktable.id
+            return SuccessData(
+                worktable.id
+            )
 
     @BaseHandler.ajax_base()
     def put(self, worktable_id=None):
@@ -52,7 +68,9 @@ class WorktableHandler(BaseHandler):
         params['description'] = self.get_argument('description', None)
         worktable = Worktable.select(id=worktable_id)
         worktable = worktable.update(**params)
-        return worktable.id
+        return SuccessData(
+            worktable.id
+        )
 
     @BaseHandler.ajax_base()
     def patch(self, worktable_id=None):
@@ -64,13 +82,17 @@ class WorktableHandler(BaseHandler):
         params['description'] = self.get_argument('description', undefined)
         worktable = Worktable.select(id=worktable_id)
         worktable = worktable.update(**params)
-        return worktable.id
+        return SuccessData(
+            worktable.id
+        )
 
     @BaseHandler.ajax_base()
     def delete(self, worktable_id=None):
         worktable = Worktable.select(id=worktable_id)
         worktable.delete()
-        return None
+        return SuccessData(
+            None
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

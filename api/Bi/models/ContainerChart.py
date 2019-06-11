@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class ContainerChart(Container):
-    chart_id = model.ObjectIdField(helper_text='图表id')
+    chart_id = model.ObjectIdField()
 
     meta = {
     }

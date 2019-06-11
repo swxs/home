@@ -21,3 +21,13 @@ class PasswordLock(BasePasswordLock):
         data_dict = super(PasswordLock, self).to_front()
         data_dict["password"] = self.password
         return data_dict
+
+
+@PasswordLock.add_search("website")
+def search_with_website(PasswordLock, **kwargs):
+    return PasswordLock.filter(website__contains=kwargs.get("website"))
+
+
+@PasswordLock.add_search("name")
+def search_with_website(PasswordLock, **kwargs):
+    return PasswordLock.filter(name__contains=kwargs.get("name"))

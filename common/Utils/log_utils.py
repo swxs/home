@@ -4,7 +4,7 @@ import os
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 
-logging.config.fileConfig(os.path.join(script_path, 'logging.conf'))
+logging.config.fileConfig(os.path.join(script_path, 'logging.ini'))
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 
 

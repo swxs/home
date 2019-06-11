@@ -10,7 +10,7 @@ from mongoengine_utils import NAME_DICT
 
 
 class DatasourceMerged(Datasource):
-    datamerge_id = model.ObjectIdField(helper_text='合表id')
+    datamerge_id = model.ObjectIdField()
 
     meta = {
         'indexes': [

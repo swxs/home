@@ -2,9 +2,11 @@
 # @File    : PasswordLock.py
 # @AUTH    : model
 
-from base import BaseHandler
+import json
 from common.Utils.log_utils import getLogger
+from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
+from ...BaseViews import BaseHandler, SuccessData
 from ..utils.PasswordLock import PasswordLock
 
 log = getLogger("views/PasswordLock")
@@ -15,10 +17,20 @@ class PasswordLockHandler(BaseHandler):
     def get(self, password_lock_id=None):
         if password_lock_id:
             password_lock = PasswordLock.select(id=password_lock_id)
-            return password_lock.to_front()
+            return SuccessData(
+                password_lock.to_front()
+            )
         else:
-            password_lock_list = PasswordLock.filter()
-            return [password_lock.to_front() for password_lock in password_lock_list]
+            search_params = json.loads(self.get_argument("search", '{}'))
+            page = int(self.get_argument("page", 1))
+            items_per_page = int(self.get_argument("items_per_page", 20))
+            pager = int(self.get_argument("pager", 1))
+            password_lock_list = PasswordLock.search(**search_params).order_by()
+            pager = Page(password_lock_list, pager=pager, page=page, items_per_page=items_per_page)
+            return SuccessData(
+                [item.to_front() for item in pager.items],
+                info=pager.info,
+            )
 
     @BaseHandler.ajax_base()
     def post(self, password_lock_id=None):
@@ -30,7 +42,9 @@ class PasswordLockHandler(BaseHandler):
             params['user_id'] = self.get_argument('user_id', undefined)
             password_lock = PasswordLock.select(id=password_lock_id)
             password_lock = password_lock.copy(**params)
-            return password_lock.id
+            return SuccessData(
+                password_lock.id
+            )
         else:
             params = dict()
             params['name'] = self.get_argument('name', None)
@@ -38,7 +52,9 @@ class PasswordLockHandler(BaseHandler):
             params['website'] = self.get_argument('website', None)
             params['user_id'] = self.get_argument('user_id', None)
             password_lock = PasswordLock.create(**params)
-            return password_lock.id
+            return SuccessData(
+                password_lock.id
+            )
 
     @BaseHandler.ajax_base()
     def put(self, password_lock_id=None):
@@ -49,7 +65,9 @@ class PasswordLockHandler(BaseHandler):
         params['user_id'] = self.get_argument('user_id', None)
         password_lock = PasswordLock.select(id=password_lock_id)
         password_lock = password_lock.update(**params)
-        return password_lock.id
+        return SuccessData(
+            password_lock.id
+        )
 
     @BaseHandler.ajax_base()
     def patch(self, password_lock_id=None):
@@ -60,13 +78,17 @@ class PasswordLockHandler(BaseHandler):
         params['user_id'] = self.get_argument('user_id', undefined)
         password_lock = PasswordLock.select(id=password_lock_id)
         password_lock = password_lock.update(**params)
-        return password_lock.id
+        return SuccessData(
+            password_lock.id
+        )
 
     @BaseHandler.ajax_base()
     def delete(self, password_lock_id=None):
         password_lock = PasswordLock.select(id=password_lock_id)
         password_lock.delete()
-        return None
+        return SuccessData(
+            None
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")
