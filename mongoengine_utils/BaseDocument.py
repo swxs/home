@@ -74,7 +74,6 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             _filter = dict()
 
         data = dict()
-<<<<<<< HEAD
         if "only" in _filter:
             all_fields = _filter["only"]
         else:
@@ -83,9 +82,6 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         for attr in all_fields:
             if ("exclude" in _filter) and (attr in _filter["exclude"]):
                 continue
-=======
-        for attr in cls.__fields__:
->>>>>>> develop
             data[attr] = model.__getattribute__(attr)
         data["_id"] = str(model.__getattribute__("id"))
         data["_oid"] = model.__getattribute__("id")
