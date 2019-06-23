@@ -6,7 +6,7 @@ import datetime
 import mongoengine as model
 from ..consts.ContainerGroupDatafilter import *
 from .Container import Container
-from mongoengine_utils import NAME_DICT
+from document_utils import NAME_DICT
 
 
 class ContainerGroupDatafilter(Container):

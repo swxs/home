@@ -18,13 +18,16 @@ SITE_PROTOCOL = 'http'
 SITE_DOMAIN = '127.0.0.1'
 SITE_PORT = 8088
 
+RPC_MODULE_LIST = ['api.User.rpc']
+
 LOG_PATH = get_dir_path(SITE_ROOT, 'logs')
 STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
-TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
-DATAFILE_PATH = get_dir_path(SITE_ROOT, 'data_file')
-TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
+DATAFILE_PATH = get_dir_path(SITE_ROOT, 'static', 'data_file')
 STATIC_ZIPFILE_PATH = get_dir_path(SITE_ROOT, 'static', 'zipfile')
 STATIC_DBBACK_PATH = get_dir_path(SITE_ROOT, 'static', 'dbback')
+TEMP_PATH = get_dir_path(SITE_ROOT, 'temp')
+TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
+TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
 SPIDER_LOG_PATH = get_dir_path(SITE_ROOT, 'model_spider', 'model_spider', 'logs')
 
 INIT_SETTINGS_FILE = os.path.join(SITE_ROOT, "init.yaml")

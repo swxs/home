@@ -4,7 +4,7 @@
 # @Time    : 2019/4/3 10:26
 
 import datetime
-import mongoengine_utils as model
+import document_utils as model
 
 
 class BaseDAO(model.BaseDocument):

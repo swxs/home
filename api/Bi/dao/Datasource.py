@@ -3,7 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine_utils as model
+import document_utils as model
 from ..models.Datasource import Datasource as _
 from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
