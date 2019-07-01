@@ -46,18 +46,18 @@ class ManagerQuerySet(object):
     def only(self, *keys):
         if self.model is not None:
             self._filter["only"] = list(keys)
-            self.model.only(*keys)
+            self.model = self.model.only(*keys)
         return self
 
     def exclude(self, *keys):
         if self.model is not None:
             self._filter["exclude"] = list(keys)
-            self.model.exclude(*keys)
+            self.model = self.model.exclude(*keys)
         return self
 
     def order_by(self, *keys):
         if self.model is not None:
-            self.model.order_by(*keys)
+            self.model = self.model.order_by(*keys)
         return self
 
 
