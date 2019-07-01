@@ -6,7 +6,7 @@ import datetime
 import mongoengine as model
 from ..consts.User import *
 from ...BaseModel import BaseModelDocument
-from mongoengine_utils import NAME_DICT
+from document_utils import NAME_DICT
 
 
 class User(BaseModelDocument):

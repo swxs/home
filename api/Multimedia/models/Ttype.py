@@ -6,7 +6,7 @@ import datetime
 import mongoengine as model
 from ..consts.Ttype import *
 from ...BaseModel import BaseModelDocument
-from mongoengine_utils import NAME_DICT
+from document_utils import NAME_DICT
 
 
 class Ttype(BaseModelDocument):

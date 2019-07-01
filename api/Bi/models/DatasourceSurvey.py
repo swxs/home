@@ -6,7 +6,7 @@ import datetime
 import mongoengine as model
 from ..consts.DatasourceSurvey import *
 from .Datasource import Datasource
-from mongoengine_utils import NAME_DICT
+from document_utils import NAME_DICT
 
 
 class DatasourceSurvey(Datasource):

@@ -3,7 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine_utils as model
+import document_utils as model
 from ..models.DatasourceRegion import DatasourceRegion as _
 from .Datasource import Datasource
 from common.Utils.log_utils import getLogger

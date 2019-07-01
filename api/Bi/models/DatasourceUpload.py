@@ -6,7 +6,7 @@ import datetime
 import mongoengine as model
 from ..consts.DatasourceUpload import *
 from .Datasource import Datasource
-from mongoengine_utils import NAME_DICT
+from document_utils import NAME_DICT
 
 
 class DatasourceUpload(Datasource):

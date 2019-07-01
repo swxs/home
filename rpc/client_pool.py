@@ -5,6 +5,13 @@ from common.Exceptions import ApiException
 import settings
 
 
+class BaseDispatcher(object):
+    """
+    所有Dispatcher的基类
+    """
+    pass
+
+
 class ThriftClient(object):
     """
     保存Thrift客户端连接信息

@@ -6,7 +6,7 @@ import datetime
 import mongoengine as model
 from ..consts.DatasourceMerged import *
 from .Datasource import Datasource
-from mongoengine_utils import NAME_DICT
+from document_utils import NAME_DICT
 
 
 class DatasourceMerged(Datasource):
