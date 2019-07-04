@@ -88,13 +88,6 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         data["__raw_model__"] = model
         return cls(**data)
 
-    def update_instance(self, model):
-        data = dict()
-        for attr in self.__fields__:
-            self.__setattr__(attr, model.__getattribute__(attr))
-            self.__dict__[attr] = model.__getattribute__(attr)
-        return self
-
     def to_dict(self, dict_factory=ObjectDict):
         data = dict_factory()
         data["id"] = self.__dict__["id"]

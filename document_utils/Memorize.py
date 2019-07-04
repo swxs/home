@@ -3,6 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2018/7/28 21:22
 
+import gc
 import time
 import uuid
 import threading
@@ -52,6 +53,7 @@ class MemorizeHelper():
             del self.OBJ_DICT[key]
             del self.OBJ_EXPIRE_DICT[key]
             del self.OBJ_VERSION_DICT[key]
+            gc.collect()
         except KeyError:
             pass
             # log.debug('%s keys deleted, %s keys remain' % (len(keys_to_remove), len(OBJ_DICT)),)
@@ -105,7 +107,7 @@ class MemorizeHelper():
     def make_model_main_key(self, name, id):
         return f"{name}_{id}"
 
-    def make_model_sub_key(self, name, **kwargs):
+    def make_model_sub_key(self, _model_name, **kwargs):
         def md5(raw_str):
             if isinstance(raw_str, str):
                 raw_str = raw_str.encode('utf-8')
@@ -115,7 +117,7 @@ class MemorizeHelper():
             lis = [kwargs[k] for k in sorted(kwargs.keys()) if kwargs[k] not in [None, undefined]]
             return md5(''.join(lis))
 
-        return f"{name}_{_open_api_signature(**kwargs)}"
+        return f"{_model_name}_{_open_api_signature(**kwargs)}"
 
 
 memorize_helper = MemorizeHelper()
@@ -174,7 +176,7 @@ def cache(function):
                         obj = function(*args, **kwargs)  # 查询获取对象
                         remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
             obj.__version__ = remote_version
-            return obj
+            return memorize_helper.OBJ_DICT[key]
         else:
             sub_key = memorize_helper.make_model_sub_key(args[0].__model_name__, **kwargs)  # 获取key
 
@@ -210,7 +212,7 @@ def cache(function):
                         remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
             memorize_helper.OBJ_DICT[sub_key] = weakref.proxy(memorize_helper.OBJ_DICT[key])
             obj.__version__ = remote_version
-            return obj
+            return memorize_helper.OBJ_DICT[key]
 
     return helper
 

@@ -119,7 +119,7 @@ class Manager(object):
 
     @classmethod
     def update(cls, model_class, **kwargs):
-        model = model_class._raw_model
+        model = model_class.__raw_model__
         for attr in model_class.__fields__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
@@ -129,7 +129,7 @@ class Manager(object):
                 else:
                     model.__setattr__(attr, value)
         cls._save(model)
-        return model_class.update_instance(model)
+        return model_class.get_instance(model)
 
     @classmethod
     def delete(cls, model_class):
