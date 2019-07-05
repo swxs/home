@@ -3,7 +3,6 @@
 # @AUTH    : swxs
 # @Time    : 2018/7/28 21:22
 
-import gc
 import time
 import uuid
 import threading
@@ -53,7 +52,6 @@ class MemorizeHelper():
             del self.OBJ_DICT[key]
             del self.OBJ_EXPIRE_DICT[key]
             del self.OBJ_VERSION_DICT[key]
-            gc.collect()
         except KeyError:
             pass
             # log.debug('%s keys deleted, %s keys remain' % (len(keys_to_remove), len(OBJ_DICT)),)
