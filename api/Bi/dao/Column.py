@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Column import Column as _
 from ...BaseDAO import BaseDAO
@@ -26,12 +27,12 @@ class Column(BaseDAO):
     def __init__(self, **kwargs):
         super(Column, self).__init__(**kwargs)
 
-    @property
-    def worktable(self):
+    @async_property
+    async def worktable(self):
         from .Worktable import Worktable
-        return Worktable.get_worktable_by_worktable_id(self.worktable_id)
+        return await Worktable.get_worktable_by_worktable_id(self.worktable_id)
 
     @classmethod
-    def get_column_by_column_id(cls, column_id):
-        return cls.select(id=column_id)
+    async def get_column_by_column_id(cls, column_id):
+        return await cls.select(id=column_id)
 

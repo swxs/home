@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.DatasourceRegion import DatasourceRegion as _
 from .Datasource import Datasource
@@ -18,6 +19,6 @@ class DatasourceRegion(Datasource):
         super(DatasourceRegion, self).__init__(**kwargs)
 
     @classmethod
-    def get_datasource_region_by_datasource_region_id(cls, datasource_region_id):
-        return cls.select(id=datasource_region_id)
+    async def get_datasource_region_by_datasource_region_id(cls, datasource_region_id):
+        return await cls.select(id=datasource_region_id)
 

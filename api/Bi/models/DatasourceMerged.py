@@ -3,22 +3,23 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.DatasourceMerged import *
 from .Datasource import Datasource
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class DatasourceMerged(Datasource):
-    datamerge_id = model.ObjectIdField()
+    datamerge_id = fields.ObjectIdField(allow_none=True)
 
-    meta = {
-        'indexes': [
+    class Meta:
+        indexes = [
             {
-                'fields': ['datamerge_id'],
+                'key': ['datamerge_id'],
             },
-        ],
-    }
+        ]
+        pass
 
 
 NAME_DICT["DatasourceMerged"] = DatasourceMerged

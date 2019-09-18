@@ -3,18 +3,19 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.ContainerGroupSwitch import *
 from .Container import Container
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class ContainerGroupSwitch(Container):
-    container_id_list = model.ListField()
-    switch_list = model.ListField()
+    container_id_list = fields.ListField(fields.StringField(), allow_none=True)
+    switch_list = fields.ListField(fields.StringField(), allow_none=True)
 
-    meta = {
-    }
+    class Meta:
+        pass
 
 
 NAME_DICT["ContainerGroupSwitch"] = ContainerGroupSwitch

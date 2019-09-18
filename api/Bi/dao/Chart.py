@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Chart import Chart as _
 from ...BaseDAO import BaseDAO
@@ -27,12 +28,12 @@ class Chart(BaseDAO):
     def __init__(self, **kwargs):
         super(Chart, self).__init__(**kwargs)
 
-    @property
-    def worktable(self):
+    @async_property
+    async def worktable(self):
         from .Worktable import Worktable
-        return Worktable.get_worktable_by_worktable_id(self.worktable_id)
+        return await Worktable.get_worktable_by_worktable_id(self.worktable_id)
 
     @classmethod
-    def get_chart_by_chart_id(cls, chart_id):
-        return cls.select(id=chart_id)
+    async def get_chart_by_chart_id(cls, chart_id):
+        return await cls.select(id=chart_id)
 

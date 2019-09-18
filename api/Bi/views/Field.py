@@ -3,6 +3,7 @@
 # @AUTH    : model
 
 import json
+from bson import ObjectId
 from common.Utils.log_utils import getLogger
 from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
@@ -14,26 +15,30 @@ log = getLogger("views/Field")
 
 class FieldHandler(BaseHandler):
     @BaseHandler.ajax_base()
-    def get(self, field_id=None):
+    async def get(self, field_id=None):
         if field_id:
-            field = Field.select(id=field_id)
+            field = await Field.select(id=field_id)
             return SuccessData(
-                field.to_front()
+                await field.to_front()
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
+            use_pager = self.get_argument("use_pager", 1)
             page = self.get_argument("page", 1)
             items_per_page = self.get_argument("items_per_page", 20)
-            pager = self.get_argument("pager", 1)
-            field_list = Field.search(**search_params).order_by()
-            pager = Page(field_list, pager=pager, page=page, items_per_page=items_per_page)
-            return SuccessData(
-                [item.to_front() for item in pager.items],
-                info=pager.info,
-            )
+            field_cursor = Field.search(**search_params)
+            data = []
+            async for field in field_cursor:
+                data.append(await field.to_front())
+            return SuccessData(data)
+            # pager = Page(field_list, use_pager=use_pager, page=page, items_per_page=items_per_page)
+            # return SuccessData(
+            #     [await item.to_front() for item in pager.items],
+            #     info=pager.info,
+            # )
 
     @BaseHandler.ajax_base()
-    def post(self, field_id=None):
+    async def post(self, field_id=None):
         if field_id:
             params = dict()
             params['chart_id'] = self.get_argument('chart_id', undefined)
@@ -51,8 +56,8 @@ class FieldHandler(BaseHandler):
             params['stype'] = self.get_argument('stype', undefined)
             params['range_region_type_id'] = self.get_argument('range_region_type_id', undefined)
             params['custom_attr'] = self.get_argument('custom_attr', undefined)
-            field = Field.select(id=field_id)
-            field = field.copy(**params)
+            field = await Field.select(id=field_id)
+            field = await field.copy(**params)
             return SuccessData(
                 field.id
             )
@@ -73,13 +78,13 @@ class FieldHandler(BaseHandler):
             params['stype'] = self.get_argument('stype', None)
             params['range_region_type_id'] = self.get_argument('range_region_type_id', None)
             params['custom_attr'] = self.get_argument('custom_attr', None)
-            field = Field.create(**params)
+            field = await Field.create(**params)
             return SuccessData(
                 field.id
             )
 
     @BaseHandler.ajax_base()
-    def put(self, field_id=None):
+    async def put(self, field_id=None):
         params = dict()
         params['chart_id'] = self.get_argument('chart_id', None)
         params['name'] = self.get_argument('name', None)
@@ -96,14 +101,14 @@ class FieldHandler(BaseHandler):
         params['stype'] = self.get_argument('stype', None)
         params['range_region_type_id'] = self.get_argument('range_region_type_id', None)
         params['custom_attr'] = self.get_argument('custom_attr', None)
-        field = Field.select(id=field_id)
-        field = field.update(**params)
+        field = await Field.select(id=field_id)
+        field = await field.update(**params)
         return SuccessData(
             field.id
         )
 
     @BaseHandler.ajax_base()
-    def patch(self, field_id=None):
+    async def patch(self, field_id=None):
         params = dict()
         params['chart_id'] = self.get_argument('chart_id', undefined)
         params['name'] = self.get_argument('name', undefined)
@@ -120,16 +125,16 @@ class FieldHandler(BaseHandler):
         params['stype'] = self.get_argument('stype', undefined)
         params['range_region_type_id'] = self.get_argument('range_region_type_id', undefined)
         params['custom_attr'] = self.get_argument('custom_attr', undefined)
-        field = Field.select(id=field_id)
-        field = field.update(**params)
+        field = await Field.select(id=field_id)
+        field = await field.update(**params)
         return SuccessData(
             field.id
         )
 
     @BaseHandler.ajax_base()
-    def delete(self, field_id=None):
-        field = Field.select(id=field_id)
-        field.delete()
+    async def delete(self, field_id=None):
+        field = await Field.select(id=field_id)
+        await field.delete()
         return SuccessData(
             None
         )

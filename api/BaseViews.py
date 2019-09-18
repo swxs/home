@@ -312,7 +312,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
                     if aio:
                         result = await method(self, *args, **kwargs)
                     else:
-                        result = method(self, *args, **kwargs)
+                        result = await method(self, *args, **kwargs)
                     if isinstance(result, concurrent.Future):
                         return result
                     else:

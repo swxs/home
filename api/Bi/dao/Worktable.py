@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Worktable import Worktable as _
 from ...BaseDAO import BaseDAO
@@ -21,12 +22,12 @@ class Worktable(BaseDAO):
     def __init__(self, **kwargs):
         super(Worktable, self).__init__(**kwargs)
 
-    @property
-    def datasource(self):
+    @async_property
+    async def datasource(self):
         from .Datasource import Datasource
-        return Datasource.get_datasource_by_datasource_id(self.datasource_id)
+        return await Datasource.get_datasource_by_datasource_id(self.datasource_id)
 
     @classmethod
-    def get_worktable_by_worktable_id(cls, worktable_id):
-        return cls.select(id=worktable_id)
+    async def get_worktable_by_worktable_id(cls, worktable_id):
+        return await cls.select(id=worktable_id)
 

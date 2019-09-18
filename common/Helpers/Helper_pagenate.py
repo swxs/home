@@ -1,35 +1,41 @@
 class Page(list):
+    def __init__(self, collection, use_pager=1, page=1, items_per_page=20, item_count=None, wrapper_class=None):
+        self._collection = collection
+        self._use_pager = use_pager
+        self._page = page
+        self._items_per_page = items_per_page
+        self._item_count = item_count
+        self._wrapper_class = wrapper_class
+        super().__init__()
 
-    def __init__(self, collection, pager=1, page=1, items_per_page=20, item_count=None, wrapper_class=None):
-        self.pager = pager
-
-        if collection is not None:
-            if wrapper_class is None:
+    async def do(self):
+        if self._collection is not None:
+            if self._wrapper_class is None:
                 # Default case. The collection is already a list-type object.
-                self.collection = collection
+                self.collection = self._collection
             else:
                 # Special case. A custom wrapper class is used to access elements of the collection.
-                self.collection = wrapper_class(collection)
+                self.collection = self._wrapper_class(self._collection)
         else:
             self.collection = []
 
-        if self.pager:
-            self.collection_type = type(collection)
+        if self._use_pager:
+            self.collection_type = type(self._collection)
 
             try:
-                self.page = int(page)  # make it int() if we get it as a string
+                self.page = int(self._page)  # make it int() if we get it as a string
             except (ValueError, TypeError):
                 self.page = 1
 
-            self.items_per_page = items_per_page
+            self.items_per_page = self._items_per_page
 
-            if item_count is not None:
-                self.item_count = item_count
+            if self._item_count is not None:
+                self.item_count = self._item_count
             else:
                 try:
                     self.item_count = len(self.collection)
                 except Exception as e:
-                    self.item_count = len(self.collection)
+                    self.item_count = await self.collection.count()
 
             # Compute the number of the first and last available page
             if self.item_count > 0:
@@ -45,8 +51,8 @@ class Page(list):
 
                 # Note: the number of items on this page can be less than
                 #       items_per_page if the last page is not full
-                self.first_item = (self.page - 1) * items_per_page + 1
-                self.last_item = min(self.first_item + items_per_page - 1, self.item_count)
+                self.first_item = (self.page - 1) * self._items_per_page + 1
+                self.last_item = min(self.first_item + self._items_per_page - 1, self.item_count)
 
                 # We subclassed "list" so we need to call its init() method
                 # and fill the new list with the items to be displayed on the page.
@@ -106,7 +112,7 @@ class Page(list):
 
     @property
     def info(self):
-        if self.pager:
+        if self._use_pager:
             return {
                 "item_count": self.item_count,
                 "first_page": self.first_page,

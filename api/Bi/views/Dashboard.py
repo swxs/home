@@ -3,6 +3,7 @@
 # @AUTH    : model
 
 import json
+from bson import ObjectId
 from common.Utils.log_utils import getLogger
 from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
@@ -14,26 +15,30 @@ log = getLogger("views/Dashboard")
 
 class DashboardHandler(BaseHandler):
     @BaseHandler.ajax_base()
-    def get(self, dashboard_id=None):
+    async def get(self, dashboard_id=None):
         if dashboard_id:
-            dashboard = Dashboard.select(id=dashboard_id)
+            dashboard = await Dashboard.select(id=dashboard_id)
             return SuccessData(
-                dashboard.to_front()
+                await dashboard.to_front()
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
+            use_pager = self.get_argument("use_pager", 1)
             page = self.get_argument("page", 1)
             items_per_page = self.get_argument("items_per_page", 20)
-            pager = self.get_argument("pager", 1)
-            dashboard_list = Dashboard.search(**search_params).order_by()
-            pager = Page(dashboard_list, pager=pager, page=page, items_per_page=items_per_page)
-            return SuccessData(
-                [item.to_front() for item in pager.items],
-                info=pager.info,
-            )
+            dashboard_cursor = Dashboard.search(**search_params)
+            data = []
+            async for dashboard in dashboard_cursor:
+                data.append(await dashboard.to_front())
+            return SuccessData(data)
+            # pager = Page(dashboard_list, use_pager=use_pager, page=page, items_per_page=items_per_page)
+            # return SuccessData(
+            #     [await item.to_front() for item in pager.items],
+            #     info=pager.info,
+            # )
 
     @BaseHandler.ajax_base()
-    def post(self, dashboard_id=None):
+    async def post(self, dashboard_id=None):
         if dashboard_id:
             params = dict()
             params['user_id'] = self.get_argument('user_id', undefined)
@@ -45,8 +50,8 @@ class DashboardHandler(BaseHandler):
             params['description'] = self.get_argument('description', undefined)
             params['simulate_region_id'] = self.get_argument('simulate_region_id', undefined)
             params['parent_id'] = self.get_argument('parent_id', undefined)
-            dashboard = Dashboard.select(id=dashboard_id)
-            dashboard = dashboard.copy(**params)
+            dashboard = await Dashboard.select(id=dashboard_id)
+            dashboard = await dashboard.copy(**params)
             return SuccessData(
                 dashboard.id
             )
@@ -61,13 +66,13 @@ class DashboardHandler(BaseHandler):
             params['description'] = self.get_argument('description', None)
             params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
             params['parent_id'] = self.get_argument('parent_id', None)
-            dashboard = Dashboard.create(**params)
+            dashboard = await Dashboard.create(**params)
             return SuccessData(
                 dashboard.id
             )
 
     @BaseHandler.ajax_base()
-    def put(self, dashboard_id=None):
+    async def put(self, dashboard_id=None):
         params = dict()
         params['user_id'] = self.get_argument('user_id', None)
         params['usage'] = self.get_argument('usage', None)
@@ -78,14 +83,14 @@ class DashboardHandler(BaseHandler):
         params['description'] = self.get_argument('description', None)
         params['simulate_region_id'] = self.get_argument('simulate_region_id', None)
         params['parent_id'] = self.get_argument('parent_id', None)
-        dashboard = Dashboard.select(id=dashboard_id)
-        dashboard = dashboard.update(**params)
+        dashboard = await Dashboard.select(id=dashboard_id)
+        dashboard = await dashboard.update(**params)
         return SuccessData(
             dashboard.id
         )
 
     @BaseHandler.ajax_base()
-    def patch(self, dashboard_id=None):
+    async def patch(self, dashboard_id=None):
         params = dict()
         params['user_id'] = self.get_argument('user_id', undefined)
         params['usage'] = self.get_argument('usage', undefined)
@@ -96,16 +101,16 @@ class DashboardHandler(BaseHandler):
         params['description'] = self.get_argument('description', undefined)
         params['simulate_region_id'] = self.get_argument('simulate_region_id', undefined)
         params['parent_id'] = self.get_argument('parent_id', undefined)
-        dashboard = Dashboard.select(id=dashboard_id)
-        dashboard = dashboard.update(**params)
+        dashboard = await Dashboard.select(id=dashboard_id)
+        dashboard = await dashboard.update(**params)
         return SuccessData(
             dashboard.id
         )
 
     @BaseHandler.ajax_base()
-    def delete(self, dashboard_id=None):
-        dashboard = Dashboard.select(id=dashboard_id)
-        dashboard.delete()
+    async def delete(self, dashboard_id=None):
+        dashboard = await Dashboard.select(id=dashboard_id)
+        await dashboard.delete()
         return SuccessData(
             None
         )

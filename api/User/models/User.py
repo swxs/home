@@ -3,33 +3,34 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.User import *
 from ...BaseModel import BaseModelDocument
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class User(BaseModelDocument):
-    username = model.StringField(helper_text='用户名')
-    nickname = model.StringField(helper_text='昵称')
-    password = model.StringField(helper_text='密码')
-    salt = model.StringField(helper_text='密码盐值')
-    avatar = model.StringField(helper_text='头像')
-    email = model.StringField(helper_text='邮箱')
-    mobile = model.StringField(helper_text='手机号')
-    description = model.StringField(helper_text='描述')
+    username = fields.StringField(allow_none=True, helper_text='用户名')
+    nickname = fields.StringField(allow_none=True, helper_text='昵称')
+    password = fields.StringField(allow_none=True, helper_text='密码')
+    salt = fields.StringField(allow_none=True, helper_text='密码盐值')
+    avatar = fields.StringField(allow_none=True, helper_text='头像')
+    email = fields.StringField(allow_none=True, helper_text='邮箱')
+    mobile = fields.StringField(allow_none=True, helper_text='手机号')
+    description = fields.StringField(allow_none=True, helper_text='描述')
 
-    meta = {
-        'indexes': [
+    class Meta:
+        indexes = [
             {
-                'fields': ['username'],
-                'unique ': True,
+                'key': ['username'],
+                'unique': True,
             },
             {
-                'fields': ['mobile'],
+                'key': ['mobile'],
             },
-        ],
-    }
+        ]
+        pass
 
 
 NAME_DICT["User"] = User

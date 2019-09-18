@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.User import User as _
 from ...BaseDAO import BaseDAO
@@ -25,6 +26,6 @@ class User(BaseDAO):
         super(User, self).__init__(**kwargs)
 
     @classmethod
-    def get_user_by_user_id(cls, user_id):
-        return cls.select(id=user_id)
+    async def get_user_by_user_id(cls, user_id):
+        return await cls.select(id=user_id)
 

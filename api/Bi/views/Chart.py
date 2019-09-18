@@ -3,6 +3,7 @@
 # @AUTH    : model
 
 import json
+from bson import ObjectId
 from common.Utils.log_utils import getLogger
 from common.Helpers.Helper_pagenate import Page
 from ...BaseConsts import *
@@ -14,26 +15,30 @@ log = getLogger("views/Chart")
 
 class ChartHandler(BaseHandler):
     @BaseHandler.ajax_base()
-    def get(self, chart_id=None):
+    async def get(self, chart_id=None):
         if chart_id:
-            chart = Chart.select(id=chart_id)
+            chart = await Chart.select(id=chart_id)
             return SuccessData(
-                chart.to_front()
+                await chart.to_front()
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
+            use_pager = self.get_argument("use_pager", 1)
             page = self.get_argument("page", 1)
             items_per_page = self.get_argument("items_per_page", 20)
-            pager = self.get_argument("pager", 1)
-            chart_list = Chart.search(**search_params).order_by()
-            pager = Page(chart_list, pager=pager, page=page, items_per_page=items_per_page)
-            return SuccessData(
-                [item.to_front() for item in pager.items],
-                info=pager.info,
-            )
+            chart_cursor = Chart.search(**search_params)
+            data = []
+            async for chart in chart_cursor:
+                data.append(await chart.to_front())
+            return SuccessData(data)
+            # pager = Page(chart_list, use_pager=use_pager, page=page, items_per_page=items_per_page)
+            # return SuccessData(
+            #     [await item.to_front() for item in pager.items],
+            #     info=pager.info,
+            # )
 
     @BaseHandler.ajax_base()
-    def post(self, chart_id=None):
+    async def post(self, chart_id=None):
         if chart_id:
             params = dict()
             params['name'] = self.get_argument('name', undefined)
@@ -47,8 +52,8 @@ class ChartHandler(BaseHandler):
             params['prev_chart_id'] = self.get_argument('prev_chart_id', undefined)
             params['custom_attr'] = self.get_argument('custom_attr', undefined)
             params['markline'] = self.get_arguments('markline', undefined)
-            chart = Chart.select(id=chart_id)
-            chart = chart.copy(**params)
+            chart = await Chart.select(id=chart_id)
+            chart = await chart.copy(**params)
             return SuccessData(
                 chart.id
             )
@@ -65,13 +70,13 @@ class ChartHandler(BaseHandler):
             params['prev_chart_id'] = self.get_argument('prev_chart_id', None)
             params['custom_attr'] = self.get_argument('custom_attr', None)
             params['markline'] = self.get_arguments('markline', [])
-            chart = Chart.create(**params)
+            chart = await Chart.create(**params)
             return SuccessData(
                 chart.id
             )
 
     @BaseHandler.ajax_base()
-    def put(self, chart_id=None):
+    async def put(self, chart_id=None):
         params = dict()
         params['name'] = self.get_argument('name', None)
         params['title'] = self.get_argument('title', None)
@@ -84,14 +89,14 @@ class ChartHandler(BaseHandler):
         params['prev_chart_id'] = self.get_argument('prev_chart_id', None)
         params['custom_attr'] = self.get_argument('custom_attr', None)
         params['markline'] = self.get_arguments('markline', [])
-        chart = Chart.select(id=chart_id)
-        chart = chart.update(**params)
+        chart = await Chart.select(id=chart_id)
+        chart = await chart.update(**params)
         return SuccessData(
             chart.id
         )
 
     @BaseHandler.ajax_base()
-    def patch(self, chart_id=None):
+    async def patch(self, chart_id=None):
         params = dict()
         params['name'] = self.get_argument('name', undefined)
         params['title'] = self.get_argument('title', undefined)
@@ -104,16 +109,16 @@ class ChartHandler(BaseHandler):
         params['prev_chart_id'] = self.get_argument('prev_chart_id', undefined)
         params['custom_attr'] = self.get_argument('custom_attr', undefined)
         params['markline'] = self.get_arguments('markline', undefined)
-        chart = Chart.select(id=chart_id)
-        chart = chart.update(**params)
+        chart = await Chart.select(id=chart_id)
+        chart = await chart.update(**params)
         return SuccessData(
             chart.id
         )
 
     @BaseHandler.ajax_base()
-    def delete(self, chart_id=None):
-        chart = Chart.select(id=chart_id)
-        chart.delete()
+    async def delete(self, chart_id=None):
+        chart = await Chart.select(id=chart_id)
+        await chart.delete()
         return SuccessData(
             None
         )

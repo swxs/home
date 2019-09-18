@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.ContainerGroup import ContainerGroup as _
 from .Container import Container
@@ -19,6 +20,6 @@ class ContainerGroup(Container):
         super(ContainerGroup, self).__init__(**kwargs)
 
     @classmethod
-    def get_container_group_by_container_group_id(cls, container_group_id):
-        return cls.select(id=container_group_id)
+    async def get_container_group_by_container_group_id(cls, container_group_id):
+        return await cls.select(id=container_group_id)
 

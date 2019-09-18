@@ -2,8 +2,12 @@
 # @File    : manager_mongoenginee.py
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:55
+import asyncio
 
+from bson import ObjectId
+from async_property import async_property
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
+from pymongo.errors import (DuplicateKeyError, )
 from api.BaseConsts import undefined
 from .models_fields import DictField
 from common.Metaclass.Singleton import Singleton
@@ -17,15 +21,14 @@ log = getLogger("manager.mongoenginee")
 
 class ManagerQuerySet(object):
     def __init__(self, get_instance, model):
+        """
+
+        :param get_instance: 转换为对应类的方法
+        :param model: cursor
+        """
         self.get_instance = get_instance
         self.model = model
         self._filter = dict()
-
-    def __getitem__(self, slice):
-        return map(lambda model: self.get_instance(model, _filter=self._filter), self.model.__getitem__(slice))
-
-    def __len__(self):
-        return self.model.count()
 
     def __iter__(self):
         if self.model is None:
@@ -33,32 +36,21 @@ class ManagerQuerySet(object):
         else:
             return map(lambda model: self.get_instance(model, _filter=self._filter), self.model)
 
-    def first(self):
-        first_model = self.model.first()
+    async def __aiter__(self):
+        if self.model is None:
+            yield []
+        else:
+            async for model in self.model:
+                yield self.get_instance(model, _filter=self._filter)
+
+    async def first(self):
+        first_model = self.model.to_list(1)
+        if isinstance(first_model, asyncio.Future):
+            first_model = await first_model
         if first_model is None:
             return None
         else:
             return self.get_instance(first_model, _filter=self._filter)
-
-    def count(self):
-        return self.model.count()
-
-    def only(self, *keys):
-        if self.model is not None:
-            self._filter["only"] = list(keys)
-            self.model = self.model.only(*keys)
-        return self
-
-    def exclude(self, *keys):
-        if self.model is not None:
-            self._filter["exclude"] = list(keys)
-            self.model = self.model.exclude(*keys)
-        return self
-
-    def order_by(self, *keys):
-        if self.model is not None:
-            self.model = self.model.order_by(*keys)
-        return self
 
 
 class Manager(object):
@@ -72,27 +64,27 @@ class Manager(object):
         return NAME_DICT[model_class.__model_name__]
 
     @classmethod
-    def _save(cls, model):
+    async def _save(cls, model):
         try:
-            model.save()
+            await model.commit()
         except ValidationError as e:
-            raise ApiValidateException(model._class_name)
-        except NotUniqueError:
-            raise ApiExistException(model._class_name)
+            raise ApiValidateException(model.__class__.__name__)
+        except (NotUniqueError, DuplicateKeyError) as e:
+            raise ApiExistException(model.__class__.__name__)
         except Exception as e:
             raise e
 
     @classmethod
-    def _delete(cls, model):
+    async def _delete(cls, model):
         try:
-            model.delete()
+            await model.delete()
         except Exception as e:
             raise e
 
     @classmethod
-    def select(cls, model_class, **kwargs):
+    async def select(cls, model_class, **kwargs):
         try:
-            model = cls._get_model(model_class).objects.get(**kwargs)
+            model = await cls._get_model(model_class).find_one(kwargs)
         except DoesNotExist:
             raise ApiNotExistException(f"{model_class.__model_name__}")
         except Exception as e:
@@ -101,24 +93,24 @@ class Manager(object):
 
     @classmethod
     def filter(cls, model_class, **kwargs):
-        model = cls._get_model(model_class).objects.filter(**kwargs)
+        model = cls._get_model(model_class).find(**kwargs)
         try:
             return ManagerQuerySet(model_class.get_instance, model)
         except Exception as e:
             print(e)
 
     @classmethod
-    def create(cls, model_class, **kwargs):
+    async def create(cls, model_class, **kwargs):
         model = cls._get_model(model_class)()
         for attr in model_class.__fields__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
                 model.__setattr__(attr, value)
-        cls._save(model)
+        await cls._save(model)
         return model_class.get_instance(model)
 
     @classmethod
-    def update(cls, model_class, **kwargs):
+    async def update(cls, model_class, **kwargs):
         model = model_class.__raw_model__
         for attr in model_class.__fields__:
             value = kwargs.get(attr, undefined)
@@ -128,10 +120,10 @@ class Manager(object):
                     model.__setattr__(attr, model.__getitem__(attr))
                 else:
                     model.__setattr__(attr, value)
-        cls._save(model)
+        await cls._save(model)
         return model_class.get_instance(model)
 
     @classmethod
-    def delete(cls, model_class):
-        model = cls._get_model(model_class).objects.get(id=model_class.id)
-        cls._delete(model)
+    async def delete(cls, model_class):
+        model = await cls._get_model(model_class).find_one({"_id": model_class.oid})
+        await cls._delete(model)

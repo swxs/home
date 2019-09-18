@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Dashboard import Dashboard as _
 from ...BaseDAO import BaseDAO
@@ -25,22 +26,22 @@ class Dashboard(BaseDAO):
     def __init__(self, **kwargs):
         super(Dashboard, self).__init__(**kwargs)
 
-    @property
-    def container(self):
+    @async_property
+    async def container(self):
         from .Container import Container
-        return Container.get_container_by_container_id(self.container_id)
+        return await Container.get_container_by_container_id(self.container_id)
 
-    @property
-    def worktable(self):
+    @async_property
+    async def worktable(self):
         from .Worktable import Worktable
-        return Worktable.get_worktable_by_worktable_id(self.worktable_id)
+        return await Worktable.get_worktable_by_worktable_id(self.worktable_id)
 
-    @property
-    def dashboard(self):
+    @async_property
+    async def dashboard(self):
         from .Dashboard import Dashboard
-        return Dashboard.get_dashboard_by_dashboard_id(self.parent_id)
+        return await Dashboard.get_dashboard_by_dashboard_id(self.parent_id)
 
     @classmethod
-    def get_dashboard_by_dashboard_id(cls, dashboard_id):
-        return cls.select(id=dashboard_id)
+    async def get_dashboard_by_dashboard_id(cls, dashboard_id):
+        return await cls.select(id=dashboard_id)
 

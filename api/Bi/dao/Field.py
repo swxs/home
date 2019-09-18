@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Field import Field as _
 from ...BaseDAO import BaseDAO
@@ -31,17 +32,17 @@ class Field(BaseDAO):
     def __init__(self, **kwargs):
         super(Field, self).__init__(**kwargs)
 
-    @property
-    def chart(self):
+    @async_property
+    async def chart(self):
         from .Chart import Chart
-        return Chart.get_chart_by_chart_id(self.chart_id)
+        return await Chart.get_chart_by_chart_id(self.chart_id)
 
-    @property
-    def column(self):
+    @async_property
+    async def column(self):
         from .Column import Column
-        return Column.get_column_by_column_id(self.column_id)
+        return await Column.get_column_by_column_id(self.column_id)
 
     @classmethod
-    def get_field_by_field_id(cls, field_id):
-        return cls.select(id=field_id)
+    async def get_field_by_field_id(cls, field_id):
+        return await cls.select(id=field_id)
 

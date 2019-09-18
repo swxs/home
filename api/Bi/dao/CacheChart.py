@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.CacheChart import CacheChart as _
 from ...BaseDAO import BaseDAO
@@ -22,17 +23,17 @@ class CacheChart(BaseDAO):
     def __init__(self, **kwargs):
         super(CacheChart, self).__init__(**kwargs)
 
-    @property
-    def chart(self):
+    @async_property
+    async def chart(self):
         from .Chart import Chart
-        return Chart.get_chart_by_chart_id(self.chart_id)
+        return await Chart.get_chart_by_chart_id(self.chart_id)
 
-    @property
-    def datafilter(self):
+    @async_property
+    async def datafilter(self):
         from .Datafilter import Datafilter
-        return Datafilter.get_datafilter_by_datafilter_id(self.data_filter_id)
+        return await Datafilter.get_datafilter_by_datafilter_id(self.data_filter_id)
 
     @classmethod
-    def get_cache_chart_by_cache_chart_id(cls, cache_chart_id):
-        return cls.select(id=cache_chart_id)
+    async def get_cache_chart_by_cache_chart_id(cls, cache_chart_id):
+        return await cls.select(id=cache_chart_id)
 

@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.ContainerChart import ContainerChart as _
 from .Container import Container
@@ -17,12 +18,12 @@ class ContainerChart(Container):
     def __init__(self, **kwargs):
         super(ContainerChart, self).__init__(**kwargs)
 
-    @property
-    def chart(self):
+    @async_property
+    async def chart(self):
         from .Chart import Chart
-        return Chart.get_chart_by_chart_id(self.chart_id)
+        return await Chart.get_chart_by_chart_id(self.chart_id)
 
     @classmethod
-    def get_container_chart_by_container_chart_id(cls, container_chart_id):
-        return cls.select(id=container_chart_id)
+    async def get_container_chart_by_container_chart_id(cls, container_chart_id):
+        return await cls.select(id=container_chart_id)
 

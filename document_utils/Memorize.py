@@ -139,9 +139,9 @@ def clear(function):
 
 def upgrade(function):
     @wraps(function)
-    def helper(*args, **kwargs):
+    async def helper(*args, **kwargs):
         try:
-            obj = function(*args, **kwargs)
+            obj = await function(*args, **kwargs)
         except Exception as e:
             raise e
         key = memorize_helper.make_model_main_key(obj.__model_name__, obj.id)
@@ -155,23 +155,23 @@ def upgrade(function):
 
 def cache(function):
     @wraps(function)
-    def helper(*args, **kwargs):
+    async def helper(*args, **kwargs):
         if "id" in kwargs:
             key = memorize_helper.make_model_main_key(args[0].__model_name__, kwargs.get("id"))  # 获取key
             remote_version = memorize_helper.get_remote_obj_version(key)  # 获取当前版本号
             if remote_version == 0:  # 如果远程无版本
-                obj = function(*args, **kwargs)  # 查询获取对象
+                obj = await function(*args, **kwargs)  # 查询获取对象
                 remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
             else:  # 如果远程有版本
                 local_version = memorize_helper.get_local_obj_version(key)  # 获取当前版本
                 if local_version != remote_version:  # 当前版本与远程版本不同
-                    obj = function(*args, **kwargs)  # 查询获取对象
+                    obj = await function(*args, **kwargs)  # 查询获取对象
                     remote_version = memorize_helper.set_obj_new_version(obj, key, remote_version)  # 同步版本至远程版本
                 else:  # 版本相同
                     if key in memorize_helper.OBJ_DICT:  # key 存在
                         obj = memorize_helper.OBJ_DICT[key]  # 获取缓存对象
                     else:  # key 不存在, 可能被删掉了？
-                        obj = function(*args, **kwargs)  # 查询获取对象
+                        obj = await function(*args, **kwargs)  # 查询获取对象
                         remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
             obj.__version__ = remote_version
             return memorize_helper.OBJ_DICT[key]

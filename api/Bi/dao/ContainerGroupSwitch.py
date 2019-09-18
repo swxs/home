@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.ContainerGroupSwitch import ContainerGroupSwitch as _
 from .Container import Container
@@ -19,6 +20,6 @@ class ContainerGroupSwitch(Container):
         super(ContainerGroupSwitch, self).__init__(**kwargs)
 
     @classmethod
-    def get_container_group_switch_by_container_group_switch_id(cls, container_group_switch_id):
-        return cls.select(id=container_group_switch_id)
+    async def get_container_group_switch_by_container_group_switch_id(cls, container_group_switch_id):
+        return await cls.select(id=container_group_switch_id)
 

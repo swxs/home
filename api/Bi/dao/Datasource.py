@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Datasource import Datasource as _
 from ...BaseDAO import BaseDAO
@@ -18,6 +19,6 @@ class Datasource(BaseDAO):
         super(Datasource, self).__init__(**kwargs)
 
     @classmethod
-    def get_datasource_by_datasource_id(cls, datasource_id):
-        return cls.select(id=datasource_id)
+    async def get_datasource_by_datasource_id(cls, datasource_id):
+        return await cls.select(id=datasource_id)
 

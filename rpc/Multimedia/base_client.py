@@ -52,7 +52,7 @@ def select_artical(id):
         return result
 
 
-def list_artical():
+def search_artical():
     with get_thrift_pool('Multimedia').get_client() as client:
         result = client.list_multimedia_artical()
         result_object_list = []
@@ -72,6 +72,7 @@ def list_artical():
                 })
             result.artical_list = result_object_list
         return result
+
 def create_movie(**kwargs):
     movie = multimedia_thrift.Movie()
     movie.__dict__.update(kwargs)
@@ -108,7 +109,7 @@ def select_movie(id):
         return result
 
 
-def list_movie():
+def search_movie():
     with get_thrift_pool('Multimedia').get_client() as client:
         result = client.list_multimedia_movie()
         result_object_list = []
@@ -122,6 +123,7 @@ def list_movie():
                 })
             result.movie_list = result_object_list
         return result
+
 def create_tag(**kwargs):
     tag = multimedia_thrift.Tag()
     tag.__dict__.update(kwargs)
@@ -157,7 +159,7 @@ def select_tag(id):
         return result
 
 
-def list_tag():
+def search_tag():
     with get_thrift_pool('Multimedia').get_client() as client:
         result = client.list_multimedia_tag()
         result_object_list = []
@@ -170,6 +172,7 @@ def list_tag():
                 })
             result.tag_list = result_object_list
         return result
+
 def create_ttype(**kwargs):
     ttype = multimedia_thrift.Ttype()
     ttype.__dict__.update(kwargs)
@@ -204,7 +207,7 @@ def select_ttype(id):
         return result
 
 
-def list_ttype():
+def search_ttype():
     with get_thrift_pool('Multimedia').get_client() as client:
         result = client.list_multimedia_ttype()
         result_object_list = []
@@ -216,3 +219,4 @@ def list_ttype():
                 })
             result.ttype_list = result_object_list
         return result
+

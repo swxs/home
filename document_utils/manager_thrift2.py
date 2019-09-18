@@ -76,9 +76,9 @@ class Manager(object):
         try:
             model.save()
         except ValidationError as e:
-            raise ApiValidateException(model._class_name)
+            raise ApiValidateException(model.__class__.__name__)
         except NotUniqueError:
-            raise ApiExistException(model._class_name)
+            raise ApiExistException(model.__class__.__name__)
         except Exception as e:
             raise e
 

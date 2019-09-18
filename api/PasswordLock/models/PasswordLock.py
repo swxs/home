@@ -3,17 +3,18 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.PasswordLock import *
 from ...BaseModel import BaseModelDocument
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class PasswordLock(BaseModelDocument):
-    name = model.StringField()
-    key = model.StringField()
-    website = model.StringField()
-    user_id = model.ObjectIdField()
+    name = fields.StringField(allow_none=True)
+    key = fields.StringField(allow_none=True)
+    website = fields.StringField(allow_none=True)
+    user_id = fields.ObjectIdField(allow_none=True)
 
 
 NAME_DICT["PasswordLock"] = PasswordLock

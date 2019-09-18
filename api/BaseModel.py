@@ -4,17 +4,21 @@
 # @Time    : 2019/4/3 10:11
 
 import datetime
-import mongoengine as model
+from settings import instance
+from umongo import Instance, Document, fields, ValidationError, set_gettext
+from umongo.marshmallow_bonus import SchemaFromUmongo
 
+@instance.register
+class BaseModelDocument(Document):
+    created = fields.DateTimeField(default=datetime.datetime.now)
+    updated = fields.DateTimeField(default=datetime.datetime.now)
 
-class BaseModelDocument(model.Document):
-    created = model.DateTimeField(default=datetime.datetime.now)
-    updated = model.DateTimeField(default=datetime.datetime.now)
+    class Meta:
+        abstract = True
+        allow_inheritance = True
 
-    meta = {
-        'abstract': True,
-        'ordering': ['-created'],
-    }
+    # meta = {
+    #     'abstract': True,
+    #     'ordering': ['-created'],
+    # }
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)

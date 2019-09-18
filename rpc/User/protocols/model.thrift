@@ -1,4 +1,10 @@
-struct SaveResult {
+struct CreateResult {
+    1: required i32 code;
+    2: optional string id;
+    3: optional string msg;
+}
+
+struct UpdateResult {
     1: required i32 code;
     2: optional string id;
     3: optional string msg;
@@ -29,7 +35,11 @@ struct UserResult {
 
 typedef list<User> UserList
 
-
+struct UserSearchResult {
+    1: required i32 code;
+    2: optional UserList user_list;
+    3: optional string msg;
+}
 
 struct Description {
     1: optional string id;
@@ -55,8 +65,10 @@ service UserService {
     UpdateResult update_user_user(1:User user),
     DeleteResult delete_user_user(1:list<string> idList),
     UserResult select_User_user(1: string oid),
+    UserSearchResult search_User_user(),
     CreateResult create_user_description(1:_description description),
     UpdateResult update_user_description(1:_description description),
     DeleteResult delete_user_description(1:list<string> idList),
     _descriptionResult select_User_description(1: string oid),
+    _descriptionSearchResult search_User_description(),
 }

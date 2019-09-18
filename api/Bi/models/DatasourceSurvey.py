@@ -3,22 +3,23 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.DatasourceSurvey import *
 from .Datasource import Datasource
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class DatasourceSurvey(Datasource):
-    survey_id = model.ObjectIdField()
+    survey_id = fields.ObjectIdField(allow_none=True)
 
-    meta = {
-        'indexes': [
+    class Meta:
+        indexes = [
             {
-                'fields': ['survey_id'],
+                'key': ['survey_id'],
             },
-        ],
-    }
+        ]
+        pass
 
 
 NAME_DICT["DatasourceSurvey"] = DatasourceSurvey

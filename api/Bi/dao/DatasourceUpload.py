@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.DatasourceUpload import DatasourceUpload as _
 from .Datasource import Datasource
@@ -18,6 +19,6 @@ class DatasourceUpload(Datasource):
         super(DatasourceUpload, self).__init__(**kwargs)
 
     @classmethod
-    def get_datasource_upload_by_datasource_upload_id(cls, datasource_upload_id):
-        return cls.select(id=datasource_upload_id)
+    async def get_datasource_upload_by_datasource_upload_id(cls, datasource_upload_id):
+        return await cls.select(id=datasource_upload_id)
 

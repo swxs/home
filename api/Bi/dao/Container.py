@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Container import Container as _
 from ...BaseDAO import BaseDAO
@@ -19,6 +20,6 @@ class Container(BaseDAO):
         super(Container, self).__init__(**kwargs)
 
     @classmethod
-    def get_container_by_container_id(cls, container_id):
-        return cls.select(id=container_id)
+    async def get_container_by_container_id(cls, container_id):
+        return await cls.select(id=container_id)
 

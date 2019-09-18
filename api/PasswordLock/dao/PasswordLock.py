@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.PasswordLock import PasswordLock as _
 from ...BaseDAO import BaseDAO
@@ -21,5 +22,6 @@ class PasswordLock(BaseDAO):
         super(PasswordLock, self).__init__(**kwargs)
 
     @classmethod
-    def get_password_lock_by_password_lock_id(cls, password_lock_id):
-        return cls.select(id=password_lock_id)
+    async def get_password_lock_by_password_lock_id(cls, password_lock_id):
+        return await cls.select(id=password_lock_id)
+

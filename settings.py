@@ -79,16 +79,21 @@ DB_CONNECTED = False
 
 def connect_db(db_name=MONGODB_DBNAME, mock=False):
     global DB_CONNECTED
-    from mongoengine.connection import connect
-    if mock:
-        host = f"{MONGODB_ADDRESS}:mock"
-    else:
-        host = MONGODB_ADDRESS
-    connect(db_name, host=host, port=MONGODB_PORT, is_slave=False, slaves=None)
-    DB_CONNECTED = True
+    from motor.motor_asyncio import AsyncIOMotorClient
+    from umongo import Instance, Document, fields, ValidationError, set_gettext
+    from umongo.marshmallow_bonus import SchemaFromUmongo
+    db = AsyncIOMotorClient()[db_name]
+    instance = Instance(db)
+    return instance
+    # if mock:
+    #     host = f"{MONGODB_ADDRESS}:mock"
+    # else:
+    #     host = MONGODB_ADDRESS
+    # connect(db_name, host=host, port=MONGODB_PORT, is_slave=False, slaves=None)
+    # DB_CONNECTED = True
 
 
-connect_db()
+instance = connect_db()
 
 settings = dict(
     cookie_secret=SECRET_KEY,

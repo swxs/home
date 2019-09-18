@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.ValueGroup import ValueGroup as _
 from ...BaseDAO import BaseDAO
@@ -20,6 +21,6 @@ class ValueGroup(BaseDAO):
         super(ValueGroup, self).__init__(**kwargs)
 
     @classmethod
-    def get_value_group_by_value_group_id(cls, value_group_id):
-        return cls.select(id=value_group_id)
+    async def get_value_group_by_value_group_id(cls, value_group_id):
+        return await cls.select(id=value_group_id)
 

@@ -3,22 +3,23 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.DatasourceRegion import *
 from .Datasource import Datasource
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class DatasourceRegion(Datasource):
-    region_type_id = model.ObjectIdField()
+    region_type_id = fields.ObjectIdField(allow_none=True)
 
-    meta = {
-        'indexes': [
+    class Meta:
+        indexes = [
             {
-                'fields': ['region_type_id'],
+                'key': ['region_type_id'],
             },
-        ],
-    }
+        ]
+        pass
 
 
 NAME_DICT["DatasourceRegion"] = DatasourceRegion

@@ -17,8 +17,8 @@ class PasswordLock(BasePasswordLock):
         else:
             return None
 
-    def to_front(self, *args, **kwargs):
-        data_dict = super(PasswordLock, self).to_front()
+    async def to_front(self, *args, **kwargs):
+        data_dict = await super(PasswordLock, self).to_front()
         data_dict["password"] = self.password
         return data_dict
 

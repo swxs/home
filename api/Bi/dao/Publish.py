@@ -3,6 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
+from async_property import async_property
 import document_utils as model
 from ..models.Publish import Publish as _
 from ...BaseDAO import BaseDAO
@@ -22,12 +23,12 @@ class Publish(BaseDAO):
     def __init__(self, **kwargs):
         super(Publish, self).__init__(**kwargs)
 
-    @property
-    def dashboard(self):
+    @async_property
+    async def dashboard(self):
         from .Dashboard import Dashboard
-        return Dashboard.get_dashboard_by_dashboard_id(self.dashboard_id)
+        return await Dashboard.get_dashboard_by_dashboard_id(self.dashboard_id)
 
     @classmethod
-    def get_publish_by_publish_id(cls, publish_id):
-        return cls.select(id=publish_id)
+    async def get_publish_by_publish_id(cls, publish_id):
+        return await cls.select(id=publish_id)
 

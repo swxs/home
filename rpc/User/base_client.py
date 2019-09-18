@@ -51,7 +51,7 @@ def select_user(id):
         return result
 
 
-def list_user():
+def search_user():
     with get_thrift_pool('User').get_client() as client:
         result = client.list_user_user()
         result_object_list = []
@@ -70,6 +70,7 @@ def list_user():
                 })
             result.user_list = result_object_list
         return result
+
 def create_description(**kwargs):
     description = user_thrift.Description()
     description.__dict__.update(kwargs)
@@ -103,7 +104,7 @@ def select_description(id):
         return result
 
 
-def list_description():
+def search_description():
     with get_thrift_pool('User').get_client() as client:
         result = client.list_user_description()
         result_object_list = []
@@ -114,3 +115,4 @@ def list_description():
                 })
             result.description_list = result_object_list
         return result
+

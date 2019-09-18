@@ -3,26 +3,27 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.Worktable import *
 from ...BaseModel import BaseModelDocument
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class Worktable(BaseModelDocument):
-    name = model.StringField()
-    datasource_id = model.ObjectIdField()
-    engine = model.IntField(enums=WORKTABLE_ENGINE_LIST, default=WORKTABLE_ENGINE_PANDAS)
-    status = model.IntField(enums=WORKTABLE_STATUS_LIST, default=WORKTABLE_STATUS_USE)
-    description = model.StringField()
+    name = fields.StringField(allow_none=True)
+    datasource_id = fields.ObjectIdField(allow_none=True)
+    engine = fields.IntField(allow_none=True, enums=WORKTABLE_ENGINE_LIST, default=WORKTABLE_ENGINE_PANDAS)
+    status = fields.IntField(allow_none=True, enums=WORKTABLE_STATUS_LIST, default=WORKTABLE_STATUS_USE)
+    description = fields.StringField(allow_none=True)
 
-    meta = {
-        'indexes': [
+    class Meta:
+        indexes = [
             {
-                'fields': ['datasource_id'],
+                'key': ['datasource_id'],
             },
-        ],
-    }
+        ]
+        pass
 
 
 NAME_DICT["Worktable"] = Worktable

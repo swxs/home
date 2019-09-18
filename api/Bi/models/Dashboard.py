@@ -3,33 +3,34 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.Dashboard import *
 from ...BaseModel import BaseModelDocument
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class Dashboard(BaseModelDocument):
-    user_id = model.ObjectIdField()
-    usage = model.StringField()
-    container_id = model.ObjectIdField()
-    worktable_id = model.ObjectIdField()
-    index = model.IntField()
-    name = model.StringField()
-    description = model.StringField()
-    simulate_region_id = model.ObjectIdField()
-    parent_id = model.ObjectIdField()
+    user_id = fields.ObjectIdField(allow_none=True)
+    usage = fields.StringField(allow_none=True)
+    container_id = fields.ObjectIdField(allow_none=True)
+    worktable_id = fields.ObjectIdField(allow_none=True)
+    index = fields.IntField(allow_none=True)
+    name = fields.StringField(allow_none=True)
+    description = fields.StringField(allow_none=True)
+    simulate_region_id = fields.ObjectIdField(allow_none=True)
+    parent_id = fields.ObjectIdField(allow_none=True)
 
-    meta = {
-        'indexes': [
+    class Meta:
+        indexes = [
             {
-                'fields': ['user_id'],
+                'key': ['user_id'],
             },
             {
-                'fields': ['simulate_region_id'],
+                'key': ['simulate_region_id'],
             },
-        ],
-    }
+        ]
+        pass
 
 
 NAME_DICT["Dashboard"] = Dashboard

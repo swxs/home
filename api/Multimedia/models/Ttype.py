@@ -3,14 +3,15 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.Ttype import *
 from ...BaseModel import BaseModelDocument
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class Ttype(BaseModelDocument):
-    name = model.StringField()
+    name = fields.StringField(allow_none=True)
 
 
 NAME_DICT["Ttype"] = Ttype

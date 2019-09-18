@@ -3,17 +3,18 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.ContainerGroupDatafilter import *
 from .Container import Container
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class ContainerGroupDatafilter(Container):
-    container_id_list = model.ListField()
+    container_id_list = fields.ListField(fields.StringField(), allow_none=True)
 
-    meta = {
-    }
+    class Meta:
+        pass
 
 
 NAME_DICT["ContainerGroupDatafilter"] = ContainerGroupDatafilter

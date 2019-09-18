@@ -69,6 +69,10 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             self._data[key] = value
 
     @classmethod
+    def schema(cls):
+        return getattr(cls, "__raw_model__").schema.as_marshmallow_schema()()
+
+    @classmethod
     def get_instance(cls, model, _filter=None):
         if _filter is None:
             _filter = dict()
@@ -82,9 +86,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         for attr in all_fields:
             if ("exclude" in _filter) and (attr in _filter["exclude"]):
                 continue
-            data[attr] = model.__getattribute__(attr)
-        data["_id"] = str(model.__getattribute__("id"))
-        data["_oid"] = model.__getattribute__("id")
+            data[attr] = getattr(model, attr)
+        data["_id"] = str(getattr(model, "id"))
+        data["_oid"] = getattr(model, "id")
         data["__raw_model__"] = model
         return cls(**data)
 
@@ -96,7 +100,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                 data[field_name] = self.__getattribute__(field_name)
         return data
 
-    def to_front(self, dict_factory=ObjectDict):
+    async def to_front(self, dict_factory=ObjectDict):
         data_dict = self.to_dict(dict_factory=dict_factory)
         for field_name, field_type in self.__fields__.items():
             if isinstance(field_type, DateTimeField) and (field_name in data_dict):
@@ -129,24 +133,27 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
     @classmethod
     @upgrade
-    def create(cls, **kwargs):
+    async def create(cls, **kwargs):
         for key in cls.__fields__:
             if not getattr(cls.__fields__[key], "create"):
                 if key in kwargs:
                     del kwargs[key]
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return Manager.create(cls, **kwargs)
+        return await Manager.create(cls, **kwargs)
 
     @classmethod
     @cache
-    def select(cls, **kwargs):
+    async def select(cls, **kwargs):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return Manager.select(cls, **kwargs)
+        if "id" in kwargs:
+            kwargs["_id"] = ObjectId(kwargs["id"])
+            kwargs.pop("id")
+        return await Manager.select(cls, **kwargs)
 
     @classmethod
-    def filter(cls, **kwargs):
+    async def filter(cls, **kwargs):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return Manager.filter(cls, **kwargs)
+        return await Manager.filter(cls, **kwargs)
 
     @classmethod
     def search(cls, **kwargs):
@@ -155,10 +162,10 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         if key in getattr(cls, '__search__'):
             return getattr(cls, '__search__')[key](cls, **kwargs)
         else:
-            return cls.filter(**kwargs)
+            return Manager.filter(cls, **kwargs)
 
     @upgrade
-    def update(self, **kwargs):
+    async def update(self, **kwargs):
         for key in self.__fields__:
             if self.__fields__[key].__getattribute__("pre_update"):
                 if callable(self.__fields__[key].pre_update):
@@ -166,9 +173,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                 else:
                     kwargs[key] = self.__fields__[key].pre_update
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return Manager.update(self, **kwargs)
+        return await Manager.update(self, **kwargs)
 
-    def copy(self, **kwargs):
+    async def copy(self, **kwargs):
         params = self.to_dict(dict_factory=dict)
         for attr in self.__fields__:
             value = kwargs.get(attr, undefined)
@@ -177,17 +184,17 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     params[attr].update(value)
                 else:
                     params[attr] = value
-        return self.__class__.create(**params)
+        return await self.__class__.create(**params)
 
     @clear
-    def delete(self):
+    async def delete(self):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
-        return Manager.delete(self)
+        return await Manager.delete(self)
 
     @classmethod
     def add_search(cls, *args):
         key = cls.get_key_with_list(list(args))
-        if key not in cls.__search__:
+        if key not in getattr(cls, "__search__"):
             def wrapper(function):
                 @wraps(function)
                 def inner_wrapper(*args, **kwargs):

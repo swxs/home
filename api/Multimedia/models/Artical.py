@@ -3,22 +3,23 @@
 # @AUTH    : model_creater
 
 import datetime
-import mongoengine as model
+from umongo import Instance, Document, fields
 from ..consts.Artical import *
 from ...BaseModel import BaseModelDocument
+from settings import instance
 from document_utils import NAME_DICT
 
-
+@instance.register
 class Artical(BaseModelDocument):
-    title = model.StringField()
-    author = model.StringField()
-    year = model.StringField()
-    source = model.StringField()
-    summary = model.StringField()
-    content = model.StringField()
-    ttype_id_list = model.StringField()
-    tag_id_list = model.StringField()
-    comment_id_list = model.StringField()
+    title = fields.StringField(allow_none=True)
+    author = fields.StringField(allow_none=True)
+    year = fields.StringField(allow_none=True)
+    source = fields.StringField(allow_none=True)
+    summary = fields.StringField(allow_none=True)
+    content = fields.StringField(allow_none=True)
+    ttype_id_list = fields.StringField(allow_none=True)
+    tag_id_list = fields.StringField(allow_none=True)
+    comment_id_list = fields.StringField(allow_none=True)
 
 
 NAME_DICT["Artical"] = Artical
