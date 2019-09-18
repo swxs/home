@@ -53,7 +53,7 @@ class Validate(object):
     @classmethod
     def has(cls, value, reg_type=RegType.ALL):
         try:
-            return re.search(r'{0}'.format(cls._find_reg(reg_type)), value, re.M) is not None
+            return re.search(r'{0}'.format(cls._find_reg(reg_type)), value, flags=re.M) is not None
         except TypeError:
             return False
 
@@ -67,35 +67,35 @@ class Validate(object):
     @classmethod
     def start_with(cls, value, reg_type=RegType.ALL):
         try:
-            return re.match(r'^{0}'.format(cls._find_reg(reg_type)), value, re.M) is not None
+            return re.match(r'^{0}'.format(cls._find_reg(reg_type)), value, flags=re.M) is not None
         except TypeError:
             return False
 
     @classmethod
     def end_with(cls, value, reg_type=RegType.ALL):
         try:
-            return re.match(r'.*{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
+            return re.match(r'.*{0}$'.format(cls._find_reg(reg_type)), value, flags=re.M) is not None
         except TypeError:
             return False
 
     @classmethod
     def check(cls, value, reg_type=RegType.ALL):
         try:
-            return re.match(r'^{0}$'.format(cls._find_reg(reg_type)), value, re.M) is not None
+            return re.match(r'^{0}$'.format(cls._find_reg(reg_type)), value, flags=re.M) is not None
         except TypeError:
             return False
 
     @classmethod
     def clear(cls, value, reg_type=RegType.ALL):
         try:
-            return re.sub(r'{0}'.format(cls._find_reg(reg_type)), "", value, re.M)
+            return re.sub(r'{0}'.format(cls._find_reg(reg_type)), "", value, flags=re.M)
         except TypeError:
             return False
 
     @classmethod
     def get_all(cls, value, reg_type=RegType.ALL):
         try:
-            result = re.findall(r'({0})+'.format(cls._find_reg(reg_type)), value, re.M)
+            result = re.findall(r'({0})+'.format(cls._find_reg(reg_type)), value, flags=re.M)
             if len(result) > 0 and isinstance(result[0], tuple):
                 return [value[0] for value in result]
             return result
