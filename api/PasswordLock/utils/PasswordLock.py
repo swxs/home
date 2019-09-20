@@ -24,10 +24,10 @@ class PasswordLock(BasePasswordLock):
 
 
 @PasswordLock.add_search("website")
-def search_with_website(PasswordLock, **kwargs):
+async def search_with_website(PasswordLock, **kwargs):
     return PasswordLock.filter(website__contains=kwargs.get("website"))
 
 
 @PasswordLock.add_search("name")
-def search_with_website(PasswordLock, **kwargs):
+async def search_with_website(PasswordLock, **kwargs):
     return PasswordLock.filter(name__contains=kwargs.get("name"))

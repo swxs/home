@@ -3,18 +3,19 @@
 # @AUTH    : model
 
 import json
-from bson import ObjectId
+from common.Decorator.render import render
 from common.Utils.log_utils import getLogger
 from common.Helpers.Helper_pagenate import Page
+from result import SuccessData
 from ...BaseConsts import *
-from ...BaseViews import BaseHandler, SuccessData
+from ...BaseViews import BaseHandler
 from ..utils.PasswordLock import PasswordLock
 
 log = getLogger("views/PasswordLock")
 
 
 class PasswordLockHandler(BaseHandler):
-    @BaseHandler.ajax_base()
+    @render
     async def get(self, password_lock_id=None):
         if password_lock_id:
             password_lock = await PasswordLock.select(id=password_lock_id)
@@ -39,7 +40,7 @@ class PasswordLockHandler(BaseHandler):
             return SuccessData(pager.items, info=pager.info)
 
 
-    @BaseHandler.ajax_base()
+    @render
     async def post(self, password_lock_id=None):
         if password_lock_id:
             params = dict()
@@ -63,7 +64,7 @@ class PasswordLockHandler(BaseHandler):
                 password_lock.id
             )
 
-    @BaseHandler.ajax_base()
+    @render
     async def put(self, password_lock_id=None):
         params = dict()
         params['name'] = self.get_argument('name', None)
@@ -76,7 +77,7 @@ class PasswordLockHandler(BaseHandler):
             password_lock.id
         )
 
-    @BaseHandler.ajax_base()
+    @render
     async def patch(self, password_lock_id=None):
         params = dict()
         params['name'] = self.get_argument('name', undefined)
@@ -89,7 +90,7 @@ class PasswordLockHandler(BaseHandler):
             password_lock.id
         )
 
-    @BaseHandler.ajax_base()
+    @render
     async def delete(self, password_lock_id=None):
         password_lock = await PasswordLock.select(id=password_lock_id)
         await password_lock.delete()

@@ -5,6 +5,4 @@
 
 from .models_fields import *
 from .BaseDocument import BaseDocument
-from .manager_mongoenginee import NAME_DICT
-
-
+from .manager_umongo_motor import NAME_DICT

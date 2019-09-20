@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# @File    : manager_mongoenginee.py
+# @File    : manager_umongo_motor.py
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:55
-import asyncio
 
+import asyncio
 from bson import ObjectId
 from async_property import async_property
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
@@ -16,7 +16,7 @@ from common.Utils.log_utils import getLogger
 
 NAME_DICT = {}
 
-log = getLogger("manager.mongoenginee")
+log = getLogger("manager.manager_umongo_motor")
 
 
 class ManagerQuerySet(object):

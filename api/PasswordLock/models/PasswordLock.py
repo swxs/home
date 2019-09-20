@@ -9,7 +9,6 @@ from ...BaseModel import BaseModelDocument
 from settings import instance
 from document_utils import NAME_DICT
 
-
 @instance.register
 class PasswordLock(BaseModelDocument):
     name = fields.StringField(allow_none=True)

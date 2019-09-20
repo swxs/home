@@ -12,7 +12,7 @@ from tornado.util import ObjectDict
 from api.BaseConsts import undefined
 from common.Exceptions import *
 from common.Utils.log_utils import getLogger
-from .manager_mongoenginee import Manager
+from .manager_umongo_motor import Manager
 from .models_fields import *
 from .Memorize import clear, upgrade, cache, memorize
 
@@ -36,9 +36,9 @@ class BaseMetaDocuemnt(type):
             __fields__[attr_name] = attr_value
         attrs["__fields__"] = __fields__
 
-        attrs["__search__"] = dict()
-        attrs["__subclass__"] = dict()
-        attrs["__model_name__"] = name
+        attrs["__search__"] = dict()  # 记录搜索的方法字段
+        attrs["__subclass__"] = dict()  # 记录子类
+        attrs["__model_name__"] = name  # 记录model的名称
         if 'meta' in attrs:
             meta_data: dict = attrs.get('meta', {})
             attrs["__base_model_name__"] = meta_data.get('inheritance', name)
@@ -158,20 +158,6 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             kwargs.pop("id")
         return await Manager.select(cls, **kwargs)
 
-    @classmethod
-    async def filter(cls, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return await Manager.filter(cls, **kwargs)
-
-    @classmethod
-    def search(cls, **kwargs):
-        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        key = cls.get_key_with_params(**kwargs)
-        if key in getattr(cls, '__search__'):
-            return getattr(cls, '__search__')[key](cls, **kwargs)
-        else:
-            return Manager.filter(cls, **kwargs)
-
     @upgrade
     async def update(self, **kwargs):
         for key in self.__fields__:
@@ -198,6 +184,20 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     async def delete(self):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
         return await Manager.delete(self)
+
+    @classmethod
+    def filter(cls, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
+        return Manager.filter(cls, **kwargs)
+
+    @classmethod
+    def search(cls, **kwargs):
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
+        key = cls.get_key_with_params(**kwargs)
+        if key in getattr(cls, '__search__'):
+            return getattr(cls, '__search__')[key](cls, **kwargs)
+        else:
+            return Manager.filter(cls, **kwargs)
 
     @classmethod
     def add_search(cls, *args):
