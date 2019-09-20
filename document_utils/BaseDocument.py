@@ -72,6 +72,16 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     def schema(cls):
         return getattr(cls, "__raw_model__").schema.as_marshmallow_schema()()
 
+    @staticmethod
+    def get_key_with_list(params):
+        params.sort()
+        return hashlib.md5(b"".join(p.encode("utf8") for p in params)).hexdigest()
+
+    @staticmethod
+    def get_key_with_params(**kwargs):
+        params = list(kwargs.keys())
+        return BaseDocument.get_key_with_list(params)
+
     @classmethod
     def get_instance(cls, model, _filter=None):
         if _filter is None:
@@ -111,9 +121,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return data_dict
 
     @classmethod
-    def is_exist(cls, **kwargs):
+    async def is_exist(cls, **kwargs):
         try:
-            obj = Manager.select(cls, **kwargs)
+            obj = await Manager.select(cls, **kwargs)
             return True
         except ApiNotExistException:
             return False
@@ -121,15 +131,13 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             log.error(e)
             return False
 
-    @staticmethod
-    def get_key_with_list(params):
-        params.sort()
-        return hashlib.md5(b"".join(p.encode("utf8") for p in params)).hexdigest()
-
-    @staticmethod
-    def get_key_with_params(**kwargs):
-        params = list(kwargs.keys())
-        return BaseDocument.get_key_with_list(params)
+    @classmethod
+    async def count(cls, **kwargs):
+        try:
+            return await Manager.count(cls, **kwargs)
+        except Exception as e:
+            log.error(e)
+            return 0
 
     @classmethod
     @upgrade

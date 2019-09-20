@@ -8,17 +8,17 @@ from settings import instance
 from umongo import Instance, Document, fields, ValidationError, set_gettext
 from umongo.marshmallow_bonus import SchemaFromUmongo
 
+
 @instance.register
 class BaseModelDocument(Document):
     created = fields.DateTimeField(default=datetime.datetime.now)
     updated = fields.DateTimeField(default=datetime.datetime.now)
 
     class Meta:
+        indexes = [
+            {
+                'key': ['-created'],
+            }
+        ]
         abstract = True
         allow_inheritance = True
-
-    # meta = {
-    #     'abstract': True,
-    #     'ordering': ['-created'],
-    # }
-

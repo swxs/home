@@ -1,27 +1,12 @@
 class Page(list):
-    def __init__(self, collection, use_pager=1, page=1, items_per_page=20, item_count=None, wrapper_class=None):
+    def __init__(self, collection, use_pager=1, page=1, items_per_page=20, item_count=None):
         self._collection = collection
         self._use_pager = use_pager
         self._page = page
         self._items_per_page = items_per_page
         self._item_count = item_count
-        self._wrapper_class = wrapper_class
-        super().__init__()
-
-    async def do(self):
-        if self._collection is not None:
-            if self._wrapper_class is None:
-                # Default case. The collection is already a list-type object.
-                self.collection = self._collection
-            else:
-                # Special case. A custom wrapper class is used to access elements of the collection.
-                self.collection = self._wrapper_class(self._collection)
-        else:
-            self.collection = []
 
         if self._use_pager:
-            self.collection_type = type(self._collection)
-
             try:
                 self.page = int(self._page)  # make it int() if we get it as a string
             except (ValueError, TypeError):
@@ -32,10 +17,7 @@ class Page(list):
             if self._item_count is not None:
                 self.item_count = self._item_count
             else:
-                try:
-                    self.item_count = len(self.collection)
-                except Exception as e:
-                    self.item_count = await self.collection.count()
+                self.item_count = 0
 
             # Compute the number of the first and last available page
             if self.item_count > 0:
@@ -49,8 +31,6 @@ class Page(list):
                 elif self.page < self.first_page:
                     self.page = self.first_page
 
-                # Note: the number of items on this page can be less than
-                #       items_per_page if the last page is not full
                 self.first_item = (self.page - 1) * self._items_per_page + 1
                 self.last_item = min(self.first_item + self._items_per_page - 1, self.item_count)
 
@@ -60,11 +40,9 @@ class Page(list):
                 # only once. In an SQL context that could otherwise lead to running the same
                 # SQL query every time items would be accessed.
                 try:
-                    first = self.first_item - 1
-                    last = self.last_item
-                    self._items = list(self.collection[first:last])
+                    self._items = list(self._collection)
                 except TypeError:
-                    raise TypeError(f"Your collection of type {type(self.collection)} cannot be handled by paginate.")
+                    raise TypeError(f"Your collection of type {type(self._collection)} cannot be handled by paginate.")
 
                 # Links to previous and next page
                 if self.page > self.first_page:
@@ -77,7 +55,6 @@ class Page(list):
                 else:
                     self.next_page = None
 
-            # No items available
             else:
                 self.first_page = None
                 self.page_count = 0
@@ -88,7 +65,7 @@ class Page(list):
                 self.next_page = None
                 self._items = []
         else:
-            self._items = self.collection
+            self._items = self._collection
         # This is a subclass of the 'list' type. Initialise the list now.
         list.__init__(self, self.items)
 

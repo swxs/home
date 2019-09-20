@@ -47,10 +47,7 @@ class ManagerQuerySet(object):
         first_model = self.model.to_list(1)
         if isinstance(first_model, asyncio.Future):
             first_model = await first_model
-        if first_model is None:
-            return None
-        else:
-            return self.get_instance(first_model, _filter=self._filter)
+        return self.get_instance(first_model, _filter=self._filter)
 
 
 class Manager(object):
@@ -78,6 +75,13 @@ class Manager(object):
     async def _delete(cls, model):
         try:
             await model.delete()
+        except Exception as e:
+            raise e
+
+    @classmethod
+    async def count(cls, model_class, **kwargs):
+        try:
+            return await cls._get_model(model_class).count_documents(**kwargs)
         except Exception as e:
             raise e
 

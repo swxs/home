@@ -26,16 +26,18 @@ class PasswordLockHandler(BaseHandler):
             use_pager = self.get_argument("use_pager", 1)
             page = self.get_argument("page", 1)
             items_per_page = self.get_argument("items_per_page", 20)
+
+            item_count = await PasswordLock.count(**search_params)
+            if use_pager:
+                search_params.update({
+                    "limit": items_per_page,
+                    "skip": (page - 1) * items_per_page
+                })
             password_lock_cursor = PasswordLock.search(**search_params)
-            data = []
-            async for password_lock in password_lock_cursor:
-                data.append(await password_lock.to_front())
-            return SuccessData(data)
-            # pager = Page(password_lock_list, use_pager=use_pager, page=page, items_per_page=items_per_page)
-            # return SuccessData(
-            #     [await item.to_front() for item in pager.items],
-            #     info=pager.info,
-            # )
+            data = [await  password_lock.to_front() async for password_lock in password_lock_cursor]
+            pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
+            return SuccessData(pager.items, info=pager.info)
+
 
     @BaseHandler.ajax_base()
     async def post(self, password_lock_id=None):
