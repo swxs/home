@@ -26,9 +26,9 @@ class PasswordLockHandler(BaseHandler):
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
             order_by = self.get_argument("order_by", "")
-            use_pager = self.get_argument("use_pager", 1)
-            page = self.get_argument("page", 1)
-            items_per_page = self.get_argument("items_per_page", 20)
+            use_pager = int(self.get_argument("use_pager", 1))
+            page = int(self.get_argument("page", 1))
+            items_per_page = int(self.get_argument("items_per_page", 20))
 
             item_count = await PasswordLock.count(**search_params)
             if use_pager:
