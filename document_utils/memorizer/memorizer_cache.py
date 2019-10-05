@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @File    : Memorize.py
+# @File    : memorizer_cache.py
 # @AUTH    : swxs
 # @Time    : 2018/7/28 21:22
 
@@ -12,7 +12,7 @@ from functools import wraps
 from common.Helpers.DBHelper_Memcache import MemcacheDBHelper
 from common.Metaclass.Singleton import Singleton
 from common.Utils.log_utils import getLogger
-from api.BaseConsts import undefined
+from document_utils.BaseDocument import undefined
 
 log = getLogger("memorize")
 

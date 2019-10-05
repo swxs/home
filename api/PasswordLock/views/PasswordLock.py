@@ -3,6 +3,7 @@
 # @AUTH    : model
 
 import json
+from document_utils.consts import undefined
 from common.Decorator.render import render
 from common.Utils.log_utils import getLogger
 from common.Helpers.Helper_pagenate import Page
@@ -11,7 +12,7 @@ from ...BaseConsts import *
 from ...BaseViews import BaseHandler
 from ..utils.PasswordLock import PasswordLock
 
-log = getLogger("views/PasswordLock")
+log = getLogger("views/password_lock")
 
 
 class PasswordLockHandler(BaseHandler):
@@ -24,6 +25,7 @@ class PasswordLockHandler(BaseHandler):
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
+            order_by = self.get_argument("order_by", "")
             use_pager = self.get_argument("use_pager", 1)
             page = self.get_argument("page", 1)
             items_per_page = self.get_argument("items_per_page", 20)
@@ -34,7 +36,9 @@ class PasswordLockHandler(BaseHandler):
                     "limit": items_per_page,
                     "skip": (page - 1) * items_per_page
                 })
-            password_lock_cursor = PasswordLock.search(**search_params)
+
+            order_by = [o for o in order_by.split(";") if bool(o)]
+            password_lock_cursor = PasswordLock.search(**search_params).order_by(order_by)
             data = [await  password_lock.to_front() async for password_lock in password_lock_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
             return SuccessData(pager.items, info=pager.info)

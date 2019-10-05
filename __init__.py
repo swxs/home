@@ -5,7 +5,7 @@ import sys
 from bson import ObjectId
 from umongo import Instance, Document, fields, ValidationError, set_gettext
 from umongo.marshmallow_bonus import SchemaFromUmongo
-
+from pymongo import ASCENDING, DESCENDING
 from motor.motor_asyncio import AsyncIOMotorClient
 
 db = AsyncIOMotorClient()['home']
@@ -84,7 +84,7 @@ async def run():
     page = 1
     per_page = 10
     print(await User.count_documents())
-    cursor = User.find(limit=per_page, skip=(page - 1) * per_page).order_by()
+    cursor = User.find(limit=per_page, skip=(page - 1) * per_page).sort([("birthday", DESCENDING), ("nick", ASCENDING)])
     return len(await cursor.to_list(None))
 
 

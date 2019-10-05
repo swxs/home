@@ -5,11 +5,12 @@
 import datetime
 from async_property import async_property
 import document_utils as model
-from ..models.PasswordLock import PasswordLock as _
+from document_utils.consts import NAME_DICT
+from ..models.PasswordLock import PasswordLock as PasswordLockModel
 from ...BaseDAO import BaseDAO
 from common.Utils.log_utils import getLogger
 
-log = getLogger("utils/{self.model_name}")
+log = getLogger("utils/password_lock")
 
 
 class PasswordLock(BaseDAO):
@@ -25,3 +26,5 @@ class PasswordLock(BaseDAO):
     async def get_password_lock_by_password_lock_id(cls, password_lock_id):
         return await cls.select(id=password_lock_id)
 
+
+NAME_DICT[BaseDAO.__manager__]["PasswordLock"] = PasswordLockModel

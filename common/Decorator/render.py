@@ -20,7 +20,7 @@ def render(func):
         result_data = None
         try:
             result_data = func(self, *args, **kwargs)
-            if isinstance(result_data, collections.abc.Coroutine):
+            if isinstance(result_data, collections.Awaitable):
                 result_data = await result_data
         except ApiException as e:
             log.exception(self.request.body)
@@ -30,7 +30,7 @@ def render(func):
             result_data = ExceptionData(ApiCommonException())
         finally:
             return_type = self.request.headers.get("Content-Type", "application/json")
-            if return_type == "application/json":
+            if return_type.startswith("application/json"):
                 self.write_json(result_data.to_json(), status=200)
             self.finish()
 
