@@ -36,7 +36,6 @@ class PasswordLockHandler(BaseHandler):
                     "limit": items_per_page,
                     "skip": (page - 1) * items_per_page
                 })
-
             order_by = [o for o in order_by.split(";") if bool(o)]
             password_lock_cursor = PasswordLock.search(**search_params).order_by(order_by)
             data = [await  password_lock.to_front() async for password_lock in password_lock_cursor]
