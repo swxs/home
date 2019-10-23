@@ -24,6 +24,7 @@ class PasswordLockHandler(BaseHandler):
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
+            order_params = json.loads(self.get_argument("order", '{}'))
             use_pager = self.get_argument("use_pager", 1)
             page = self.get_argument("page", 1)
             items_per_page = self.get_argument("items_per_page", 20)
@@ -34,11 +35,10 @@ class PasswordLockHandler(BaseHandler):
                     "limit": items_per_page,
                     "skip": (page - 1) * items_per_page
                 })
-            password_lock_cursor = PasswordLock.search(**search_params)
+            password_lock_cursor = PasswordLock.search(**search_params).order_by(**order_params)
             data = [await  password_lock.to_front() async for password_lock in password_lock_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
             return SuccessData(pager.items, info=pager.info)
-
 
     @render
     async def post(self, password_lock_id=None):

@@ -48,6 +48,16 @@ class ManagerQuerySet(object):
             first_model = await first_model
         return self.get_instance(first_model, _filter=self._filter)
 
+    async def order_by(self, key_list):
+        """
+        返回排序后的数据
+        :param key_list: [('key1', 1/-1), ('key1', 1/-1)]
+        :return:
+        """
+        self.model = self.model.sort(key_list)
+
+        return self
+
 
 class Manager(object):
     __metaclass__ = Singleton

@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-
 import sys
 from bson import ObjectId
 from umongo import Instance, Document, fields, ValidationError, set_gettext
@@ -84,8 +83,11 @@ async def run():
     page = 1
     per_page = 10
     print(await User.count_documents())
-    cursor = User.find(limit=per_page, skip=(page - 1) * per_page).order_by()
-    return len(await cursor.to_list(None))
+    cursor = User.find(limit=per_page, skip=(page - 1) * per_page).sort([("nick", 1)])
+    print([a.nick for a in await cursor.to_list(None)])
+
+    cursor = User.find(limit=per_page, skip=(page - 1) * per_page)
+    return [a.nick for a in await cursor.to_list(None)]
 
 
 if __name__ == "__main__":

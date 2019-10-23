@@ -20,11 +20,11 @@ def render(func):
         result_data = None
         try:
             result_data = func(self, *args, **kwargs)
-            if isinstance(result_data, collections.abc.Coroutine):
+            if isinstance(result_data, collections.Awaitable):
                 result_data = await result_data
-        except ApiException as e:
+        except ApiException as ae:
             log.exception(self.request.body)
-            result_data = ExceptionData(e)
+            result_data = ExceptionData(ae)
         except (Exception, NotImplementedError) as e:
             log.exception(self.request.body)
             result_data = ExceptionData(ApiCommonException())
@@ -57,7 +57,7 @@ def render_file(func):
         file_name = None
         try:
             result_data = func(self, *args, **kwargs)
-            if isinstance(result_data, asyncio.Future):
+            if isinstance(result_data, collections.Awaitable):
                 result_data = await result_data
 
             if isinstance(result_data, tuple) and len(result_data) > 1:
@@ -90,3 +90,24 @@ def render_file(func):
                 self.write(data)
 
     return wrapper
+
+
+def render_thrift(result_thrift):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                result_data = await func(*args, **kwargs)
+                if isinstance(result_data, collections.Awaitable):
+                    result_data = await result_data
+            except ApiException as ae:
+                result_thrift.print_exc()
+                result_data = ExceptionData(ae)
+            except Exception:
+                result_thrift.print_exc()
+                result_data = ExceptionData(ApiCommonException())
+            return result_data.to_thrift(result_thrift)
+
+        return wrapper
+
+    return decorator

@@ -11,8 +11,9 @@ class ResultData(object):
     数据结果
     """
 
-    def __init__(self, code=0, **kwargs):
+    def __init__(self, code=0, msg=None, **kwargs):
         self.code = code
+        self.msg = msg
         self.kwargs = kwargs
 
     @property
@@ -35,6 +36,14 @@ class ResultData(object):
     def to_json(self):
         return json.dumps(self.data)
 
+    def to_thrift(self, thrift):
+        result = thrift()
+        result.code = self.code
+        result.msg = self.msg
+        if "data" in self.kwargs:
+            result.data = self.kwargs.get("data")
+        return result
+
 
 class ExceptionData(ResultData):
     """
@@ -42,7 +51,7 @@ class ExceptionData(ResultData):
     """
 
     def __init__(self, e):
-        super(ExceptionData, self).__init__(code=e.code, data=e.data, message=e.message)
+        super(ExceptionData, self).__init__(code=e.code, msg=e.message)
 
 
 class SuccessData(ResultData):

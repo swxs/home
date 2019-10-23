@@ -13,6 +13,7 @@ import tornado.escape
 from tornado import locale, concurrent
 from tornado.web import escape
 import settings
+from common.Decorator.render import render
 from common.Helpers.Helper_JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
 from api.BaseConsts import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
@@ -157,6 +158,19 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def get_user_locale(self):
         return self.locale
 
+    @property
+    def locale(self):
+        if not hasattr(self, '_locale'):
+            local_code = self.get_cookie('locale', default=settings.DEFAULT_LOCAL)
+            self.set_cookie('locale', local_code, expires_days=30)
+            self._locale = locale.get(local_code)
+        return self._locale
+
+    @locale.setter
+    def locale(self, local_code):
+        self.set_cookie('locale', local_code)
+        self._locale = locale.get(local_code)
+
     def my_render(self, template, argus=None, rubbish_keys=None):
         if not isinstance(argus, dict):
             argus = dict()
@@ -190,133 +204,31 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         t = '<input type="hidden" id="{0}" name="{0}" value="{1}"/>'
         return t.format(xsrf_key, xsrf_val)
 
-    @property
-    def locale(self):
-        if not hasattr(self, '_locale'):
-            local_code = self.get_cookie('locale', default=settings.DEFAULT_LOCAL)
-            self.set_cookie('locale', local_code, expires_days=30)
-            self._locale = locale.get(local_code)
-        return self._locale
-
-    @locale.setter
-    def locale(self, local_code):
-        self.set_cookie('locale', local_code)
-        self._locale = locale.get(local_code)
-
-    @property
-    def access_token(self):
-        if not hasattr(self, '_access_token'):
-            self._access_token = self.request.headers.get('access_token').replace("Bearer ", "")
-        return self._access_token
-
-    @access_token.setter
-    def access_token(self, token):
-        self._headers.add('access_token', f"Bearer {token}")
-
-    @property
-    def refresh_token(self):
-        if not hasattr(self, '_refresh_token'):
-            self._refresh_token = self.request.headers.get('refresh_token').replace("Bearer ", "")
-        return self._refresh_token
-
-    @refresh_token.setter
-    def refresh_token(self, token):
-        self._headers.add('refresh_token', f"Bearer {token}")
-
-    def _do_filter(self, result, filter):
-        if len(filter) == 1:
-            if filter[0] in result:
-                result.pop(filter[0])
-            return result
-        else:
-            checked = result.get(filter[0])
-            if isinstance(checked, dict):
-                result[filter[0]] = self._do_filter(checked, filter[1:])
-            elif isinstance(checked, list):
-                result[filter[0]] = [self._do_filter(new_result, filter[1:]) for new_result in checked]
-            return result
-
-    def _filter_result(self, result):
-        if isinstance(result, dict):
-            filters = self.get_query_argument("filters", "").split("|")
-            for filter in filters:
-                f = filter.split(".")
-                result = self._do_filter(result, f)
-        return result
-
     def set_default_headers(self):
         self._headers.add("version", "1")
 
-    @classmethod
-    def ajax_base(cls, auth=False, aio=False):
-
-        def wrapper(method):
-
-            @functools.wraps(method)
-            async def inner_wrapper(self, *args, **kwargs):
-                try:
-                    if auth:
-                        payload = AuthCenter.identify(self.access_token)
-                        self.current_user_id = payload.get("id")
-                    if aio:
-                        result = await method(self, *args, **kwargs)
-                    else:
-                        result = await method(self, *args, **kwargs)
-                    if isinstance(result, concurrent.Future):
-                        return result
-                    else:
-                        self.write_json(result.to_json(), status=200)
-                except ApiRedirectException as e:
-                    return self.redirect(e.url)
-                except ApiReturnFileException as e:
-                    path, filename = os.path.split(e.filepath)
-                    export_filename = f"filename={quote(filename)}"
-                    name, ext = os.path.splitext(filename)
-                    if ext in [".xlsx" ".xls"]:
-                        self.set_header("Content-Type", "application/vnd.ms-excel")
-                    self.set_header("Content-Type", "application/force-download")
-                    self.set_header("Content-Disposition", f"attachment; {export_filename}")
-                    with open(e.filepath, 'rb') as f:
-                        buf_size = 4096
-                        while 1:
-                            data = f.read(buf_size)
-                            if not data:
-                                break
-                            self.write(data)
-                except ApiException as e:
-                    log.exception(repr(e))
-                    self.write_json(ExceptionData(e).to_json(), status=e.status)
-                except (Exception, NotImplementedError) as e:
-                    log.exception(repr(e))
-                    self.write_json(ResultData(code=HTTP_STATUS.AJAX_FAIL_NORMAL, data=None).to_json(), status=200)
-                self.finish()
-
-            return inner_wrapper
-
-        return wrapper
-
 
 class PageNotFoundHandler(BaseHandler):
-    @BaseHandler.ajax_base()
+    @render
     def head(self):
         raise ApiNotFoundException()
 
-    @BaseHandler.ajax_base()
+    @render
     def get(self):
         raise ApiNotFoundException()
 
-    @BaseHandler.ajax_base()
+    @render
     def post(self):
         raise ApiNotFoundException()
 
-    @BaseHandler.ajax_base()
+    @render
     def put(self):
         raise ApiNotFoundException()
 
-    @BaseHandler.ajax_base()
+    @render
     def patch(self):
         raise ApiNotFoundException()
 
-    @BaseHandler.ajax_base()
+    @render
     def delete(self):
         raise ApiNotFoundException()
