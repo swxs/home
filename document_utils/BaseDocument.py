@@ -4,17 +4,16 @@
 # @Time    : 2018/5/7 22:40
 
 import datetime
-import functools
 import hashlib
 from functools import wraps
 from bson import ObjectId
 from tornado.util import ObjectDict
-from api.BaseConsts import undefined
 from common.Exceptions import *
 from common.Utils.log_utils import getLogger
-from .manager_umongo_motor import Manager
-from .models_fields import *
-from .Memorize import clear, upgrade, cache, memorize
+from document_utils.consts import undefined
+from document_utils.manager_productor import manager_productor
+from .fields import *
+from document_utils.memorizer.memorizer_cache import clear, upgrade, cache
 
 log = getLogger("BaseDocument")
 
@@ -50,10 +49,12 @@ class BaseMetaDocuemnt(type):
             getattr(parent, "__subclass__")[name] = current_class
         return current_class
 
+    @property
+    def _manager(self):
+        return manager_productor[self.__manager__]
+
 
 class BaseDocument(object, metaclass=BaseMetaDocuemnt):
-    __page_number__ = 20
-
     metaclass = BaseMetaDocuemnt
 
     def __init__(self, **kwargs):
@@ -123,7 +124,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     @classmethod
     async def is_exist(cls, **kwargs):
         try:
-            obj = await Manager.select(cls, **kwargs)
+            obj = await cls._manager.select(cls, **kwargs)
             return True
         except ApiNotExistException:
             return False
@@ -134,7 +135,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     @classmethod
     async def count(cls, **kwargs):
         try:
-            return await Manager.count(cls, **kwargs)
+            return await cls._manager.count(cls, **kwargs)
         except Exception as e:
             log.error(e)
             return 0
@@ -147,7 +148,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                 if key in kwargs:
                     del kwargs[key]
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return await Manager.create(cls, **kwargs)
+        return await cls._manager.create(cls, **kwargs)
 
     @classmethod
     @cache
@@ -156,7 +157,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         if "id" in kwargs:
             kwargs["_id"] = ObjectId(kwargs["id"])
             kwargs.pop("id")
-        return await Manager.select(cls, **kwargs)
+        return await cls._manager.select(cls, **kwargs)
 
     @upgrade
     async def update(self, **kwargs):
@@ -167,7 +168,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                 else:
                     kwargs[key] = self.__fields__[key].pre_update
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return await Manager.update(self, **kwargs)
+        return await self.__class__._manager.update(self.__class__, self, **kwargs)
 
     async def copy(self, **kwargs):
         params = self.to_dict(dict_factory=dict)
@@ -178,17 +179,17 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     params[attr].update(value)
                 else:
                     params[attr] = value
-        return await self.__class__.create(**params)
+        return await self.__class__._manager.create(self.__class__, **params)
 
     @clear
     async def delete(self):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
-        return await Manager.delete(self)
+        return await self.__class__._manager.delete(self.__class__, self)
 
     @classmethod
     def filter(cls, **kwargs):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [filter] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
-        return Manager.filter(cls, **kwargs)
+        return cls._manager.filter(cls, **kwargs)
 
     @classmethod
     def search(cls, **kwargs):
@@ -197,7 +198,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         if key in getattr(cls, '__search__'):
             return getattr(cls, '__search__')[key](cls, **kwargs)
         else:
-            return Manager.filter(cls, **kwargs)
+            return cls._manager.filter(cls, **kwargs)
 
     @classmethod
     def add_search(cls, *args):

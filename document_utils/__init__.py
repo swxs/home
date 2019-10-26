@@ -3,6 +3,5 @@
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:54
 
-from .models_fields import *
+from .fields import *
 from .BaseDocument import BaseDocument
-from .manager_umongo_motor import NAME_DICT

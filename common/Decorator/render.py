@@ -30,7 +30,7 @@ def render(func):
             result_data = ExceptionData(ApiCommonException())
         finally:
             return_type = self.request.headers.get("Content-Type", "application/json")
-            if return_type == "application/json":
+            if return_type.startswith("application/json"):
                 self.write_json(result_data.to_json(), status=200)
             self.finish()
 

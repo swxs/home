@@ -2,8 +2,6 @@
 
 from enum import IntEnum
 
-undefined = frozenset()
-
 HTTP_METHOD_GET = "GET"
 HTTP_METHOD_DELETE = "DELETE"
 
