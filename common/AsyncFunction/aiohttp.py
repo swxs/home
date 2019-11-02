@@ -6,7 +6,7 @@
 import json
 import requests
 from tornado.httpclient import AsyncHTTPClient
-from common.Exceptions import *
+from common.ApiExceptions import *
 
 
 async def aio_get(url, headers=None):

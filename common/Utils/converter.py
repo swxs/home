@@ -1,5 +1,5 @@
 from api.consts.const import undefined
-from common.Exceptions import *
+from common.ApiExceptions import *
 
 
 def optional(converter):

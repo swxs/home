@@ -16,11 +16,10 @@ from urllib import parse as urlparse
 from urllib.parse import urlencode
 from hashlib import md5
 from zlib import crc32
-from requests_toolbelt import MultipartEncoder
 import requests
 import rsa
 import tempfile
-from common.Web.BufferReader import BufferReader
+from common.Utils.BufferReader import BufferReader
 
 try:
     requests.packages.urllib3.disable_warnings()

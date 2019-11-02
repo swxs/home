@@ -8,7 +8,7 @@ import functools
 import urllib.parse
 import collections
 from result import SuccessData, ExceptionData, ResultData
-from common.Exceptions import ApiException, ApiCommonException
+from common.ApiExceptions import ApiException, ApiCommonException
 from common.Utils.log_utils import getLogger
 
 log = getLogger("views.render")
@@ -97,16 +97,14 @@ def render_thrift(result_thrift):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             try:
-                result_data = await func(*args, **kwargs)
+                result_data = func(*args, **kwargs)
                 if isinstance(result_data, collections.Awaitable):
                     result_data = await result_data
             except ApiException as ae:
-                result_thrift.print_exc()
                 result_data = ExceptionData(ae)
             except Exception:
-                result_thrift.print_exc()
                 result_data = ExceptionData(ApiCommonException())
-            return result_data.to_thrift(result_thrift)
+            return result_data
 
         return wrapper
 

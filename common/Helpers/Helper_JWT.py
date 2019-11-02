@@ -6,7 +6,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as jwt
 from itsdangerous import SignatureExpired, BadSignature
 import time
 import settings
-from common.Exceptions import *
+from common.ApiExceptions import *
 from common.Helpers.DBHelper_Redis import redis_helper
 from common.Utils import log_utils
 

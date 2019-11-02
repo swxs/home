@@ -1,5 +1,5 @@
 import functools
-from common.Exceptions import *
+from common.ApiExceptions import *
 
 
 @property
