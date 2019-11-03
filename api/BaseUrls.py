@@ -20,9 +20,12 @@ def load_urls():
                 if "__pycache__" in base_path_list or ".DS_Store" in base_path_list:
                     continue
                 module_path = ".".join(base_path_list[base_path_list.index("api"):])
-                module = import_module(module_path)
-                if hasattr(module, 'url_mapping'):
-                    url_list.extend(module.url_mapping)
+                try:
+                    module = import_module(module_path)
+                    if hasattr(module, 'url_mapping'):
+                        url_list.extend(module.url_mapping)
+                except Exception as e:
+                    print(e)
     return url_list
 
 

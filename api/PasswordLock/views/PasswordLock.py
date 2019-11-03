@@ -51,6 +51,7 @@ class PasswordLockHandler(BaseHandler):
             params['key'] = self.get_argument('key', undefined)
             params['website'] = self.get_argument('website', undefined)
             params['user_id'] = self.get_argument('user_id', undefined)
+            params['index'] = self.get_argument('index', undefined)
             password_lock = await PasswordLock.select(id=password_lock_id)
             password_lock = await password_lock.copy(**params)
             return SuccessData(
@@ -62,6 +63,7 @@ class PasswordLockHandler(BaseHandler):
             params['key'] = self.get_argument('key', None)
             params['website'] = self.get_argument('website', None)
             params['user_id'] = self.get_argument('user_id', None)
+            params['index'] = self.get_argument('index', None)
             password_lock = await PasswordLock.create(**params)
             return SuccessData(
                 password_lock.id
@@ -74,6 +76,7 @@ class PasswordLockHandler(BaseHandler):
         params['key'] = self.get_argument('key', None)
         params['website'] = self.get_argument('website', None)
         params['user_id'] = self.get_argument('user_id', None)
+        params['index'] = self.get_argument('index', None)
         password_lock = await PasswordLock.select(id=password_lock_id)
         password_lock = await password_lock.update(**params)
         return SuccessData(
@@ -87,6 +90,7 @@ class PasswordLockHandler(BaseHandler):
         params['key'] = self.get_argument('key', undefined)
         params['website'] = self.get_argument('website', undefined)
         params['user_id'] = self.get_argument('user_id', undefined)
+        params['index'] = self.get_argument('index', undefined)
         password_lock = await PasswordLock.select(id=password_lock_id)
         password_lock = await password_lock.update(**params)
         return SuccessData(
