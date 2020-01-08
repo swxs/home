@@ -13,7 +13,6 @@ from api.consts.bi import data_filter as data_filter_consts
 from api.consts.bi import cached_chart as cached_chart_consts
 from api.utils.bi.cached_chart import CachedChart
 from common.Decorator import MemorizeFile
-from common.ApiExceptions import CommonException, NoDataException
 from common.Utils import utils, translation
 from common.Utils.log_utils import getLogger
 

@@ -10,7 +10,6 @@ from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from document_utils.consts import undefined
 from document_utils.fields import DictField
 from document_utils.manager.manager_base import BaseManager, BaseManagerQuerySet
-from common.ApiExceptions import *
 from common.Metaclass.Singleton import Singleton
 from common.Utils.log_utils import getLogger
 

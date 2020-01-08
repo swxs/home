@@ -51,7 +51,7 @@ class ExceptionData(ResultData):
     """
 
     def __init__(self, e):
-        super(ExceptionData, self).__init__(code=e.code, msg=e.message)
+        super(ExceptionData, self).__init__(code=e.code, msg=str(e))
 
 
 class SuccessData(ResultData):

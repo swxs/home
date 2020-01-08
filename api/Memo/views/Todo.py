@@ -10,7 +10,7 @@ from common.Helpers.Helper_pagenate import Page
 from result import SuccessData
 from ...BaseConsts import *
 from ...BaseViews import BaseHandler
-from ..utils.Todo import Todo
+from ..utils.Todo import Todo, TodoSchema
 
 log = getLogger("views/todo")
 
@@ -46,67 +46,40 @@ class TodoHandler(BaseHandler):
     @render
     async def post(self, todo_id=None):
         if todo_id:
-            params = dict()
-            params['title'] = self.get_argument('title', undefined)
-            params['summary'] = self.get_argument('summary', undefined)
-            params['document'] = self.get_argument('document', undefined)
-            params['user_id'] = self.get_argument('user_id', undefined)
-            params['status'] = self.get_argument('status', undefined)
-            params['priority'] = self.get_argument('priority', undefined)
+            params = TodoSchema.load(self.arguments, partial=True)
             todo = await Todo.select(id=todo_id)
             todo = await todo.copy(**params)
             return SuccessData(
-                todo.id
+                id=todo.id
             )
         else:
-            params = dict()
-            params['title'] = self.get_argument('title', None)
-            params['summary'] = self.get_argument('summary', None)
-            params['document'] = self.get_argument('document', None)
-            params['user_id'] = self.get_argument('user_id', None)
-            params['status'] = self.get_argument('status', None)
-            params['priority'] = self.get_argument('priority', None)
+            params = TodoSchema.load(self.arguments)
             todo = await Todo.create(**params)
             return SuccessData(
-                todo.id
+                id=todo.id
             )
 
     @render
     async def put(self, todo_id=None):
-        params = dict()
-        params['title'] = self.get_argument('title', None)
-        params['summary'] = self.get_argument('summary', None)
-        params['document'] = self.get_argument('document', None)
-        params['user_id'] = self.get_argument('user_id', None)
-        params['status'] = self.get_argument('status', None)
-        params['priority'] = self.get_argument('priority', None)
-        todo = await Todo.select(id=todo_id)
-        todo = await todo.update(**params)
+        params = TodoSchema.load(self.arguments)
+        todo = await Todo.find_and_update(id=todo_id, **params)
         return SuccessData(
-            todo.id
+            id=todo.id
         )
 
     @render
     async def patch(self, todo_id=None):
-        params = dict()
-        params['title'] = self.get_argument('title', undefined)
-        params['summary'] = self.get_argument('summary', undefined)
-        params['document'] = self.get_argument('document', undefined)
-        params['user_id'] = self.get_argument('user_id', undefined)
-        params['status'] = self.get_argument('status', undefined)
-        params['priority'] = self.get_argument('priority', undefined)
-        todo = await Todo.select(id=todo_id)
-        todo = await todo.update(**params)
+        params = TodoSchema.load(self.arguments, partial=True)
+        todo = await Todo.find_and_update(id=todo_id, **params)
         return SuccessData(
-            todo.id
+            id=todo.id
         )
 
     @render
     async def delete(self, todo_id=None):
-        todo = await Todo.select(id=todo_id)
-        await todo.delete()
+        count = await Todo.find_and_delete(id=todo_id)
         return SuccessData(
-            None
+            count=count
         )
 
     def set_default_headers(self):

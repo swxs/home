@@ -11,7 +11,6 @@ from pymongo.errors import (DuplicateKeyError, )
 from api.BaseConsts import undefined
 from .models_fields import DictField
 from common.Metaclass.Singleton import Singleton
-from common.ApiExceptions import *
 from common.Utils.log_utils import getLogger
 
 NAME_DICT = {}

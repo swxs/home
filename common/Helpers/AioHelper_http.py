@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-# @File    : aiohttp.py
+# @File    : aiohelper_http.py
 # @AUTH    : swxs
 # @Time    : 2018/6/7 14:38
 
 import json
 import requests
 from tornado.httpclient import AsyncHTTPClient
-from common.ApiExceptions import *
 
 
 async def aio_get(url, headers=None):

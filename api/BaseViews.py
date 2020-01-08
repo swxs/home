@@ -16,8 +16,6 @@ import settings
 from common.Decorator.render import render
 from common.Helpers.Helper_JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
-from api.BaseConsts import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
-from common.ApiExceptions import *
 from common.Helpers.Helper_validate import Validate, RegType
 from common.Utils.log_utils import getLogger
 from result import ExceptionData, ResultData
@@ -35,11 +33,17 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def _is_normal_argumnet(self):
         if not hasattr(self, "__normal_argument"):
             self.__normal_argument = (
-                self.request.method.upper() in (HTTP_METHOD_GET, HTTP_METHOD_DELETE)
+                self.request.method.upper() in ("GET", "DELETE")
                 or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
                 or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE)
             )
         return self.__normal_argument
+
+    @property
+    def arguments(self):
+        if not hasattr(self, "__arguments"):
+            self.__arguments = json.loads(self.request.body)
+        return self.__arguments
 
     def _get_argument_as_dict(self):
         if not hasattr(self, "__dict_args"):
