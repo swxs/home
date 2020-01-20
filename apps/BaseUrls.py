@@ -11,7 +11,7 @@ from importlib import import_module
 
 def load_urls():
     url_list = []
-    BASE_PATH = os.path.join(settings.SITE_ROOT, "api")
+    BASE_PATH = os.path.join(settings.SITE_ROOT, "apps")
     for root, dirname_list, filename_list in os.walk(BASE_PATH):
         for filename in filename_list:
             if filename not in ["__init__.py"]:
@@ -19,7 +19,7 @@ def load_urls():
                 base_path_list = base_path.split(os.sep)
                 if "__pycache__" in base_path_list or ".DS_Store" in base_path_list:
                     continue
-                module_path = ".".join(base_path_list[base_path_list.index("api"):])
+                module_path = ".".join(base_path_list[base_path_list.index("apps"):])
                 try:
                     module = import_module(module_path)
                     if hasattr(module, 'url_mapping'):

@@ -6,7 +6,7 @@ import os
 import json
 import thriftpy2
 from common.Decorator.render import render_thrift
-from api.PasswordLock.utils.PasswordLock import PasswordLock
+from apps.PasswordLock.utils.PasswordLock import PasswordLock
 from rpc.dispatcher import BaseDispatcher
 
 
@@ -82,6 +82,6 @@ if __name__ == '__main__':
     from rpc.main import make_server
     server = make_server(
         port=5000,
-        module_list=['api.PasswordLock.rpc.base_server']
+        module_list=['apps.PasswordLock.rpc.base_server']
     )
     server.serve()

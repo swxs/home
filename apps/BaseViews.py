@@ -16,7 +16,7 @@ import settings
 from common.Decorator.render import render
 from common.Helpers.Helper_JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
-from api.BaseConsts import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
+from apps.BaseConsts import HTTP_METHOD_GET, HTTP_METHOD_DELETE, HTTP_STATUS
 from common.ApiExceptions import *
 from common.Helpers.Helper_validate import Validate, RegType
 from common.Utils.log_utils import getLogger

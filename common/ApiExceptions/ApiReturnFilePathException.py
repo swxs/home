@@ -4,7 +4,7 @@
 # @Time    : 2018/9/25 17:58
 
 import os
-from api.BaseConsts import HTTP_STATUS
+from apps.BaseConsts import HTTP_STATUS
 from common.ApiExceptions.ApiException import ApiException
 
 

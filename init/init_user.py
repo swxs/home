@@ -7,8 +7,8 @@ if __name__ == '__main__':
 import fire
 import yaml
 import settings
-from api.consts.const import undefined
-from api.utils.user import User
+from apps.consts.const import undefined
+from apps.utils.user import User
 
 def init_user():
     with open(settings.INIT_SETTINGS_FILE, "rb") as file:

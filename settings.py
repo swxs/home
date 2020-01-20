@@ -18,7 +18,7 @@ SITE_PROTOCOL = 'http'
 SITE_DOMAIN = '127.0.0.1'
 SITE_PORT = 8088
 
-RPC_MODULE_LIST = ['api.User.rpc']
+RPC_MODULE_LIST = ['apps.User.rpc']
 
 LOG_PATH = get_dir_path(SITE_ROOT, 'logs')
 STATIC_PATH = get_dir_path(SITE_ROOT, 'static')

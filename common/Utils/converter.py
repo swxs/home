@@ -1,4 +1,4 @@
-from api.consts.const import undefined
+from apps.consts.const import undefined
 from common.ApiExceptions import *
 
 

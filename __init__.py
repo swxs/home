@@ -1,6 +1,6 @@
 import asyncio
 
-from api.PasswordLock.rpc.base_client import select_password_lock
+from apps.PasswordLock.rpc.base_client import select_password_lock
 
 
 async def run():

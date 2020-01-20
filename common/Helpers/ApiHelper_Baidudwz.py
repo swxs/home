@@ -1,4 +1,4 @@
-from api.consts import *
+from apps.consts import *
 import json
 from enum import IntEnum
 import requests

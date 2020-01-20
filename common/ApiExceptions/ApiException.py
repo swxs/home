@@ -3,7 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2018/6/25 15:09
 
-from api.BaseConsts import HTTP_STATUS
+from apps.BaseConsts import HTTP_STATUS
 
 
 class ApiException(Exception):

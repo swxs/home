@@ -1,4 +1,4 @@
-from api.BaseConsts import HTTP_STATUS
+from apps.BaseConsts import HTTP_STATUS
 from common.ApiExceptions.ApiException import ApiException
 
 

@@ -8,7 +8,7 @@ from bson import ObjectId
 from async_property import async_property
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from pymongo.errors import (DuplicateKeyError, )
-from api.BaseConsts import undefined
+from apps.BaseConsts import undefined
 from .models_fields import DictField
 from common.Metaclass.Singleton import Singleton
 from common.ApiExceptions import *
