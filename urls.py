@@ -2,7 +2,7 @@
 
 import tornado.web
 import settings
-import api.BaseUrls as api_urls
+import apps.BaseUrls as api_urls
 
 url_mapping = [
     (r"/(favicon\.ico)", tornado.web.StaticFileHandler, {"path": "%s/static" % settings.SITE_ROOT}),

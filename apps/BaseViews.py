@@ -15,8 +15,8 @@ from tornado.web import escape
 import settings
 from common.Decorator.render import render
 from common.Helpers.Helper_JWT import AuthCenter
-from common.Utils.pycket.session import SessionMixin
 from common.Helpers.Helper_validate import Validate, RegType
+from common.Utils.pycket.session import SessionMixin
 from common.Utils.log_utils import getLogger
 from result import ExceptionData, ResultData
 

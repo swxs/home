@@ -8,7 +8,7 @@ import scrapy
 from scrapy import Request
 from scrapy import Selector
 from model_spider.model_spider.items import ArticalItem
-from api.utils.artical import Artical
+from apps.utils.artical import Artical
 
 
 class WklkenSpider(scrapy.Spider):

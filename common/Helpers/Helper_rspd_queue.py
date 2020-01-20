@@ -4,8 +4,8 @@
 from copy import copy
 
 import settings
-from api.consts.const import undefined
-from api.utils.survey.rspd_data import RspdData
+from apps.consts.const import undefined
+from apps.utils.survey.rspd_data import RspdData
 from common.Helpers.DBHelper_Redis import RedisDBHelper
 from common.Helpers.Helper_msgqueue import MessageQueueFactory
 from common.Metaclass.Singleton import Singleton

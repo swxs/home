@@ -9,7 +9,7 @@ import threading
 import hashlib
 import weakref
 
-from api.BaseConsts import undefined
+from apps.BaseConsts import undefined
 from common.Helpers.DBHelper_Memcache import MemcacheDBHelper
 from common.Metaclass.Singleton import Singleton
 from common.Utils.log_utils import getLogger

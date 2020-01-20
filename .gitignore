@@ -1,7 +1,7 @@
 # ignore
 logs/
 docs/
-api/auto/
+apps/auto/
 data_file/
 .vscode/
 .tox

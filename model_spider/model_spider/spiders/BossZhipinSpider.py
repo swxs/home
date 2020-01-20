@@ -8,8 +8,8 @@ import re
 import scrapy
 from scrapy import Request
 from scrapy import Selector
-from api.utils.job import Job
-from api.consts.const import undefined
+from apps.utils.job import Job
+from apps.consts.const import undefined
 
 
 class BossZhipinSpider(scrapy.Spider):

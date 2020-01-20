@@ -8,10 +8,10 @@ import functools
 import json
 import traceback
 
-from api.consts import const
-from api.consts.bi import data_filter as data_filter_consts
-from api.consts.bi import cached_chart as cached_chart_consts
-from api.utils.bi.cached_chart import CachedChart
+from apps.consts import const
+from apps.consts.bi import data_filter as data_filter_consts
+from apps.consts.bi import cached_chart as cached_chart_consts
+from apps.utils.bi.cached_chart import CachedChart
 from common.Decorator import MemorizeFile
 from common.Utils import utils, translation
 from common.Utils.log_utils import getLogger
@@ -31,7 +31,7 @@ def get_key(obj, kwargs):
 
 
 def remove_data_of_worktable_id(worktable_id):
-    from api.utils.bi.chart_page import ChartPage
+    from apps.utils.bi.chart_page import ChartPage
     MemorizeFile.remove_data_memorize_by_worktable_id(worktable_id)
     chart_page_list = ChartPage.get_chart_page_list_by_worktable_id(worktable_id)
     for chart_page in chart_page_list:
@@ -55,7 +55,7 @@ def memorize_chartpage(function):
 def memorize_chart(function):
     @functools.wraps(function)
     def helper(*args, **kwargs):
-        from api.utils.bi.chart_page import ChartPage
+        from apps.utils.bi.chart_page import ChartPage
         chart = args[0]
         key = get_key(chart, kwargs)
         cached_chart = CachedChart.get_cached_chart_by_key_ttype(key, cached_chart_consts.SHOW)
@@ -92,7 +92,7 @@ def memorize_chart(function):
 def memorize_download(function):
     @functools.wraps(function)
     def helper(*args, **kwargs):
-        from api.utils.bi.chart_page import ChartPage
+        from apps.utils.bi.chart_page import ChartPage
         chart = args[0]
         key = get_key(chart, kwargs)
         cached_chart = CachedChart.get_cached_chart_by_key_ttype(key, cached_chart_consts.DOWNLOAD)
@@ -128,8 +128,8 @@ def memorize_download(function):
 def memorize_datafilter(function):
     @functools.wraps(function)
     def helper(*args, **kwargs):
-        from api.utils.bi.chart import Chart
-        from api.utils.bi.chart_page import ChartPage
+        from apps.utils.bi.chart import Chart
+        from apps.utils.bi.chart_page import ChartPage
         data_filter = args[0]
         key = get_key(data_filter, kwargs)
         cached_data_filter = CachedChart.get_cached_chart_by_key_ttype(key, cached_chart_consts.DATAFILTER)
