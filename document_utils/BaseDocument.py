@@ -169,6 +169,20 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: kwargs - {str(kwargs)}")
         return await self.__class__._manager.update(self.__class__, self, **kwargs)
 
+    @classmethod
+    @upgrade
+    async def find_and_update(cls, id, **kwargs):
+        instance = await cls.select(id=id)
+        for key in instance.__fields__:
+            if instance.__fields__[key].__getattribute__("pre_update"):
+                if callable(instance.__fields__[key].pre_update):
+                    kwargs[key] = instance.__fields__[key].pre_update()
+                else:
+                    kwargs[key] = instance.__fields__[key].pre_update
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(instance, '__model_name__')}>: kwargs - {str(kwargs)}")
+        return await cls._manager.update(cls, instance, **kwargs)
+
+
     async def copy(self, **kwargs):
         params = self.to_dict(dict_factory=dict)
         for attr in self.__fields__:
@@ -184,6 +198,13 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     async def delete(self):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
         return await self.__class__._manager.delete(self.__class__, self)
+
+    @classmethod
+    @clear
+    async def find_and_delete(cls, id):
+        instance = await cls.select(id=id)
+        log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(instance, '__model_name__')}>: kwargs - {str(dict(id=id))}")
+        return await cls._manager.delete(cls, instance)
 
     @classmethod
     def filter(cls, **kwargs):

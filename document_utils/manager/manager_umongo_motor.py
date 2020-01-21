@@ -112,7 +112,7 @@ class Manager(BaseManager, metaclass=Singleton):
 
     @classmethod
     async def update(cls, klass, instance, **kwargs):
-        model = klass.__raw_model__
+        model = instance.__raw_model__
         for attr in klass.__fields__:
             value = kwargs.get(attr, undefined)
             if value != undefined:
