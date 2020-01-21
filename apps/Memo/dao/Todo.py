@@ -30,4 +30,3 @@ class Todo(BaseDAO):
 
 
 NAME_DICT[BaseDAO.__manager__]["Todo"] = TodoModel
-TodoModel.schema

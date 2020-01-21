@@ -10,7 +10,7 @@ from common.Helpers.Helper_pagenate import Page
 from result import SuccessData
 from ...BaseConsts import *
 from ...BaseViews import BaseHandler
-from ..utils.Word import Word
+from ..utils.Word import Word, word_schema
 
 log = getLogger("views/word")
 
@@ -21,7 +21,7 @@ class WordHandler(BaseHandler):
         if word_id:
             word = await Word.select(id=word_id)
             return SuccessData(
-                await word.to_front()
+                data=await word.to_front()
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
@@ -40,65 +40,49 @@ class WordHandler(BaseHandler):
             word_cursor = Word.search(**search_params).order_by(order_by)
             data = [await  word.to_front() async for word in word_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(pager.items, info=pager.info)
+            return SuccessData(
+                data=pager.items, 
+                info=pager.info
+            )
 
 
     @render
     async def post(self, word_id=None):
         if word_id:
-            params = dict()
-            params['en'] = self.get_argument('en', undefined)
-            params['cn'] = self.get_argument('cn', undefined)
-            params['number'] = self.get_argument('number', undefined)
-            params['last_time'] = self.get_argument('last_time', undefined)
-            word = await Word.select(id=word_id)
-            word = await word.copy(**params)
+            params = word_schema.load(self.arguments, partial=True)
+            old_word = await Word.select(id=word_id)
+            new_word = await word.copy(**params.data)
             return SuccessData(
-                word.id
+                id=new_word.id
             )
         else:
-            params = dict()
-            params['en'] = self.get_argument('en', None)
-            params['cn'] = self.get_argument('cn', None)
-            params['number'] = self.get_argument('number', None)
-            params['last_time'] = self.get_argument('last_time', None)
-            word = await Word.create(**params)
+            params = word_schema.load(self.arguments)
+            word = await Word.create(**params.data)
             return SuccessData(
-                word.id
+                id=word.id
             )
 
     @render
     async def put(self, word_id=None):
-        params = dict()
-        params['en'] = self.get_argument('en', None)
-        params['cn'] = self.get_argument('cn', None)
-        params['number'] = self.get_argument('number', None)
-        params['last_time'] = self.get_argument('last_time', None)
-        word = await Word.select(id=word_id)
-        word = await word.update(**params)
+        params = word_schema.load(self.arguments)
+        word = await Word.find_and_update(id=word_id, **params.data)
         return SuccessData(
-            word.id
+            id=word.id
         )
 
     @render
     async def patch(self, word_id=None):
-        params = dict()
-        params['en'] = self.get_argument('en', undefined)
-        params['cn'] = self.get_argument('cn', undefined)
-        params['number'] = self.get_argument('number', undefined)
-        params['last_time'] = self.get_argument('last_time', undefined)
-        word = await Word.select(id=word_id)
-        word = await word.update(**params)
+        params = word_schema.load(self.arguments, partial=True)
+        word = await Word.find_and_update(id=word_id, **params.data)
         return SuccessData(
-            word.id
+            id=word.id
         )
 
     @render
     async def delete(self, word_id=None):
-        word = await Word.select(id=word_id)
-        await word.delete()
+        count = await Word.find_and_delete(id=word_id)
         return SuccessData(
-            None
+            count=count
         )
 
     def set_default_headers(self):

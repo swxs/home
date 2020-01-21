@@ -2,9 +2,14 @@
 # @File    : PasswordLock.py
 # @AUTH    : model_creater
 
+from ..models.PasswordLock import PasswordLock as PasswordLockModel
 from ..dao.PasswordLock import PasswordLock as BasePasswordLock
 from common.Helpers.Helper_encryption import Encryption
+from marshmallow import Schema, fields
 
+PasswordLockSchema = PasswordLockModel.schema.as_marshmallow_schema()
+
+password_lock_schema = PasswordLockSchema()
 
 class PasswordLock(BasePasswordLock):
     def __init__(self, **kwargs):

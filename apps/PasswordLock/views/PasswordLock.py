@@ -10,7 +10,7 @@ from common.Helpers.Helper_pagenate import Page
 from result import SuccessData
 from ...BaseConsts import *
 from ...BaseViews import BaseHandler
-from ..utils.PasswordLock import PasswordLock
+from ..utils.PasswordLock import PasswordLock, password_lock_schema
 
 log = getLogger("views/password_lock")
 
@@ -21,7 +21,7 @@ class PasswordLockHandler(BaseHandler):
         if password_lock_id:
             password_lock = await PasswordLock.select(id=password_lock_id)
             return SuccessData(
-                await password_lock.to_front()
+                data=await password_lock.to_front()
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
@@ -40,69 +40,49 @@ class PasswordLockHandler(BaseHandler):
             password_lock_cursor = PasswordLock.search(**search_params).order_by(order_by)
             data = [await  password_lock.to_front() async for password_lock in password_lock_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(pager.items, info=pager.info)
+            return SuccessData(
+                data=pager.items, 
+                info=pager.info
+            )
 
 
     @render
     async def post(self, password_lock_id=None):
         if password_lock_id:
-            params = dict()
-            params['name'] = self.get_argument('name', undefined)
-            params['key'] = self.get_argument('key', undefined)
-            params['website'] = self.get_argument('website', undefined)
-            params['user_id'] = self.get_argument('user_id', undefined)
-            params['index'] = self.get_argument('index', undefined)
-            password_lock = await PasswordLock.select(id=password_lock_id)
-            password_lock = await password_lock.copy(**params)
+            params = password_lock_schema.load(self.arguments, partial=True)
+            old_password_lock = await PasswordLock.select(id=password_lock_id)
+            new_password_lock = await password_lock.copy(**params.data)
             return SuccessData(
-                password_lock.id
+                id=new_password_lock.id
             )
         else:
-            params = dict()
-            params['name'] = self.get_argument('name', None)
-            params['key'] = self.get_argument('key', None)
-            params['website'] = self.get_argument('website', None)
-            params['user_id'] = self.get_argument('user_id', None)
-            params['index'] = self.get_argument('index', None)
-            password_lock = await PasswordLock.create(**params)
+            params = password_lock_schema.load(self.arguments)
+            password_lock = await PasswordLock.create(**params.data)
             return SuccessData(
-                password_lock.id
+                id=password_lock.id
             )
 
     @render
     async def put(self, password_lock_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', None)
-        params['key'] = self.get_argument('key', None)
-        params['website'] = self.get_argument('website', None)
-        params['user_id'] = self.get_argument('user_id', None)
-        params['index'] = self.get_argument('index', None)
-        password_lock = await PasswordLock.select(id=password_lock_id)
-        password_lock = await password_lock.update(**params)
+        params = password_lock_schema.load(self.arguments)
+        password_lock = await PasswordLock.find_and_update(id=password_lock_id, **params.data)
         return SuccessData(
-            password_lock.id
+            id=password_lock.id
         )
 
     @render
     async def patch(self, password_lock_id=None):
-        params = dict()
-        params['name'] = self.get_argument('name', undefined)
-        params['key'] = self.get_argument('key', undefined)
-        params['website'] = self.get_argument('website', undefined)
-        params['user_id'] = self.get_argument('user_id', undefined)
-        params['index'] = self.get_argument('index', undefined)
-        password_lock = await PasswordLock.select(id=password_lock_id)
-        password_lock = await password_lock.update(**params)
+        params = password_lock_schema.load(self.arguments, partial=True)
+        password_lock = await PasswordLock.find_and_update(id=password_lock_id, **params.data)
         return SuccessData(
-            password_lock.id
+            id=password_lock.id
         )
 
     @render
     async def delete(self, password_lock_id=None):
-        password_lock = await PasswordLock.select(id=password_lock_id)
-        await password_lock.delete()
+        count = await PasswordLock.find_and_delete(id=password_lock_id)
         return SuccessData(
-            None
+            count=count
         )
 
     def set_default_headers(self):
