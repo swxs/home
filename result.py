@@ -59,8 +59,7 @@ class SuccessData(ResultData):
     成功返回的结果
     """
 
-    def __init__(self, data, **kwargs):
-        kwargs.update({'data': data})
+    def __init__(self, **kwargs):
         super(SuccessData, self).__init__(code=0, data=kwargs)
 
     def __setitem__(self, key, value):

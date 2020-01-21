@@ -9,6 +9,7 @@ import urllib.parse
 import collections
 from result import SuccessData, ExceptionData, ResultData
 from common.Utils.log_utils import getLogger
+from common.Utils.ApiException import ApiException, ApiUnknowException
 
 log = getLogger("views.render")
 
@@ -16,17 +17,17 @@ log = getLogger("views.render")
 def render(func):
     @functools.wraps(func)
     async def wrapper(self, *args, **kwargs):
-        result_data = None
         try:
             result_data = func(self, *args, **kwargs)
             if isinstance(result_data, collections.Awaitable):
                 result_data = await result_data
         except ApiException as ae:
-            log.exception(self.request.body)
+            log.exception(ae)
             result_data = ExceptionData(ae)
-        except (Exception, NotImplementedError) as e:
-            log.exception(self.request.body)
-            result_data = ExceptionData(ApiCommonException())
+        except Exception as e:
+            ae = ApiUnknowException(e)
+            log.exception(ae)
+            result_data = ExceptionData(ae)
         finally:
             return_type = self.request.headers.get("Content-Type", "application/json")
             if return_type.startswith("application/json"):

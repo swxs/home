@@ -1,19 +1,23 @@
 class ApiException(Exception):
-    def __init__(self, exception_info):
-        self.exception_info = exception_info
+    def __init__(self, info):
+        self.code = info.code
+        self.template = info.template
+        self.message = info.message
+        self.data = info.data
+        self.status = info.status
 
     def __str__(self):
-        return str(self.exception_info)
+        return self.template.format(message=self.message)
 
 class ApiCommonException(ApiException):
-    def __init__(self, exception_info, **kwargs):
-        real_exception_info = exception_info.update(**kwargs)
-        super().__init__(real_exception_info)
+    def __init__(self, info, **kwargs):
+        info = info.update(**kwargs)
+        super().__init__(info)
 
 class ApiUnknowException(ApiException):
     def __init__(self, e, **kwargs):
-        real_exception_info = CommmonExceptionInfo.BaseException.update(**kwargs)
-        super().__init__(real_exception_info)
+        info = BaseExceptionInfo(message=str(e))
+        super().__init__(info)
 
 class BaseExceptionInfo:
     """

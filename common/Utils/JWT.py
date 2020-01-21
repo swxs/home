@@ -6,7 +6,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as jwt
 from itsdangerous import SignatureExpired, BadSignature
 import time
 import settings
-from common.ApiExceptions import *
+from .ApiException import ApiCommonException, CommmonExceptionInfo
 from common.Helpers.DBHelper_Redis import redis_helper
 from common.Utils import log_utils
 
@@ -43,12 +43,12 @@ class AuthCenter(object):
         try:
             return gen.loads(token)
         except SignatureExpired:
-            raise ApiTokenTimeOutException()
+            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenTimeoutException)
         except BadSignature:
-            raise ApiTokenIllegalException()
+            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenIllegalException)
         except Exception as e:
             log.error(f"unknow error: {e}")
-            raise ApiTokenIllegalException()
+            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenIllegalException)
 
     @classmethod
     def gen_access_token(cls, **kwargs):
@@ -66,7 +66,7 @@ class AuthCenter(object):
     @classmethod
     def identify(cls, token, secret_key=settings.SECRET_KEY, salt=settings.SALT):
         if BlockTokenHelper.is_blocked(token):
-            raise ApiTokenTimeOutException()
+            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenTimeoutException)
         return cls._decode(token, secret_key, salt)
 
     @classmethod

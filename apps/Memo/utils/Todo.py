@@ -6,8 +6,9 @@ from ..models.Todo import Todo as TodoModel
 from ..dao.Todo import Todo as BaseTodo
 from marshmallow import Schema, fields
 
-class TodoSchema(TodoModel.Schema):
-    pass
+TodoSchema = TodoModel.schema.as_marshmallow_schema()
+
+todo_schema = TodoSchema()
 
 class Todo(BaseTodo):
     def __init__(self, **kwargs):

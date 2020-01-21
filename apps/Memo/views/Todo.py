@@ -10,7 +10,7 @@ from common.Helpers.Helper_pagenate import Page
 from result import SuccessData
 from ...BaseConsts import *
 from ...BaseViews import BaseHandler
-from ..utils.Todo import Todo, TodoSchema
+from ..utils.Todo import Todo, todo_schema
 
 log = getLogger("views/todo")
 
@@ -21,7 +21,7 @@ class TodoHandler(BaseHandler):
         if todo_id:
             todo = await Todo.select(id=todo_id)
             return SuccessData(
-                await todo.to_front()
+                data=await todo.to_front()
             )
         else:
             search_params = json.loads(self.get_argument("search", '{}'))
@@ -40,37 +40,40 @@ class TodoHandler(BaseHandler):
             todo_cursor = Todo.search(**search_params).order_by(order_by)
             data = [await  todo.to_front() async for todo in todo_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(pager.items, info=pager.info)
+            return SuccessData(
+                data=pager.items, 
+                info=pager.info
+            )
 
 
     @render
     async def post(self, todo_id=None):
         if todo_id:
-            params = TodoSchema.load(self.arguments, partial=True)
-            todo = await Todo.select(id=todo_id)
-            todo = await todo.copy(**params)
+            params = todo_schema.load(self.arguments, partial=True)
+            old_todo = await Todo.select(id=todo_id)
+            new_todo = await todo.copy(**params.data)
             return SuccessData(
-                id=todo.id
+                id=new_todo.id
             )
         else:
-            params = TodoSchema.load(self.arguments)
-            todo = await Todo.create(**params)
+            params = todo_schema.load(self.arguments)
+            todo = await Todo.create(**params.data)
             return SuccessData(
                 id=todo.id
             )
 
     @render
     async def put(self, todo_id=None):
-        params = TodoSchema.load(self.arguments)
-        todo = await Todo.find_and_update(id=todo_id, **params)
+        params = todo_schema.load(self.arguments)
+        todo = await Todo.find_and_update(id=todo_id, **params.data)
         return SuccessData(
             id=todo.id
         )
 
     @render
     async def patch(self, todo_id=None):
-        params = TodoSchema.load(self.arguments, partial=True)
-        todo = await Todo.find_and_update(id=todo_id, **params)
+        params = todo_schema.load(self.arguments, partial=True)
+        todo = await Todo.find_and_update(id=todo_id, **params.data)
         return SuccessData(
             id=todo.id
         )

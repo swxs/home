@@ -12,3 +12,5 @@ qrcode==6.0
 redis==2.10.6
 msgpack==0.6.1
 python-memcached==1.59
+itsdangerous==1.1.0
+async_property==0.2.1

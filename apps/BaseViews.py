@@ -14,8 +14,9 @@ from tornado import locale, concurrent
 from tornado.web import escape
 import settings
 from common.Decorator.render import render
-from common.Helpers.Helper_JWT import AuthCenter
 from common.Helpers.Helper_validate import Validate, RegType
+from common.Utils.JWT import AuthCenter
+from common.Utils.ApiException import ApiCommonException, CommmonExceptionInfo
 from common.Utils.pycket.session import SessionMixin
 from common.Utils.log_utils import getLogger
 from result import ExceptionData, ResultData
@@ -45,17 +46,12 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             self.__arguments = json.loads(self.request.body)
         return self.__arguments
 
-    def _get_argument_as_dict(self):
-        if not hasattr(self, "__dict_args"):
-            self.__dict_args = json.loads(self.request.body)
-        return self.__dict_args
-
     def get_argument(self, argument, default=None, strip=True):
         if self._is_normal_argumnet():
             return super(BaseHandler, self).get_argument(argument, default=default, strip=strip)
         else:
             try:
-                value = self._get_argument_as_dict().get(argument, default)
+                value = self.arguments.get(argument, default)
                 if strip:
                     try:
                         value = value.strip()
@@ -73,7 +69,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             return value
         else:
             try:
-                value = self._get_argument_as_dict().get(argument)
+                value = self.arguments.get(argument)
             except Exception:
                 value = []
             if value is None:
@@ -92,19 +88,6 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         if isinstance(status, int):
             self.set_status(status)
         self.write(data)
-
-    def _handle_request_exception(self, e):
-        if isinstance(e, ApiException):
-            self.write_json(ExceptionData(e).to_json(), status=200)
-            self.finish()
-        else:
-            try:
-                log.exception()
-            except ApiNotLoginException as e:
-                self.write_json(ExceptionData(e).to_json(), status=e.status)
-                self.finish()
-            else:
-                super(BaseHandler, self)._handle_request_exception(e)
 
     def write_error(self, status_code, **kwargs):
         if settings.DEBUG:
@@ -145,26 +128,8 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             # raise tornado.web.HTTPError(403, msg)
 
     @property
-    def current_user(self):
-        if not hasattr(self, '_user'):
-            user_id = self.session.get('user_id')
-            if user_id is None:
-                raise ApiNotLoginException()
-            self._user = None
-        return self._user
-
-    @current_user.setter
-    def current_user(self, user_id=None):
-        if not hasattr(self, '_user'):
-            if user_id is not None:
-                raise ApiNotLoginException()
-
-    def get_user_locale(self):
-        return self.locale
-
-    @property
     def locale(self):
-        if not hasattr(self, '_locale'):
+        if not hasattr(self, '__locale'):
             local_code = self.get_cookie('locale', default=settings.DEFAULT_LOCAL)
             self.set_cookie('locale', local_code, expires_days=30)
             self._locale = locale.get(local_code)
@@ -173,7 +138,7 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     @locale.setter
     def locale(self, local_code):
         self.set_cookie('locale', local_code)
-        self._locale = locale.get(local_code)
+        self.__locale = locale.get(local_code)
 
     def my_render(self, template, argus=None, rubbish_keys=None):
         if not isinstance(argus, dict):
@@ -208,31 +173,28 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         t = '<input type="hidden" id="{0}" name="{0}" value="{1}"/>'
         return t.format(xsrf_key, xsrf_val)
 
-    def set_default_headers(self):
-        self._headers.add("version", "1")
-
 
 class PageNotFoundHandler(BaseHandler):
     @render
     def head(self):
-        raise ApiNotFoundException()
+        raise ApiCommonException(CommmonExceptionInfo.PageNotFoundException)
 
     @render
     def get(self):
-        raise ApiNotFoundException()
+        raise ApiCommonException(CommmonExceptionInfo.PageNotFoundException)
 
     @render
     def post(self):
-        raise ApiNotFoundException()
+        raise ApiCommonException(CommmonExceptionInfo.PageNotFoundException)
 
     @render
     def put(self):
-        raise ApiNotFoundException()
+        raise ApiCommonException(CommmonExceptionInfo.PageNotFoundException)
 
     @render
     def patch(self):
-        raise ApiNotFoundException()
+        raise ApiCommonException(CommmonExceptionInfo.PageNotFoundException)
 
     @render
     def delete(self):
-        raise ApiNotFoundException()
+        raise ApiCommonException(CommmonExceptionInfo.PageNotFoundException)
