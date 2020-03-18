@@ -15,4 +15,11 @@ class PasswordLock(BaseModelDocument):
     key = fields.StringField(allow_none=True)
     website = fields.StringField(allow_none=True)
     user_id = fields.ObjectIdField(allow_none=True)
-    index = fields.StringField(allow_none=True)
+
+    class Meta:
+        indexes = [
+            {
+                'key': ['user_id, name'],
+            },
+        ]
+        pass

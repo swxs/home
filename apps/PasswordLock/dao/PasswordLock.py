@@ -18,7 +18,6 @@ class PasswordLock(BaseDAO):
     key = model.StringField()
     website = model.StringField()
     user_id = model.ObjectIdField()
-    index = model.StringField()
 
     def __init__(self, **kwargs):
         super(PasswordLock, self).__init__(**kwargs)

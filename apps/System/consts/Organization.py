@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+# @File    : Organization.py
+# @AUTH    : model_creater
+
+ORGANIZATION_STATUS_ACTIVATED = 1
+ORGANIZATION_STATUS_FROZEN = 2
+
+ORGANIZATION_STATUS_LIST = [
+    (ORGANIZATION_STATUS_ACTIVATED, '激活'),
+    (ORGANIZATION_STATUS_FROZEN, '冻结'),
+]
