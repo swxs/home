@@ -21,6 +21,7 @@ scrapy = "*"
 itsdangerous = "*"
 fire = "*"
 pyyaml = "*"
+umongo[motor] = "*"
 
 [requires]
 python_version = "3.6"

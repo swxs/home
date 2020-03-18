@@ -1,0 +1,1862 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    EBRACE
+    OBRACE
+    QUOTE
+    SEMICOLON
+    WORD
+
+Grammar
+
+Rule 0     S' -> commands
+Rule 1     commands -> empty
+Rule 2     commands -> command
+Rule 3     commands -> value_groups
+Rule 4     command -> node
+Rule 5     value_groups -> group
+Rule 6     value_groups -> value_groups group
+Rule 7     group -> node GOTO node
+Rule 8     node_list -> node
+Rule 9     node_list -> node_list COMMA node
+Rule 10    node -> STRING LPAREN node_list RPAREN
+Rule 11    node -> number
+Rule 12    node -> string
+Rule 13    node -> column
+Rule 14    node -> node PLUS node
+Rule 15    node -> node MINUS node
+Rule 16    node -> node TIMES node
+Rule 17    node -> node DIVIDE node
+Rule 18    node -> node EQUAL node
+Rule 19    node -> node GT node
+Rule 20    node -> node GTE node
+Rule 21    node -> node LT node
+Rule 22    node -> node LTE node
+Rule 23    node -> node OR node
+Rule 24    node -> node AND node
+Rule 25    node -> LPAREN node RPAREN
+Rule 26    string -> STRING
+Rule 27    number -> NUMBER
+Rule 28    number -> MINUS NUMBER
+Rule 29    column -> COLUMN_ID
+Rule 30    empty -> <empty>
+
+Terminals, with rules where they appear
+
+AND                  : 24
+COLUMN_ID            : 29
+COMMA                : 9
+DIVIDE               : 17
+EBRACE               : 
+EQUAL                : 18
+GOTO                 : 7
+GT                   : 19
+GTE                  : 20
+LPAREN               : 10 25
+LT                   : 21
+LTE                  : 22
+MINUS                : 15 28
+NUMBER               : 27 28
+OBRACE               : 
+OR                   : 23
+PLUS                 : 14
+QUOTE                : 
+RPAREN               : 10 25
+SEMICOLON            : 
+STRING               : 10 26
+TIMES                : 16
+WORD                 : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+column               : 13
+command              : 2
+commands             : 0
+empty                : 1
+group                : 5 6
+node                 : 4 7 7 8 9 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 24 25
+node_list            : 9 10
+number               : 11
+string               : 12
+value_groups         : 3 6
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . commands
+    (1) commands -> . empty
+    (2) commands -> . command
+    (3) commands -> . value_groups
+    (30) empty -> .
+    (4) command -> . node
+    (5) value_groups -> . group
+    (6) value_groups -> . value_groups group
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (7) group -> . node GOTO node
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    $end            reduce using rule 30 (empty -> .)
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    commands                       shift and go to state 1
+    empty                          shift and go to state 2
+    command                        shift and go to state 3
+    value_groups                   shift and go to state 4
+    node                           shift and go to state 5
+    group                          shift and go to state 6
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 1
+
+    (0) S' -> commands .
+
+
+
+state 2
+
+    (1) commands -> empty .
+
+    $end            reduce using rule 1 (commands -> empty .)
+
+
+state 3
+
+    (2) commands -> command .
+
+    $end            reduce using rule 2 (commands -> command .)
+
+
+state 4
+
+    (3) commands -> value_groups .
+    (6) value_groups -> value_groups . group
+    (7) group -> . node GOTO node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    $end            reduce using rule 3 (commands -> value_groups .)
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    group                          shift and go to state 15
+    node                           shift and go to state 16
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 5
+
+    (4) command -> node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+    (7) group -> node . GOTO node
+
+    $end            reduce using rule 4 (command -> node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+    GOTO            shift and go to state 28
+
+
+state 6
+
+    (5) value_groups -> group .
+
+    STRING          reduce using rule 5 (value_groups -> group .)
+    LPAREN          reduce using rule 5 (value_groups -> group .)
+    NUMBER          reduce using rule 5 (value_groups -> group .)
+    MINUS           reduce using rule 5 (value_groups -> group .)
+    COLUMN_ID       reduce using rule 5 (value_groups -> group .)
+    $end            reduce using rule 5 (value_groups -> group .)
+
+
+state 7
+
+    (10) node -> STRING . LPAREN node_list RPAREN
+    (26) string -> STRING .
+
+  ! shift/reduce conflict for LPAREN resolved as shift
+    LPAREN          shift and go to state 29
+    PLUS            reduce using rule 26 (string -> STRING .)
+    MINUS           reduce using rule 26 (string -> STRING .)
+    TIMES           reduce using rule 26 (string -> STRING .)
+    DIVIDE          reduce using rule 26 (string -> STRING .)
+    EQUAL           reduce using rule 26 (string -> STRING .)
+    GT              reduce using rule 26 (string -> STRING .)
+    GTE             reduce using rule 26 (string -> STRING .)
+    LT              reduce using rule 26 (string -> STRING .)
+    LTE             reduce using rule 26 (string -> STRING .)
+    OR              reduce using rule 26 (string -> STRING .)
+    AND             reduce using rule 26 (string -> STRING .)
+    GOTO            reduce using rule 26 (string -> STRING .)
+    $end            reduce using rule 26 (string -> STRING .)
+    RPAREN          reduce using rule 26 (string -> STRING .)
+    STRING          reduce using rule 26 (string -> STRING .)
+    NUMBER          reduce using rule 26 (string -> STRING .)
+    COLUMN_ID       reduce using rule 26 (string -> STRING .)
+    COMMA           reduce using rule 26 (string -> STRING .)
+
+  ! LPAREN          [ reduce using rule 26 (string -> STRING .) ]
+
+
+state 8
+
+    (25) node -> LPAREN . node RPAREN
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 30
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 9
+
+    (11) node -> number .
+
+    PLUS            reduce using rule 11 (node -> number .)
+    MINUS           reduce using rule 11 (node -> number .)
+    TIMES           reduce using rule 11 (node -> number .)
+    DIVIDE          reduce using rule 11 (node -> number .)
+    EQUAL           reduce using rule 11 (node -> number .)
+    GT              reduce using rule 11 (node -> number .)
+    GTE             reduce using rule 11 (node -> number .)
+    LT              reduce using rule 11 (node -> number .)
+    LTE             reduce using rule 11 (node -> number .)
+    OR              reduce using rule 11 (node -> number .)
+    AND             reduce using rule 11 (node -> number .)
+    GOTO            reduce using rule 11 (node -> number .)
+    $end            reduce using rule 11 (node -> number .)
+    RPAREN          reduce using rule 11 (node -> number .)
+    STRING          reduce using rule 11 (node -> number .)
+    LPAREN          reduce using rule 11 (node -> number .)
+    NUMBER          reduce using rule 11 (node -> number .)
+    COLUMN_ID       reduce using rule 11 (node -> number .)
+    COMMA           reduce using rule 11 (node -> number .)
+
+
+state 10
+
+    (12) node -> string .
+
+    PLUS            reduce using rule 12 (node -> string .)
+    MINUS           reduce using rule 12 (node -> string .)
+    TIMES           reduce using rule 12 (node -> string .)
+    DIVIDE          reduce using rule 12 (node -> string .)
+    EQUAL           reduce using rule 12 (node -> string .)
+    GT              reduce using rule 12 (node -> string .)
+    GTE             reduce using rule 12 (node -> string .)
+    LT              reduce using rule 12 (node -> string .)
+    LTE             reduce using rule 12 (node -> string .)
+    OR              reduce using rule 12 (node -> string .)
+    AND             reduce using rule 12 (node -> string .)
+    GOTO            reduce using rule 12 (node -> string .)
+    $end            reduce using rule 12 (node -> string .)
+    RPAREN          reduce using rule 12 (node -> string .)
+    STRING          reduce using rule 12 (node -> string .)
+    LPAREN          reduce using rule 12 (node -> string .)
+    NUMBER          reduce using rule 12 (node -> string .)
+    COLUMN_ID       reduce using rule 12 (node -> string .)
+    COMMA           reduce using rule 12 (node -> string .)
+
+
+state 11
+
+    (13) node -> column .
+
+    PLUS            reduce using rule 13 (node -> column .)
+    MINUS           reduce using rule 13 (node -> column .)
+    TIMES           reduce using rule 13 (node -> column .)
+    DIVIDE          reduce using rule 13 (node -> column .)
+    EQUAL           reduce using rule 13 (node -> column .)
+    GT              reduce using rule 13 (node -> column .)
+    GTE             reduce using rule 13 (node -> column .)
+    LT              reduce using rule 13 (node -> column .)
+    LTE             reduce using rule 13 (node -> column .)
+    OR              reduce using rule 13 (node -> column .)
+    AND             reduce using rule 13 (node -> column .)
+    GOTO            reduce using rule 13 (node -> column .)
+    $end            reduce using rule 13 (node -> column .)
+    RPAREN          reduce using rule 13 (node -> column .)
+    STRING          reduce using rule 13 (node -> column .)
+    LPAREN          reduce using rule 13 (node -> column .)
+    NUMBER          reduce using rule 13 (node -> column .)
+    COLUMN_ID       reduce using rule 13 (node -> column .)
+    COMMA           reduce using rule 13 (node -> column .)
+
+
+state 12
+
+    (28) number -> MINUS . NUMBER
+
+    NUMBER          shift and go to state 31
+
+
+state 13
+
+    (27) number -> NUMBER .
+
+    PLUS            reduce using rule 27 (number -> NUMBER .)
+    MINUS           reduce using rule 27 (number -> NUMBER .)
+    TIMES           reduce using rule 27 (number -> NUMBER .)
+    DIVIDE          reduce using rule 27 (number -> NUMBER .)
+    EQUAL           reduce using rule 27 (number -> NUMBER .)
+    GT              reduce using rule 27 (number -> NUMBER .)
+    GTE             reduce using rule 27 (number -> NUMBER .)
+    LT              reduce using rule 27 (number -> NUMBER .)
+    LTE             reduce using rule 27 (number -> NUMBER .)
+    OR              reduce using rule 27 (number -> NUMBER .)
+    AND             reduce using rule 27 (number -> NUMBER .)
+    GOTO            reduce using rule 27 (number -> NUMBER .)
+    $end            reduce using rule 27 (number -> NUMBER .)
+    RPAREN          reduce using rule 27 (number -> NUMBER .)
+    STRING          reduce using rule 27 (number -> NUMBER .)
+    LPAREN          reduce using rule 27 (number -> NUMBER .)
+    NUMBER          reduce using rule 27 (number -> NUMBER .)
+    COLUMN_ID       reduce using rule 27 (number -> NUMBER .)
+    COMMA           reduce using rule 27 (number -> NUMBER .)
+
+
+state 14
+
+    (29) column -> COLUMN_ID .
+
+    PLUS            reduce using rule 29 (column -> COLUMN_ID .)
+    MINUS           reduce using rule 29 (column -> COLUMN_ID .)
+    TIMES           reduce using rule 29 (column -> COLUMN_ID .)
+    DIVIDE          reduce using rule 29 (column -> COLUMN_ID .)
+    EQUAL           reduce using rule 29 (column -> COLUMN_ID .)
+    GT              reduce using rule 29 (column -> COLUMN_ID .)
+    GTE             reduce using rule 29 (column -> COLUMN_ID .)
+    LT              reduce using rule 29 (column -> COLUMN_ID .)
+    LTE             reduce using rule 29 (column -> COLUMN_ID .)
+    OR              reduce using rule 29 (column -> COLUMN_ID .)
+    AND             reduce using rule 29 (column -> COLUMN_ID .)
+    GOTO            reduce using rule 29 (column -> COLUMN_ID .)
+    $end            reduce using rule 29 (column -> COLUMN_ID .)
+    RPAREN          reduce using rule 29 (column -> COLUMN_ID .)
+    STRING          reduce using rule 29 (column -> COLUMN_ID .)
+    LPAREN          reduce using rule 29 (column -> COLUMN_ID .)
+    NUMBER          reduce using rule 29 (column -> COLUMN_ID .)
+    COLUMN_ID       reduce using rule 29 (column -> COLUMN_ID .)
+    COMMA           reduce using rule 29 (column -> COLUMN_ID .)
+
+
+state 15
+
+    (6) value_groups -> value_groups group .
+
+    STRING          reduce using rule 6 (value_groups -> value_groups group .)
+    LPAREN          reduce using rule 6 (value_groups -> value_groups group .)
+    NUMBER          reduce using rule 6 (value_groups -> value_groups group .)
+    MINUS           reduce using rule 6 (value_groups -> value_groups group .)
+    COLUMN_ID       reduce using rule 6 (value_groups -> value_groups group .)
+    $end            reduce using rule 6 (value_groups -> value_groups group .)
+
+
+state 16
+
+    (7) group -> node . GOTO node
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    GOTO            shift and go to state 28
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+
+state 17
+
+    (14) node -> node PLUS . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 32
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 18
+
+    (15) node -> node MINUS . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 33
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 19
+
+    (16) node -> node TIMES . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 34
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 20
+
+    (17) node -> node DIVIDE . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 35
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 21
+
+    (18) node -> node EQUAL . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 36
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 22
+
+    (19) node -> node GT . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 37
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 23
+
+    (20) node -> node GTE . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 38
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 24
+
+    (21) node -> node LT . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 39
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 25
+
+    (22) node -> node LTE . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 40
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 26
+
+    (23) node -> node OR . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 41
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 27
+
+    (24) node -> node AND . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 42
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 28
+
+    (7) group -> node GOTO . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 43
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 29
+
+    (10) node -> STRING LPAREN . node_list RPAREN
+    (8) node_list -> . node
+    (9) node_list -> . node_list COMMA node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node_list                      shift and go to state 44
+    node                           shift and go to state 45
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 30
+
+    (25) node -> LPAREN node . RPAREN
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    RPAREN          shift and go to state 46
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+
+state 31
+
+    (28) number -> MINUS NUMBER .
+
+    PLUS            reduce using rule 28 (number -> MINUS NUMBER .)
+    MINUS           reduce using rule 28 (number -> MINUS NUMBER .)
+    TIMES           reduce using rule 28 (number -> MINUS NUMBER .)
+    DIVIDE          reduce using rule 28 (number -> MINUS NUMBER .)
+    EQUAL           reduce using rule 28 (number -> MINUS NUMBER .)
+    GT              reduce using rule 28 (number -> MINUS NUMBER .)
+    GTE             reduce using rule 28 (number -> MINUS NUMBER .)
+    LT              reduce using rule 28 (number -> MINUS NUMBER .)
+    LTE             reduce using rule 28 (number -> MINUS NUMBER .)
+    OR              reduce using rule 28 (number -> MINUS NUMBER .)
+    AND             reduce using rule 28 (number -> MINUS NUMBER .)
+    GOTO            reduce using rule 28 (number -> MINUS NUMBER .)
+    $end            reduce using rule 28 (number -> MINUS NUMBER .)
+    RPAREN          reduce using rule 28 (number -> MINUS NUMBER .)
+    STRING          reduce using rule 28 (number -> MINUS NUMBER .)
+    LPAREN          reduce using rule 28 (number -> MINUS NUMBER .)
+    NUMBER          reduce using rule 28 (number -> MINUS NUMBER .)
+    COLUMN_ID       reduce using rule 28 (number -> MINUS NUMBER .)
+    COMMA           reduce using rule 28 (number -> MINUS NUMBER .)
+
+
+state 32
+
+    (14) node -> node PLUS node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    PLUS            reduce using rule 14 (node -> node PLUS node .)
+    MINUS           reduce using rule 14 (node -> node PLUS node .)
+    EQUAL           reduce using rule 14 (node -> node PLUS node .)
+    GT              reduce using rule 14 (node -> node PLUS node .)
+    GTE             reduce using rule 14 (node -> node PLUS node .)
+    LT              reduce using rule 14 (node -> node PLUS node .)
+    LTE             reduce using rule 14 (node -> node PLUS node .)
+    OR              reduce using rule 14 (node -> node PLUS node .)
+    AND             reduce using rule 14 (node -> node PLUS node .)
+    GOTO            reduce using rule 14 (node -> node PLUS node .)
+    $end            reduce using rule 14 (node -> node PLUS node .)
+    RPAREN          reduce using rule 14 (node -> node PLUS node .)
+    STRING          reduce using rule 14 (node -> node PLUS node .)
+    LPAREN          reduce using rule 14 (node -> node PLUS node .)
+    NUMBER          reduce using rule 14 (node -> node PLUS node .)
+    COLUMN_ID       reduce using rule 14 (node -> node PLUS node .)
+    COMMA           reduce using rule 14 (node -> node PLUS node .)
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+
+  ! TIMES           [ reduce using rule 14 (node -> node PLUS node .) ]
+  ! DIVIDE          [ reduce using rule 14 (node -> node PLUS node .) ]
+  ! PLUS            [ shift and go to state 17 ]
+  ! MINUS           [ shift and go to state 18 ]
+  ! EQUAL           [ shift and go to state 21 ]
+  ! GT              [ shift and go to state 22 ]
+  ! GTE             [ shift and go to state 23 ]
+  ! LT              [ shift and go to state 24 ]
+  ! LTE             [ shift and go to state 25 ]
+  ! OR              [ shift and go to state 26 ]
+  ! AND             [ shift and go to state 27 ]
+
+
+state 33
+
+    (15) node -> node MINUS node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    PLUS            reduce using rule 15 (node -> node MINUS node .)
+    MINUS           reduce using rule 15 (node -> node MINUS node .)
+    EQUAL           reduce using rule 15 (node -> node MINUS node .)
+    GT              reduce using rule 15 (node -> node MINUS node .)
+    GTE             reduce using rule 15 (node -> node MINUS node .)
+    LT              reduce using rule 15 (node -> node MINUS node .)
+    LTE             reduce using rule 15 (node -> node MINUS node .)
+    OR              reduce using rule 15 (node -> node MINUS node .)
+    AND             reduce using rule 15 (node -> node MINUS node .)
+    GOTO            reduce using rule 15 (node -> node MINUS node .)
+    $end            reduce using rule 15 (node -> node MINUS node .)
+    RPAREN          reduce using rule 15 (node -> node MINUS node .)
+    STRING          reduce using rule 15 (node -> node MINUS node .)
+    LPAREN          reduce using rule 15 (node -> node MINUS node .)
+    NUMBER          reduce using rule 15 (node -> node MINUS node .)
+    COLUMN_ID       reduce using rule 15 (node -> node MINUS node .)
+    COMMA           reduce using rule 15 (node -> node MINUS node .)
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+
+  ! TIMES           [ reduce using rule 15 (node -> node MINUS node .) ]
+  ! DIVIDE          [ reduce using rule 15 (node -> node MINUS node .) ]
+  ! PLUS            [ shift and go to state 17 ]
+  ! MINUS           [ shift and go to state 18 ]
+  ! EQUAL           [ shift and go to state 21 ]
+  ! GT              [ shift and go to state 22 ]
+  ! GTE             [ shift and go to state 23 ]
+  ! LT              [ shift and go to state 24 ]
+  ! LTE             [ shift and go to state 25 ]
+  ! OR              [ shift and go to state 26 ]
+  ! AND             [ shift and go to state 27 ]
+
+
+state 34
+
+    (16) node -> node TIMES node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    PLUS            reduce using rule 16 (node -> node TIMES node .)
+    MINUS           reduce using rule 16 (node -> node TIMES node .)
+    TIMES           reduce using rule 16 (node -> node TIMES node .)
+    DIVIDE          reduce using rule 16 (node -> node TIMES node .)
+    EQUAL           reduce using rule 16 (node -> node TIMES node .)
+    GT              reduce using rule 16 (node -> node TIMES node .)
+    GTE             reduce using rule 16 (node -> node TIMES node .)
+    LT              reduce using rule 16 (node -> node TIMES node .)
+    LTE             reduce using rule 16 (node -> node TIMES node .)
+    OR              reduce using rule 16 (node -> node TIMES node .)
+    AND             reduce using rule 16 (node -> node TIMES node .)
+    GOTO            reduce using rule 16 (node -> node TIMES node .)
+    $end            reduce using rule 16 (node -> node TIMES node .)
+    RPAREN          reduce using rule 16 (node -> node TIMES node .)
+    STRING          reduce using rule 16 (node -> node TIMES node .)
+    LPAREN          reduce using rule 16 (node -> node TIMES node .)
+    NUMBER          reduce using rule 16 (node -> node TIMES node .)
+    COLUMN_ID       reduce using rule 16 (node -> node TIMES node .)
+    COMMA           reduce using rule 16 (node -> node TIMES node .)
+
+  ! PLUS            [ shift and go to state 17 ]
+  ! MINUS           [ shift and go to state 18 ]
+  ! TIMES           [ shift and go to state 19 ]
+  ! DIVIDE          [ shift and go to state 20 ]
+  ! EQUAL           [ shift and go to state 21 ]
+  ! GT              [ shift and go to state 22 ]
+  ! GTE             [ shift and go to state 23 ]
+  ! LT              [ shift and go to state 24 ]
+  ! LTE             [ shift and go to state 25 ]
+  ! OR              [ shift and go to state 26 ]
+  ! AND             [ shift and go to state 27 ]
+
+
+state 35
+
+    (17) node -> node DIVIDE node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    PLUS            reduce using rule 17 (node -> node DIVIDE node .)
+    MINUS           reduce using rule 17 (node -> node DIVIDE node .)
+    TIMES           reduce using rule 17 (node -> node DIVIDE node .)
+    DIVIDE          reduce using rule 17 (node -> node DIVIDE node .)
+    EQUAL           reduce using rule 17 (node -> node DIVIDE node .)
+    GT              reduce using rule 17 (node -> node DIVIDE node .)
+    GTE             reduce using rule 17 (node -> node DIVIDE node .)
+    LT              reduce using rule 17 (node -> node DIVIDE node .)
+    LTE             reduce using rule 17 (node -> node DIVIDE node .)
+    OR              reduce using rule 17 (node -> node DIVIDE node .)
+    AND             reduce using rule 17 (node -> node DIVIDE node .)
+    GOTO            reduce using rule 17 (node -> node DIVIDE node .)
+    $end            reduce using rule 17 (node -> node DIVIDE node .)
+    RPAREN          reduce using rule 17 (node -> node DIVIDE node .)
+    STRING          reduce using rule 17 (node -> node DIVIDE node .)
+    LPAREN          reduce using rule 17 (node -> node DIVIDE node .)
+    NUMBER          reduce using rule 17 (node -> node DIVIDE node .)
+    COLUMN_ID       reduce using rule 17 (node -> node DIVIDE node .)
+    COMMA           reduce using rule 17 (node -> node DIVIDE node .)
+
+  ! PLUS            [ shift and go to state 17 ]
+  ! MINUS           [ shift and go to state 18 ]
+  ! TIMES           [ shift and go to state 19 ]
+  ! DIVIDE          [ shift and go to state 20 ]
+  ! EQUAL           [ shift and go to state 21 ]
+  ! GT              [ shift and go to state 22 ]
+  ! GTE             [ shift and go to state 23 ]
+  ! LT              [ shift and go to state 24 ]
+  ! LTE             [ shift and go to state 25 ]
+  ! OR              [ shift and go to state 26 ]
+  ! AND             [ shift and go to state 27 ]
+
+
+state 36
+
+    (18) node -> node EQUAL node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 18 (node -> node EQUAL node .)
+    $end            reduce using rule 18 (node -> node EQUAL node .)
+    RPAREN          reduce using rule 18 (node -> node EQUAL node .)
+    STRING          reduce using rule 18 (node -> node EQUAL node .)
+    LPAREN          reduce using rule 18 (node -> node EQUAL node .)
+    NUMBER          reduce using rule 18 (node -> node EQUAL node .)
+    COLUMN_ID       reduce using rule 18 (node -> node EQUAL node .)
+    COMMA           reduce using rule 18 (node -> node EQUAL node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! MINUS           [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! TIMES           [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! DIVIDE          [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! EQUAL           [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! GT              [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! GTE             [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! LT              [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! LTE             [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! OR              [ reduce using rule 18 (node -> node EQUAL node .) ]
+  ! AND             [ reduce using rule 18 (node -> node EQUAL node .) ]
+
+
+state 37
+
+    (19) node -> node GT node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 19 (node -> node GT node .)
+    $end            reduce using rule 19 (node -> node GT node .)
+    RPAREN          reduce using rule 19 (node -> node GT node .)
+    STRING          reduce using rule 19 (node -> node GT node .)
+    LPAREN          reduce using rule 19 (node -> node GT node .)
+    NUMBER          reduce using rule 19 (node -> node GT node .)
+    COLUMN_ID       reduce using rule 19 (node -> node GT node .)
+    COMMA           reduce using rule 19 (node -> node GT node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 19 (node -> node GT node .) ]
+  ! MINUS           [ reduce using rule 19 (node -> node GT node .) ]
+  ! TIMES           [ reduce using rule 19 (node -> node GT node .) ]
+  ! DIVIDE          [ reduce using rule 19 (node -> node GT node .) ]
+  ! EQUAL           [ reduce using rule 19 (node -> node GT node .) ]
+  ! GT              [ reduce using rule 19 (node -> node GT node .) ]
+  ! GTE             [ reduce using rule 19 (node -> node GT node .) ]
+  ! LT              [ reduce using rule 19 (node -> node GT node .) ]
+  ! LTE             [ reduce using rule 19 (node -> node GT node .) ]
+  ! OR              [ reduce using rule 19 (node -> node GT node .) ]
+  ! AND             [ reduce using rule 19 (node -> node GT node .) ]
+
+
+state 38
+
+    (20) node -> node GTE node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 20 (node -> node GTE node .)
+    $end            reduce using rule 20 (node -> node GTE node .)
+    RPAREN          reduce using rule 20 (node -> node GTE node .)
+    STRING          reduce using rule 20 (node -> node GTE node .)
+    LPAREN          reduce using rule 20 (node -> node GTE node .)
+    NUMBER          reduce using rule 20 (node -> node GTE node .)
+    COLUMN_ID       reduce using rule 20 (node -> node GTE node .)
+    COMMA           reduce using rule 20 (node -> node GTE node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 20 (node -> node GTE node .) ]
+  ! MINUS           [ reduce using rule 20 (node -> node GTE node .) ]
+  ! TIMES           [ reduce using rule 20 (node -> node GTE node .) ]
+  ! DIVIDE          [ reduce using rule 20 (node -> node GTE node .) ]
+  ! EQUAL           [ reduce using rule 20 (node -> node GTE node .) ]
+  ! GT              [ reduce using rule 20 (node -> node GTE node .) ]
+  ! GTE             [ reduce using rule 20 (node -> node GTE node .) ]
+  ! LT              [ reduce using rule 20 (node -> node GTE node .) ]
+  ! LTE             [ reduce using rule 20 (node -> node GTE node .) ]
+  ! OR              [ reduce using rule 20 (node -> node GTE node .) ]
+  ! AND             [ reduce using rule 20 (node -> node GTE node .) ]
+
+
+state 39
+
+    (21) node -> node LT node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 21 (node -> node LT node .)
+    $end            reduce using rule 21 (node -> node LT node .)
+    RPAREN          reduce using rule 21 (node -> node LT node .)
+    STRING          reduce using rule 21 (node -> node LT node .)
+    LPAREN          reduce using rule 21 (node -> node LT node .)
+    NUMBER          reduce using rule 21 (node -> node LT node .)
+    COLUMN_ID       reduce using rule 21 (node -> node LT node .)
+    COMMA           reduce using rule 21 (node -> node LT node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 21 (node -> node LT node .) ]
+  ! MINUS           [ reduce using rule 21 (node -> node LT node .) ]
+  ! TIMES           [ reduce using rule 21 (node -> node LT node .) ]
+  ! DIVIDE          [ reduce using rule 21 (node -> node LT node .) ]
+  ! EQUAL           [ reduce using rule 21 (node -> node LT node .) ]
+  ! GT              [ reduce using rule 21 (node -> node LT node .) ]
+  ! GTE             [ reduce using rule 21 (node -> node LT node .) ]
+  ! LT              [ reduce using rule 21 (node -> node LT node .) ]
+  ! LTE             [ reduce using rule 21 (node -> node LT node .) ]
+  ! OR              [ reduce using rule 21 (node -> node LT node .) ]
+  ! AND             [ reduce using rule 21 (node -> node LT node .) ]
+
+
+state 40
+
+    (22) node -> node LTE node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 22 (node -> node LTE node .)
+    $end            reduce using rule 22 (node -> node LTE node .)
+    RPAREN          reduce using rule 22 (node -> node LTE node .)
+    STRING          reduce using rule 22 (node -> node LTE node .)
+    LPAREN          reduce using rule 22 (node -> node LTE node .)
+    NUMBER          reduce using rule 22 (node -> node LTE node .)
+    COLUMN_ID       reduce using rule 22 (node -> node LTE node .)
+    COMMA           reduce using rule 22 (node -> node LTE node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 22 (node -> node LTE node .) ]
+  ! MINUS           [ reduce using rule 22 (node -> node LTE node .) ]
+  ! TIMES           [ reduce using rule 22 (node -> node LTE node .) ]
+  ! DIVIDE          [ reduce using rule 22 (node -> node LTE node .) ]
+  ! EQUAL           [ reduce using rule 22 (node -> node LTE node .) ]
+  ! GT              [ reduce using rule 22 (node -> node LTE node .) ]
+  ! GTE             [ reduce using rule 22 (node -> node LTE node .) ]
+  ! LT              [ reduce using rule 22 (node -> node LTE node .) ]
+  ! LTE             [ reduce using rule 22 (node -> node LTE node .) ]
+  ! OR              [ reduce using rule 22 (node -> node LTE node .) ]
+  ! AND             [ reduce using rule 22 (node -> node LTE node .) ]
+
+
+state 41
+
+    (23) node -> node OR node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 23 (node -> node OR node .)
+    $end            reduce using rule 23 (node -> node OR node .)
+    RPAREN          reduce using rule 23 (node -> node OR node .)
+    STRING          reduce using rule 23 (node -> node OR node .)
+    LPAREN          reduce using rule 23 (node -> node OR node .)
+    NUMBER          reduce using rule 23 (node -> node OR node .)
+    COLUMN_ID       reduce using rule 23 (node -> node OR node .)
+    COMMA           reduce using rule 23 (node -> node OR node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 23 (node -> node OR node .) ]
+  ! MINUS           [ reduce using rule 23 (node -> node OR node .) ]
+  ! TIMES           [ reduce using rule 23 (node -> node OR node .) ]
+  ! DIVIDE          [ reduce using rule 23 (node -> node OR node .) ]
+  ! EQUAL           [ reduce using rule 23 (node -> node OR node .) ]
+  ! GT              [ reduce using rule 23 (node -> node OR node .) ]
+  ! GTE             [ reduce using rule 23 (node -> node OR node .) ]
+  ! LT              [ reduce using rule 23 (node -> node OR node .) ]
+  ! LTE             [ reduce using rule 23 (node -> node OR node .) ]
+  ! OR              [ reduce using rule 23 (node -> node OR node .) ]
+  ! AND             [ reduce using rule 23 (node -> node OR node .) ]
+
+
+state 42
+
+    (24) node -> node AND node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+  ! shift/reduce conflict for EQUAL resolved as shift
+  ! shift/reduce conflict for GT resolved as shift
+  ! shift/reduce conflict for GTE resolved as shift
+  ! shift/reduce conflict for LT resolved as shift
+  ! shift/reduce conflict for LTE resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    GOTO            reduce using rule 24 (node -> node AND node .)
+    $end            reduce using rule 24 (node -> node AND node .)
+    RPAREN          reduce using rule 24 (node -> node AND node .)
+    STRING          reduce using rule 24 (node -> node AND node .)
+    LPAREN          reduce using rule 24 (node -> node AND node .)
+    NUMBER          reduce using rule 24 (node -> node AND node .)
+    COLUMN_ID       reduce using rule 24 (node -> node AND node .)
+    COMMA           reduce using rule 24 (node -> node AND node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! PLUS            [ reduce using rule 24 (node -> node AND node .) ]
+  ! MINUS           [ reduce using rule 24 (node -> node AND node .) ]
+  ! TIMES           [ reduce using rule 24 (node -> node AND node .) ]
+  ! DIVIDE          [ reduce using rule 24 (node -> node AND node .) ]
+  ! EQUAL           [ reduce using rule 24 (node -> node AND node .) ]
+  ! GT              [ reduce using rule 24 (node -> node AND node .) ]
+  ! GTE             [ reduce using rule 24 (node -> node AND node .) ]
+  ! LT              [ reduce using rule 24 (node -> node AND node .) ]
+  ! LTE             [ reduce using rule 24 (node -> node AND node .) ]
+  ! OR              [ reduce using rule 24 (node -> node AND node .) ]
+  ! AND             [ reduce using rule 24 (node -> node AND node .) ]
+
+
+state 43
+
+    (7) group -> node GOTO node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+  ! shift/reduce conflict for MINUS resolved as shift
+    STRING          reduce using rule 7 (group -> node GOTO node .)
+    LPAREN          reduce using rule 7 (group -> node GOTO node .)
+    NUMBER          reduce using rule 7 (group -> node GOTO node .)
+    COLUMN_ID       reduce using rule 7 (group -> node GOTO node .)
+    $end            reduce using rule 7 (group -> node GOTO node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+  ! MINUS           [ reduce using rule 7 (group -> node GOTO node .) ]
+
+
+state 44
+
+    (10) node -> STRING LPAREN node_list . RPAREN
+    (9) node_list -> node_list . COMMA node
+
+    RPAREN          shift and go to state 47
+    COMMA           shift and go to state 48
+
+
+state 45
+
+    (8) node_list -> node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    RPAREN          reduce using rule 8 (node_list -> node .)
+    COMMA           reduce using rule 8 (node_list -> node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+
+state 46
+
+    (25) node -> LPAREN node RPAREN .
+
+    PLUS            reduce using rule 25 (node -> LPAREN node RPAREN .)
+    MINUS           reduce using rule 25 (node -> LPAREN node RPAREN .)
+    TIMES           reduce using rule 25 (node -> LPAREN node RPAREN .)
+    DIVIDE          reduce using rule 25 (node -> LPAREN node RPAREN .)
+    EQUAL           reduce using rule 25 (node -> LPAREN node RPAREN .)
+    GT              reduce using rule 25 (node -> LPAREN node RPAREN .)
+    GTE             reduce using rule 25 (node -> LPAREN node RPAREN .)
+    LT              reduce using rule 25 (node -> LPAREN node RPAREN .)
+    LTE             reduce using rule 25 (node -> LPAREN node RPAREN .)
+    OR              reduce using rule 25 (node -> LPAREN node RPAREN .)
+    AND             reduce using rule 25 (node -> LPAREN node RPAREN .)
+    GOTO            reduce using rule 25 (node -> LPAREN node RPAREN .)
+    $end            reduce using rule 25 (node -> LPAREN node RPAREN .)
+    RPAREN          reduce using rule 25 (node -> LPAREN node RPAREN .)
+    STRING          reduce using rule 25 (node -> LPAREN node RPAREN .)
+    LPAREN          reduce using rule 25 (node -> LPAREN node RPAREN .)
+    NUMBER          reduce using rule 25 (node -> LPAREN node RPAREN .)
+    COLUMN_ID       reduce using rule 25 (node -> LPAREN node RPAREN .)
+    COMMA           reduce using rule 25 (node -> LPAREN node RPAREN .)
+
+
+state 47
+
+    (10) node -> STRING LPAREN node_list RPAREN .
+
+    PLUS            reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    MINUS           reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    TIMES           reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    DIVIDE          reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    EQUAL           reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    GT              reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    GTE             reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    LT              reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    LTE             reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    OR              reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    AND             reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    GOTO            reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    $end            reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    RPAREN          reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    STRING          reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    LPAREN          reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    NUMBER          reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    COLUMN_ID       reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+    COMMA           reduce using rule 10 (node -> STRING LPAREN node_list RPAREN .)
+
+
+state 48
+
+    (9) node_list -> node_list COMMA . node
+    (10) node -> . STRING LPAREN node_list RPAREN
+    (11) node -> . number
+    (12) node -> . string
+    (13) node -> . column
+    (14) node -> . node PLUS node
+    (15) node -> . node MINUS node
+    (16) node -> . node TIMES node
+    (17) node -> . node DIVIDE node
+    (18) node -> . node EQUAL node
+    (19) node -> . node GT node
+    (20) node -> . node GTE node
+    (21) node -> . node LT node
+    (22) node -> . node LTE node
+    (23) node -> . node OR node
+    (24) node -> . node AND node
+    (25) node -> . LPAREN node RPAREN
+    (27) number -> . NUMBER
+    (28) number -> . MINUS NUMBER
+    (26) string -> . STRING
+    (29) column -> . COLUMN_ID
+
+    STRING          shift and go to state 7
+    LPAREN          shift and go to state 8
+    NUMBER          shift and go to state 13
+    MINUS           shift and go to state 12
+    COLUMN_ID       shift and go to state 14
+
+    node                           shift and go to state 49
+    number                         shift and go to state 9
+    string                         shift and go to state 10
+    column                         shift and go to state 11
+
+state 49
+
+    (9) node_list -> node_list COMMA node .
+    (14) node -> node . PLUS node
+    (15) node -> node . MINUS node
+    (16) node -> node . TIMES node
+    (17) node -> node . DIVIDE node
+    (18) node -> node . EQUAL node
+    (19) node -> node . GT node
+    (20) node -> node . GTE node
+    (21) node -> node . LT node
+    (22) node -> node . LTE node
+    (23) node -> node . OR node
+    (24) node -> node . AND node
+
+    RPAREN          reduce using rule 9 (node_list -> node_list COMMA node .)
+    COMMA           reduce using rule 9 (node_list -> node_list COMMA node .)
+    PLUS            shift and go to state 17
+    MINUS           shift and go to state 18
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 20
+    EQUAL           shift and go to state 21
+    GT              shift and go to state 22
+    GTE             shift and go to state 23
+    LT              shift and go to state 24
+    LTE             shift and go to state 25
+    OR              shift and go to state 26
+    AND             shift and go to state 27
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for LPAREN in state 7 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 36 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 36 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 36 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 36 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 36 resolved as shift
+WARNING: shift/reduce conflict for GT in state 36 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 36 resolved as shift
+WARNING: shift/reduce conflict for LT in state 36 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 36 resolved as shift
+WARNING: shift/reduce conflict for OR in state 36 resolved as shift
+WARNING: shift/reduce conflict for AND in state 36 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 37 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 37 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 37 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 37 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 37 resolved as shift
+WARNING: shift/reduce conflict for GT in state 37 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 37 resolved as shift
+WARNING: shift/reduce conflict for LT in state 37 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 37 resolved as shift
+WARNING: shift/reduce conflict for OR in state 37 resolved as shift
+WARNING: shift/reduce conflict for AND in state 37 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 38 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 38 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 38 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 38 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 38 resolved as shift
+WARNING: shift/reduce conflict for GT in state 38 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 38 resolved as shift
+WARNING: shift/reduce conflict for LT in state 38 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 38 resolved as shift
+WARNING: shift/reduce conflict for OR in state 38 resolved as shift
+WARNING: shift/reduce conflict for AND in state 38 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 39 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 39 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 39 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 39 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 39 resolved as shift
+WARNING: shift/reduce conflict for GT in state 39 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 39 resolved as shift
+WARNING: shift/reduce conflict for LT in state 39 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 39 resolved as shift
+WARNING: shift/reduce conflict for OR in state 39 resolved as shift
+WARNING: shift/reduce conflict for AND in state 39 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 40 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 40 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 40 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 40 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 40 resolved as shift
+WARNING: shift/reduce conflict for GT in state 40 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 40 resolved as shift
+WARNING: shift/reduce conflict for LT in state 40 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 40 resolved as shift
+WARNING: shift/reduce conflict for OR in state 40 resolved as shift
+WARNING: shift/reduce conflict for AND in state 40 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 41 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 41 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 41 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 41 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 41 resolved as shift
+WARNING: shift/reduce conflict for GT in state 41 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 41 resolved as shift
+WARNING: shift/reduce conflict for LT in state 41 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 41 resolved as shift
+WARNING: shift/reduce conflict for OR in state 41 resolved as shift
+WARNING: shift/reduce conflict for AND in state 41 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 42 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 42 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 42 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 42 resolved as shift
+WARNING: shift/reduce conflict for EQUAL in state 42 resolved as shift
+WARNING: shift/reduce conflict for GT in state 42 resolved as shift
+WARNING: shift/reduce conflict for GTE in state 42 resolved as shift
+WARNING: shift/reduce conflict for LT in state 42 resolved as shift
+WARNING: shift/reduce conflict for LTE in state 42 resolved as shift
+WARNING: shift/reduce conflict for OR in state 42 resolved as shift
+WARNING: shift/reduce conflict for AND in state 42 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 43 resolved as shift
