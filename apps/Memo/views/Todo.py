@@ -3,13 +3,13 @@
 # @AUTH    : model
 
 import json
-from document_utils.consts import undefined
-from common.Decorator.render import render
-from common.Utils.log_utils import getLogger
+from tornado.web import url
+from web.web import BaseHandler
+from web.consts import undefined
+from web.result import SuccessData
+from web.decorator.render import render
 from common.Helpers.Helper_pagenate import Page
-from result import SuccessData
-from ...BaseConsts import *
-from ...BaseViews import BaseHandler
+from common.Utils.log_utils import getLogger
 from ..utils.Todo import Todo, todo_schema
 
 log = getLogger("views/todo")
@@ -87,3 +87,8 @@ class TodoHandler(BaseHandler):
 
     def set_default_headers(self):
         self._headers.add("version", "1")
+
+
+URL_MAPPING_LIST = [
+    url(r"/api/memo/todo/(?:([a-zA-Z0-9&%\.~-]+)/)?", TodoHandler),
+]

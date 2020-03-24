@@ -8,13 +8,11 @@ from document_utils.manager.manager_base import BaseManager
 from common.Helpers.Helper_productor import Productor
 import settings
 
-base_name = os.path.join(os.path.dirname(__file__), "manager")
-
 
 class ManagerProductor(Productor):
-    def __init__(self, base_module: object, start_dir: object, pattern: object = '*.py', top_level_dir: object = None, temp_module: object = None) -> object:
-        super().__init__(base_module, start_dir, pattern=pattern, top_level_dir=top_level_dir, temp_module=temp_module)
-        self.root_dir = settings.SITE_ROOT
+    def __init__(self, root_dir, start_dir, base_module, temp_module, pattern="*.py") -> object:
+        super().__init__(root_dir, start_dir, base_module, temp_module, pattern)
 
 
-manager_productor = ManagerProductor(BaseManager, base_name, "*.py")
+base_name = os.path.join(os.path.dirname(__file__), "manager")
+manager_productor = ManagerProductor(settings.SITE_ROOT, base_name, BaseManager, BaseManager, "*.py")

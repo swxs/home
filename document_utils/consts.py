@@ -6,4 +6,3 @@
 from collections import defaultdict
 
 NAME_DICT = defaultdict(dict)
-undefined = frozenset()

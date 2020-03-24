@@ -9,7 +9,7 @@ from functools import wraps
 from bson import ObjectId
 from tornado.util import ObjectDict
 from common.Utils.log_utils import getLogger
-from document_utils.consts import undefined
+from web.consts import undefined
 from document_utils.manager_productor import manager_productor
 from .fields import *
 from document_utils.memorizer.memorizer_cache import clear, upgrade, cache
