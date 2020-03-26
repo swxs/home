@@ -7,7 +7,7 @@ import asyncio
 from pymongo.errors import (DuplicateKeyError, )
 from pymongo import ASCENDING, DESCENDING
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
-from document_utils.consts import undefined
+from web.consts import undefined
 from document_utils.fields import DictField
 from document_utils.manager.manager_base import BaseManager, BaseManagerQuerySet
 from common.Metaclass.Singleton import Singleton
@@ -55,7 +55,7 @@ class ManagerQuerySet(BaseManagerQuerySet):
 
 
 class Manager(BaseManager, metaclass=Singleton):
-    __cname__ = "umongo_motor"
+    name = "umongo_motor"
 
     @classmethod
     async def _save(cls, model):

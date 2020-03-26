@@ -56,11 +56,11 @@ class BaseManagerQuerySet(object):
 
 
 class BaseManager(object):
-    __cname__ = "base"
+    name = "base"
 
     @classmethod
     def _get_model(cls, klass):
-        return NAME_DICT[cls.__cname__][klass.__name__]
+        return NAME_DICT[cls.name][klass.__name__]
 
     @classmethod
     def filter(cls, klass, **kwargs):

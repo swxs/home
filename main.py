@@ -22,9 +22,11 @@ if __name__ == "__main__":
         MAIN_SITE_PORT = settings.SITE_PORT
         
     tornado.locale.load_translations(settings.settings.get('translations'))
-    application = IBApplication().register_handlers(os.path.join(settings.SITE_ROOT))
+    application = IBApplication()
+    application.register_handlers(os.path.join(settings.SITE_ROOT))
     sockets = bind_sockets(MAIN_SITE_PORT)
     server = HTTPServer(application, xheaders=True)
     server.add_sockets(sockets)
     log.debug('Tornado server started on port %s.' % MAIN_SITE_PORT)
     tornado.ioloop.IOLoop.instance().start()
+    log.debug('Tornado server finished on port %s.' % MAIN_SITE_PORT)
