@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @File    : dir_path.py
+# @File    : path_utils.py
 # @AUTH    : swxs
 # @Time    : 2018/5/31 15:58
 

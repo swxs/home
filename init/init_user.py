@@ -1,14 +1,10 @@
 import sys
 import os
-
-if __name__ == '__main__':
-    sys.path.insert(0, os.path.abspath(os.curdir))
-
-import fire
 import yaml
 import settings
 from apps.consts.const import undefined
 from apps.utils.user import User
+
 
 def init_user():
     with open(settings.INIT_SETTINGS_FILE, "rb") as file:
@@ -23,6 +19,13 @@ def init_user():
         )
 
 
+def init_system():
+    pass
+
+
+def main():
+    init_system()
+
+
 if __name__ == "__main__":
-    fire.Fire(init_user)
-    print("----------user初始化完成----------")
+    main()

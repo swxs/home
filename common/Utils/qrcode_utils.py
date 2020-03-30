@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import io
 import qrcode
+import base64
 from pyzbar.pyzbar import decode as qrdecode
 from PIL import Image
-import io
-import base64
-
 from commons.pil_image_utils import base64_to_image
 
 

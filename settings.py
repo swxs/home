@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import os
-from common.Utils.dir_path import get_dir_path
+from common.Utils.path_utils import get_dir_path
 
 OS = 'linux'
 DEBUG = False
 XSRF = '__xsrf'
 DEFAULT_LOCAL = 'zh_CN'
-ACCESS_TOKEN_EXPIRE = 3600
-REFRESH_TOKEN_EXPIRE = 24 * 3600
+ACCESS_TOKEN_EXPIRE = 60 * 60 * 2
+REFRESH_TOKEN_EXPIRE = 60 * 60 * 24 * 7
 SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
-SECRET_KEY = 'd96f097c-4b1b-4867-3859-375830cd69c4'
+SECRET_KEY = '2f3c330a-7557-4705-9a61-8a4cc8d8698c'
 SALT = 'cf70538d-46a6-47f7-bc99-51c3e45126ea'
+
+JWT_SECRET_KEY = '7f8512a4-afe7-4941-a0c0-62e75dc8edd4'  # 密钥
+JWT_TIMEOUT = 2 * 60 * 60  # 超时时间，单位: s
+JWT_REFRESH_TIMEOUT = 7 * 24 * 60 * 60  # 超时时间，单位: s
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_PROTOCOL = 'http'

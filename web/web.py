@@ -17,7 +17,6 @@ from web.decorator.render import render
 from web.exceptions import ApiCommonException, CommmonExceptionInfo as ei
 from web.result import ExceptionData, ResultData
 from common.Helpers.Helper_validate import Validate, RegType
-from common.Utils.JWT import AuthCenter
 from common.Utils.pycket.session import SessionMixin
 from common.Utils.log_utils import getLogger
 

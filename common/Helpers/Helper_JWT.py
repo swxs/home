@@ -2,15 +2,16 @@
 # Author  : gorden
 # Time    : 2018/8/31 10:21
 
+import time
 from itsdangerous import TimedJSONWebSignatureSerializer as jwt
 from itsdangerous import SignatureExpired, BadSignature
-import time
+
 import settings
-from web.exceptions import ApiCommonException, CommmonExceptionInfo
 from common.Helpers.DBHelper_Redis import redis_helper
 from common.Utils import log_utils
+from web.exceptions import ApiCommonException, CommmonExceptionInfo
 
-log = log_utils.getLogger("TOKEN")
+log = log_utils.getLogger("Helper_JWT")
 
 
 class BlockTokenHelper(object):

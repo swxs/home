@@ -19,7 +19,7 @@ from zlib import crc32
 import requests
 import rsa
 import tempfile
-from common.Utils.BufferReader import BufferReader
+from common.Helpers.Helper_BufferReader import BufferReader
 
 try:
     requests.packages.urllib3.disable_warnings()

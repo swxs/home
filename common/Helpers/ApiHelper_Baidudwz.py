@@ -1,8 +1,7 @@
-from apps.consts import *
 import json
-from enum import IntEnum
 import requests
-from common.AsyncFunction.aiohttp import aio_post
+from enum import IntEnum
+from common.Helpers import AioHelper_http
 from common.Utils.log_utils import getLogger
 
 log = getLogger("Exception.UrlConvertFailedException")
@@ -50,7 +49,7 @@ LONG_TO_SHORT_URL = "http://dwz.cn/admin/query"
 async def aio_convert_short_url(url):
     data = {"url": url}
     body = json.dumps(data)
-    response = await aio_post(SHORT_TO_LONG_URL, body=body)
+    response = await AioHelper_http.aio_post(SHORT_TO_LONG_URL, body=body)
     result = json.loads(response.body)
     if result["Code"] != 0:
         raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"])
@@ -60,7 +59,7 @@ async def aio_convert_short_url(url):
 async def aio_query_origin_url(shorturl):
     data = {"shortUrl": shorturl}
     body = json.dumps(data)
-    response = await aio_post(LONG_TO_SHORT_URL, body=body)
+    response = await AioHelper_http.aio_post(LONG_TO_SHORT_URL, body=body)
     result = json.loads(response.body)
     if result["Code"] != 0:
         raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"])
