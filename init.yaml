@@ -1,5 +1,15 @@
+organization:
+- code: "home"
+  name: "基础服务"
+  phone: "13651881774"
+
 user:
-- username: "swxs"
+- org_id: 
+    ref: organization
+    key: code
+    value: "home"
+  username: "swxs"
   nickname: "swxs"
   password: "swxsjxrewq"
-  key: "b8862e668e5abbc99d8390347e7ac749"
+  salt: "b8862e668e5abbc99d8390347e7ac749"
+  phone: "13651881774"
