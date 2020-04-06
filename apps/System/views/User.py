@@ -51,7 +51,7 @@ class UserHandler(BaseHandler):
         if user_id:
             params = user_schema.load(self.arguments, partial=True)
             old_user = await User.select(id=user_id)
-            new_user = await user.copy(**params.data)
+            new_user = await old_user.copy(**params.data)
             return SuccessData(
                 id=new_user.id
             )

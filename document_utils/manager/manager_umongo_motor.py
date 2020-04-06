@@ -4,10 +4,11 @@
 # @Time    : 2018/4/30 14:55
 
 import asyncio
-from pymongo.errors import (DuplicateKeyError, )
 from pymongo import ASCENDING, DESCENDING
+from pymongo.errors import (DuplicateKeyError, )
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from web.consts import undefined
+from web.exceptions import ApiCommonException, CommmonExceptionInfo
 from document_utils.fields import DictField
 from document_utils.manager.manager_base import BaseManager, BaseManagerQuerySet
 from common.Metaclass.Singleton import Singleton
@@ -60,11 +61,11 @@ class Manager(BaseManager, metaclass=Singleton):
     @classmethod
     async def _save(cls, model):
         try:
-            await model.commit()
+            return await model.commit()
         except ValidationError as e:
-            raise ApiValidateException(model.__class__.__name__)
+            raise ApiCommonException(CommmonExceptionInfo.ValidateException, message=model.__class__.__name__)
         except (NotUniqueError, DuplicateKeyError) as e:
-            raise ApiExistException(model.__class__.__name__)
+            raise ApiCommonException(CommmonExceptionInfo.ExistedException, message=model.__class__.__name__)
         except Exception as e:
             raise e
 
@@ -87,7 +88,7 @@ class Manager(BaseManager, metaclass=Singleton):
         try:
             model = await cls._get_model(klass).find_one(kwargs)
         except DoesNotExist:
-            raise ApiNotExistException(f"{klass.__model_name__}")
+            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__class__.__name__)
         except Exception as e:
             raise e
         return klass.get_instance(model)

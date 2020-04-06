@@ -51,7 +51,7 @@ class OrganizationHandler(BaseHandler):
         if organization_id:
             params = organization_schema.load(self.arguments, partial=True)
             old_organization = await Organization.select(id=organization_id)
-            new_organization = await organization.copy(**params.data)
+            new_organization = await old_organization.copy(**params.data)
             return SuccessData(
                 id=new_organization.id
             )

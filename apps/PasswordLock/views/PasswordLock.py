@@ -51,7 +51,7 @@ class PasswordLockHandler(BaseHandler):
         if password_lock_id:
             params = password_lock_schema.load(self.arguments, partial=True)
             old_password_lock = await PasswordLock.select(id=password_lock_id)
-            new_password_lock = await password_lock.copy(**params.data)
+            new_password_lock = await old_password_lock.copy(**params.data)
             return SuccessData(
                 id=new_password_lock.id
             )
