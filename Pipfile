@@ -25,6 +25,8 @@ pyyaml = "*"
 umongo = "*"
 pyjwt = "*"
 pycryptodome = "*"
+sqlalchemy = "*"
+aiomysql = "*"
 
 [requires]
 python_version = "3.6"
