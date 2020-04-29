@@ -88,9 +88,11 @@ class Manager(BaseManager, metaclass=Singleton):
         try:
             model = await cls._get_model(klass).find_one(kwargs)
         except DoesNotExist:
-            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__class__.__name__)
+            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__name__)
         except Exception as e:
             raise e
+        if model is None:
+            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__name__)
         return klass.get_instance(model)
 
     @classmethod

@@ -140,7 +140,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             return 0
 
     @classmethod
-    @upgrade
+    # @upgrade
     async def create(cls, **kwargs):
         for key in cls.__fields__:
             if not getattr(cls.__fields__[key], "create"):
@@ -150,7 +150,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return await cls._manager.create(cls, **kwargs)
 
     @classmethod
-    @cache
+    # @cache
     async def select(cls, **kwargs):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{getattr(cls, '__model_name__')}>: kwargs - {str(kwargs)}")
         if "id" in kwargs:
@@ -158,7 +158,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             kwargs.pop("id")
         return await cls._manager.select(cls, **kwargs)
 
-    @upgrade
+    # @upgrade
     async def update(self, **kwargs):
         for key in self.__fields__:
             if self.__fields__[key].__getattribute__("pre_update"):
@@ -170,7 +170,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return await self.__class__._manager.update(self.__class__, self, **kwargs)
 
     @classmethod
-    @upgrade
+    # @upgrade
     async def find_and_update(cls, id, **kwargs):
         instance = await cls.select(id=id)
         for key in instance.__fields__:
@@ -194,13 +194,13 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     params[attr] = value
         return await self.__class__._manager.create(self.__class__, **params)
 
-    @clear
+    # @clear
     async def delete(self):
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: kwargs - {str(dict(id=self.id))}")
         return await self.__class__._manager.delete(self.__class__, self)
 
     @classmethod
-    @clear
+    # @clear
     async def find_and_delete(cls, id):
         instance = await cls.select(id=id)
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(instance, '__model_name__')}>: kwargs - {str(dict(id=id))}")
