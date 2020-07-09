@@ -51,7 +51,7 @@ class WordHandler(BaseHandler):
         if word_id:
             params = word_schema.load(self.arguments, partial=True)
             old_word = await Word.select(id=word_id)
-            new_word = await old_word.copy(**params.data)
+            new_word = await word.copy(**params.data)
             return SuccessData(
                 id=new_word.id
             )

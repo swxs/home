@@ -4,6 +4,14 @@
 # @Time    : 2018/4/30 14:55
 
 import asyncio
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Text, MetaData, Table
+from sqlalchemy.schema import CreateTable
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_aio import ASYNCIO_STRATEGY, TRIO_STRATEGY
+from sqlalchemy_aio.asyncio import AsyncioEngine
+
+import settings
 from web.consts import undefined
 from web.exceptions import ApiCommonException, CommmonExceptionInfo
 from document_utils.fields import DictField
@@ -13,6 +21,7 @@ from common.Utils.log_utils import getLogger
 
 log = getLogger("manager.manager_sqlalchemy")
 
+Base = declarative_base()
 
 class ManagerQuerySet(BaseManagerQuerySet):
     def __iter__(self):
@@ -55,10 +64,14 @@ class ManagerQuerySet(BaseManagerQuerySet):
 class Manager(BaseManager, metaclass=Singleton):
     name = "sqlalchemy"
 
+    Session = sessionmaker(bind=settings.engine)
+
     @classmethod
     async def _save(cls, model):
         try:
-            return await model.execute()
+            session = cls.Session()
+            session.add(model)
+            return await session.commit()
         except ValidationError as e:
             raise ApiCommonException(CommmonExceptionInfo.ValidateException, message=model.__class__.__name__)
         except (NotUniqueError, DuplicateKeyError) as e:

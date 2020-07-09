@@ -51,7 +51,7 @@ class TodoHandler(BaseHandler):
         if todo_id:
             params = todo_schema.load(self.arguments, partial=True)
             old_todo = await Todo.select(id=todo_id)
-            new_todo = await old_todo.copy(**params.data)
+            new_todo = await todo.copy(**params.data)
             return SuccessData(
                 id=new_todo.id
             )
