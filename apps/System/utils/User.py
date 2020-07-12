@@ -2,8 +2,8 @@
 # @File    : User.py
 # @AUTH    : model_creater
 
-from ..models.User import User as UserModel
-from ..dao.User import User as BaseUser
+from ..models import User as UserModel
+from ..dao import User as BaseUser
 from marshmallow import Schema, fields
 
 UserSchema = UserModel.schema.as_marshmallow_schema()

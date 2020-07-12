@@ -2,8 +2,8 @@
 # @File    : Todo.py
 # @AUTH    : model_creater
 
-from ..models.Todo import Todo as TodoModel
-from ..dao.Todo import Todo as BaseTodo
+from ..models import Todo as TodoModel
+from ..dao import Todo as BaseTodo
 from marshmallow import Schema, fields
 
 TodoSchema = TodoModel.schema.as_marshmallow_schema()

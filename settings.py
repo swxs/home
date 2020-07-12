@@ -113,8 +113,16 @@ def connect_db_mysql():
     engine = create_engine("mysql://root:swxs@localhost/runoob", strategy=ASYNCIO_STRATEGY, encoding='latin1', echo=False)
     return engine
 
-instance = connect_db()
-engine = connect_db_mysql()
+
+try:
+    engine = connect_db_mysql()
+except:
+    print("mysql db connect failed!")
+
+try:
+    instance = connect_db()
+except:
+    print("mongo db connect failed!")
 
 settings = dict(
     cookie_secret=SECRET_KEY,

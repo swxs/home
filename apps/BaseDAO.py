@@ -4,7 +4,7 @@
 # @Time    : 2019/4/3 10:26
 
 import datetime
-import document_utils as model
+import dao as model
 
 
 class BaseDAO(model.BaseDocument):

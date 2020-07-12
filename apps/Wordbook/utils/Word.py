@@ -2,8 +2,8 @@
 # @File    : Word.py
 # @AUTH    : model_creater
 
-from ..models.Word import Word as WordModel
-from ..dao.Word import Word as BaseWord
+from ..models import Word as WordModel
+from ..dao import Word as BaseWord
 from marshmallow import Schema, fields
 
 WordSchema = WordModel.schema.as_marshmallow_schema()

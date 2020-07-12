@@ -2,10 +2,10 @@
 # @File    : PasswordLock.py
 # @AUTH    : model_creater
 
-from ..models.PasswordLock import PasswordLock as PasswordLockModel
-from ..dao.PasswordLock import PasswordLock as BasePasswordLock
-from common.Helpers.Helper_encryption import Encryption
+from ..models import PasswordLock as PasswordLockModel
+from ..dao import PasswordLock as BasePasswordLock
 from marshmallow import Schema, fields
+from common.Helpers.Helper_encryption import Encryption
 
 PasswordLockSchema = PasswordLockModel.schema.as_marshmallow_schema()
 
@@ -34,5 +34,5 @@ async def search_with_website(PasswordLock, **kwargs):
 
 
 @PasswordLock.add_search("name")
-async def search_with_website(PasswordLock, **kwargs):
+async def search_with_name(PasswordLock, **kwargs):
     return PasswordLock.filter(name__contains=kwargs.get("name"))
