@@ -8,9 +8,12 @@ import sys
 from fnmatch import fnmatch
 from importlib import import_module
 
+class NoModule(Exception):
+    pass
+
 
 class Productor(object):
-    def __init__(self, root_dir, start_dir, base_module, temp_module, pattern='*.py'):
+    def __init__(self, root_dir: str, start_dir: str, base_module: object, temp_module: object, pattern: str = '*.py'):
         """
         简介
         ----------
