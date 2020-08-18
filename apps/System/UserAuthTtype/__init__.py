@@ -6,14 +6,15 @@ from .UserAuthTtypeBase import BaseTtypeUserAuth
 
 class UserAuthTtypeProductor(Productor):
     def __init__(
-            self,
-            root_dir: object,
-            start_dir: object,
-            base_module: object = None,
-            temp_module: object = None,
-            pattern: object = '*.py'
+        self,
+        root_dir: object,
+        start_dir: object,
+        base_module: object = None,
+        temp_module: object = None,
+        pattern: object = '*.py'
     ):
         super().__init__(root_dir, start_dir, base_module=base_module, temp_module=temp_module, pattern=pattern)
+
 
 print(os.path.abspath(os.path.dirname(__file__)))
 base_path = os.path.join(settings.SITE_ROOT)

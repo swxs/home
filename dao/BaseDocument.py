@@ -3,16 +3,16 @@
 # @AUTH    : swxs
 # @Time    : 2018/5/7 22:40
 
-import datetime
 import hashlib
-from functools import wraps
+import datetime
 from bson import ObjectId
+from functools import wraps
 from tornado.util import ObjectDict
 from common.Utils.log_utils import getLogger
 from web.consts import undefined
+from .fields import BaseField, DateTimeField, DictField
 from .manager_productor import manager_productor
 from .memorizer.memorizer_cache import clear, upgrade, cache
-from .fields import *
 
 log = getLogger("BaseDocument")
 
@@ -125,8 +125,6 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         try:
             obj = await cls._manager.select(cls, **kwargs)
             return True
-        except ApiNotExistException:
-            return False
         except Exception as e:
             log.error(e)
             return False
@@ -181,7 +179,6 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
                     kwargs[key] = instance.__fields__[key].pre_update
         log.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(instance, '__model_name__')}>: kwargs - {str(kwargs)}")
         return await cls._manager.update(cls, instance, **kwargs)
-
 
     async def copy(self, **kwargs):
         params = self.to_dict(dict_factory=dict)

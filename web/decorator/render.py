@@ -8,7 +8,7 @@ import functools
 import urllib.parse
 import collections
 from web.result import SuccessData, ExceptionData, ResultData
-from web.exceptions import ApiException, ApiUnknowException
+from web.exceptions import ApiException, ApiUnknowException, ApiCommonException
 from common.Utils.log_utils import getLogger
 
 log = getLogger("views.render")

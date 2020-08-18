@@ -5,6 +5,7 @@ name = "pypi"
 
 [dev-packages]
 autopep8 = "*"
+flake8 = "*"
 
 [packages]
 tornado = "*"
