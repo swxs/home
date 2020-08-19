@@ -2,81 +2,80 @@
 # Author  : gorden
 # Time    : 2018/8/31 10:21
 
+import jwt
+import base64
 import time
-from itsdangerous import TimedJSONWebSignatureSerializer as jwt
-from itsdangerous import SignatureExpired, BadSignature
+import datetime
+from binascii import unhexlify
+from Crypto.Hash import SHA256
+from Crypto.Cipher import PKCS1_v1_5
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5 as SignPKCS1_v1_5
 
-import settings
-from common.Helpers.DBHelper_Redis import redis_helper
-from common.Utils import log_utils
-from web.exceptions import ApiCommonException, CommmonExceptionInfo
+JWT_SECRET_KEY = '6ec98328-133c-4c2f-933f-f5eadb49b9f3'  # 密钥
+JWT_TIMEOUT = 2 * 60 * 60  # 超时时间，单位: s
+JWT_ALGORITHM = "HS256"
+JWT_TIMEOUT_LEEWAY_TIME = 60  # Token超时时间检验误差阀值，单位: s
+JWT_ENCODER = None
+JWT_ISSUER = 'AuthTokener'  # 发行者信息
 
-log = log_utils.getLogger("Helper_JWT")
-
-
-class BlockTokenHelper(object):
-    block_list = []
-
-    @classmethod
-    def append_block_token(cls, token):
-        redis_helper.set(f"token_{token}", True, settings.ACCESS_TOKEN_EXPIRE)
-
-    @classmethod
-    def is_blocked(cls, token):
-        return redis_helper.get(f"token_{token}") != None
+InvalidSignatureError = jwt.InvalidSignatureError
+ExpiredSignatureError = jwt.ExpiredSignatureError
+ImmatureSignatureError = jwt.ImmatureSignatureError
 
 
-class AuthCenter(object):
-    @classmethod
-    def _encode(self, **kwargs):
-        secret_key = kwargs.get("secret_key")
-        salt = kwargs.get("salt")
-        expire = kwargs.get("expire", None)
-        gen = jwt(secret_key=secret_key, salt=salt, expires_in=expire)
+class AuthTokner(object):
+    def __init__(
+        self,
+        key=JWT_SECRET_KEY,
+        algorithm=JWT_ALGORITHM,
+        timeout=JWT_TIMEOUT,
+        leeway_time=JWT_TIMEOUT_LEEWAY_TIME,
+        json_encoder=JWT_ENCODER,
+        issue=JWT_ISSUER
+    ) -> None:
+        self.key = key
+        self.algorithm = algorithm
+        self.timeout = timeout
+        self.leeway_time = leeway_time
+        self.json_encoder = json_encoder
+        self.issue = issue
 
-        data = kwargs.get("playload", {})
-        data.update({"iat": time.time()})
-        return gen.dumps(data)
+    def encode(self, **kwargs):
+        """
+        生成json web token
 
-    @classmethod
-    def _decode(self, token, secret_key, salt):
-        gen = jwt(secret_key=secret_key, salt=salt)
-        try:
-            return gen.loads(token)
-        except SignatureExpired:
-            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenTimeoutException)
-        except BadSignature:
-            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenIllegalException)
-        except Exception as e:
-            log.error(f"unknow error: {e}")
-            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenIllegalException)
+        :param headers: token头信息
+        :param json_encoder: json转化器
+        :param kwargs:
+        :return: jwt，字节型
+        """
+        utc_now = utc_now = datetime.datetime.utcnow()
+        headers = {
 
-    @classmethod
-    def gen_access_token(cls, **kwargs):
-        kwargs.update(dict(expire=settings.ACCESS_TOKEN_EXPIRE))
-        # token = kwargs.pop("token", None)
-        # if token:
-        #     BlockTokenHelper.append_block_token(token)
-        return cls._encode(**kwargs).decode()
-
-    @classmethod
-    def gen_refresh_token(cls, **kwargs):
-        kwargs.update({"expire": settings.REFRESH_TOKEN_EXPIRE})
-        return cls._encode(**kwargs).decode()
-
-    @classmethod
-    def identify(cls, token, secret_key=settings.SECRET_KEY, salt=settings.SALT):
-        if BlockTokenHelper.is_blocked(token):
-            raise ApiTokenIllegalException(CommmonExceptionInfo.TokenTimeoutException)
-        return cls._decode(token, secret_key, salt)
-
-    @classmethod
-    def authenticate(cls, user):
-        data = {
-            "salt": settings.SALT,
-            "secret_key": settings.SECRET_KEY,
-            "playload": {"id": user.id},
         }
-        access_token = cls.gen_access_token(**data)
-        refresh_token = cls.gen_refresh_token(**data)
-        return access_token, refresh_token
+        payload = {
+            'exp': utc_now + datetime.timedelta(seconds=self.timeout),
+            'iat': utc_now,
+            'nbf': utc_now,
+            'iss': self.issue,
+        }
+        payload.update(kwargs)
+
+        return jwt.encode(
+            payload,
+            key=self.key,
+            algorithm=self.algorithm,
+            headers=headers,
+            json_encoder=self.json_encoder,
+        ).decode('utf-8')
+
+    def decode(self, token):
+        header = jwt.get_unverified_header(token if isinstance(token, bytes) else token.encode('utf-8'))
+        payload = jwt.decode(
+            token,
+            key=self.key,
+            verify=self.verify,
+            leeway=self.leeway_time
+        )
+        return header, payload

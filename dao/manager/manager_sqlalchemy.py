@@ -4,6 +4,7 @@
 # @Time    : 2018/4/30 14:55
 
 import asyncio
+from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Text, MetaData, Table
 from sqlalchemy.schema import CreateTable
@@ -13,7 +14,7 @@ from sqlalchemy_aio.asyncio import AsyncioEngine
 
 import settings
 from web.consts import undefined
-from web.exceptions import ApiCommonException, CommmonExceptionInfo
+from web.exceptions import ApiException, Info
 from ..fields import DictField
 from .manager_base import BaseManager, BaseManagerQuerySet
 from common.Metaclass.Singleton import Singleton
@@ -22,6 +23,7 @@ from common.Utils.log_utils import getLogger
 log = getLogger("manager.manager_sqlalchemy")
 
 Base = declarative_base()
+NAME_DICT = defaultdict(dict)
 
 class ManagerQuerySet(BaseManagerQuerySet):
     def __iter__(self):
@@ -76,9 +78,9 @@ class Manager(BaseManager, metaclass=Singleton):
             session.add(model)
             return await session.commit()
         except ValidationError as e:
-            raise ApiCommonException(CommmonExceptionInfo.ValidateException, message=model.__class__.__name__)
+            raise ApiException(Info.ParamsValidate, message=model.__class__.__name__)
         except (NotUniqueError, DuplicateKeyError) as e:
-            raise ApiCommonException(CommmonExceptionInfo.ExistedException, message=model.__class__.__name__)
+            raise ApiException(Info.Existed, message=model.__class__.__name__)
         except Exception as e:
             raise e
 
@@ -101,7 +103,7 @@ class Manager(BaseManager, metaclass=Singleton):
         try:
             model = await conn.execute(cls._get_model(klass).select(kwargs))
         except DoesNotExist:
-            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__class__.__name__)
+            raise ApiException(Info.NotExist, message=klass.__class__.__name__)
         except Exception as e:
             raise e
         return klass.get_instance(model)

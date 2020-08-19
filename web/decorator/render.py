@@ -8,7 +8,7 @@ import functools
 import urllib.parse
 import collections
 from web.result import SuccessData, ExceptionData, ResultData
-from web.exceptions import ApiException, ApiUnknowException, ApiCommonException
+from web.exceptions import ApiException, ApiUnknowException, Info
 from common.Utils.log_utils import getLogger
 
 log = getLogger("views.render")
@@ -22,11 +22,11 @@ def render(func):
             if isinstance(result_data, collections.Awaitable):
                 result_data = await result_data
         except ApiException as ae:
-            log.exception(ae)
+            log.exception(self.request.body)
             result_data = ExceptionData(ae)
         except Exception as e:
-            ae = ApiUnknowException(e)
-            log.exception(ae)
+            ae = ApiUnknowException(e, Info.Base)
+            log.exception(self.request.body)
             result_data = ExceptionData(ae)
         finally:
             return_type = self.request.headers.get("Content-Type", "application/json")
@@ -70,12 +70,13 @@ def render_file(func):
                         file_name = part
                         break
                 data = result_data
-        except ApiException as e:
+        except ApiException as ae:
             log.exception(self.request.body)
-            errors = ExceptionData(e).to_json()
+            errors = ExceptionData(ae).to_json()
         except (Exception, NotImplementedError) as e:
+            ae = ApiUnknowException(e, Info.Base)
             log.exception(self.request.body)
-            errors = ExceptionData(ApiCommonException()).to_json()
+            errors = ExceptionData(ae).to_json()
         finally:
             if errors is not None:
                 self.set_header("Content-Type", "application/json; charset=UTF-8")
@@ -102,8 +103,9 @@ def render_thrift(result_thrift):
                     result_data = await result_data
             except ApiException as ae:
                 result_data = ExceptionData(ae)
-            except Exception:
-                result_data = ExceptionData(ApiCommonException())
+            except Exception as e:
+                ae = ApiUnknowException(e, Info.Base)
+                result_data = ExceptionData(ae)
             return result_data
 
         return wrapper

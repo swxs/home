@@ -9,7 +9,7 @@ from pymongo import ASCENDING, DESCENDING
 from pymongo.errors import (DuplicateKeyError, )
 from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
 from web.consts import undefined
-from web.exceptions import ApiCommonException, CommmonExceptionInfo
+from web.exceptions import ApiException, Info
 from ..fields import DictField
 from .manager_base import BaseManager, BaseManagerQuerySet
 from common.Metaclass.Singleton import Singleton
@@ -69,9 +69,9 @@ class Manager(BaseManager, metaclass=Singleton):
         try:
             return await model.commit()
         except ValidationError as e:
-            raise ApiCommonException(CommmonExceptionInfo.ValidateException, message=model.__class__.__name__)
+            raise ApiException(Info.ParamsValidate, message=model.__class__.__name__)
         except (NotUniqueError, DuplicateKeyError) as e:
-            raise ApiCommonException(CommmonExceptionInfo.ExistedException, message=model.__class__.__name__)
+            raise ApiException(Info.Existed, message=model.__class__.__name__)
         except Exception as e:
             raise e
 
@@ -94,11 +94,11 @@ class Manager(BaseManager, metaclass=Singleton):
         try:
             model = await cls._get_model(klass).find_one(kwargs)
         except DoesNotExist:
-            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__name__)
+            raise ApiException(Info.NotExist, message=klass.__name__)
         except Exception as e:
             raise e
         if model is None:
-            raise ApiCommonException(CommmonExceptionInfo.NotExistException, message=klass.__name__)
+            raise ApiException(Info.NotExist, message=klass.__name__)
         return klass.get_instance(model)
 
     @classmethod

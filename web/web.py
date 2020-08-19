@@ -2,6 +2,7 @@
 
 import json
 import os
+from re import template
 import uuid
 import binascii
 import datetime
@@ -13,17 +14,31 @@ from urllib.parse import quote
 from importlib import import_module
 from tornado import locale, concurrent
 from tornado.web import url, escape, Application
+
+import settings
 from web.decorator.render import render
-from web.exceptions import ApiCommonException, CommmonExceptionInfo as ei
+from web.exceptions import ApiException, ApiUnknowException, Info
 from web.result import ExceptionData, ResultData
+from common.Helpers.Helper_JWT import AuthTokner, InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
 from common.Helpers.Helper_validate import Validate, RegType
 from common.Utils.pycket.session import SessionMixin
 from common.Utils.log_utils import getLogger
 
 log = getLogger("web")
 
+tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_TIMEOUT)
+refresh_tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_REFRESH_TIMEOUT)
 
-class BaseHandler(tornado.web.RequestHandler, SessionMixin):
+
+class BaseHandler(tornado.web.RequestHandler):
+    """
+    简介
+    ----------
+    句柄基类
+    记录每个接口的调用信息
+    提供一些获取参数的方法
+    """
+
     def prepare(self):
         log.info(f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start')
 
@@ -33,9 +48,13 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def _is_normal_argumnet(self):
         if not hasattr(self, "__normal_argument"):
             self.__normal_argument = (
-                self.request.method.upper() in ("GET", "DELETE")
-                or Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
-                or Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE)
+                (
+                    self.request.method.upper() in ("GET", "DELETE")
+                ) or (
+                    Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
+                ) or (
+                    Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE)
+                )
             )
         return self.__normal_argument
 
@@ -127,9 +146,9 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
 
     def check_xsrf_cookie(self):
         token = self.get_cookie(self.config.XSRF, None) or \
-                self.get_argument(self.config.XSRF, None) or \
-                self.request.headers.get("X-Xsrftoken") or \
-                self.request.headers.get("X-Csrftoken")
+            self.get_argument(self.config.XSRF, None) or \
+            self.request.headers.get("X-Xsrftoken") or \
+            self.request.headers.get("X-Csrftoken")
 
         if not token:
             msg = "'%s' argument missing from POST" % self.config.XSRF
@@ -145,30 +164,80 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
         return t.format(xsrf_key, xsrf_val)
 
 
+class BaseAuthedHanlder(BaseHandler):
+    """
+    简介
+    ----------
+    需要校验权限的句柄类
+    提供一些从状态信息中获取数据的方法
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.__token_header = {}
+        self.__token_payload = {}
+        super(BaseHandler, self).__init__(*args, **kwargs)
+        self.check_jwt_token()
+
+    def __get_request_token(self):
+        headers = self.request.headers
+        if headers:
+            authorization: str = headers.get('Authorization')
+            if not authorization:
+                raise ApiException(Info.TokenLost, template='No "Authorization" in request headers.')
+            if not authorization.lower().startswith('bearer'):
+                raise ApiException(Info.TokenIllegal, template='"Bearer" not in "Authorization".')
+            return authorization[authorization.rfind(' '):].strip()
+        return None
+
+    def check_jwt_token(self):
+        self.request_token = self.__get_request_token()  # 形如：Authorization: Bearer <token>
+        if not self.request_token:
+            raise ApiException(Info.TokenLost, template='No token')
+
+        try:
+            header, payload = tokener.decode(self.request_token)
+            if header:
+                self.__token_header.update(header)
+            if payload:
+                self.__token_payload.update(payload)
+        except InvalidSignatureError:
+            raise ApiException(Info.TokenIllegal, template='Invalid Token.')
+        except ExpiredSignatureError:
+            raise ApiException(Info.TokenTimeout, template='Token expire date.')
+        except ImmatureSignatureError:
+            raise ApiException(Info.TokenIllegal, template='Immature signature.')
+        except Exception as e:
+            raise ApiUnknowException(e, Info.Base)
+
+    @property
+    def token(self):
+        return self.__token_payload
+
+
 class PageNotFoundHandler(BaseHandler):
     @render
     def head(self):
-        raise ApiCommonException(ei.PageNotFoundException)
+        raise ApiException(Info.PageNotFound)
 
     @render
     def get(self):
-        raise ApiCommonException(ei.PageNotFoundException)
+        raise ApiException(Info.PageNotFound)
 
     @render
     def post(self):
-        raise ApiCommonException(ei.PageNotFoundException)
+        raise ApiException(Info.PageNotFound)
 
     @render
     def put(self):
-        raise ApiCommonException(ei.PageNotFoundException)
+        raise ApiException(Info.PageNotFound)
 
     @render
     def patch(self):
-        raise ApiCommonException(ei.PageNotFoundException)
+        raise ApiException(Info.PageNotFound)
 
     @render
     def delete(self):
-        raise ApiCommonException(ei.PageNotFoundException)
+        raise ApiException(Info.PageNotFound)
 
 
 class IBApplication(Application):
@@ -188,7 +257,7 @@ class IBApplication(Application):
         for handlers in base_handlers:
             self.add_handlers('.*$', handlers)
         self.add_handlers(".*$", [url(r".*", PageNotFoundHandler)])
-        
+
     @staticmethod
     def _path_2_module(path='', root=''):
         if path:
