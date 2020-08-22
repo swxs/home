@@ -45,9 +45,21 @@ class BaseHandler(tornado.web.RequestHandler):
     def on_finish(self):
         log.info(f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished')
 
+    @render
+    async def _unimplemented_method(self, *args: str, **kwargs: str) -> None:
+        raise ApiException(Info.PageNotFound)
+
+    head = _unimplemented_method
+    get = _unimplemented_method
+    post = _unimplemented_method
+    delete = _unimplemented_method
+    patch = _unimplemented_method
+    put = _unimplemented_method
+    options = _unimplemented_method
+
     def _is_normal_argumnet(self):
-        if not hasattr(self, "__normal_argument"):
-            self.__normal_argument = (
+        if not hasattr(self, "_normal_argument"):
+            self._normal_argument = (
                 (
                     self.request.method.upper() in ("GET", "DELETE")
                 ) or (
@@ -56,13 +68,13 @@ class BaseHandler(tornado.web.RequestHandler):
                     Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE)
                 )
             )
-        return self.__normal_argument
+        return self._normal_argument
 
     @property
     def arguments(self):
-        if not hasattr(self, "__arguments"):
-            self.__arguments = json.loads(self.request.body)
-        return self.__arguments
+        if not hasattr(self, "_arguments"):
+            self._arguments = json.loads(self.request.body)
+        return self._arguments
 
     def get_argument(self, argument, default=None, strip=True):
         if self._is_normal_argumnet():
@@ -121,7 +133,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.write(data)
 
     def write_error(self, status_code, **kwargs):
-        if self.config.DEBUG:
+        if self.settings.DEBUG:
             self.set_header('Content-Type', 'text/plain')
             self.finish('\n'.join(traceback.format_exception(*kwargs.get("exc_info"))))
         else:
@@ -136,29 +148,29 @@ class BaseHandler(tornado.web.RequestHandler):
     @property
     def xsrf_token(self):
         if not hasattr(self, "_xsrf_token"):
-            token = self.get_cookie(self.config.XSRF)
+            token = self.get_cookie(self.settings.XSRF)
             if not token:
                 token = binascii.b2a_hex(uuid.uuid4().bytes)
                 exp = 30 if self.current_user else None
-                self.set_cookie(self.config.XSRF, token, expires_days=exp)
+                self.set_cookie(self.settings.XSRF, token, expires_days=exp)
             self._xsrf_token = token
         return self._xsrf_token
 
     def check_xsrf_cookie(self):
-        token = self.get_cookie(self.config.XSRF, None) or \
-            self.get_argument(self.config.XSRF, None) or \
+        token = self.get_cookie(self.settings.XSRF, None) or \
+            self.get_argument(self.settings.XSRF, None) or \
             self.request.headers.get("X-Xsrftoken") or \
             self.request.headers.get("X-Csrftoken")
 
         if not token:
-            msg = "'%s' argument missing from POST" % self.config.XSRF
+            msg = "'%s' argument missing from POST" % self.settings.XSRF
             raise tornado.web.HTTPError(403, msg)
         if self.xsrf_token != token:
             msg = "XSRF cookie does not match POST argument"
             # raise tornado.web.HTTPError(403, msg)
 
     def xsrf_form_html(self):
-        xsrf_key = self.config.XSRF
+        xsrf_key = self.settings.XSRF
         xsrf_val = escape.xhtml_escape(self.xsrf_token)
         t = '<input type="hidden" id="{0}" name="{0}" value="{1}"/>'
         return t.format(xsrf_key, xsrf_val)
@@ -175,8 +187,12 @@ class BaseAuthedHanlder(BaseHandler):
     def __init__(self, *args, **kwargs):
         self.__token_header = {}
         self.__token_payload = {}
-        super(BaseHandler, self).__init__(*args, **kwargs)
-        self.check_jwt_token()
+        super(BaseAuthedHanlder, self).__init__(*args, **kwargs)
+
+    async def prepare(self):
+        super(BaseAuthedHanlder, self).prepare()
+        await self.check_jwt_token()
+        
 
     def __get_request_token(self):
         headers = self.request.headers
@@ -189,7 +205,8 @@ class BaseAuthedHanlder(BaseHandler):
             return authorization[authorization.rfind(' '):].strip()
         return None
 
-    def check_jwt_token(self):
+    @render
+    async def check_jwt_token(self):
         self.request_token = self.__get_request_token()  # 形如：Authorization: Bearer <token>
         if not self.request_token:
             raise ApiException(Info.TokenLost, template='No token')
@@ -210,7 +227,7 @@ class BaseAuthedHanlder(BaseHandler):
             raise ApiUnknowException(e, Info.Base)
 
     @property
-    def token(self):
+    def tokens(self):
         return self.__token_payload
 
 

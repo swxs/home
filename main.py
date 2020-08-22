@@ -22,7 +22,7 @@ if __name__ == "__main__":
         MAIN_SITE_PORT = settings.SITE_PORT
         
     tornado.locale.load_translations(settings.settings.get('translations'))
-    application = IBApplication()
+    application = IBApplication(**settings.settings)
     application.register_handlers(os.path.join(settings.SITE_ROOT))
     sockets = bind_sockets(MAIN_SITE_PORT)
     server = HTTPServer(application, xheaders=True)

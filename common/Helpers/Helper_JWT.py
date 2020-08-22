@@ -15,6 +15,7 @@ from Crypto.Signature import PKCS1_v1_5 as SignPKCS1_v1_5
 JWT_SECRET_KEY = '6ec98328-133c-4c2f-933f-f5eadb49b9f3'  # 密钥
 JWT_TIMEOUT = 2 * 60 * 60  # 超时时间，单位: s
 JWT_ALGORITHM = "HS256"
+JWT_VERIFY = True
 JWT_TIMEOUT_LEEWAY_TIME = 60  # Token超时时间检验误差阀值，单位: s
 JWT_ENCODER = None
 JWT_ISSUER = 'AuthTokener'  # 发行者信息
@@ -29,6 +30,7 @@ class AuthTokner(object):
         self,
         key=JWT_SECRET_KEY,
         algorithm=JWT_ALGORITHM,
+        verify=JWT_VERIFY,
         timeout=JWT_TIMEOUT,
         leeway_time=JWT_TIMEOUT_LEEWAY_TIME,
         json_encoder=JWT_ENCODER,
@@ -36,6 +38,7 @@ class AuthTokner(object):
     ) -> None:
         self.key = key
         self.algorithm = algorithm
+        self.verify = verify
         self.timeout = timeout
         self.leeway_time = leeway_time
         self.json_encoder = json_encoder
@@ -67,7 +70,6 @@ class AuthTokner(object):
             key=self.key,
             algorithm=self.algorithm,
             headers=headers,
-            json_encoder=self.json_encoder,
         ).decode('utf-8')
 
     def decode(self, token):
@@ -78,4 +80,8 @@ class AuthTokner(object):
             verify=self.verify,
             leeway=self.leeway_time
         )
+        del payload['exp']
+        del payload['nbf']
+        del payload['iat']
+        del payload['iss']
         return header, payload

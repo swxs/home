@@ -29,10 +29,13 @@ def render(func):
             log.exception(self.request.body)
             result_data = ExceptionData(ae)
         finally:
-            return_type = self.request.headers.get("Content-Type", "application/json")
-            if return_type.startswith("application/json"):
-                self.write_json(result_data.to_json(), status=200)
-            self.finish()
+            if isinstance(result_data, ResultData):
+                return_type = self.request.headers.get("Content-Type", "application/json")
+                if return_type.startswith("application/json"):
+                    self.write_json(result_data.to_json(), status=200)
+                self.finish()
+            else:
+                return result_data
 
     return wrapper
 
