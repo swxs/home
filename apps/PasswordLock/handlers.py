@@ -45,7 +45,6 @@ class PasswordLockHandler(BaseHandler):
                 info=pager.info
             )
 
-
     @render
     async def post(self, password_lock_id=None):
         if password_lock_id:

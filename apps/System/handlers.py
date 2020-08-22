@@ -42,7 +42,7 @@ class UserHandler(BaseHandler):
             data = [await  user.to_front() async for user in user_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
             return SuccessData(
-                data=pager.items,
+                data=pager.items, 
                 info=pager.info
             )
 
@@ -87,7 +87,7 @@ class UserHandler(BaseHandler):
 
     def set_default_headers(self):
         self._headers.add("version", "1")
-
+        
 
 class UserAuthHandler(BaseHandler):
     @render
@@ -115,7 +115,7 @@ class UserAuthHandler(BaseHandler):
             data = [await  user_auth.to_front() async for user_auth in user_auth_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
             return SuccessData(
-                data=pager.items,
+                data=pager.items, 
                 info=pager.info
             )
 
@@ -160,7 +160,7 @@ class UserAuthHandler(BaseHandler):
 
     def set_default_headers(self):
         self._headers.add("version", "1")
-
+        
 
 URL_MAPPING_LIST = [
     url(r"/api/system/user/(?:([a-zA-Z0-9&%\.~-]+)/)?", UserHandler),

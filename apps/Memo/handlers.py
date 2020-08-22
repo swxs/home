@@ -45,7 +45,6 @@ class TodoHandler(BaseHandler):
                 info=pager.info
             )
 
-
     @render
     async def post(self, todo_id=None):
         if todo_id:

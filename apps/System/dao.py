@@ -2,7 +2,6 @@
 # @FILE    : dao.py
 # @AUTH    : model_creater
 
-import uuid
 from dao import fields
 from ..BaseDAO import BaseDAO
 from . import consts
@@ -15,7 +14,6 @@ class User(BaseDAO):
     username = fields.StringField()
     description = fields.StringField()
     avatar = fields.ObjectIdField()
-    salt = fields.StringField(default=str(uuid.uuid4()))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -38,3 +36,4 @@ class UserAuth(BaseDAO):
     @classmethod
     async def get_user_auth_by_user_auth_id(cls, user_auth_id):
         return await cls.select(id=user_auth_id)
+

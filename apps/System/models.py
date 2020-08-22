@@ -3,7 +3,6 @@
 # @AUTH    : model_creater
 
 import datetime
-import uuid
 from umongo import Instance, Document, fields
 from dao.manager.manager_umongo_motor import NAME_DICT
 from ..BaseModel import BaseModelDocument
@@ -16,7 +15,6 @@ class User(BaseModelDocument):
     username = fields.StringField(allow_none=True)
     description = fields.StringField(allow_none=True)
     avatar = fields.ObjectIdField(allow_none=True)
-    salt = fields.StringField(allow_none=True, default=str(uuid.uuid4()))
 
 
 @instance.register

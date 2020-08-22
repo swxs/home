@@ -45,7 +45,6 @@ class WordHandler(BaseHandler):
                 info=pager.info
             )
 
-
     @render
     async def post(self, word_id=None):
         if word_id:
