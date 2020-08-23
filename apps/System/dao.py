@@ -2,6 +2,7 @@
 # @FILE    : dao.py
 # @AUTH    : model_creater
 
+import bson
 from dao import fields
 from ..BaseDAO import BaseDAO
 from . import consts
@@ -20,7 +21,7 @@ class User(BaseDAO):
 
     @classmethod
     async def get_user_by_user_id(cls, user_id):
-        return await cls.select(id=user_id)
+        return await cls.find(dict(id=user_id))
 
 
 class UserAuth(BaseDAO):
@@ -35,5 +36,5 @@ class UserAuth(BaseDAO):
 
     @classmethod
     async def get_user_auth_by_user_auth_id(cls, user_auth_id):
-        return await cls.select(id=user_auth_id)
+        return await cls.find(dict(id=user_auth_id))
 

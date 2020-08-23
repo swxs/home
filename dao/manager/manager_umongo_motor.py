@@ -15,9 +15,10 @@ from .manager_base import BaseManager, BaseManagerQuerySet
 from common.Metaclass.Singleton import Singleton
 from common.Utils.log_utils import getLogger
 
-log = getLogger("manager.manager_umongo_motor")
+logger = getLogger("manager.manager_umongo_motor")
 
 NAME_DICT = defaultdict(dict)
+
 
 class ManagerQuerySet(BaseManagerQuerySet):
     def __iter__(self):
@@ -27,28 +28,28 @@ class ManagerQuerySet(BaseManagerQuerySet):
             return self.cursor
 
     def __next__(self, cursor):
-        return self.get_instance(cursor, _filter=self._filter)
+        return self.get_instance(cursor, filters=self.filters)
 
     async def __aiter__(self):
         if self.cursor is None:
             yield []
         else:
             async for cursor in self.cursor:
-                yield self.get_instance(cursor, _filter=self._filter)
+                yield self.get_instance(cursor, filters=self.filters)
 
-    async def __anext__(self, cursor):
-        return await self.get_instance(cursor, _filter=self._filter)
+    async def __anext__(self):
+        return await self.get_instance(self.cursor, filters=self.filters)
 
     async def first(self):
         first_model = self.cursor.to_list(1)
         if isinstance(first_model, asyncio.Future):
             first_model = await first_model
-        return self.get_instance(first_model, _filter=self._filter)
+        return self.get_instance(first_model, filters=self.filters)
 
-    def order_by(self, key_or_list):
-        if key_or_list:
+    def order_by(self, keys):
+        if keys:
             key_list = []
-            for key in key_or_list:
+            for key in keys:
                 if key.startswith("-"):
                     key_list.append((key[1:], DESCENDING))
                 else:
@@ -78,21 +79,22 @@ class Manager(BaseManager, metaclass=Singleton):
     @classmethod
     async def _delete(cls, model):
         try:
-            await model.delete()
+            delete_result = await model.delete()
+            return delete_result.deleted_count
         except Exception as e:
             raise e
 
     @classmethod
-    async def count(cls, klass, **kwargs):
+    async def count(cls, klass, searches):
         try:
-            return await cls._get_model(klass).count_documents(**kwargs)
+            return await cls._get_model(klass).count_documents(searches)
         except Exception as e:
             raise e
 
     @classmethod
-    async def select(cls, klass, **kwargs):
+    async def find(cls, klass, finds):
         try:
-            model = await cls._get_model(klass).find_one(kwargs)
+            model = await cls._get_model(klass).find_one(finds)
         except DoesNotExist:
             raise ApiException(Info.NotExist, message=klass.__name__)
         except Exception as e:
@@ -102,30 +104,43 @@ class Manager(BaseManager, metaclass=Singleton):
         return klass.get_instance(model)
 
     @classmethod
-    def filter(cls, klass, **kwargs):
-        limit = kwargs.pop('limit', 0)
-        skip = kwargs.pop('skip', 0)
-        model = cls._get_model(klass).find(kwargs, limit=limit, skip=skip)
+    def search(cls, klass, searches, limit=0, skip=0):
+        model = cls._get_model(klass).find(searches, limit=limit, skip=skip)
         try:
             return ManagerQuerySet(klass.get_instance, model)
         except Exception as e:
-            print(e)
+            logger.exception(e)
 
     @classmethod
-    async def create(cls, klass, **kwargs):
+    async def create(cls, klass, creates):
         model = cls._get_model(klass)()
         for attr in klass.__fields__:
-            value = kwargs.get(attr, undefined)
+            value = creates.get(attr, undefined)
             if value != undefined:
                 model.__setattr__(attr, value)
         await cls._save(model)
         return klass.get_instance(model)
 
     @classmethod
-    async def update(cls, klass, instance, **kwargs):
-        model = instance.__raw_model__
+    async def update(cls, klass, instance, updates):
+        model = instance.__raw__
         for attr in klass.__fields__:
-            value = kwargs.get(attr, undefined)
+            value = updates.get(attr, undefined)
+            if value != undefined:
+                if isinstance(klass.__fields__[attr], DictField):
+                    model.__getitem__(attr).update(value)
+                    model.__setattr__(attr, model.__getitem__(attr))
+                else:
+                    model.__setattr__(attr, value)
+        await cls._save(model)
+        return klass.get_instance(model)
+
+    @classmethod
+    async def find_and_update(cls, klass, finds, updates):
+        instance = await cls.find(klass, finds)
+        model = instance.__raw__
+        for attr in klass.__fields__:
+            value = updates.get(attr, undefined)
             if value != undefined:
                 if isinstance(klass.__fields__[attr], DictField):
                     model.__getitem__(attr).update(value)
@@ -137,5 +152,20 @@ class Manager(BaseManager, metaclass=Singleton):
 
     @classmethod
     async def delete(cls, klass, instance):
-        model = await cls._get_model(klass).find_one({"_id": instance.oid})
+        model = instance.__raw__
         return await cls._delete(model)
+
+    @classmethod
+    async def find_and_delete(cls, klass, finds):
+        instance = await cls.find(klass, finds)
+        model = instance.__raw__
+        return await cls._delete(model)
+
+    @classmethod
+    async def search_and_delete(cls, klass, searches):
+        count = 0
+        cursor = cls.search(klass, searches)
+        async for instance in cursor:
+            model = instance.__raw__
+            count += await cls._delete(model)
+        return count

@@ -5,6 +5,7 @@
 
 import asyncio
 
+
 class BaseManagerQuerySet(object):
     def __init__(self, get_instance, cursor):
         """
@@ -13,42 +14,62 @@ class BaseManagerQuerySet(object):
         """
         self.get_instance = get_instance
         self.cursor = cursor
-        self._filter = dict()
+        self.filters = dict()
 
     def __iter__(self):
         """
+        简介
+        ----------
         迭代器
-        :return:
+
         """
 
     def __next__(self, cursor):
         """
+        简介
+        ----------
         应该在此处包装原始model
-        :return:
+
+        参数
+        ----------
+        cursor :
+
         """
 
     async def __aiter__(self):
         """
+        简介
+        ----------
         异步迭代器
-        :return:
+
         """
 
-    async def __anext__(self, cursor):
+    async def __anext__(self):
         """
+        简介
+        ----------
         应该在此处包装原始model
-        :return:
+
         """
 
     async def first(self):
         """
+        简介
+        ----------
         获取第一个对象，并包装
-        :return:
+
         """
 
-    def order_by(self, **kwargs):
+    def order_by(self, keys):
         """
+        简介
+        ----------
         排序对象
-        :return：
+
+
+        返回
+        -------
+
         """
 
 
@@ -60,56 +81,140 @@ class BaseManager(object):
         return cls._get_model(klass)
 
     @classmethod
-    def filter(cls, klass, **kwargs):
+    def search(cls, klass, searches, limit=0, skip=0):
         """
+        简介
+        ----------
         选择获取一些满足条件的对象，并返回一个QuerySet对象
-        :param klass:
-        :param kwargs:
-        :return:
+
+        参数
+        ----------
+        klass :
+
+        searches :
+
         """
 
     @classmethod
-    async def count(cls, klass, **kwargs):
+    async def count(cls, klass, searches):
         """
+        简介
+        ----------
         获取满足筛选条件的对象数量
-        :param klass:
-        :param kwargs:
-        :return:
+
+        参数
+        ----------
+        klass :
+
+        searches :
+
         """
 
     @classmethod
-    async def select(cls, klass, **kwargs):
+    async def find(cls, klass, finds):
         """
+        简介
+        ----------
         选择获取一个满足条件的对象实例，并初始化
-        :param klass:
-        :param kwargs:
-        :return:
+
+        参数
+        ----------
+        klass :
+
+        finds :
+
         """
 
     @classmethod
-    async def create(cls, klass, **kwargs):
+    async def create(cls, klass, creates):
         """
+        简介
+        ----------
         创建一个对象实例，并初始化
-        :param klass:
-        :param kwargs:
-        :return:
+
+        参数
+        ----------
+        klass :
+
+        creates :
+
         """
 
     @classmethod
-    async def update(cls, klass, instance, **kwargs):
+    async def update(cls, klass, instance, updates):
         """
+        简介
+        ----------
         更新一个对象实例，并返回
-        :param klass: 对象类
-        :param instance: 对象实例
-        :param kwargs: 更新内容
-        :return:
+
+        参数
+        ----------
+        klass :
+
+        instance :
+
+        updates :
+
+        """
+
+    @classmethod
+    async def find_and_update(cls, klass, finds, updates):
+        """
+        简介
+        ----------
+        更新一个对象实例，并返回
+
+        参数
+        ----------
+        klass :
+
+        finds :
+
+        updates :
+
         """
 
     @classmethod
     async def delete(cls, klass, instance):
         """
+        简介
+        ----------
         删除一个对象实例
-        :param klass: 对象类
-        :param instance: 对象实例
-        :return:
+
+        参数
+        ----------
+        klass :
+
+        instance :
+
+        """
+
+    @classmethod
+    async def find_and_delete(cls, klass, finds):
+        """
+        简介
+        ----------
+        删除一个对象实例
+
+        参数
+        ----------
+        klass :
+
+        finds :
+
+        """
+
+    @classmethod
+    async def search_and_delete(cls, klass, searches):
+        """
+        简介
+        ----------
+        删除一个对象实例
+
+        参数
+        ----------
+        klass :
+
+        searches :
+
         """

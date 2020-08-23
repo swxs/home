@@ -2,9 +2,10 @@
 # @File    : views.py
 # @AUTH    : model
 
+import bson
 import json
 from tornado.web import url
-from web.web import BaseHandler
+from web.web import BaseHandler, BaseAuthedHanlder
 from web.consts import undefined
 from web.result import SuccessData
 from web.decorator.render import render
@@ -15,78 +16,104 @@ from .utils.Todo import Todo, todo_schema
 log = getLogger("views")
 
 
-class TodoHandler(BaseHandler):
+class TodoHandler(BaseAuthedHanlder):
+    async def add_tokens(self, params):
+        params['user_id'] = bson.ObjectId(self.tokens.get("user_id"))
+        return params
+
     @render
     async def get(self, todo_id=None):
         if todo_id:
-            todo = await Todo.select(id=todo_id)
+            finds = await self.add_tokens({
+                "id": todo_id
+            })
+            todo = await Todo.find(finds)
             return SuccessData(
                 data=await todo.to_front()
             )
         else:
-            search_params = json.loads(self.get_argument("search", '{}'))
-            order_by = self.get_argument("order_by", "")
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
             items_per_page = int(self.get_argument("items_per_page", 20))
+            search = self.arguments.get('search', "")
+            orderby = self.arguments.get("orderby", "")
 
-            item_count = await Todo.count(**search_params)
-            if use_pager:
-                search_params.update({
-                    "limit": items_per_page,
-                    "skip": (page - 1) * items_per_page
+            searches = await self.add_tokens(
+                todo_schema.load(self.arguments, partial=True).data
+            )
+            if search:
+                searches.update({
+                    "search": search
                 })
-            order_by = [o for o in order_by.split(";") if bool(o)]
-            todo_cursor = Todo.search(**search_params).order_by(order_by)
+
+            keys = []
+            for _order in orderby.split(";"):
+                if _order:
+                    keys.append(_order)
+
+            item_count = await Todo.count(searches)
+            if use_pager:
+                limit = items_per_page
+                skip = (page - 1) * items_per_page
+            else:
+                limit = 0
+                skip = 0
+            todo_cursor = Todo.search(searches, limit=limit, skip=skip).order_by(keys)
             data = [await  todo.to_front() async for todo in todo_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
             return SuccessData(
-                data=pager.items, 
+                data=pager.items,
                 info=pager.info
             )
 
     @render
     async def post(self, todo_id=None):
         if todo_id:
-            params = todo_schema.load(self.arguments, partial=True)
-            old_todo = await Todo.select(id=todo_id)
-            new_todo = await old_todo.copy(**params.data)
+            finds = await self.add_tokens({
+                "id": todo_id
+            })
+            copys = todo_schema.load(self.arguments, partial=True).data
+            todo = await Todo.find_and_copy(finds, copys)
             return SuccessData(
-                id=new_todo.id
+                id=todo.id
             )
         else:
-            params = todo_schema.load(self.arguments)
-            todo = await Todo.create(**params.data)
+            creates = await self.add_tokens(
+                todo_schema.load(self.arguments).data
+            )
+            todo = await Todo.create(creates)
             return SuccessData(
                 id=todo.id
             )
 
     @render
     async def put(self, todo_id=None):
-        params = todo_schema.load(self.arguments)
-        todo = await Todo.find_and_update(id=todo_id, **params.data)
-        return SuccessData(
-            id=todo.id
-        )
-
-    @render
-    async def patch(self, todo_id=None):
-        params = todo_schema.load(self.arguments, partial=True)
-        todo = await Todo.find_and_update(id=todo_id, **params.data)
+        finds = await self.add_tokens({
+            "id": todo_id
+        })
+        updates = todo_schema.load(self.arguments, partial=True).data
+        todo = await Todo.find_and_update(finds, updates)
         return SuccessData(
             id=todo.id
         )
 
     @render
     async def delete(self, todo_id=None):
-        count = await Todo.find_and_delete(id=todo_id)
+        finds = await self.add_tokens({
+            "id": todo_id
+        })
+        count = await Todo.find_and_delete(finds)
         return SuccessData(
             count=count
         )
 
+    @render
+    async def patch(self, todo_id=None):
+        pass
+
     def set_default_headers(self):
         self._headers.add("version", "1")
-        
+
 
 URL_MAPPING_LIST = [
     url(r"/api/memo/todo/(?:([a-zA-Z0-9&%\.~-]+)/)?", TodoHandler),

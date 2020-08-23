@@ -2,6 +2,7 @@
 # @FILE    : models.py
 # @AUTH    : model_creater
 
+import bson
 import datetime
 from umongo import Instance, Document, fields
 from dao.manager.manager_umongo_motor import NAME_DICT

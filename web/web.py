@@ -73,7 +73,12 @@ class BaseHandler(tornado.web.RequestHandler):
     @property
     def arguments(self):
         if not hasattr(self, "_arguments"):
-            self._arguments = json.loads(self.request.body)
+            self._arguments = {}
+            for key, value in self.request.query_arguments.items():
+                self._arguments[key] = value[0].decode('utf8')
+            self._arguments.update(self.request.body_arguments)
+            if self.request.body:
+                self._arguments.update(json.loads(self.request.body))
         return self._arguments
 
     def get_argument(self, argument, default=None, strip=True):

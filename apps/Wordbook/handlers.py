@@ -2,9 +2,10 @@
 # @File    : views.py
 # @AUTH    : model
 
+import bson
 import json
 from tornado.web import url
-from web.web import BaseHandler
+from web.web import BaseHandler, BaseAuthedHanlder
 from web.consts import undefined
 from web.result import SuccessData
 from web.decorator.render import render
@@ -15,78 +16,104 @@ from .utils.Word import Word, word_schema
 log = getLogger("views")
 
 
-class WordHandler(BaseHandler):
+class WordHandler(BaseAuthedHanlder):
+    async def add_tokens(self, params):
+        params['user_id'] = bson.ObjectId(self.tokens.get("user_id"))
+        return params
+
     @render
     async def get(self, word_id=None):
         if word_id:
-            word = await Word.select(id=word_id)
+            finds = await self.add_tokens({
+                "id": word_id
+            })
+            word = await Word.find(finds)
             return SuccessData(
                 data=await word.to_front()
             )
         else:
-            search_params = json.loads(self.get_argument("search", '{}'))
-            order_by = self.get_argument("order_by", "")
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
             items_per_page = int(self.get_argument("items_per_page", 20))
+            search = self.arguments.get('search', "")
+            orderby = self.arguments.get("orderby", "")
 
-            item_count = await Word.count(**search_params)
-            if use_pager:
-                search_params.update({
-                    "limit": items_per_page,
-                    "skip": (page - 1) * items_per_page
+            searches = await self.add_tokens(
+                word_schema.load(self.arguments, partial=True).data
+            )
+            if search:
+                searches.update({
+                    "search": search
                 })
-            order_by = [o for o in order_by.split(";") if bool(o)]
-            word_cursor = Word.search(**search_params).order_by(order_by)
+
+            keys = []
+            for _order in orderby.split(";"):
+                if _order:
+                    keys.append(_order)
+
+            item_count = await Word.count(searches)
+            if use_pager:
+                limit = items_per_page
+                skip = (page - 1) * items_per_page
+            else:
+                limit = 0
+                skip = 0
+            word_cursor = Word.search(searches, limit=limit, skip=skip).order_by(keys)
             data = [await  word.to_front() async for word in word_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
             return SuccessData(
-                data=pager.items, 
+                data=pager.items,
                 info=pager.info
             )
 
     @render
     async def post(self, word_id=None):
         if word_id:
-            params = word_schema.load(self.arguments, partial=True)
-            old_word = await Word.select(id=word_id)
-            new_word = await old_word.copy(**params.data)
+            finds = await self.add_tokens({
+                "id": word_id
+            })
+            copys = word_schema.load(self.arguments, partial=True).data
+            word = await Word.find_and_copy(finds, copys)
             return SuccessData(
-                id=new_word.id
+                id=word.id
             )
         else:
-            params = word_schema.load(self.arguments)
-            word = await Word.create(**params.data)
+            creates = await self.add_tokens(
+                word_schema.load(self.arguments).data
+            )
+            word = await Word.create(creates)
             return SuccessData(
                 id=word.id
             )
 
     @render
     async def put(self, word_id=None):
-        params = word_schema.load(self.arguments)
-        word = await Word.find_and_update(id=word_id, **params.data)
-        return SuccessData(
-            id=word.id
-        )
-
-    @render
-    async def patch(self, word_id=None):
-        params = word_schema.load(self.arguments, partial=True)
-        word = await Word.find_and_update(id=word_id, **params.data)
+        finds = await self.add_tokens({
+            "id": word_id
+        })
+        updates = word_schema.load(self.arguments, partial=True).data
+        word = await Word.find_and_update(finds, updates)
         return SuccessData(
             id=word.id
         )
 
     @render
     async def delete(self, word_id=None):
-        count = await Word.find_and_delete(id=word_id)
+        finds = await self.add_tokens({
+            "id": word_id
+        })
+        count = await Word.find_and_delete(finds)
         return SuccessData(
             count=count
         )
 
+    @render
+    async def patch(self, word_id=None):
+        pass
+
     def set_default_headers(self):
         self._headers.add("version", "1")
-        
+
 
 URL_MAPPING_LIST = [
     url(r"/api/wordbook/word/(?:([a-zA-Z0-9&%\.~-]+)/)?", WordHandler),

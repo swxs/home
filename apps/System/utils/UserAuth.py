@@ -17,9 +17,9 @@ class UserAuth(BaseUserAuth):
         super(UserAuth, self).__init__(**kwargs)
 
     @classmethod
-    async def create(cls, **kwargs):
-        if 'user_id' not in kwargs:
-            user = await User.create(username=f"user_{str(uuid.uuid4())}")
-            kwargs['user_id'] = user.id
+    async def create(cls, creates):
+        if 'user_id' not in creates:
+            user = await User.create(dict(username=f"user_{str(uuid.uuid4())}"))
+            creates['user_id'] = user.id
 
-        return await super(UserAuth, cls).create(**kwargs)
+        return await super(UserAuth, cls).create(creates)

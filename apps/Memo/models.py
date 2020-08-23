@@ -2,6 +2,7 @@
 # @FILE    : models.py
 # @AUTH    : model_creater
 
+import bson
 import datetime
 from umongo import Instance, Document, fields
 from dao.manager.manager_umongo_motor import NAME_DICT
@@ -18,6 +19,15 @@ class Todo(BaseModelDocument):
     user_id = fields.ObjectIdField(allow_none=True)
     status = fields.IntField(allow_none=True, enums=consts.TODO_STATUS_LIST, default=consts.TODO_STATUS_NEW)
     priority = fields.IntField(allow_none=True, enums=consts.TODO_PRIORITY_LIST, default=consts.TODO_PRIORITY_LOW)
+    user_id = fields.ObjectIdField(allow_none=True)
+
+    class Meta:
+        indexes = [
+            {
+                'key': ['user_id'],
+            },
+        ]
+        pass
 
 
 NAME_DICT["Todo"] = Todo

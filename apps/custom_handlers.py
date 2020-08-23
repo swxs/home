@@ -20,13 +20,35 @@ from .System.utils.UserAuth import UserAuth, user_auth_schema
 log = getLogger("views/user")
 
 
+class UserAuthHandler(BaseHandler):
+    @render
+    async def post(self):
+        creates = user_auth_schema.load(self.arguments).data
+        user_auth = await UserAuth.create(creates)
+        token = tokener.encode(
+            user_id=str(user_auth.user_id),
+        )
+        refresh_token = refresh_tokener.encode(
+            user_id=str(user_auth.user_id),
+        )
+        return SuccessData(
+            user_id=user_auth.user_id,
+            id=user_auth.id,
+            ttype=user_auth.ttype,
+            identifier=user_auth.identifier,
+            ifverified=user_auth.ifverified,
+            token=token,
+            refresh_token=refresh_token,
+        )
+
+
 class AuthTokenHandler(BaseHandler):
     @render
     async def post(self):
         ttype = self.arguments.get('ttype')
         identifier = self.arguments.get('identifier')
         credential = self.arguments.get('credential')
-        user_auth = await UserAuth.select(ttype=ttype, identifier=identifier, credential=credential)
+        user_auth = await UserAuth.find(dict(ttype=ttype, identifier=identifier, credential=credential))
         # 生成jwt
         token = tokener.encode(
             user_id=str(user_auth.user_id),
@@ -49,6 +71,7 @@ class RefreshTokenHandler(BaseAuthedHanlder):
 
 
 URL_MAPPING_LIST = [
+    url(r'/api/authorize/user_auth/', UserAuthHandler, name='authorize_user_auth'),
     url(r'/api/authorize/token/auth/', AuthTokenHandler, name='authorize_auth_token'),
     url(r'/api/authorize/token/refresh/', RefreshTokenHandler, name='authorize_refresh_token'),
 ]
