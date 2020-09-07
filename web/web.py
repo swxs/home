@@ -197,7 +197,6 @@ class BaseAuthedHanlder(BaseHandler):
     async def prepare(self):
         super(BaseAuthedHanlder, self).prepare()
         await self.check_jwt_token()
-        
 
     def __get_request_token(self):
         headers = self.request.headers

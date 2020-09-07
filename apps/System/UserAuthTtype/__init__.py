@@ -16,6 +16,5 @@ class UserAuthTtypeProductor(Productor):
         super().__init__(root_dir, start_dir, base_module=base_module, temp_module=temp_module, pattern=pattern)
 
 
-print(os.path.abspath(os.path.dirname(__file__)))
 base_path = os.path.join(settings.SITE_ROOT)
 deliver_productor = UserAuthTtypeProductor(settings.SITE_ROOT, base_path, BaseTtypeUserAuth, BaseTtypeUserAuth, "*.py")
