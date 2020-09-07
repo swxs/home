@@ -8,10 +8,10 @@ from umongo import Instance, Document, fields
 from dao.manager.manager_umongo_motor import NAME_DICT
 from ..BaseModel import BaseModelDocument
 from . import consts
-from settings import instance
+from settings import MONGO_INSTANCE
 
 
-@instance.register
+@MONGO_INSTANCE.register
 class PasswordLock(BaseModelDocument):
     name = fields.StringField(allow_none=True)
     key = fields.StringField(allow_none=True)

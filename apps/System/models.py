@@ -8,17 +8,17 @@ from umongo import Instance, Document, fields
 from dao.manager.manager_umongo_motor import NAME_DICT
 from ..BaseModel import BaseModelDocument
 from . import consts
-from settings import instance
+from settings import MONGO_INSTANCE
 
 
-@instance.register
+@MONGO_INSTANCE.register
 class User(BaseModelDocument):
     username = fields.StringField(allow_none=True)
     description = fields.StringField(allow_none=True)
     avatar = fields.ObjectIdField(allow_none=True)
 
 
-@instance.register
+@MONGO_INSTANCE.register
 class UserAuth(BaseModelDocument):
     user_id = fields.ObjectIdField(allow_none=True)
     ttype = fields.IntField(allow_none=True, enums=consts.USER_AUTH_TTYPE_LIST)

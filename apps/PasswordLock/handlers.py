@@ -109,7 +109,43 @@ class PasswordLockHandler(BaseAuthedHanlder):
 
     @render
     async def patch(self, password_lock_id=None):
-        pass
+        create_list = []
+        for __create in self.arguments.get("create", []):
+            creates = await self.add_tokens(
+                password_lock_schema.load(__create).data
+            )
+            password_lock = await PasswordLock.create(creates)
+            create_list.append(password_lock.id)
+
+        update_list = []
+        for __update in self.arguments.get("update", []):
+            if "find" in __update:
+                finds = await self.add_tokens(__update.pop("find", {}))
+                updates = password_lock_schema.load(__update, partial=True).data
+                password_lock = await PasswordLock.find_and_update(finds, updates)
+                update_list.append(password_lock.id)
+            elif "search" in __update:
+                searches = await self.add_tokens(__update.pop("search", {}))
+                updates = password_lock_schema.load(__update, partial=True).data
+                password_lock_list = await PasswordLock.search_and_update(searches, updates)
+                update_list.append(password_lock_list)
+
+        delete_list = []
+        for __delete in self.arguments.get("delete", []):
+            if "find" in __delete:
+                finds = await self.add_tokens(__delete.pop("find", {}))
+                count = await PasswordLock.find_and_delete(finds)
+                delete_list.append(count)
+            elif "search" in __delete:
+                searches = await self.add_tokens(__delete.pop("search", {}))
+                count = await PasswordLock.search_and_delete(searches)
+                delete_list.append(count)
+
+        return SuccessData(
+            create_list=create_list,
+            update_list=update_list,
+            delete_list=delete_list,
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

@@ -109,7 +109,43 @@ class UserHandler(BaseAuthedHanlder):
 
     @render
     async def patch(self, user_id=None):
-        pass
+        create_list = []
+        for __create in self.arguments.get("create", []):
+            creates = await self.add_tokens(
+                user_schema.load(__create).data
+            )
+            user = await User.create(creates)
+            create_list.append(user.id)
+
+        update_list = []
+        for __update in self.arguments.get("update", []):
+            if "find" in __update:
+                finds = await self.add_tokens(__update.pop("find", {}))
+                updates = user_schema.load(__update, partial=True).data
+                user = await User.find_and_update(finds, updates)
+                update_list.append(user.id)
+            elif "search" in __update:
+                searches = await self.add_tokens(__update.pop("search", {}))
+                updates = user_schema.load(__update, partial=True).data
+                user_list = await User.search_and_update(searches, updates)
+                update_list.append(user_list)
+
+        delete_list = []
+        for __delete in self.arguments.get("delete", []):
+            if "find" in __delete:
+                finds = await self.add_tokens(__delete.pop("find", {}))
+                count = await User.find_and_delete(finds)
+                delete_list.append(count)
+            elif "search" in __delete:
+                searches = await self.add_tokens(__delete.pop("search", {}))
+                count = await User.search_and_delete(searches)
+                delete_list.append(count)
+
+        return SuccessData(
+            create_list=create_list,
+            update_list=update_list,
+            delete_list=delete_list,
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")
@@ -208,7 +244,43 @@ class UserAuthHandler(BaseAuthedHanlder):
 
     @render
     async def patch(self, user_auth_id=None):
-        pass
+        create_list = []
+        for __create in self.arguments.get("create", []):
+            creates = await self.add_tokens(
+                user_auth_schema.load(__create).data
+            )
+            user_auth = await UserAuth.create(creates)
+            create_list.append(user_auth.id)
+
+        update_list = []
+        for __update in self.arguments.get("update", []):
+            if "find" in __update:
+                finds = await self.add_tokens(__update.pop("find", {}))
+                updates = user_auth_schema.load(__update, partial=True).data
+                user_auth = await UserAuth.find_and_update(finds, updates)
+                update_list.append(user_auth.id)
+            elif "search" in __update:
+                searches = await self.add_tokens(__update.pop("search", {}))
+                updates = user_auth_schema.load(__update, partial=True).data
+                user_auth_list = await UserAuth.search_and_update(searches, updates)
+                update_list.append(user_auth_list)
+
+        delete_list = []
+        for __delete in self.arguments.get("delete", []):
+            if "find" in __delete:
+                finds = await self.add_tokens(__delete.pop("find", {}))
+                count = await UserAuth.find_and_delete(finds)
+                delete_list.append(count)
+            elif "search" in __delete:
+                searches = await self.add_tokens(__delete.pop("search", {}))
+                count = await UserAuth.search_and_delete(searches)
+                delete_list.append(count)
+
+        return SuccessData(
+            create_list=create_list,
+            update_list=update_list,
+            delete_list=delete_list,
+        )
 
     def set_default_headers(self):
         self._headers.add("version", "1")

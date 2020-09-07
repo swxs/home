@@ -5,7 +5,7 @@
 
 import hashlib
 import datetime
-from settings import instance
+from settings import MONGO_INSTANCE
 from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
@@ -191,6 +191,11 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             finds["_id"] = ObjectId(finds.pop("id"))
         logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}; updates - {str(updates)}")
         return await cls.manager.find_and_update(cls, finds, updates)
+
+    @classmethod
+    async def search_and_update(cls, searches: dict, updates: dict):
+        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}; updates - {str(updates)}")
+        return await cls.manager.searches_and_update(cls, searches, updates)
 
     async def delete(self):
         logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}")

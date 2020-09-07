@@ -87,8 +87,7 @@ def connect_db(db_name=MONGODB_DBNAME, mock=False):
     from umongo import Instance, Document, fields, ValidationError, set_gettext
     from umongo.marshmallow_bonus import SchemaFromUmongo
     db = AsyncIOMotorClient()[db_name]
-    instance = Instance(db)
-    return instance
+    return Instance(db)
     # if mock:
     #     host = f"{MONGODB_ADDRESS}:mock"
     # else:
@@ -120,7 +119,7 @@ except:
     print("mysql db connect failed!")
 
 try:
-    instance = connect_db()
+    MONGO_INSTANCE = connect_db()
 except:
     print("mongo db connect failed!")
 
