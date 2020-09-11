@@ -8,24 +8,30 @@ import sys
 from fnmatch import fnmatch
 from importlib import import_module
 
+
 class NoModule(Exception):
     pass
 
 
 class Productor(object):
-    def __init__(self, root_dir: str, start_dir: str, base_module: object, temp_module: object, pattern: str = '*.py'):
+    def __init__(self,
+                 root_dir: str,
+                 start_dir: str,
+                 base_module: object,
+                 temp_module: object,
+                 pattern: str = '*.py'):
         """
         简介
         ----------
-        
-        
+
+
         参数
         ----------
-        root_dir : 
+        root_dir :
             系统根目录
-        start_dir : 
+        start_dir :
             查询根目录
-        base_module : 
+        base_module :
             基础模块，所有查询对象应该是该类的子类
         temp_module :
             默认模块，设置为None时， 若没有查询到对象，会报NoModuleException
@@ -53,7 +59,7 @@ class Productor(object):
                 return self.temp_module
             else:
                 raise ModuleNotFoundError(f"{item}不存在！")
-    
+
     def __delitem__(self, item):
         del sys.modules[self.__path[item]]
         del self.__productor[item]
@@ -61,7 +67,7 @@ class Productor(object):
 
     def __contains__(self, item):
         return item in self.__productor
-    
+
     def __match_path(self, path, full_path, pattern):
         # override this method to use alternative matching strategy
         return fnmatch(path, pattern)
