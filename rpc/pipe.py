@@ -9,7 +9,6 @@ import asyncio
 
 
 class PipeProtocol(asyncio.Protocol):
-
     def __init__(self, pipecmd):
         super(PipeProtocol, self).__init__()
         self._pipecmd = pipecmd
@@ -30,7 +29,7 @@ class PipeCommand(object):
         self._handlers = {}
 
     def register_handler(self, cmd, handler):
-        assert(isinstance(cmd, int) and 0 <= cmd <= 255)
+        assert isinstance(cmd, int) and 0 <= cmd <= 255
         self._handlers[cmd] = handler
 
     def do_handler(self, cmd):
@@ -43,5 +42,4 @@ class PipeCommand(object):
 
     def start(self, pipe_fd):
         loop = asyncio.get_event_loop()
-        asyncio.ensure_future(loop.connect_read_pipe(
-            self.create_protocol, open(pipe_fd)))
+        asyncio.ensure_future(loop.connect_read_pipe(self.create_protocol, open(pipe_fd)))

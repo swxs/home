@@ -8,13 +8,13 @@ import hashlib
 
 class LuaManager(type):
     def __new__(cls, name, bases, attrs):
-        '''
+        """
         lua:
         :param name:
         :param bases:
         :param attrs:
         :return:
-        '''
+        """
         attrs["flag"] = False
         attrs["lua"] = attrs.get("lua", b"")
         attrs["hashcode"] = hashlib.sha1(attrs.get("lua", b"")).hexdigest()
@@ -47,9 +47,10 @@ class CheckProcessLua(RedisLua):
 
 class IncrExpireLua(RedisLua):
     """
-        给指定健设置过期时间， 过期时间不能被再次修改
-        find in https://redis.io/commands/incr
+    给指定健设置过期时间， 过期时间不能被再次修改
+    find in https://redis.io/commands/incr
     """
+
     lua = b"""\
     local current
     current = redis.call("incr", KEYS[1])
@@ -62,8 +63,9 @@ class IncrExpireLua(RedisLua):
 
 class CountKeyWithPrefixLua(RedisLua):
     """
-        扫描指定健(支持*)的数量
+    扫描指定健(支持*)的数量
     """
+
     lua = b"""\
     local cursor = '0'
     local count = 0
@@ -78,8 +80,9 @@ class CountKeyWithPrefixLua(RedisLua):
 
 class ScanDelWithPrefixLua(RedisLua):
     """
-        删除指定健(支持*)， 并返回删除的数量
+    删除指定健(支持*)， 并返回删除的数量
     """
+
     lua = b"""\
     redis.replicate_commands()
     local cursor = '0'

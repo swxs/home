@@ -31,13 +31,10 @@ class BufferReader(MultipartEncoder):
     def read(self, size=None):
         chunk = super(BufferReader, self).read(size)
         self._progress += int(len(chunk))
-        self._cb_kwargs.update({
-            'size': self._len,
-            'progress': self._progress
-        })
+        self._cb_kwargs.update({'size': self._len, 'progress': self._progress})
         if self._callback:
             try:
                 self._callback(*self._cb_args, **self._cb_kwargs)
-            except:  # catches exception from the callback
+            except Exception:  # catches exception from the callback
                 raise CancelledError('The upload was cancelled.')
         return chunk

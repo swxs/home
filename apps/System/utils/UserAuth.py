@@ -12,6 +12,7 @@ UserAuthSchema = UserAuthModel.schema.as_marshmallow_schema()
 
 user_auth_schema = UserAuthSchema()
 
+
 class UserAuth(BaseUserAuth):
     def __init__(self, **kwargs):
         super(UserAuth, self).__init__(**kwargs)

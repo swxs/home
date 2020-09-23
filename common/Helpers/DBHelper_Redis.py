@@ -9,10 +9,10 @@ class RedisDBHelper(object):
     def __init__(self, db, host, port, password):
         """
         连接数据库
-        :param dbbase: 
-        :param host: 
-        :param port: 
-        :param password: 
+        :param dbbase:
+        :param host:
+        :param port:
+        :param password:
         """
         self.db = db
         self.host = host
@@ -50,8 +50,5 @@ class RedisDBHelper(object):
 
 
 redis_helper = RedisDBHelper(
-    db=settings.REDIS_DB,
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    password=settings.REDIS_PASSWORD
+    db=settings.REDIS_DB, host=settings.REDIS_HOST, port=settings.REDIS_PORT, password=settings.REDIS_PASSWORD
 )

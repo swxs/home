@@ -1,5 +1,2 @@
-
-
 class BaseTtypeUserAuth(object):
     pass
-    

@@ -68,7 +68,7 @@ RPC_SERVER_HOST = '127.0.0.1'
 RPC_SERVER_PORT = 6000
 
 try:
-    from local_settings import *
+    from local_settings import *  # noqa: F403
 except Exception:
     print('load local settings faild.')
 
@@ -86,6 +86,7 @@ def connect_db(db_name=MONGODB_DBNAME, mock=False):
     from motor.motor_asyncio import AsyncIOMotorClient
     from umongo import Instance, Document, fields, ValidationError, set_gettext
     from umongo.marshmallow_bonus import SchemaFromUmongo
+
     db = AsyncIOMotorClient()[db_name]
     return Instance(db)
     # if mock:
@@ -99,6 +100,7 @@ def connect_db(db_name=MONGODB_DBNAME, mock=False):
 def connect_db_mysql():
     import asyncio
     import pymysql
+
     pymysql.install_as_MySQLdb()
 
     from sqlalchemy import create_engine
@@ -109,18 +111,21 @@ def connect_db_mysql():
 
     from sqlalchemy_aio import ASYNCIO_STRATEGY, TRIO_STRATEGY
     from sqlalchemy_aio.asyncio import AsyncioEngine
-    engine = create_engine("mysql://root:swxs@localhost/runoob", strategy=ASYNCIO_STRATEGY, encoding='latin1', echo=False)
+
+    engine = create_engine(
+        "mysql://root:swxs@localhost/runoob", strategy=ASYNCIO_STRATEGY, encoding='latin1', echo=False
+    )
     return engine
 
 
 try:
     engine = connect_db_mysql()
-except:
+except Exception:
     print("mysql db connect failed!")
 
 try:
     MONGO_INSTANCE = connect_db()
-except:
+except Exception:
     print("mongo db connect failed!")
 
 settings = dict(
@@ -137,21 +142,14 @@ settings = dict(
     # static_url_prefix='', #启用CDN后可修改此定义, 例如: "http://cdn.abc.com/static/"
     pycket={
         'engine': 'memcached',
-        'storage': {
-            'servers': MEMCACHE_HOSTS
-        },
+        'storage': {'servers': MEMCACHE_HOSTS},
         'cookies': {
             'expires_days': 6,
-        }
-    }
+        },
+    },
 )
 
 settings['pycket'] = {
     'engine': 'redis',
-    'storage': {
-        'host': REDIS_HOST,
-        'port': REDIS_PORT,
-        'db_sessions': 10,
-        'db_notifications': 11
-    }
+    'storage': {'host': REDIS_HOST, 'port': REDIS_PORT, 'db_sessions': 10, 'db_notifications': 11},
 }

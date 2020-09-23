@@ -22,14 +22,13 @@ async def init_system():
         )
         org_dict[organization.get("code", undefined)] = org.oid
 
-
     for user in user_list:
         User.create(
             org_id=org_dict.get(user.get('org_id').get('value', undefined), undefined),
             username=user.get('username', undefined),
             nickname=user.get('nickname', undefined),
             password=user.get('password', undefined),
-            key=user.get('key', undefined)
+            key=user.get('key', undefined),
         )
 
 

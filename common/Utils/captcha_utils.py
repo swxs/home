@@ -13,8 +13,9 @@ from apps.errors import AppValidationError as ValidationError
 img_captcha_prefix = 'img_captcha_'
 
 
-class RandomChar():
+class RandomChar:
     """用于随机生成字符"""
+
     @staticmethod
     def Unicode():
         cnCharacters = "123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKMLNOPQRSTUVWXYZ"
@@ -22,20 +23,21 @@ class RandomChar():
         return cnCharacters[random.randint(0, chrLength)]
 
 
-class ImageChar():
-    def __init__(self, fontColor=(0, 0, 0),
-                 size=(100, 40),
-                 fontPath=os.path.join(
-                     settings.SITE_ROOT, 'res', 'TAHOMABD.TTF'),
-                 bgColor=(255, 255, 255),
-                 fontSize=22):
+class ImageChar:
+    def __init__(
+        self,
+        fontColor=(0, 0, 0),
+        size=(100, 40),
+        fontPath=os.path.join(settings.SITE_ROOT, 'res', 'TAHOMABD.TTF'),
+        bgColor=(255, 255, 255),
+        fontSize=22,
+    ):
         self.size = size
         self.fontPath = fontPath
         self.bgColor = bgColor
         self.fontSize = fontSize
         self.fontColor = fontColor
-        self.font = ImageFont.truetype(
-            self.fontPath, self.fontSize, encoding='unic')
+        self.font = ImageFont.truetype(self.fontPath, self.fontSize, encoding='unic')
         self.image = Image.new('RGB', size, bgColor)
 
     def rotate(self):
@@ -47,19 +49,16 @@ class ImageChar():
         del draw
 
     def randRGB(self, base=0):
-        return (random.randint(base, 255),
-                random.randint(base, 255),
-                random.randint(base, 255))
+        return (random.randint(base, 255), random.randint(base, 255), random.randint(base, 255))
 
     def randPoint(self):
         (width, height) = self.size
-        return (random.randint(0, width*2)-width/2, random.randint(0, height*2)-height/2)
+        return (random.randint(0, width * 2) - width / 2, random.randint(0, height * 2) - height / 2)
 
     def randLine(self, num):
         draw = ImageDraw.Draw(self.image)
         for i in range(0, num):
-            draw.line([self.randPoint(), self.randPoint()],
-                      self.randRGB(), width=random.randint(0, 3))
+            draw.line([self.randPoint(), self.randPoint()], self.randRGB(), width=random.randint(0, 3))
         del draw
 
     def randChinese(self, num):
@@ -80,19 +79,20 @@ class ImageChar():
 
 
 class ImageChinese(ImageChar):
-    def __init__(self, fontColor=(0, 0, 0),
-                 size=(110, 40),
-                 fontPath=os.path.join(
-                     settings.SITE_ROOT, 'res', 'msyh.TTF'),
-                 bgColor=(255, 255, 255),
-                 fontSize=22):
+    def __init__(
+        self,
+        fontColor=(0, 0, 0),
+        size=(110, 40),
+        fontPath=os.path.join(settings.SITE_ROOT, 'res', 'msyh.TTF'),
+        bgColor=(255, 255, 255),
+        fontSize=22,
+    ):
         self.size = size
         self.fontPath = fontPath
         self.bgColor = bgColor
         self.fontSize = fontSize
         self.fontColor = fontColor
-        self.font = ImageFont.truetype(
-            self.fontPath, self.fontSize, encoding='unic')
+        self.font = ImageFont.truetype(self.fontPath, self.fontSize, encoding='unic')
         self.image = Image.new('RGB', size, bgColor)
 
     def drawText(self, pos, txt, fill):
@@ -108,9 +108,9 @@ class ImageChinese(ImageChar):
         uchr = ''
         self.randLine(5)
         for i in range(0, num):
-            head = random.randint(0xb0, 0xd7)
+            head = random.randint(0xB0, 0xD7)
             # 在head区号为55的那一块最后5个汉字是乱码,忽略了body[0xfa,0xfe]的部分
-            body = random.randint(0xa1, 0xf9)
+            body = random.randint(0xA1, 0xF9)
             tmpchr = bytes([head, body]).decode('gb2312')
             uchr = uchr + tmpchr
             x = start + self.fontSize * i + random.randint(0, gap) + gap * i
@@ -155,5 +155,4 @@ async def check_img_captcha(key, code):
 if __name__ == '__main__':
     ic = ImageChinese(fontColor=(100, 211, 90))
     uchr = ic.randChinese(4)
-    ic.save(os.path.join(settings.SITE_ROOT,
-                         'common', "vcode/%s.png" % uchr), 'png')
+    ic.save(os.path.join(settings.SITE_ROOT, 'common', "vcode/%s.png" % uchr), 'png')

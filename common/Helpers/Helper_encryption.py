@@ -3,7 +3,7 @@
 import hashlib
 
 
-class Encryption():
+class Encryption:
     @classmethod
     def get_md5(cls, pwd, salt=None):
         if salt:
@@ -20,7 +20,7 @@ class Encryption():
         for c in password:
             if c.isalpha():
                 password_begin = password.index(c)
-                password = password[password_begin].upper() + password[password_begin + 1: password_begin + 12]
+                password = password[password_begin].upper() + password[password_begin + 1 : password_begin + 12]
                 break
         return password
 

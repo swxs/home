@@ -11,8 +11,7 @@ from mongoengine.connection import connect
 
 class MyLoader(unittest.TestLoader):
     def getTestCaseNames(self, testCaseClass):
-        """Return a sorted sequence of method names found within testCaseClass
-        """
+        """Return a sorted sequence of method names found within testCaseClass"""
 
         def isTestMethod(attrname, testCaseClass=testCaseClass, prefix=self.testMethodPrefix):
             return attrname.startswith(prefix) and callable(getattr(testCaseClass, attrname))
@@ -50,10 +49,7 @@ def report_to_html(suite):
         runner.run(suite)
 
 
-REPORT_TARGET_DICT = {
-    "html": report_to_html,
-    "shell": report_to_shell
-}
+REPORT_TARGET_DICT = {"html": report_to_html, "shell": report_to_shell}
 
 
 def run_tests(target="shell"):

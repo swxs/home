@@ -7,5 +7,4 @@ from common.Utils.log_utils import getLogger
 
 log = getLogger("custom.handlers")
 
-URL_MAPPING_LIST = [
-]
+URL_MAPPING_LIST = []

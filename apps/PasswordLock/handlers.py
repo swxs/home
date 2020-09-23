@@ -24,13 +24,9 @@ class PasswordLockHandler(BaseAuthedHanlder):
     @render
     async def get(self, password_lock_id=None):
         if password_lock_id:
-            finds = await self.add_tokens({
-                "id": password_lock_id
-            })
+            finds = await self.add_tokens({"id": password_lock_id})
             password_lock = await PasswordLock.find(finds)
-            return SuccessData(
-                data=await password_lock.to_front()
-            )
+            return SuccessData(data=await password_lock.to_front())
         else:
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
@@ -38,13 +34,9 @@ class PasswordLockHandler(BaseAuthedHanlder):
             search = self.arguments.get('search', "")
             orderby = self.arguments.get("orderby", "")
 
-            searches = await self.add_tokens(
-                password_lock_schema.load(self.arguments, partial=True).data
-            )
+            searches = await self.add_tokens(password_lock_schema.load(self.arguments, partial=True).data)
             if search:
-                searches.update({
-                    "search": search
-                })
+                searches.update({"search": search})
 
             keys = []
             for _order in orderby.split(";"):
@@ -59,61 +51,40 @@ class PasswordLockHandler(BaseAuthedHanlder):
                 limit = 0
                 skip = 0
             password_lock_cursor = PasswordLock.search(searches, limit=limit, skip=skip).order_by(keys)
-            data = [await  password_lock.to_front() async for password_lock in password_lock_cursor]
+            data = [await password_lock.to_front() async for password_lock in password_lock_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(
-                data=pager.items,
-                info=pager.info
-            )
+            return SuccessData(data=pager.items, info=pager.info)
 
     @render
     async def post(self, password_lock_id=None):
         if password_lock_id:
-            finds = await self.add_tokens({
-                "id": password_lock_id
-            })
+            finds = await self.add_tokens({"id": password_lock_id})
             copys = password_lock_schema.load(self.arguments, partial=True).data
             password_lock = await PasswordLock.find_and_copy(finds, copys)
-            return SuccessData(
-                id=password_lock.id
-            )
+            return SuccessData(id=password_lock.id)
         else:
-            creates = await self.add_tokens(
-                password_lock_schema.load(self.arguments).data
-            )
+            creates = await self.add_tokens(password_lock_schema.load(self.arguments).data)
             password_lock = await PasswordLock.create(creates)
-            return SuccessData(
-                id=password_lock.id
-            )
+            return SuccessData(id=password_lock.id)
 
     @render
     async def put(self, password_lock_id=None):
-        finds = await self.add_tokens({
-            "id": password_lock_id
-        })
+        finds = await self.add_tokens({"id": password_lock_id})
         updates = password_lock_schema.load(self.arguments, partial=True).data
         password_lock = await PasswordLock.find_and_update(finds, updates)
-        return SuccessData(
-            id=password_lock.id
-        )
+        return SuccessData(id=password_lock.id)
 
     @render
     async def delete(self, password_lock_id=None):
-        finds = await self.add_tokens({
-            "id": password_lock_id
-        })
+        finds = await self.add_tokens({"id": password_lock_id})
         count = await PasswordLock.find_and_delete(finds)
-        return SuccessData(
-            count=count
-        )
+        return SuccessData(count=count)
 
     @render
     async def patch(self, password_lock_id=None):
         create_list = []
         for __create in self.arguments.get("create", []):
-            creates = await self.add_tokens(
-                password_lock_schema.load(__create).data
-            )
+            creates = await self.add_tokens(password_lock_schema.load(__create).data)
             password_lock = await PasswordLock.create(creates)
             create_list.append(password_lock.id)
 

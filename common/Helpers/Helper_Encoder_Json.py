@@ -5,9 +5,14 @@
 
 import json
 from functools import partial
-from .Helper_Encoder import (CONVERTERS, encoder)
+from .Helper_Encoder import CONVERTERS, encoder
 
-__all__ = ["dump", "dumps", "load", "loads", ]
+__all__ = [
+    "dump",
+    "dumps",
+    "load",
+    "loads",
+]
 
 
 class ComplexEncoder(json.JSONEncoder):

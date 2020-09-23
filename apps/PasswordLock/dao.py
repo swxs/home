@@ -23,4 +23,3 @@ class PasswordLock(BaseDAO):
     @classmethod
     async def get_password_lock_by_password_lock_id(cls, password_lock_id):
         return await cls.find(dict(id=password_lock_id))
-

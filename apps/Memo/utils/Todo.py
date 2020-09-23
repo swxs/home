@@ -10,6 +10,7 @@ TodoSchema = TodoModel.schema.as_marshmallow_schema()
 
 todo_schema = TodoSchema()
 
+
 class Todo(BaseTodo):
     def __init__(self, **kwargs):
         super(Todo, self).__init__(**kwargs)

@@ -10,6 +10,7 @@ UserSchema = UserModel.schema.as_marshmallow_schema()
 
 user_schema = UserSchema()
 
+
 class User(BaseUser):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

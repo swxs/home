@@ -37,4 +37,3 @@ class UserAuth(BaseDAO):
     @classmethod
     async def get_user_auth_by_user_auth_id(cls, user_auth_id):
         return await cls.find(dict(id=user_auth_id))
-

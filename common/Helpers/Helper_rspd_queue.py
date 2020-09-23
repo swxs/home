@@ -14,16 +14,13 @@ from common.Utils.utils import serialize
 
 class RspdQueue(metaclass=Singleton):
     """
-        答卷处理业务逻辑
+    答卷处理业务逻辑
     """
 
     # cmd 和对应的处理函数的映射
     CMD_WHAT_SURVEY_START = "survey_start"
     CMD_WHAT_SURVEY_END = "survey_end"
-    CMD_HANDLER_DICT = {
-        CMD_WHAT_SURVEY_START: "survey_start_handler",
-        CMD_WHAT_SURVEY_END: "survey_end_handler"
-    }
+    CMD_HANDLER_DICT = {CMD_WHAT_SURVEY_START: "survey_start_handler", CMD_WHAT_SURVEY_END: "survey_end_handler"}
 
     def __init__(self, channel="rspd_queue"):
         factory = MessageQueueFactory()

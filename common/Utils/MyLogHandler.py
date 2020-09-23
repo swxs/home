@@ -10,7 +10,9 @@ from stat import ST_MTIME, ST_CTIME
 
 
 class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
-    def __init__(self, filename, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False, atTime=None):
+    def __init__(
+        self, filename, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False, atTime=None
+    ):
         path = os.path.dirname(os.path.abspath(filename))
         if not os.path.exists(path):
             try:
@@ -18,7 +20,9 @@ class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
             except Exception as e:
                 pass
 
-        super(MyTimedRotatingFileHandler, self).__init__(filename, when, interval, backupCount, encoding, delay, utc, atTime)
+        super(MyTimedRotatingFileHandler, self).__init__(
+            filename, when, interval, backupCount, encoding, delay, utc, atTime
+        )
 
     def shouldRollover(self, record):
         t = int(time.time())

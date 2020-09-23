@@ -30,9 +30,4 @@ class Books69Spider(scrapy.Spider):
 
         next_page_list = sel.css('a.pager_next::attr(href)').extract()
         for next_page in next_page_list:
-            yield Request(next_page,
-                          method="GET",
-                          callback=self.parse)
-
-
-
+            yield Request(next_page, method="GET", callback=self.parse)

@@ -30,6 +30,5 @@ __all__ = [
     "DateTimeField",
     "ListField",
     "DictField",
-
     "ForeignIdField",
 ]

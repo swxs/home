@@ -34,7 +34,7 @@ class AuthTokner(object):
         timeout=JWT_TIMEOUT,
         leeway_time=JWT_TIMEOUT_LEEWAY_TIME,
         json_encoder=JWT_ENCODER,
-        issue=JWT_ISSUER
+        issue=JWT_ISSUER,
     ) -> None:
         self.key = key
         self.algorithm = algorithm
@@ -54,9 +54,7 @@ class AuthTokner(object):
         :return: jwt，字节型
         """
         utc_now = utc_now = datetime.datetime.utcnow()
-        headers = {
-
-        }
+        headers = {}
         payload = {
             'exp': utc_now + datetime.timedelta(seconds=self.timeout),
             'iat': utc_now,
@@ -74,12 +72,7 @@ class AuthTokner(object):
 
     def decode(self, token):
         header = jwt.get_unverified_header(token if isinstance(token, bytes) else token.encode('utf-8'))
-        payload = jwt.decode(
-            token,
-            key=self.key,
-            verify=self.verify,
-            leeway=self.leeway_time
-        )
+        payload = jwt.decode(token, key=self.key, verify=self.verify, leeway=self.leeway_time)
         del payload['exp']
         del payload['nbf']
         del payload['iat']

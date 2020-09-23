@@ -6,7 +6,7 @@
 
 import unittest
 import datetime
-from common.Helpers.Helper_Encoder_Msgpack import *
+from common.Helpers.Helper_Encoder_Msgpack import dumps, loads
 
 
 class MsgpackEncoderHelperTestCase(unittest.TestCase):
@@ -28,6 +28,7 @@ class MsgpackEncoderHelperTestCase(unittest.TestCase):
 
     def test_dumps_npint(self):
         import numpy as np
+
         msgpack_str = dumps({"npint": np.int(123)})
         self.assertEqual(msgpack_str, b'\x81\xa5npint{')
 
@@ -45,10 +46,12 @@ class MsgpackEncoderHelperTestCase(unittest.TestCase):
 
     def test_dumps_objectfield(self):
         from bson import ObjectId
+
         msgpack_str = dumps({"objfield": ObjectId("5c889900c33201480c4228a6")})
         self.assertEqual(msgpack_str, b'\x81\xa8objfield\xc7\x18.5c889900c33201480c4228a6')
 
     def test_loads_objectfield(self):
         from bson import ObjectId
+
         msgpack_str = loads(b'\x81\xa8objfield\xc7\x18.5c889900c33201480c4228a6')
         self.assertEqual(msgpack_str, {b"objfield": ObjectId("5c889900c33201480c4228a6")})

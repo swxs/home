@@ -10,15 +10,16 @@ from ftplib import FTP_TLS
 
 
 class FTPS(FTP_TLS):
-    def __init__(self, host='', user='', passwd='', acct='', keyfile=None,
-                 certfile=None, context=None, timeout=60): # 这里做过修改
+    def __init__(
+        self, host='', user='', passwd='', acct='', keyfile=None, certfile=None, context=None, timeout=60
+    ):  # 这里做过修改
         FTP_TLS.__init__(self, host, user, passwd, acct, keyfile, certfile, context, timeout)
-    
+
     def connect(self, host='', port=0, timeout=-999):
-        '''Connect to host.  Arguments are:
+        """Connect to host.  Arguments are:
         - host: hostname to connect to (string, default previous host)
         - port: port to connect to (integer, default previous port)
-        '''
+        """
         if host != '':
             self.host = host
         if port > 0:
@@ -36,19 +37,21 @@ class FTPS(FTP_TLS):
         except Exception as e:
             print(e)
         return self.welcome
-    
+
     def storbinary(self, cmd, fp, blocksize=8192, callback=None, rest=None):
         self.voidcmd('TYPE I')
         conn = self.transfercmd(cmd, rest)
         try:
             while 1:
                 buf = fp.read(blocksize)
-                if not buf: break
+                if not buf:
+                    break
                 conn.sendall(buf)
-                if callback: callback(buf)
+                if callback:
+                    callback(buf)
             # shutdown ssl layer
             if isinstance(conn, ssl.SSLSocket):
-                pass   # 这里做过修改
+                pass  # 这里做过修改
                 # conn.unwrap()
         finally:
             conn.close()

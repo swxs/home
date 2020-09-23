@@ -14,12 +14,7 @@ class NoModule(Exception):
 
 
 class Productor(object):
-    def __init__(self,
-                 root_dir: str,
-                 start_dir: str,
-                 base_module: object,
-                 temp_module: object,
-                 pattern: str = '*.py'):
+    def __init__(self, root_dir: str, start_dir: str, base_module: object, temp_module: object, pattern: str = '*.py'):
         """
         简介
         ----------
@@ -108,7 +103,11 @@ class Productor(object):
                         module = import_module(module_path)
                         for name in dir(module):
                             obj = getattr(module, name)
-                            if isinstance(obj, type) and issubclass(obj, self.base_module) and getattr(obj, "__module__") == module_path:
+                            if (
+                                isinstance(obj, type)
+                                and issubclass(obj, self.base_module)
+                                and getattr(obj, "__module__") == module_path
+                            ):
                                 self.__load_module(obj, module_path)
                     except Exception as e:
                         print(full_path, e)

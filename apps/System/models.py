@@ -24,7 +24,9 @@ class UserAuth(BaseModelDocument):
     ttype = fields.IntField(allow_none=True, enums=consts.USER_AUTH_TTYPE_LIST)
     identifier = fields.StringField(allow_none=True)
     credential = fields.StringField(allow_none=True)
-    ifverified = fields.IntField(allow_none=True, enums=consts.USER_AUTH_IFVERIFIED_LIST, default=consts.USER_AUTH_IFVERIFIED_FALSE)
+    ifverified = fields.IntField(
+        allow_none=True, enums=consts.USER_AUTH_IFVERIFIED_LIST, default=consts.USER_AUTH_IFVERIFIED_FALSE
+    )
 
     class Meta:
         indexes = [

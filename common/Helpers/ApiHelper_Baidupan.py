@@ -23,7 +23,7 @@ from common.Helpers.Helper_BufferReader import BufferReader
 
 try:
     requests.packages.urllib3.disable_warnings()
-except:
+except Exception:
     pass
 
 '''
@@ -34,7 +34,7 @@ BAIDUPAN_SERVER = 'pan.baidu.com'
 BAIDUPCS_SERVER = 'pcs.baidu.com'
 BAIDUPAN_HEADERS = {
     "Referer": "http://pan.baidu.com/disk/home",
-    "User-Agent": "netdisk;4.6.2.0;PC;PC-Windows;10.0.10240;WindowsBaiduYunGuanJia"
+    "User-Agent": "netdisk;4.6.2.0;PC;PC-Windows;10.0.10240;WindowsBaiduYunGuanJia",
 }
 
 
@@ -71,6 +71,7 @@ class LoginFailed(Exception):
     """因为帐号原因引起的登录失败异常
     如果是超时则是返回Timeout的异常
     """
+
     pass
 
 
@@ -109,7 +110,7 @@ def check_login(func):
                     if os.path.exists(path):
                         os.remove(path)
                     args[0]._initiate()
-            except:
+            except Exception:
                 raise LoginFailed('User unsigned in.')
         return ret
 
@@ -117,8 +118,8 @@ def check_login(func):
 
 
 class PCSBase(object):
-    """提供PCS类的基本方法
-    """
+    """提供PCS类的基本方法"""
+
     # 某些情况下会遇到请求多次被拦截。增加全局codeString方便应对
     codeString = None
 
@@ -147,8 +148,7 @@ class PCSBase(object):
         """通过测试返回最快的pcs服务器
         :returns: str -- 服务器地址
         """
-        ret = requests.get(
-            'https://pcs.baidu.com/rest/2.0/pcs/manage?method=listhost').content
+        ret = requests.get('https://pcs.baidu.com/rest/2.0/pcs/manage?method=listhost').content
         serverlist = [server['host'] for server in json.loads(ret)['list']]
         url_pattern = 'http://{0}/monitor.jpg'
         time_record = []
@@ -162,8 +162,7 @@ class PCSBase(object):
 
     @staticmethod
     def get_fastest_pcs_server():
-        """通过百度返回设置最快的pcs服务器
-        """
+        """通过百度返回设置最快的pcs服务器"""
         url = 'http://pcs.baidu.com/rest/2.0/pcs/file?app_id=250528&method=locateupload'
         ret = requests.get(url).content
         foo = json.loads(ret.decode('utf-8'))
@@ -204,8 +203,7 @@ class PCSBase(object):
     def _save_cookies(self):
         cookies_file = '.{0}.cookies'.format(self.username)
         with open(cookies_file, 'wb') as f:
-            pickle.dump(
-                requests.utils.dict_from_cookiejar(self.session.cookies), f)
+            pickle.dump(requests.utils.dict_from_cookiejar(self.session.cookies), f)
 
     def _load_cookies(self):
         cookies_file = f'.{self.username}.cookies'
@@ -224,7 +222,9 @@ class PCSBase(object):
 
     def _get_token(self):
         # Token
-        ret = self.session.get('https://passport.baidu.com/v2/api/?getapi&tpl=mn&apiver=v3&class=login&tt=%s&logintype=dialogLogin&callback=0').text.replace('\'', '\"')
+        ret = self.session.get(
+            'https://passport.baidu.com/v2/api/?getapi&tpl=mn&apiver=v3&class=login&tt=%s&logintype=dialogLogin&callback=0'
+        ).text.replace('\'', '\"')
         foo = json.loads(ret)
         logging.info('token %s' % foo['data']['token'])
         return foo['data']['token']
@@ -232,7 +232,9 @@ class PCSBase(object):
     def _get_captcha(self, code_string):
         # Captcha
         if code_string:
-            verify_code = self.captcha_func("https://passport.baidu.com/cgi-bin/genimage?" + code_string.decode('utf-8'))
+            verify_code = self.captcha_func(
+                "https://passport.baidu.com/cgi-bin/genimage?" + code_string.decode('utf-8')
+            )
         else:
             verify_code = ""
 
@@ -278,7 +280,7 @@ class PCSBase(object):
                 'rsakey': str(rsakey),
                 'crypttype': 12,
                 'ppui_logintime': '50918',
-                'callback': 'parent.bd__pcbs__oa36qm'
+                'callback': 'parent.bd__pcbs__oa36qm',
             }
             result = self.session.post('https://passport.baidu.com/v2/api/?login', data=login_data)
 
@@ -300,7 +302,7 @@ class PCSBase(object):
         logging.info('COOKIES' + str(self.session.cookies))
         try:
             self.user['BDUSS'] = self.session.cookies['BDUSS']
-        except:
+        except Exception:
             raise LoginFailed('Logging failed.')
         logging.info('user %s Logged in BDUSS: %s' % (self.username, self.user['BDUSS']))
 
@@ -310,7 +312,7 @@ class PCSBase(object):
         self._save_cookies()
 
     def _check_account_exception(self, content):
-        err_id = re.findall(b'err_no=([\d]+)', content)[0].decode('utf-8')
+        err_id = re.findall(rb"err_no=([\d]+)", content)[0].decode('utf-8')
 
         if err_id == '0':
             return
@@ -319,39 +321,45 @@ class PCSBase(object):
             # 如果用户需要外部认证(邮箱)
             auth_token = re.findall(b'authtoken=([^&]+)', content)[0]
             loginproxy_url = re.findall(b'loginproxy=([^&]+)', content)[0]
-            resp = self.session.get('https://passport.baidu.com/v2/sapi/authwidgetverify', params={
-                'authtoken': urlparse.unquote(auth_token.decode()),
-                'type': 'email',
-                'apiver': 'v3',
-                'action': 'send',
-                'vcode': '',
-                'questionAndAnswer': '',
-                'needsid': '',
-                'rsakey': '',
-                'countrycode': '',
-                'subpro': '',
-                'callback': '',
-                'tpl': 'mn',
-                'u': 'https://www.baidu.com/'
-            })
+            resp = self.session.get(
+                'https://passport.baidu.com/v2/sapi/authwidgetverify',
+                params={
+                    'authtoken': urlparse.unquote(auth_token.decode()),
+                    'type': 'email',
+                    'apiver': 'v3',
+                    'action': 'send',
+                    'vcode': '',
+                    'questionAndAnswer': '',
+                    'needsid': '',
+                    'rsakey': '',
+                    'countrycode': '',
+                    'subpro': '',
+                    'callback': '',
+                    'tpl': 'mn',
+                    'u': 'https://www.baidu.com/',
+                },
+            )
             if resp.ok:
                 while 1:
                     # get vcode
                     vcode = input('Verification Code> ')
 
-                    vresp = self.session.get('https://passport.baidu.com/v2/sapi/authwidgetverify', params={
-                        'authtoken': urlparse.unquote(auth_token.decode()),
-                        'type': 'email',
-                        'apiver': 'v3',
-                        'action': 'check',
-                        'vcode': vcode,
-                        'questionAndAnswer': '',
-                        'needsid': '',
-                        'rsakey': '',
-                        'countrycode': '',
-                        'subpro': '',
-                        'callback': ''
-                    })
+                    vresp = self.session.get(
+                        'https://passport.baidu.com/v2/sapi/authwidgetverify',
+                        params={
+                            'authtoken': urlparse.unquote(auth_token.decode()),
+                            'type': 'email',
+                            'apiver': 'v3',
+                            'action': 'check',
+                            'vcode': vcode,
+                            'questionAndAnswer': '',
+                            'needsid': '',
+                            'rsakey': '',
+                            'countrycode': '',
+                            'subpro': '',
+                            'callback': '',
+                        },
+                    )
 
                     vresp_data = json.loads(vresp.content.decode())
                     if vresp_data['errno'] == 110000:
@@ -376,7 +384,8 @@ class PCSBase(object):
             '120021': '登录失败,请在弹出的窗口操作,或重新登录',
             '500010': '登录过于频繁,请24小时后再试',
             '400031': '账号异常，请在当前网络环境下在百度网页端正常登录一次',
-            '401007': '您的手机号关联了其他帐号，请选择登录'}
+            '401007': '您的手机号关联了其他帐号，请选择登录',
+        }
         try:
             msg = error_message[err_id]
         except KeyError:
@@ -394,7 +403,7 @@ class PCSBase(object):
             'app_id': "250528",
             'BDUSS': self.user['BDUSS'],
             't': str(int(time.time())),
-            'bdstoken': self.user['token']
+            'bdstoken': self.user['token'],
         }
         if extra_params:
             params.update(extra_params)
@@ -424,9 +433,7 @@ class PCSBase(object):
                 self._remove_empty_items(files)
 
                 body = BufferReader(files, callback=callback)
-                headers.update({
-                    "Content-Type": body.content_type
-                })
+                headers.update({"Content-Type": body.content_type})
 
                 response = self.session.post(api, data=body, verify=False, headers=headers, **kwargs)
         else:
@@ -457,8 +464,7 @@ class PCS(PCSBase):
             .. note::
                 该函数返回值为字符串作为安全验证码输入
         """
-        super(PCS, self).__init__(username, password, captcha_func=captcha_callback,
-                                  verify_func=verify_callback)
+        super(PCS, self).__init__(username, password, captcha_func=captcha_callback, verify_func=verify_callback)
 
     def __err_handler(self, act, errno, callback=None, args=(), kwargs=None):
         """百度网盘下载错误控制
@@ -488,10 +494,7 @@ class PCS(PCSBase):
         def err_handler_generic():
             return
 
-        _act = {'download': err_handler_download,
-                'upload': err_handler_upload,
-                'generic': err_handler_generic
-                }
+        _act = {'download': err_handler_download, 'upload': err_handler_upload, 'generic': err_handler_generic}
 
         if act not in _act:
             raise Exception('行为未定义, 无法处理该行为的错误')
@@ -546,9 +549,7 @@ class PCS(PCSBase):
 
         """
 
-        params = {
-            'path': str(dest_dir) + "/" + str(filename)
-        }
+        params = {'path': str(dest_dir) + "/" + str(filename)}
 
         tmp_filename = ''.join(random.sample(string.ascii_letters, 10))
         files = {'file': (tmp_filename, file_handler)}
@@ -595,9 +596,7 @@ class PCS(PCSBase):
 
         """
 
-        params = {
-            'type': 'tmpfile'
-        }
+        params = {'type': 'tmpfile'}
         files = {'file': (str(int(time.time())), file_handler)}
         url = 'https://{0}/rest/2.0/pcs/file'.format(BAIDUPCS_SERVER)
         return self._request('file', 'upload', url=url, extra_params=params, callback=callback, files=files, **kwargs)
@@ -633,10 +632,7 @@ class PCS(PCSBase):
 
         """
 
-        params = {
-            'path': remote_path,
-            'ondup': ondup
-        }
+        params = {'path': remote_path, 'ondup': ondup}
         data = {
             'param': json.dumps({'block_list': block_list}),
         }
@@ -691,9 +687,7 @@ class PCS(PCSBase):
         :param remote_path: 需要下载的文件路径
         :type remote_path: str
         """
-        params = {
-            'path': remote_path
-        }
+        params = {'path': remote_path}
         url = 'https://{0}/rest/2.0/pcs/file'.format(BAIDUPCS_SERVER)
         return self._request('file', 'locatedownload', url=url, extra_params=params, **kwargs)
 
@@ -709,9 +703,7 @@ class PCS(PCSBase):
         """
 
         def get_url(dlink):
-            return self.session.get(dlink,
-                                    headers=BAIDUPAN_HEADERS,
-                                    stream=True).url
+            return self.session.get(dlink, headers=BAIDUPAN_HEADERS, stream=True).url
 
         if not hasattr(self, 'dsign'):
             self.get_sign()
@@ -722,10 +714,7 @@ class PCS(PCSBase):
         file_list = []
         jdata = json.loads(self.meta(remote_path).content)
         if jdata['errno'] != 0:
-            jdata = self.__err_handler('generic', jdata['errno'],
-                                       self.meta,
-                                       args=(remote_path,)
-                                       )
+            jdata = self.__err_handler('generic', jdata['errno'], self.meta, args=(remote_path,))
         logging.debug('[*]' + str(jdata))
         for i, entry in enumerate(jdata['info']):
             url = entry['dlink']
@@ -750,56 +739,56 @@ class PCS(PCSBase):
             "fid_list": json.dumps(fsid_list),
         }
         reqheader = {"Referer": "https://pan.baidu.com/share/link?shareid=" + shareid + "&uk=" + uk}
-        resp = self._request(None, data=data,
-                             extra_params={"sign": sign, "clienttype": 0, "timestamp": int(time.time())}, url=url,
-                             headers=reqheader)
+        resp = self._request(
+            None,
+            data=data,
+            extra_params={"sign": sign, "clienttype": 0, "timestamp": int(time.time())},
+            url=url,
+            headers=reqheader,
+        )
         return resp
 
     def save_album_file(self, album_id, from_uk, save_path, fsid_list):
-        data = {
-            "from_uk": from_uk,
-            "album_id": album_id,
-            "to_path": save_path,
-            "fsid_list": fsid_list}
+        data = {"from_uk": from_uk, "album_id": album_id, "to_path": save_path, "fsid_list": fsid_list}
         url = "http://pan.baidu.com/pcloud/album/transfertask/create"
         return self._request(None, data=data, url=url)
 
     def _verify_shared_file(self, shareid, uk, password, vcode="", vcode_str=""):
-        data = {
-            "pwd": password,
-            "vcode": vcode,
-            "vcode_str": vcode_str,
-            "shareid": shareid,
-            "uk": uk
-        }
+        data = {"pwd": password, "vcode": vcode, "vcode_str": vcode_str, "shareid": shareid, "uk": uk}
         url = "http://pan.baidu.com/share/verify?shareid=" + shareid + "&uk=" + uk
         return json.loads(self._request(None, data=data, url=url).content)
 
     def _handle_shared_captcha(self, shareid, uk, password):  # 处理分享页的验证码
         rep = json.loads(
-            self._request(None, data={"prod": "shareverify"},
-                          url="https://pan.baidu.com/api/getcaptcha").content.decode('utf-8'))
+            self._request(
+                None, data={"prod": "shareverify"}, url="https://pan.baidu.com/api/getcaptcha"
+            ).content.decode('utf-8')
+        )
 
         vcode = self.captcha_func("https://pan.baidu.com/genimage?" + str(rep["vcode_str"]))
         return self._verify_shared_file(shareid, uk, password, vcode=vcode, vcode_str=str(rep["vcode_str"]))
 
     def _save_shared_file_list(self, shareid, uk, path, file_list):
         url = "http://pan.baidu.com/share/transfer?shareid=" + shareid + "&from=" + uk
-        data = {
-            "filelist": json.dumps(file_list),
-            "path": path
-        }
+        data = {"filelist": json.dumps(file_list), "path": path}
         return json.loads(self._request(None, url=url, data=data).content)
 
     def list_shared_folder(self, shareid, uk, path, page=1, number=100):
-        return json.loads(self.list_files(path, extra_params={"shareid": shareid,
-                                                              "uk": uk,
-                                                              "web": '1',
-                                                              "page": page,
-                                                              "number": number,
-                                                              "showempty": 0,
-                                                              "clienttype": 0
-                                                              }, is_share=True).text)
+        return json.loads(
+            self.list_files(
+                path,
+                extra_params={
+                    "shareid": shareid,
+                    "uk": uk,
+                    "web": '1',
+                    "page": page,
+                    "number": number,
+                    "showempty": 0,
+                    "clienttype": 0,
+                },
+                is_share=True,
+            ).text
+        )
 
     def _scan_folder(self, shareid, uk, dir_path, filter_callback=None, init_file_list=None):
         filelistcurrentdict = {}
@@ -835,8 +824,9 @@ class PCS(PCSBase):
         m = re.search(r"uk=(\d+)", target_url)
         if m:
             uk = m.group(1)
-        html = self._request(None,
-                             url="https://pan.baidu.com/share/link?shareid=" + str(shareid) + "&uk=" + str(uk)).content
+        html = self._request(
+            None, url="https://pan.baidu.com/share/link?shareid=" + str(shareid) + "&uk=" + str(uk)
+        ).content
         pwindex = html.decode('utf-8').find("请输入提取密码")
 
         if pwindex > -1:  # 需要密码
@@ -872,12 +862,13 @@ class PCS(PCSBase):
             context = json.loads(m.group(1))
             try:
                 fl = context['file_list']['list']  # Root FileList
-            except:
+            except Exception:
                 raise ValueError("File_List Not Found in HTML from: " + initurl)
             for item in fl:
                 if int(item["isdir"]) == 1:
-                    downloadurllist[item["server_filename"]] = self._scan_folder(shareid, uk,
-                                                                                 initial_path + item["server_filename"])
+                    downloadurllist[item["server_filename"]] = self._scan_folder(
+                        shareid, uk, initial_path + item["server_filename"]
+                    )
                 else:
                     downloadurllist[item["server_filename"]] = item
 
@@ -891,7 +882,7 @@ class PCS(PCSBase):
         return downloadurllist
 
     def save_share_list(self, url, path, password=None, filter_callback=None):
-        """ 保存分享文件列表到自己的网盘, 支持密码, 支持文件过滤的回调函数
+        """保存分享文件列表到自己的网盘, 支持密码, 支持文件过滤的回调函数
         :param url: 分享的url
         :type url: str
 
@@ -916,10 +907,10 @@ class PCS(PCSBase):
         context是从分享页面的html中提取的json, 里面保存了分享文件列表
         暂时有用的是file_list, uk, shareid
         context = {
-            "typicalPath": "\/\u65b0\u5efa\u6587\u4ef6\u5939(1)\/[SumiSora][Yosuga_no_Sora][BDRip][BIG5][720P]",
+            "typicalPath": "/\u65b0\u5efa\u6587\u4ef6\u5939(1)/[SumiSora][Yosuga_no_Sora][BDRip][BIG5][720P]",
             "self": false,
             "username": "",
-            "photo": "http:\/\/himg.bdimg.com\/sys\/portrait\/item\/0237bb1b.jpg",
+            "photo": "http://himg.bdimg.com/sys/portrait/item/0237bb1b.jpg",
             "uk": 924798052,
             "ctime": 1455779404,
             "flag": 2,
@@ -951,7 +942,7 @@ class PCS(PCSBase):
                     "extent_tinyint2": "0",
                     "extent_tinyint3": "0",
                     "extent_tinyint4": "0",
-                    "path": "\/\u65b0\u5efa\u6587\u4ef6\u5939(1)\/[SumiSora][Yosuga_no_Sora][BDRip][BIG5][720P]",
+                    "path": "/\u65b0\u5efa\u6587\u4ef6\u5939(1)/[SumiSora][Yosuga_no_Sora][BDRip][BIG5][720P]",
                     "root_ns": 465254146,
                     "md5": "",
                     "file_key": ""
@@ -1029,11 +1020,7 @@ class PCS(PCSBase):
             shareid = str(context['shareid'])
             ret = {"filelist": []}
             for f in file_list:
-                file_obj = {
-                    'filename': f['server_filename'],
-                    'size': f['size'],
-                    'isdir': f['isdir']
-                }
+                file_obj = {'filename': f['server_filename'], 'size': f['size'], 'isdir': f['isdir']}
                 if not filter_callback or filter_callback(file_obj):
                     ret['filelist'].append(f['path'])
             save_share_file_ret = self._save_shared_file_list(shareid, uk, path, ret['filelist'])
@@ -1076,8 +1063,7 @@ class PCS(PCSBase):
             'path': remote_path,
         }
         url = 'https://{0}/rest/2.0/pcs/file'.format(BAIDUPCS_SERVER)
-        return self._request('file', 'download', url=url,
-                             extra_params=params, **kwargs)
+        return self._request('file', 'download', url=url, extra_params=params, **kwargs)
 
     def get_streaming(self, path, stype="M3U8_AUTO_480", **kwargs):
         """获得视频的m3u8列表
@@ -1090,10 +1076,7 @@ class PCS(PCSBase):
         :return: str 播放(列表)需要的信息
         """
 
-        params = {
-            'path': path,
-            'type': stype
-        }
+        params = {'path': path, 'type': stype}
         url = 'https://{0}/rest/2.0/pcs/file'.format(BAIDUPCS_SERVER)
         while True:
             ret = self._request('file', 'streaming', url=url, extra_params=params, **kwargs)
@@ -1134,17 +1117,11 @@ class PCS(PCSBase):
 
         """
 
-        data = {
-            'path': remote_path,
-            'isdir': "1",
-            "size": "",
-            "block_list": "[]"
-        }
+        data = {'path': remote_path, 'isdir': "1", "size": "", "block_list": "[]"}
         # 奇怪的是创建新目录的method是post
         return self._request('create', 'post', data=data, **kwargs)
 
-    def list_files(self, remote_path, by="name", order="desc",
-                   limit=None, extra_params=None, is_share=False, **kwargs):
+    def list_files(self, remote_path, by="name", order="desc", limit=None, extra_params=None, is_share=False, **kwargs):
         """获取目录下的文件列表.
 
         :param remote_path: 网盘中目录的路径，必须以 / 开头。
@@ -1196,8 +1173,9 @@ class PCS(PCSBase):
         params['order'] = by
         params['desc'] = desc
         if is_share:
-            return self._request('/share/list', None, extra_params=params, url="https://pan.baidu.com/share/list",
-                                 **kwargs)
+            return self._request(
+                '/share/list', None, extra_params=params, url="https://pan.baidu.com/share/list", **kwargs
+            )
         return self._request('list', 'list', extra_params=params, **kwargs)
 
     def move(self, path_list, dest, **kwargs):
@@ -1218,14 +1196,9 @@ class PCS(PCSBase):
             else:
                 return os.path.basename(path)
 
-        params = {
-            'opera': 'move'
-        }
+        params = {'opera': 'move'}
         data = {
-            'filelist': json.dumps([{
-                "path": path,
-                "dest": dest,
-                "newname": __path(path)} for path in path_list]),
+            'filelist': json.dumps([{"path": path, "dest": dest, "newname": __path(path)} for path in path_list]),
         }
         url = 'http://{0}/api/filemanager'.format(BAIDUPAN_SERVER)
         return self._request('filemanager', 'move', url=url, data=data, extra_params=params, **kwargs)
@@ -1239,14 +1212,10 @@ class PCS(PCSBase):
         """
         foo = []
         for path, newname in rename_pair_list:
-            foo.append({'path': path,
-                        'newname': newname
-                        })
+            foo.append({'path': path, 'newname': newname})
 
         data = {'filelist': json.dumps(foo)}
-        params = {
-            'opera': 'rename'
-        }
+        params = {'opera': 'rename'}
 
         url = 'http://{0}/api/filemanager'.format(BAIDUPAN_SERVER)
         logging.debug('rename ' + str(data) + 'URL:' + url)
@@ -1270,14 +1239,9 @@ class PCS(PCSBase):
             else:
                 return os.path.basename(path)
 
-        params = {
-            'opera': 'copy'
-        }
+        params = {'opera': 'copy'}
         data = {
-            'filelist': json.dumps([{
-                "path": path,
-                "dest": dest,
-                "newname": __path(path)} for path in path_list]),
+            'filelist': json.dumps([{"path": path, "dest": dest, "newname": __path(path)} for path in path_list]),
         }
         url = 'http://{0}/api/filemanager'.format(BAIDUPAN_SERVER)
         return self._request('filemanager', 'copy', url=url, data=data, extra_params=params, **kwargs)
@@ -1291,9 +1255,7 @@ class PCS(PCSBase):
 
 
         """
-        data = {
-            'filelist': json.dumps([path for path in path_list])
-        }
+        data = {'filelist': json.dumps([path for path in path_list])}
         url = 'http://{0}/api/filemanager?opera=delete'.format(BAIDUPAN_SERVER)
         return self._request('filemanager', 'delete', url=url, data=data, **kwargs)
 
@@ -1333,19 +1295,18 @@ class PCS(PCSBase):
                 'fid_list': json.dumps([int(fid) for fid in file_ids]),
                 'pwd': pwd,
                 'schannel': 4,
-                'channel_list': json.dumps([])
+                'channel_list': json.dumps([]),
             }
         else:
             data = {
                 'fid_list': json.dumps([int(fid) for fid in file_ids]),
                 'schannel': 0,
-                'channel_list': json.dumps([])
+                'channel_list': json.dumps([]),
             }
         url = 'http://pan.baidu.com/share/set'
         return self._request('share/set', '', url=url, data=data, **kwargs)
 
-    def list_streams(self, file_type, start=0, limit=1000, order='time', desc='1',
-                     filter_path=None, **kwargs):
+    def list_streams(self, file_type, start=0, limit=1000, order='time', desc='1', filter_path=None, **kwargs):
         """以视频、音频、图片及文档四种类型的视图获取所创建应用程序下的
         文件列表.
 
@@ -1389,8 +1350,7 @@ class PCS(PCSBase):
             'filter_path': filter_path,
         }
         url = 'http://pan.baidu.com/api/categorylist'
-        return self._request('categorylist', 'list', url=url, extra_params=params,
-                             **kwargs)
+        return self._request('categorylist', 'list', url=url, extra_params=params, **kwargs)
 
     def add_download_task(self, source_url, remote_path, selected_idx=(), **kwargs):
         """
@@ -1413,8 +1373,7 @@ class PCS(PCSBase):
                 'save_path': remote_path,
             }
             url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
-            return self._request('services/cloud_dl', 'add_task', url=url,
-                                 data=data, **kwargs)
+            return self._request('services/cloud_dl', 'add_task', url=url, data=data, **kwargs)
 
     def add_torrent_task(self, torrent_path, save_path='/', selected_idx=(), **kwargs):
         """
@@ -1470,16 +1429,13 @@ class PCS(PCSBase):
             'selected_idx': selected_idx,
             'task_from': '1',
             'source_path': remote_path,
-            'type': '2'  # 2 is torrent file
+            'type': '2',  # 2 is torrent file
         }
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
         return self._request('create', 'add_task', url=url, data=data, **kwargs)
 
     def _get_torrent_info(self, torrent_path):
-        data = {
-            'source_path': torrent_path,
-            'type': '2'  # 2 is torrent
-        }
+        data = {'source_path': torrent_path, 'type': '2'}  # 2 is torrent
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
 
         return self._request('cloud_dl', 'query_sinfo', url=url, data=data, timeout=30)
@@ -1506,18 +1462,14 @@ class PCS(PCSBase):
             'save_path': remote_path,
             'selected_idx': selected_idx,
             'task_from': '1',
-            'type': '4'  # 4 is magnet
+            'type': '4',  # 4 is magnet
         }
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
 
         return self._request('create', 'add_task', url=url, data=data, timeout=30)
 
     def _get_magnet_info(self, magnet):
-        data = {
-            'source_url': magnet,
-            'save_path': '/',
-            'type': '4'  # 4 is magnet
-        }
+        data = {'source_url': magnet, 'save_path': '/', 'type': '4'}  # 4 is magnet
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
 
         return self._request('cloud_dl', 'query_magnetinfo', url=url, data=data, timeout=30)
@@ -1553,9 +1505,9 @@ class PCS(PCSBase):
 
                                 "finish_time":"1391620757",
 
-                                "save_path":"\/",
+                                "save_path":"/",
 
-                                "source_url":"\/saki-nation04gbcn.torrent",
+                                "source_url":"/saki-nation04gbcn.torrent",
 
                                 "task_name":"[KTXP][Saki-National][04][GB_CN][720p]",
 
@@ -1586,8 +1538,7 @@ class PCS(PCSBase):
             'op_type': operate_type,
         }
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
-        return self._request('services/cloud_dl', 'query_task', url=url,
-                             extra_params=params, **kwargs)
+        return self._request('services/cloud_dl', 'query_task', url=url, extra_params=params, **kwargs)
 
     def download_tasks_number(self):
         """获取离线任务总数
@@ -1598,8 +1549,18 @@ class PCS(PCSBase):
         foo = json.loads(ret)
         return foo['total']
 
-    def list_download_tasks(self, need_task_info="1", asc="0", start=0, create_time=None, limit=1000, status="255",
-                            source_url=None, remote_path=None, **kwargs):
+    def list_download_tasks(
+        self,
+        need_task_info="1",
+        asc="0",
+        start=0,
+        create_time=None,
+        limit=1000,
+        status="255",
+        source_url=None,
+        remote_path=None,
+        **kwargs,
+    ):
         """查询离线下载任务ID列表及任务信息.
 
         :param need_task_info: 是否需要返回任务信息:
@@ -1690,8 +1651,7 @@ class PCS(PCSBase):
             'asc': asc,
             'source_url': source_url,
             'remote_path': remote_path,
-            'create_time': create_time
-
+            'create_time': create_time,
         }
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
         return self._request('services/cloud_dl', 'list_task', url=url, extra_params=params, **kwargs)
@@ -1711,8 +1671,7 @@ class PCS(PCSBase):
             'task_id': task_id,
         }
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
-        return self._request('services/cloud_dl', 'cancel_task', url=url,
-                             data=data, **kwargs)
+        return self._request('services/cloud_dl', 'cancel_task', url=url, data=data, **kwargs)
 
     def delete_download_task(self, task_id, **kwargs):
         """删除离线下载任务.
@@ -1726,8 +1685,7 @@ class PCS(PCSBase):
             'task_id': task_id,
         }
         url = 'http://{0}/rest/2.0/services/cloud_dl'.format(BAIDUPAN_SERVER)
-        return self._request('services/cloud_dl', 'delete_task', url=url,
-                             data=data, **kwargs)
+        return self._request('services/cloud_dl', 'delete_task', url=url, data=data, **kwargs)
 
     def list_recycle_bin(self, order="time", desc="1", start=0, limit=1000, page=1, **kwargs):
         # Done
@@ -1742,14 +1700,7 @@ class PCS(PCSBase):
             格式同 list_files
         """
 
-        params = {
-            'start': start,
-            'num': limit,
-            'dir': '/',
-            'order': order,
-            'desc': desc,
-            'page': page
-        }
+        params = {'start': start, 'num': limit, 'dir': '/', 'order': order, 'desc': desc, 'page': page}
         url = 'http://{0}/api/recycle/list'.format(BAIDUPAN_SERVER)
         return self._request('recycle', 'list', url=url, extra_params=params, **kwargs)
 
@@ -1761,9 +1712,7 @@ class PCS(PCSBase):
         :return: requests.Response 对象
         """
 
-        data = {
-            'fidlist': json.dumps(fs_ids)
-        }
+        data = {'fidlist': json.dumps(fs_ids)}
         url = 'http://{0}/api/recycle/restore'.format(BAIDUPAN_SERVER)
         return self._request('recycle', 'restore', data=data, **kwargs)
 
@@ -1843,11 +1792,13 @@ class PCS(PCSBase):
             content_crc32 = crc32(block, content_crc32).conjugate()
             content_md5.update(block)
 
-        data = {'path': path,
-                'content-length': content_length,
-                'content-md5': content_md5.hexdigest(),
-                'slice-md5': slice_md5,
-                'content-crc32': '%d' % (content_crc32.conjugate() & 0xFFFFFFFF)}
+        data = {
+            'path': path,
+            'content-length': content_length,
+            'content-md5': content_md5.hexdigest(),
+            'slice-md5': slice_md5,
+            'content-crc32': '%d' % (content_crc32.conjugate() & 0xFFFFFFFF),
+        }
         logging.debug('RAPIDUPLOAD DATA ' + str(data))
         # url = 'http://pan.baidu.com/api/rapidupload'
         return self._request('rapidupload', 'rapidupload', data=data, **kwargs)
@@ -1864,11 +1815,7 @@ class PCS(PCSBase):
         :return: requests.Repsonse
         返回结果和list_files一样结构
         """
-        params = {'dir': path,
-                  'recursion': recursion,
-                  'key': keyword,
-                  'page': page,
-                  'num': limit}
+        params = {'dir': path, 'recursion': recursion, 'key': keyword, 'page': page, 'num': limit}
 
         # url = 'http://pan.baidu.com/api/search'
 
@@ -1887,11 +1834,7 @@ class PCS(PCSBase):
             .. note::
                 如果返回 HTTP 404 说明该文件不存在缩略图形式
         """
-        params = {'ec': 1,
-                  'path': path,
-                  'quality': quality,
-                  'width': width,
-                  'height': height}
+        params = {'ec': 1, 'path': path, 'quality': quality, 'width': width, 'height': height}
 
         url = 'http://{0}/rest/2.0/pcs/thumbnail'.format(BAIDUPCS_SERVER)
         return self._request('thumbnail', 'generate', url=url, extra_params=params, **kwargs)
@@ -1920,7 +1863,7 @@ class PCS(PCSBase):
 
                         "fs_id": 文件id,
 
-                        "path": "\/\u5c0f\u7c73\/mi2s\u5237recovery.rar",
+                        "path": "/\u5c0f\u7c73/mi2s\u5237recovery.rar",
 
                         "server_filename": "mi2s\u5237recovery.rar",
 
@@ -1997,9 +1940,6 @@ class PCS(PCSBase):
 
         """
 
-        data = {'path': path,
-                'size': size,
-                'isdir': 0,
-                'block_list': json.dumps(block_list)}
+        data = {'path': path, 'size': size, 'isdir': 0, 'block_list': json.dumps(block_list)}
 
         return self._request('precreate', 'post', data=data, **kwargs)

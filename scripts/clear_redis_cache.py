@@ -8,4 +8,10 @@ from common.Helpers.DBHelper_Redis import redis_helper
 
 if __name__ == "__main__":
     # 清除所有缓存
-    redis_helper.run_script("SCAN_DEL_WITH_PREFIXLUA", ["IBF*", ], [])
+    redis_helper.run_script(
+        "SCAN_DEL_WITH_PREFIXLUA",
+        [
+            "IBF*",
+        ],
+        [],
+    )

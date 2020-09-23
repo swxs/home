@@ -16,6 +16,7 @@ def retry(retry_times=5, fixed_sleep=0, retry_on_exception=Exception, *dargs):
     def decorator(func):
 
         if is_coroutine(func):
+
             @functools.wraps(func)
             async def wrapped(*args, **kwargs):
                 for _ in range(retry_times):
@@ -29,6 +30,7 @@ def retry(retry_times=5, fixed_sleep=0, retry_on_exception=Exception, *dargs):
             return wrapped
 
         else:
+
             @functools.wraps(func)
             def wrapped(*args, **kwargs):
                 for _ in range(retry_times):

@@ -64,8 +64,7 @@ def gen_dispatcher(module_name_list):
                     base_dispatchers.append(d2)
                 elif issubclass(d2, d1):
                     base_dispatchers.append(d1)
-        dispatchers.extend(
-            list(set(module_dispatchers) - set(base_dispatchers)))
+        dispatchers.extend(list(set(module_dispatchers) - set(base_dispatchers)))
 
     Dispatcher = type('Dispatcher', tuple(dispatchers), {})
     Service = type('Service', tuple(thrifts_list), {'thrift_services': services_set})
@@ -74,12 +73,12 @@ def gen_dispatcher(module_name_list):
 
 def make_server(port=None, module_list=None):
     if port:
-        server_socket = TAsyncServerSocket(
-            host="0.0.0.0", port=port, client_timeout=None)
+        server_socket = TAsyncServerSocket(host="0.0.0.0", port=port, client_timeout=None)
     else:
         raise ValueError("port must be provided.")
     try:
         import socket
+
         s = socket.socket()
         s.bind(('0.0.0.0', port))
         s.close()
@@ -88,9 +87,10 @@ def make_server(port=None, module_list=None):
     server_socket.listen()
 
     rpc_server = TAsyncServer(
-        None, server_socket,
+        None,
+        server_socket,
         iprot_factory=TAsyncBinaryProtocolFactory(),
-        itrans_factory=TAsyncBufferedTransportFactory()
+        itrans_factory=TAsyncBufferedTransportFactory(),
     )
     rpc_server.start()
 

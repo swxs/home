@@ -20,7 +20,7 @@ if __name__ == "__main__":
         MAIN_SITE_PORT = int(sys.argv[1])
     else:
         MAIN_SITE_PORT = settings.SITE_PORT
-        
+
     tornado.locale.load_translations(settings.settings.get('translations'))
     application = IBApplication(**settings.settings)
     application.register_handlers(os.path.join(settings.SITE_ROOT))

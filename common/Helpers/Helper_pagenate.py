@@ -70,22 +70,23 @@ class Page(list):
         list.__init__(self, self.items)
 
     def __str__(self):
-        return ("Page:\n"
-                "Collection type:        {0.collection_type}\n"
-                "Current page:           {0.page}\n"
-                "First item:             {0.first_item}\n"
-                "Last item:              {0.last_item}\n"
-                "First page:             {0.first_page}\n"
-                "Last page:              {0.last_page}\n"
-                "Previous page:          {0.previous_page}\n"
-                "Next page:              {0.next_page}\n"
-                "Items per page:         {0.items_per_page}\n"
-                "Total number of items:  {0.item_count}\n"
-                "Number of pages:        {0.page_count}\n"
-                ).format(self)
+        return (
+            "Page:\n"
+            "Collection type:        {0.collection_type}\n"
+            "Current page:           {0.page}\n"
+            "First item:             {0.first_item}\n"
+            "Last item:              {0.last_item}\n"
+            "First page:             {0.first_page}\n"
+            "Last page:              {0.last_page}\n"
+            "Previous page:          {0.previous_page}\n"
+            "Next page:              {0.next_page}\n"
+            "Items per page:         {0.items_per_page}\n"
+            "Total number of items:  {0.item_count}\n"
+            "Number of pages:        {0.page_count}\n"
+        ).format(self)
 
     def __repr__(self):
-        return ("<paginate.Page: Page {0}/{1}>".format(self.page, self.page_count))
+        return "<paginate.Page: Page {0}/{1}>".format(self.page, self.page_count)
 
     @property
     def info(self):
@@ -99,7 +100,7 @@ class Page(list):
                 "last_item": self.last_item,
                 "previous_page": self.previous_page,
                 "next_page": self.next_page,
-                "item_per_page": self.items_per_page
+                "item_per_page": self.items_per_page,
             }
         else:
             return {}

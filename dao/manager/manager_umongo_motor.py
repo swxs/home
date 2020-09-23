@@ -6,8 +6,10 @@
 import asyncio
 from collections import defaultdict
 from pymongo import ASCENDING, DESCENDING
-from pymongo.errors import (DuplicateKeyError, )
-from mongoengine import (NotUniqueError, ValidationError, DoesNotExist)
+from pymongo.errors import (
+    DuplicateKeyError,
+)
+from mongoengine import NotUniqueError, ValidationError, DoesNotExist
 from web.consts import undefined
 from web.exceptions import ApiException, Info
 from ..fields import DictField

@@ -19,7 +19,7 @@ log = getLogger("memorize")
 __all__ = ["clear", "upgrade", "cache", "memorize"]
 
 
-class MemorizeHelper():
+class MemorizeHelper:
     __metaclass__ = Singleton
 
     def __init__(self):
@@ -183,7 +183,7 @@ def cache(function):
                 obj = memorize_helper.OBJ_DICT[sub_key]
                 try:
                     print(obj.id)
-                except:
+                except Exception:
                     obj = function(*args, **kwargs)  # 查询获取对象
                     new_obj = True
             else:

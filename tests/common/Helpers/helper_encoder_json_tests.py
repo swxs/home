@@ -6,7 +6,7 @@
 
 import unittest
 import datetime
-from common.Helpers.Helper_Encoder_Json import *
+from common.Helpers.Helper_Encoder_Json import dumps, loads
 
 
 class JsonEncoderHelperTestCase(unittest.TestCase):
@@ -20,6 +20,7 @@ class JsonEncoderHelperTestCase(unittest.TestCase):
 
     def test_dumps_npint(self):
         import numpy as np
+
         json_str = dumps({"npint": np.int(123)})
         self.assertEqual(json_str, '{"npint": 123}')
 

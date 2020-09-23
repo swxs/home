@@ -20,15 +20,15 @@ class Helper_mongodb(object, metaclass=Singleton):
         self.MONGODB_USERNAME = settings.MONGODB_USERNAME
         self.MONGODB_PASSWORD = settings.MONGODB_PASSWORD
         self.MONGODB_AUTHDB = settings.MONGODB_AUTHDB
-        
+
         self.MONGO_DUMP_DIR = settings.STATIC_DBBACK_PATH
-    
+
     def dump(self, gzip=True):
         if sys.platform == 'win32':
             MONGODUMP_EXE = 'mongodump.exe'
         else:
             MONGODUMP_EXE = 'mongodump'
-        
+
         args = list()
         if self.MONGODB_ADDRESS:
             args.append("--host {MONGODB_ADDRESS}".format(MONGODB_ADDRESS=self.MONGODB_ADDRESS))
@@ -42,13 +42,13 @@ class Helper_mongodb(object, metaclass=Singleton):
             args.append("-p {MONGODB_PASSWORD}".format(MONGODB_PASSWORD=self.MONGODB_PASSWORD))
         if self.MONGODB_AUTHDB:
             args.append("--authenticationDatabase {MONGODB_AUTHDB}".format(MONGODB_AUTHDB=self.MONGODB_AUTHDB))
-        
+
         filename = os.path.join(self.MONGO_DUMP_DIR, "{now:%Y%m%d%H%M%S}".format(now=datetime.datetime.now()))
         args.append("--out {filename}".format(filename=filename))
-        
+
         if gzip:
             args.append("--gzip")
-        
+
         cmd = '{MONGODUMP_EXE} {MONGODUMP_ARGS}'.format(MONGODUMP_EXE=MONGODUMP_EXE, MONGODUMP_ARGS=" ".join(args))
         os.system(cmd)
 

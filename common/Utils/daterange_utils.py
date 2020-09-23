@@ -22,11 +22,7 @@ WEEK_TYPE_LIST = [
 NEAR_HALF_YEAR = 1
 FRONT_HALF_YEAR = 2
 BEHAND_HALF_YEAR = 3
-HALF_YEAR_TYPE_LIST = [
-    (NEAR_HALF_YEAR, '最近半年'),
-    (FRONT_HALF_YEAR, '上半年'),
-    (BEHAND_HALF_YEAR, '下半年')
-]
+HALF_YEAR_TYPE_LIST = [(NEAR_HALF_YEAR, '最近半年'), (FRONT_HALF_YEAR, '上半年'), (BEHAND_HALF_YEAR, '下半年')]
 
 
 def convert_date_to_datetime(func):
@@ -86,7 +82,9 @@ def get_last_quarter(base=arrow.utcnow()):
 
 
 def get_shift_quarter(n, base=arrow.utcnow()):
-    return arrow.get(base).replace(month=(((arrow.get(base).month + 2) // 3 - 1) * 3 + 1), day=1).shift(quarters=n).date()
+    return (
+        arrow.get(base).replace(month=(((arrow.get(base).month + 2) // 3 - 1) * 3 + 1), day=1).shift(quarters=n).date()
+    )
 
 
 def get_current_year(base=arrow.utcnow()):

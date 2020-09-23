@@ -7,7 +7,6 @@ import datetime
 import signal
 import multiprocessing
 from typing import Optional
-from importlib import reload
 from importlib import import_module
 from thriftpy2.contrib.aio.protocol.binary import TAsyncBinaryProtocolFactory
 from thriftpy2.contrib.aio.transport.buffered import TAsyncBufferedTransportFactory
@@ -50,11 +49,7 @@ class TAsyncServer(TServer):
             signal.signal(signal.SIGUSR1, lambda sig, frame: self.reload())
             signal.signal(signal.SIGTERM, lambda sig, frame: self.shutdown())
 
-        TServer.__init__(
-            self,
-            *args,
-            **kwargs
-        )
+        TServer.__init__(self, *args, **kwargs)
         self.closed = False
         self.num_processes = 0
         self._task_id = None

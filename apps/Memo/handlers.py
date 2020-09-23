@@ -24,13 +24,9 @@ class TodoHandler(BaseAuthedHanlder):
     @render
     async def get(self, todo_id=None):
         if todo_id:
-            finds = await self.add_tokens({
-                "id": todo_id
-            })
+            finds = await self.add_tokens({"id": todo_id})
             todo = await Todo.find(finds)
-            return SuccessData(
-                data=await todo.to_front()
-            )
+            return SuccessData(data=await todo.to_front())
         else:
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
@@ -38,13 +34,9 @@ class TodoHandler(BaseAuthedHanlder):
             search = self.arguments.get('search', "")
             orderby = self.arguments.get("orderby", "")
 
-            searches = await self.add_tokens(
-                todo_schema.load(self.arguments, partial=True).data
-            )
+            searches = await self.add_tokens(todo_schema.load(self.arguments, partial=True).data)
             if search:
-                searches.update({
-                    "search": search
-                })
+                searches.update({"search": search})
 
             keys = []
             for _order in orderby.split(";"):
@@ -59,61 +51,40 @@ class TodoHandler(BaseAuthedHanlder):
                 limit = 0
                 skip = 0
             todo_cursor = Todo.search(searches, limit=limit, skip=skip).order_by(keys)
-            data = [await  todo.to_front() async for todo in todo_cursor]
+            data = [await todo.to_front() async for todo in todo_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(
-                data=pager.items,
-                info=pager.info
-            )
+            return SuccessData(data=pager.items, info=pager.info)
 
     @render
     async def post(self, todo_id=None):
         if todo_id:
-            finds = await self.add_tokens({
-                "id": todo_id
-            })
+            finds = await self.add_tokens({"id": todo_id})
             copys = todo_schema.load(self.arguments, partial=True).data
             todo = await Todo.find_and_copy(finds, copys)
-            return SuccessData(
-                id=todo.id
-            )
+            return SuccessData(id=todo.id)
         else:
-            creates = await self.add_tokens(
-                todo_schema.load(self.arguments).data
-            )
+            creates = await self.add_tokens(todo_schema.load(self.arguments).data)
             todo = await Todo.create(creates)
-            return SuccessData(
-                id=todo.id
-            )
+            return SuccessData(id=todo.id)
 
     @render
     async def put(self, todo_id=None):
-        finds = await self.add_tokens({
-            "id": todo_id
-        })
+        finds = await self.add_tokens({"id": todo_id})
         updates = todo_schema.load(self.arguments, partial=True).data
         todo = await Todo.find_and_update(finds, updates)
-        return SuccessData(
-            id=todo.id
-        )
+        return SuccessData(id=todo.id)
 
     @render
     async def delete(self, todo_id=None):
-        finds = await self.add_tokens({
-            "id": todo_id
-        })
+        finds = await self.add_tokens({"id": todo_id})
         count = await Todo.find_and_delete(finds)
-        return SuccessData(
-            count=count
-        )
+        return SuccessData(count=count)
 
     @render
     async def patch(self, todo_id=None):
         create_list = []
         for __create in self.arguments.get("create", []):
-            creates = await self.add_tokens(
-                todo_schema.load(__create).data
-            )
+            creates = await self.add_tokens(todo_schema.load(__create).data)
             todo = await Todo.create(creates)
             create_list.append(todo.id)
 

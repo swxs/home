@@ -41,7 +41,7 @@ def encode(key=JWT_SECRET_KEY, algorithm="HS256", headers=None, json_encoder=Non
         CLAIM_EXP_TIME: utc_now + datetime.timedelta(seconds=kwargs.get("timeout", JWT_TIMEOUT)),
         CLAIM_ISSUED_AT: utc_now,
         CLAIM_NOT_BEFORE_TIME: utc_now,
-        CLAIM_ISSUER: JWT_ISSUER
+        CLAIM_ISSUER: JWT_ISSUER,
     }
     payload.update(kwargs)
 
@@ -70,17 +70,13 @@ def decode(token, key=JWT_SECRET_KEY, verify=True, **kwargs) -> tuple:
     :param kwargs:
     :return:
     """
-    header = jwt.get_unverified_header(
-        token if isinstance(token, bytes) else token.encode('utf-8'))
+    header = jwt.get_unverified_header(token if isinstance(token, bytes) else token.encode('utf-8'))
     payload = jwt.decode(token, key, verify=verify, leeway=JWT_TIMEOUT_LEEWAY_TIME, **kwargs)
 
     return header, payload
 
 
-def create_rsa_key(password: str = None,
-                   bits: int = 1024,
-                   key_format: ('DER', 'PEM', 'OpenSSH') = 'PEM',
-                   pkcs: (1, 8) = 1) -> (bytes, bytes):
+def create_rsa_key(password: str = None, bits: int = 1024, key_format='PEM', pkcs=1):
     """
     创建rsa公私钥
     @params password: 密码
@@ -90,8 +86,7 @@ def create_rsa_key(password: str = None,
     @return : 私钥，公钥
     """
     key = RSA.generate(1024)
-    private_key = key.exportKey(
-        format=key_format, passphrase=password, pkcs=pkcs)
+    private_key = key.exportKey(format=key_format, passphrase=password, pkcs=pkcs)
     public_key = key.publickey().exportKey()
     return private_key, public_key
 
@@ -146,8 +141,7 @@ def rsa_verify(data: str, public_key: str, signature: str) -> bool:
     hash_obj = SHA256.new(data)
     try:
         # 因为签名被base64编码，所以这里先解码，再验签
-        SignPKCS1_v1_5.new(pub_key).verify(
-            hash_obj, base64.b64decode(signature))
+        SignPKCS1_v1_5.new(pub_key).verify(hash_obj, base64.b64decode(signature))
         return True
     except (ValueError, TypeError):
         return False

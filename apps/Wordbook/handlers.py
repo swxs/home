@@ -24,13 +24,9 @@ class WordHandler(BaseAuthedHanlder):
     @render
     async def get(self, word_id=None):
         if word_id:
-            finds = await self.add_tokens({
-                "id": word_id
-            })
+            finds = await self.add_tokens({"id": word_id})
             word = await Word.find(finds)
-            return SuccessData(
-                data=await word.to_front()
-            )
+            return SuccessData(data=await word.to_front())
         else:
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
@@ -38,13 +34,9 @@ class WordHandler(BaseAuthedHanlder):
             search = self.arguments.get('search', "")
             orderby = self.arguments.get("orderby", "")
 
-            searches = await self.add_tokens(
-                word_schema.load(self.arguments, partial=True).data
-            )
+            searches = await self.add_tokens(word_schema.load(self.arguments, partial=True).data)
             if search:
-                searches.update({
-                    "search": search
-                })
+                searches.update({"search": search})
 
             keys = []
             for _order in orderby.split(";"):
@@ -59,61 +51,40 @@ class WordHandler(BaseAuthedHanlder):
                 limit = 0
                 skip = 0
             word_cursor = Word.search(searches, limit=limit, skip=skip).order_by(keys)
-            data = [await  word.to_front() async for word in word_cursor]
+            data = [await word.to_front() async for word in word_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(
-                data=pager.items,
-                info=pager.info
-            )
+            return SuccessData(data=pager.items, info=pager.info)
 
     @render
     async def post(self, word_id=None):
         if word_id:
-            finds = await self.add_tokens({
-                "id": word_id
-            })
+            finds = await self.add_tokens({"id": word_id})
             copys = word_schema.load(self.arguments, partial=True).data
             word = await Word.find_and_copy(finds, copys)
-            return SuccessData(
-                id=word.id
-            )
+            return SuccessData(id=word.id)
         else:
-            creates = await self.add_tokens(
-                word_schema.load(self.arguments).data
-            )
+            creates = await self.add_tokens(word_schema.load(self.arguments).data)
             word = await Word.create(creates)
-            return SuccessData(
-                id=word.id
-            )
+            return SuccessData(id=word.id)
 
     @render
     async def put(self, word_id=None):
-        finds = await self.add_tokens({
-            "id": word_id
-        })
+        finds = await self.add_tokens({"id": word_id})
         updates = word_schema.load(self.arguments, partial=True).data
         word = await Word.find_and_update(finds, updates)
-        return SuccessData(
-            id=word.id
-        )
+        return SuccessData(id=word.id)
 
     @render
     async def delete(self, word_id=None):
-        finds = await self.add_tokens({
-            "id": word_id
-        })
+        finds = await self.add_tokens({"id": word_id})
         count = await Word.find_and_delete(finds)
-        return SuccessData(
-            count=count
-        )
+        return SuccessData(count=count)
 
     @render
     async def patch(self, word_id=None):
         create_list = []
         for __create in self.arguments.get("create", []):
-            creates = await self.add_tokens(
-                word_schema.load(__create).data
-            )
+            creates = await self.add_tokens(word_schema.load(__create).data)
             word = await Word.create(creates)
             create_list.append(word.id)
 

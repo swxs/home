@@ -1,4 +1,4 @@
-#!usr/bin/env python  
+#!usr/bin/env python
 # -*- coding:utf-8 _*-
 # @author:fang
 # @file: Helper_keywords.py
@@ -76,8 +76,8 @@ class Trie(object):
             for reversedwords in reversedwords_list:
                 for group in re.finditer(rf'.*?(?P<keyword>{keywords})', reversedwords, re.M):
                     self.reversedwords_dict[keywords].append(
-                        ReversedWordNode(group.start("keyword"), length=len(reversedwords),
-                                         reversedwords=reversedwords))
+                        ReversedWordNode(group.start("keyword"), length=len(reversedwords), reversedwords=reversedwords)
+                    )
 
     def __walk(self, trie_node, ch):
         """
@@ -119,9 +119,11 @@ class Trie(object):
 
     def __is_reversedwords(self, content, position, reversedword):
         try:
-            return content[
-                   position - reversedword.start: position - reversedword.start + reversedword.length] == reversedword.reversedwords
-        except:
+            return (
+                content[position - reversedword.start : position - reversedword.start + reversedword.length]
+                == reversedword.reversedwords
+            )
+        except Exception:
             return False
 
     def match_all(self, content):

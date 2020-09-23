@@ -51,14 +51,20 @@ class BossZhipinSpider(scrapy.Spider):
             job_sel = Selector(text=job_html.extract())
             job_type = job_sel.css('div.job-title::text').extract_first()
             job_pay = job_sel.css('span.red::text').extract_first()
-            job_city, job_age, job_edu = job_sel.css('p').extract()[0].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')
-            company_info = job_sel.css('p').extract()[1].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')
+            job_city, job_age, job_edu = (
+                job_sel.css('p').extract()[0].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')
+            )
+            company_info = (
+                job_sel.css('p').extract()[1].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')
+            )
             if len(company_info) == 2:
                 job_company_type, job_company_pn = company_info
                 job_company_kind = undefined
             else:
                 job_company_type, job_company_kind, job_company_pn = company_info
-            job_time = job_sel.css('p').extract()[2].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')[0]
+            job_time = (
+                job_sel.css('p').extract()[2].replace('<p>', '').replace('</p>', '').split('<em class="vline"></em>')[0]
+            )
             job_company_name = job_sel.css('a::text').extract()[-1]
             job_url = "https://www.zhipin.com" + job_sel.css('a::attr(href)').extract()[0]
             job = Job.select(job_type=job_type, job_company_name=job_company_name)
@@ -74,10 +80,8 @@ class BossZhipinSpider(scrapy.Spider):
                     job_company_type=job_company_type,
                     job_company_kind=job_company_kind,
                     job_company_pn=job_company_pn,
-                    job_url=job_url
+                    job_url=job_url,
                 )
 
         if self.get_next_page_url(sel):
-            yield Request(self.get_next_page_url(sel),
-                          method="GET",
-                          callback=self.parse)
+            yield Request(self.get_next_page_url(sel), method="GET", callback=self.parse)

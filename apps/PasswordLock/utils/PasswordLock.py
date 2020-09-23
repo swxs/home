@@ -11,6 +11,7 @@ PasswordLockSchema = PasswordLockModel.schema.as_marshmallow_schema()
 
 password_lock_schema = PasswordLockSchema()
 
+
 class PasswordLock(BasePasswordLock):
     def __init__(self, **kwargs):
         super(PasswordLock, self).__init__(**kwargs)

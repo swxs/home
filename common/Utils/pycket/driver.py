@@ -49,6 +49,7 @@ class RedisDriver(Driver):
 
     def _create_client(self):
         import redis
+
         if 'max_connections' in self.settings:
             connection_pool = redis.ConnectionPool(**self.settings)
             settings = copy(self.settings)
@@ -68,6 +69,7 @@ class MemcachedDriver(Driver):
 
     def _create_client(self):
         import memcache
+
         settings = copy(self.settings)
         default_servers = ('localhost:11211',)
         servers = settings.pop('servers', default_servers)

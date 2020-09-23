@@ -62,7 +62,9 @@ async def aio_query_origin_url(shorturl):
     response = await AioHelper_http.aio_post(LONG_TO_SHORT_URL, body=body)
     result = json.loads(response.body)
     if result["Code"] != 0:
-        raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"])
+        raise UrlLongToShortConvertFailedException(
+            code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
+        )
     return result["LongUrl"]
 
 
@@ -82,5 +84,7 @@ def query_origin_url(shorturl):
     response = requests.post(LONG_TO_SHORT_URL, data=body)
     result = response.json()
     if result["Code"] != 0:
-        raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"])
+        raise UrlLongToShortConvertFailedException(
+            code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
+        )
     return result["LongUrl"]

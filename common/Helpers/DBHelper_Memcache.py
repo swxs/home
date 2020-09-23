@@ -11,14 +11,12 @@ from common.Metaclass.Singleton import Singleton
 class MemcacheDBHelper(object):
     __metaclass__ = Singleton
 
-    def __init__(self,
-                 host=settings.MEMCACHE_HOST,
-                 port=settings.MEMCACHE_PORT):
-        '''
+    def __init__(self, host=settings.MEMCACHE_HOST, port=settings.MEMCACHE_PORT):
+        """
         连接数据库
         :param host:
         :param port:
-        '''
+        """
         self.client = memcache.Client([f"{host}:{port}"])
 
     def set(self, key, value, time=settings.MEMCACHE_EXPIRE_TIME):

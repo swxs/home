@@ -29,6 +29,7 @@ class BaseMetaDocuemnt(type):
     type :
 
     """
+
     def __new__(cls, name, bases, attrs):
         __fields__ = {}
 
@@ -129,7 +130,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     async def find(cls, finds: dict):
         if "id" in finds:
             finds["_id"] = ObjectId(finds.pop("id"))
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{getattr(cls, '__model_name__')}>: kwargs - {str(finds)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{getattr(cls, '__model_name__')}>: kwargs - {str(finds)}"
+        )
         return await cls.manager.find(cls, finds)
 
     @classmethod
@@ -143,7 +146,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
     @classmethod
     def search(cls, searches, limit=0, skip=0):
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(searches)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(searches)}"
+        )
         key = cls.get_key_with_params(searches)
         if key in getattr(cls, "__searches__"):
             return getattr(cls, "__searches__")[key](cls, searches)
@@ -160,7 +165,9 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
     @classmethod
     async def create(cls, creates: dict):
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{getattr(cls, '__model_name__')}>: kwargs - {str(creates)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{getattr(cls, '__model_name__')}>: kwargs - {str(creates)}"
+        )
         return await cls.manager.create(cls, creates)
 
     async def copy(self, copies):
@@ -182,41 +189,54 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return await instance.copy(copies)
 
     async def update(self, updates: dict):
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}; updates - {str(updates)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}; updates - {str(updates)}"
+        )
         return await self.__class__.manager.update(self.__class__, self, updates)
 
     @classmethod
     async def find_and_update(cls, finds: dict, updates: dict):
         if "id" in finds:
             finds["_id"] = ObjectId(finds.pop("id"))
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}; updates - {str(updates)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}; updates - {str(updates)}"
+        )
         return await cls.manager.find_and_update(cls, finds, updates)
 
     @classmethod
     async def search_and_update(cls, searches: dict, updates: dict):
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}; updates - {str(updates)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}; updates - {str(updates)}"
+        )
         return await cls.manager.searches_and_update(cls, searches, updates)
 
     async def delete(self):
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}"
+        )
         return await self.__class__.manager.delete(self.__class__, self)
 
     @classmethod
     async def find_and_delete(cls, finds: dict):
         if "id" in finds:
-            finds["_id"] = ObjectId(finds.pop("id"))        
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}")
+            finds["_id"] = ObjectId(finds.pop("id"))
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}"
+        )
         return await cls.manager.find_and_delete(cls, finds)
 
     @classmethod
     async def search_and_delete(cls, searches: dict):
-        logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}")
+        logger.info(
+            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}"
+        )
         return await cls.manager.searches_and_delete(cls, searches)
 
     @classmethod
     def add_search(cls, *args):
         key = cls.get_key_with_list(list(args))
         if key not in getattr(cls, "__searches__"):
+
             def wrapper(function):
                 @wraps(function)
                 def inner_wrapper(*args, **kwargs):

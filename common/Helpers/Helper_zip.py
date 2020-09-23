@@ -20,13 +20,12 @@ class ZipHelper(object):
         if os.path.isdir(src):
             for root, filepath_list, filename_list in os.walk(src):
                 for filepath in filepath_list:
-                    ZipHelper.zip(src=os.path.join(root, filepath),
-                                  dest=dest,
-                                  arcname=ZipHelper._get_arcname(arcname, filepath))
+                    ZipHelper.zip(
+                        src=os.path.join(root, filepath), dest=dest, arcname=ZipHelper._get_arcname(arcname, filepath)
+                    )
                 for filename in filename_list:
                     with zipfile.ZipFile(dest, 'a', zipfile.ZIP_DEFLATED) as zf:
-                        zf.write(os.path.join(root, filename),
-                                 arcname=ZipHelper._get_arcname(arcname, filename))
+                        zf.write(os.path.join(root, filename), arcname=ZipHelper._get_arcname(arcname, filename))
                 break
         elif os.path.isfile(src):
             filepath, filename = os.path.split(src)
@@ -68,7 +67,6 @@ class ZipHelper(object):
             ZipHelper.zip(folder, zipname, arcname=None)
         return True
 
-
     @classmethod
     def unzip(cls, zipname, dest=None):
         """服务器端解压文件生成r_list.dat文件"""
@@ -106,8 +104,8 @@ class InMemoryZip(object):
         self.in_memory_zip = io.StringIO()
 
     def append(self, filename_in_zip, file_contents):
-        '''Appends a file with name filename_in_zip and contents of
-           file_contents to the in-memory zip.'''
+        """Appends a file with name filename_in_zip and contents of
+        file_contents to the in-memory zip."""
         # Get a handle to the in-memory zip in append mode
         zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
 

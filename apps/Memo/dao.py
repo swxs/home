@@ -26,4 +26,3 @@ class Todo(BaseDAO):
     @classmethod
     async def get_todo_by_todo_id(cls, todo_id):
         return await cls.find(dict(id=todo_id))
-

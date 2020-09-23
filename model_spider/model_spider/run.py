@@ -2,6 +2,7 @@
 
 import sys
 import os
+
 if __name__ == '__main__':
     sys.path.insert(0, os.path.abspath(os.curdir))
 
@@ -10,8 +11,10 @@ from scrapy.utils.project import get_project_settings
 
 # from model_spider.model_spider.spiders.JobboleSpider import JobboleSpider
 from model_spider.model_spider.spiders.BaiduSpider import BaiduSpider
+
 # from model_spider.model_spider.spiders.wklkenSpider import WklkenSpider
 # from model_spider.model_spider.spiders.BossZhipinSpider import BossZhipinSpider
+
 
 def run():
     # 获取settings.py模块的设置
@@ -26,6 +29,7 @@ def run():
 
     # 启动爬虫，会阻塞，直到爬取完成
     process.start()
+
 
 if __name__ == "__main__":
     run()

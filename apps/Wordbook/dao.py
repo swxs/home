@@ -24,4 +24,3 @@ class Word(BaseDAO):
     @classmethod
     async def get_word_by_word_id(cls, word_id):
         return await cls.find(dict(id=word_id))
-

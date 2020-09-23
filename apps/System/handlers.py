@@ -24,13 +24,9 @@ class UserHandler(BaseAuthedHanlder):
     @render
     async def get(self, user_id=None):
         if user_id:
-            finds = await self.add_tokens({
-                "id": user_id
-            })
+            finds = await self.add_tokens({"id": user_id})
             user = await User.find(finds)
-            return SuccessData(
-                data=await user.to_front()
-            )
+            return SuccessData(data=await user.to_front())
         else:
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
@@ -38,13 +34,9 @@ class UserHandler(BaseAuthedHanlder):
             search = self.arguments.get('search', "")
             orderby = self.arguments.get("orderby", "")
 
-            searches = await self.add_tokens(
-                user_schema.load(self.arguments, partial=True).data
-            )
+            searches = await self.add_tokens(user_schema.load(self.arguments, partial=True).data)
             if search:
-                searches.update({
-                    "search": search
-                })
+                searches.update({"search": search})
 
             keys = []
             for _order in orderby.split(";"):
@@ -59,61 +51,40 @@ class UserHandler(BaseAuthedHanlder):
                 limit = 0
                 skip = 0
             user_cursor = User.search(searches, limit=limit, skip=skip).order_by(keys)
-            data = [await  user.to_front() async for user in user_cursor]
+            data = [await user.to_front() async for user in user_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(
-                data=pager.items,
-                info=pager.info
-            )
+            return SuccessData(data=pager.items, info=pager.info)
 
     @render
     async def post(self, user_id=None):
         if user_id:
-            finds = await self.add_tokens({
-                "id": user_id
-            })
+            finds = await self.add_tokens({"id": user_id})
             copys = user_schema.load(self.arguments, partial=True).data
             user = await User.find_and_copy(finds, copys)
-            return SuccessData(
-                id=user.id
-            )
+            return SuccessData(id=user.id)
         else:
-            creates = await self.add_tokens(
-                user_schema.load(self.arguments).data
-            )
+            creates = await self.add_tokens(user_schema.load(self.arguments).data)
             user = await User.create(creates)
-            return SuccessData(
-                id=user.id
-            )
+            return SuccessData(id=user.id)
 
     @render
     async def put(self, user_id=None):
-        finds = await self.add_tokens({
-            "id": user_id
-        })
+        finds = await self.add_tokens({"id": user_id})
         updates = user_schema.load(self.arguments, partial=True).data
         user = await User.find_and_update(finds, updates)
-        return SuccessData(
-            id=user.id
-        )
+        return SuccessData(id=user.id)
 
     @render
     async def delete(self, user_id=None):
-        finds = await self.add_tokens({
-            "id": user_id
-        })
+        finds = await self.add_tokens({"id": user_id})
         count = await User.find_and_delete(finds)
-        return SuccessData(
-            count=count
-        )
+        return SuccessData(count=count)
 
     @render
     async def patch(self, user_id=None):
         create_list = []
         for __create in self.arguments.get("create", []):
-            creates = await self.add_tokens(
-                user_schema.load(__create).data
-            )
+            creates = await self.add_tokens(user_schema.load(__create).data)
             user = await User.create(creates)
             create_list.append(user.id)
 
@@ -159,13 +130,9 @@ class UserAuthHandler(BaseAuthedHanlder):
     @render
     async def get(self, user_auth_id=None):
         if user_auth_id:
-            finds = await self.add_tokens({
-                "id": user_auth_id
-            })
+            finds = await self.add_tokens({"id": user_auth_id})
             user_auth = await UserAuth.find(finds)
-            return SuccessData(
-                data=await user_auth.to_front()
-            )
+            return SuccessData(data=await user_auth.to_front())
         else:
             use_pager = int(self.get_argument("use_pager", 1))
             page = int(self.get_argument("page", 1))
@@ -173,13 +140,9 @@ class UserAuthHandler(BaseAuthedHanlder):
             search = self.arguments.get('search', "")
             orderby = self.arguments.get("orderby", "")
 
-            searches = await self.add_tokens(
-                user_auth_schema.load(self.arguments, partial=True).data
-            )
+            searches = await self.add_tokens(user_auth_schema.load(self.arguments, partial=True).data)
             if search:
-                searches.update({
-                    "search": search
-                })
+                searches.update({"search": search})
 
             keys = []
             for _order in orderby.split(";"):
@@ -194,61 +157,40 @@ class UserAuthHandler(BaseAuthedHanlder):
                 limit = 0
                 skip = 0
             user_auth_cursor = UserAuth.search(searches, limit=limit, skip=skip).order_by(keys)
-            data = [await  user_auth.to_front() async for user_auth in user_auth_cursor]
+            data = [await user_auth.to_front() async for user_auth in user_auth_cursor]
             pager = Page(data, use_pager=use_pager, page=page, items_per_page=items_per_page, item_count=item_count)
-            return SuccessData(
-                data=pager.items,
-                info=pager.info
-            )
+            return SuccessData(data=pager.items, info=pager.info)
 
     @render
     async def post(self, user_auth_id=None):
         if user_auth_id:
-            finds = await self.add_tokens({
-                "id": user_auth_id
-            })
+            finds = await self.add_tokens({"id": user_auth_id})
             copys = user_auth_schema.load(self.arguments, partial=True).data
             user_auth = await UserAuth.find_and_copy(finds, copys)
-            return SuccessData(
-                id=user_auth.id
-            )
+            return SuccessData(id=user_auth.id)
         else:
-            creates = await self.add_tokens(
-                user_auth_schema.load(self.arguments).data
-            )
+            creates = await self.add_tokens(user_auth_schema.load(self.arguments).data)
             user_auth = await UserAuth.create(creates)
-            return SuccessData(
-                id=user_auth.id
-            )
+            return SuccessData(id=user_auth.id)
 
     @render
     async def put(self, user_auth_id=None):
-        finds = await self.add_tokens({
-            "id": user_auth_id
-        })
+        finds = await self.add_tokens({"id": user_auth_id})
         updates = user_auth_schema.load(self.arguments, partial=True).data
         user_auth = await UserAuth.find_and_update(finds, updates)
-        return SuccessData(
-            id=user_auth.id
-        )
+        return SuccessData(id=user_auth.id)
 
     @render
     async def delete(self, user_auth_id=None):
-        finds = await self.add_tokens({
-            "id": user_auth_id
-        })
+        finds = await self.add_tokens({"id": user_auth_id})
         count = await UserAuth.find_and_delete(finds)
-        return SuccessData(
-            count=count
-        )
+        return SuccessData(count=count)
 
     @render
     async def patch(self, user_auth_id=None):
         create_list = []
         for __create in self.arguments.get("create", []):
-            creates = await self.add_tokens(
-                user_auth_schema.load(__create).data
-            )
+            creates = await self.add_tokens(user_auth_schema.load(__create).data)
             user_auth = await UserAuth.create(creates)
             create_list.append(user_auth.id)
 

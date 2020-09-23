@@ -10,6 +10,7 @@ WordSchema = WordModel.schema.as_marshmallow_schema()
 
 word_schema = WordSchema()
 
+
 class Word(BaseWord):
     def __init__(self, **kwargs):
         super(Word, self).__init__(**kwargs)

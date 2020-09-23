@@ -24,7 +24,7 @@ async def _create_connection(host, port, options):
         ssl_context=options.ssl_context,
         certfile=options.certfile,
         keyfile=options.keyfile,
-        validate=options.validate
+        validate=options.validate,
     )
     transport = options.trans_factory.get_transport(client)
     protocol = options.proto_factory.get_protocol(transport)
@@ -72,11 +72,7 @@ class ClientInfo(object):
         return hash(self.client)
 
     def __repr__(self):
-        return "ClientInfo(%s)%s at %s" % (
-            repr(self.client),
-            self.closed and " CLOSED" or "",
-            id(self)
-        )
+        return "ClientInfo(%s)%s at %s" % (repr(self.client), self.closed and " CLOSED" or "", id(self))
 
 
 class PoolOptions(object):
@@ -153,8 +149,7 @@ class Pool(object):
             self.reset()
 
         if self.closed:
-            raise Exception(
-                'Attempted to check out a connection from closed connection pool')
+            raise Exception('Attempted to check out a connection from closed connection pool')
 
         with self.lock:
             self.active_clients += 1
@@ -211,7 +206,7 @@ class Pool(object):
     def remove_stale_sockets(self):
         """
         清除僵尸链接， 如果存在的链接过少则创建链接
-        :return: 
+        :return:
         """
         if self.options.max_idle_time_seconds is not None:
             with self.lock:

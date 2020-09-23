@@ -27,8 +27,9 @@ class JobboleSpider(scrapy.Spider):
         return selector.css('a.archive-title::attr(href)').extract_first()
 
     def is_yestaerday_artical(self, time):
-        return (datetime.datetime.combine(datetime.date.today(), datetime.time.min) - datetime.timedelta(days=1)) == \
-               datetime.datetime.strptime(time, "%Y/%m/%d")
+        return (
+            datetime.datetime.combine(datetime.date.today(), datetime.time.min) - datetime.timedelta(days=1)
+        ) == datetime.datetime.strptime(time, "%Y/%m/%d")
 
     # 默认response处理函数
     def parse(self, response):
@@ -40,10 +41,7 @@ class JobboleSpider(scrapy.Spider):
             artical_item["title"] = artical_sel.css('a.archive-title::attr(title)').extract_first()
             artical_item["summary"] = artical_sel.css('span.excerpt>p::text').extract_first()
             if self.get_url(artical_sel) is not None:
-                yield Request(self.get_url(artical_sel),
-                              method="GET",
-                              meta=artical_item,
-                              callback=self.content_parse)
+                yield Request(self.get_url(artical_sel), method="GET", meta=artical_item, callback=self.content_parse)
 
     def content_parse(self, response):
         artical_sel = Selector(text=response.body)
@@ -57,8 +55,12 @@ class JobboleSpider(scrapy.Spider):
             artical_item["source"] = artical_sel.css('div.copyright-area>a::attr(href)').extract_first()
             artical_item["content"] = artical_sel.css('div.entry').extract_first()
 
-            Artical.create(**dict(author=artical_item["author"],
-                                  title=artical_item["title"],
-                                  source=artical_item["source"],
-                                  summary=artical_item["summary"],
-                                  content=artical_item["content"]))
+            Artical.create(
+                **dict(
+                    author=artical_item["author"],
+                    title=artical_item["title"],
+                    source=artical_item["source"],
+                    summary=artical_item["summary"],
+                    content=artical_item["content"],
+                )
+            )

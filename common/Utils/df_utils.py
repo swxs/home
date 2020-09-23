@@ -21,6 +21,7 @@ except AttributeError:
 
 
 from commons import log_utils
+
 logger = log_utils.get_logging(name='df_utils', file_name='df_utils.log')
 
 
@@ -179,7 +180,9 @@ def get_dateframe_by_timestamp(abs_filename, timestamp_start=None, timestamp_end
 
 
 def get_concat_dateframe_by_timestamp(abs_filename_list, timestamp_start=None, timestamp_end=None):
-    df_list = [get_dateframe_by_timestamp(abs_filename, timestamp_start, timestamp_end) for abs_filename in abs_filename_list]
+    df_list = [
+        get_dateframe_by_timestamp(abs_filename, timestamp_start, timestamp_end) for abs_filename in abs_filename_list
+    ]
     if df_list:
         return pd.concat(df_list, sort=False, ignore_index=True)
     else:

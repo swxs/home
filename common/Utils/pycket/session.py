@@ -32,7 +32,7 @@ from common.Utils.pycket.driver import DriverFactory
 
 
 class SessionManager(object):
-    '''
+    """
     This is the real class that manages sessions. All session objects are
     persisted in a Redis or Memcache store (depending on your settings).
     After 1 day without changing a session, it's purged from the datastore,
@@ -45,7 +45,7 @@ class SessionManager(object):
     The recommendation is to use the manager instance that comes with the
     SessionMixin (using the "session" property of the handler instance), but it
     can be instantiated ad-hoc.
-    '''
+    """
 
     SESSION_ID_NAME = 'PYCKET_ID'
     STORAGE_CATEGORY = 'db_sessions'
@@ -53,9 +53,9 @@ class SessionManager(object):
     driver = None
 
     def __init__(self, handler):
-        '''
+        """
         Expects a tornado.web.RequestHandler
-        '''
+        """
 
         self.handler = handler
         self.settings = {}
@@ -77,36 +77,39 @@ class SessionManager(object):
         self.settings = pycket_settings
 
     def set(self, name, value):
-        '''
+        """
         Sets a value for "name". It may be any pickable (see "pickle" module
         documentation) object.
-        '''
+        """
 
         def change(session):
             session[name] = value
+
         self.__change_session(change)
 
     def get(self, name, default=None):
-        '''
+        """
         Gets the object for "name", or None if there's no such object. If
         "default" is provided, return it if no object is found.
-        '''
+        """
 
         session = self.__get_session_from_db()
 
         return session.get(name, default)
 
     def delete(self, *names):
-        '''
+        """
         Deletes the object with "name" from the session, if exists.
-        '''
+        """
 
         def change(session):
             keys = list(session.keys())
             names_in_common = [name for name in names if name in keys]
             for name in names_in_common:
                 del session[name]
+
         self.__change_session(change)
+
     __delitem__ = delete
 
     def keys(self):
@@ -116,6 +119,7 @@ class SessionManager(object):
     def iterkeys(self):
         session = self.__get_session_from_db()
         return iter(session)
+
     __iter__ = iterkeys
 
     def __getitem__(self, key):
@@ -147,8 +151,7 @@ class SessionManager(object):
 
     def __create_session_id(self):
         session_id = str(uuid4())
-        self.handler.set_secure_cookie(
-            self.SESSION_ID_NAME, session_id, **self.__cookie_settings())
+        self.handler.set_secure_cookie(self.SESSION_ID_NAME, session_id, **self.__cookie_settings())
         return session_id
 
     def __change_session(self, callback):
@@ -165,7 +168,7 @@ class SessionManager(object):
 
 
 class SessionMixin(object):
-    '''
+    """
     This mixin must be included in the request handler inheritance list, so that
     the handler can support sessions.
 
@@ -176,13 +179,13 @@ class SessionMixin(object):
 
     Refer to SessionManager documentation in order to know which methods are
     available.
-    '''
+    """
 
     @property
     def session(self):
-        '''
+        """
         Returns a SessionManager instance
-        '''
+        """
 
         return create_mixin(self, '__session_manager', SessionManager)
 

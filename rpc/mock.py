@@ -9,14 +9,14 @@ async def user_has_permission(*args, **kwargs):
     return result
 
 
-class MockClient():
+class MockClient:
     def __init__(self):
         Dispatcher, _ = gen_dispatcher(settings.RPC_MODULE_LIST)
         self._oprot = MagicMock()
         self._oprot.trans.is_open.return_value = True
         self._dispatch = Dispatcher()
         self._dispatch.user_has_permission = user_has_permission
-        self._dispatch.close = lambda : None
+        self._dispatch.close = lambda: None
 
     def __getattr__(self, key):
         return getattr(self._dispatch, key)

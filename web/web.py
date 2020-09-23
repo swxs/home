@@ -40,10 +40,14 @@ class BaseHandler(tornado.web.RequestHandler):
     """
 
     def prepare(self):
-        log.info(f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start')
+        log.info(
+            f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start'
+        )
 
     def on_finish(self):
-        log.info(f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished')
+        log.info(
+            f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished'
+        )
 
     @render
     async def _unimplemented_method(self, *args: str, **kwargs: str) -> None:
@@ -60,13 +64,9 @@ class BaseHandler(tornado.web.RequestHandler):
     def _is_normal_argumnet(self):
         if not hasattr(self, "_normal_argument"):
             self._normal_argument = (
-                (
-                    self.request.method.upper() in ("GET", "DELETE")
-                ) or (
-                    Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET)
-                ) or (
-                    Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE)
-                )
+                (self.request.method.upper() in ("GET", "DELETE"))
+                or (Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET))
+                or (Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE))
             )
         return self._normal_argument
 
@@ -162,10 +162,12 @@ class BaseHandler(tornado.web.RequestHandler):
         return self._xsrf_token
 
     def check_xsrf_cookie(self):
-        token = self.get_cookie(self.settings.XSRF, None) or \
-            self.get_argument(self.settings.XSRF, None) or \
-            self.request.headers.get("X-Xsrftoken") or \
-            self.request.headers.get("X-Csrftoken")
+        token = (
+            self.get_cookie(self.settings.XSRF, None)
+            or self.get_argument(self.settings.XSRF, None)
+            or self.request.headers.get("X-Xsrftoken")
+            or self.request.headers.get("X-Csrftoken")
+        )
 
         if not token:
             msg = "'%s' argument missing from POST" % self.settings.XSRF
@@ -206,7 +208,7 @@ class BaseAuthedHanlder(BaseHandler):
                 raise ApiException(Info.TokenLost, template='No "Authorization" in request headers.')
             if not authorization.lower().startswith('bearer'):
                 raise ApiException(Info.TokenIllegal, template='"Bearer" not in "Authorization".')
-            return authorization[authorization.rfind(' '):].strip()
+            return authorization[authorization.rfind(' ') :].strip()
         return None
 
     @render
@@ -282,8 +284,7 @@ class IBApplication(Application):
     @staticmethod
     def _path_2_module(path='', root=''):
         if path:
-            module = path.replace('\\', '/').replace(
-                root.replace('\\', '/'), '')
+            module = path.replace('\\', '/').replace(root.replace('\\', '/'), '')
             if module.startswith('/'):
                 module = module[1:]
             module = module.replace('.py', '').replace('.PY', '')

@@ -3,14 +3,13 @@ import os
 import pandas as pd
 from hdfs3 import HDFileSystem
 
-class HdfsHelper():
+
+class HdfsHelper:
     def __init__(self, host=None, port=None):
         self.hdfs = HDFileSystem(host=host, port=port)
 
-
     def chmod(self, file_path, filename, mode=0o777):
         self.hdfs.chmod("{0}/{1}".format(file_path, filename), mode)
-
 
     def chown(self, file_path, filename, owner, group):
         self.hdfs.chown("{0}/{1}".format(file_path, filename), owner, group)
@@ -19,16 +18,13 @@ class HdfsHelper():
     def put_file(self, file_path, filename):
         self.hdfs.put("{0}/{1}".format(file_path, filename), "/{0}".format(filename))
 
-
     def get_file(self, file_path, filename):
         self.hdfs.get("{0}/{1}".format(file_path, filename), "/{0}".format(filename))
-
 
     def read_file(self, file_path, filename):
         with self.hdfs.open("{0}/{1}".format(file_path, filename)) as f:
             bytes = f.read()
         return bytes
-
 
     def get_dataframe_by_file(self, file_path, filename, encoding="utf8", skiprows=0, nrows=0, key="table"):
         ext = os.path.splitext(filename)[1].lower()

@@ -47,8 +47,7 @@ def restart_port(port):
         cmd = 'kill -9 %s' % pid
         status, output = subprocess.getstatusoutput(cmd)
         time.sleep(1)
-    cmd = 'nohup python main.py %s >> logs/p_%s.log &' % (
-        port, port)
+    cmd = 'nohup python main.py %s >> logs/p_%s.log &' % (port, port)
     # status,output = commands.getstatusoutput(cmd)
     os.system(cmd)
 
@@ -75,18 +74,18 @@ def check_port_is_health(port):
 if __name__ == '__main__':
     try:
         port = sys.argv[1]
-    except:
+    except Exception:
         usage()
 
     if port == 'all':
         try:
             port_from = int(sys.argv[2])
-        except:
+        except Exception:
             usage()
 
         try:
             process_number = int(sys.argv[3])
-        except:
+        except Exception:
             usage()
 
         for port in range(port_from, port_from + process_number):
@@ -95,12 +94,12 @@ if __name__ == '__main__':
     elif port == 'kill':
         try:
             port_from = int(sys.argv[2])
-        except:
+        except Exception:
             usage()
 
         try:
             process_number = int(sys.argv[3])
-        except:
+        except Exception:
             usage()
 
         for port in range(port_from, port_from + process_number):

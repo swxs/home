@@ -34,11 +34,13 @@ class BaiduSpider(scrapy.Spider):
 
     def start_requests(self):
         ''' 覆盖默认的方法(忽略start_urls)'''
-        yield Request('http://tieba.baidu.com/mo/',
-                      method="GET",
-                      headers=BaiduSpider.headers,
-                      cookies=BaiduSpider.getCookies(),
-                      callback=self.get_more_url_parser)
+        yield Request(
+            'http://tieba.baidu.com/mo/',
+            method="GET",
+            headers=BaiduSpider.headers,
+            cookies=BaiduSpider.getCookies(),
+            callback=self.get_more_url_parser,
+        )
 
     def parse(self, response):
         pass
@@ -46,23 +48,27 @@ class BaiduSpider(scrapy.Spider):
     def get_more_url_parser(self, response):
         sel = Selector(text=response.body)
         url = 'http://tieba.baidu.com{0}'.format(sel.re("\"([^\"]+tab=favorite)\"")[0].replace("&amp;", "&"))
-        yield Request(url,
-                      method="GET",
-                      headers=BaiduSpider.headers,
-                      meta=dict(url=url[:-21]),
-                      cookies=BaiduSpider.getCookies(),
-                      callback=self.get_kw_url_parser)
+        yield Request(
+            url,
+            method="GET",
+            headers=BaiduSpider.headers,
+            meta=dict(url=url[:-21]),
+            cookies=BaiduSpider.getCookies(),
+            callback=self.get_kw_url_parser,
+        )
 
     def get_kw_url_parser(self, response):
         sel = Selector(text=response.body)
         kw_url_list = sel.re("kw.+?\">")
         for kw_url in kw_url_list:
             url = '{0}{1}'.format(response.meta.get('url'), kw_url[:-2])
-            yield Request(url,
-                          method="GET",
-                          headers=BaiduSpider.headers,
-                          cookies=BaiduSpider.getCookies(),
-                          callback=self.get_sign_url_parser)
+            yield Request(
+                url,
+                method="GET",
+                headers=BaiduSpider.headers,
+                cookies=BaiduSpider.getCookies(),
+                callback=self.get_sign_url_parser,
+            )
 
     def get_sign_url_parser(self, response):
         sel = Selector(text=response.body)
@@ -71,7 +77,4 @@ class BaiduSpider(scrapy.Spider):
             yield
         else:
             url = 'http://tieba.baidu.com/{0}'.format(sign_list[0][:-4].replace("&amp;", "&"))
-            yield Request(url,
-                          method="GET",
-                          headers=BaiduSpider.headers,
-                          cookies=BaiduSpider.getCookies())
+            yield Request(url, method="GET", headers=BaiduSpider.headers, cookies=BaiduSpider.getCookies())

@@ -26,9 +26,9 @@ def refresh_token(self, token):
 
 
 def permission(*perm_list):
-    '''
+    """
     判断用户是否有指定权限
-    '''
+    """
 
     def _decorator(method):
         @functools.wraps(method)
