@@ -2,7 +2,7 @@
 
 # from envoy import run  #不知为何，用envoy.run，程序不能正确执行，会挂起
 import sys
-from common.mqtt_utils import send_msg
+from commons.mqtt_utils import send_msg
 
 topic = 'home'
 try:

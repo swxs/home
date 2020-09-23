@@ -3,7 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2019/5/8 16:41
 
-from common.Helpers.DBHelper_Redis import redis_helper
+from commons.Helpers.DBHelper_Redis import redis_helper
 
 
 if __name__ == "__main__":

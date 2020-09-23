@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from common.Utils.path_utils import get_dir_path
+from commons.Utils.path_utils import get_dir_path
 
 OS = 'linux'
 DEBUG = False

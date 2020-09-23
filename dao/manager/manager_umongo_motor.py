@@ -14,8 +14,8 @@ from web.consts import undefined
 from web.exceptions import ApiException, Info
 from ..fields import DictField
 from .manager_base import BaseManager, BaseManagerQuerySet
-from common.Metaclass.Singleton import Singleton
-from common.Utils.log_utils import getLogger
+from commons.Metaclass.Singleton import Singleton
+from commons.Utils.log_utils import getLogger
 
 logger = getLogger("manager.manager_umongo_motor")
 

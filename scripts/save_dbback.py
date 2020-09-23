@@ -5,8 +5,8 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.abspath(os.curdir))
 
 import settings
-from common.Helpers.Helper_mongodb import Helper_mongodb
-from common.Helpers.ApiHelper_Baidupan import PCS
+from commons.Helpers.Helper_mongodb import Helper_mongodb
+from commons.Helpers.ApiHelper_Baidupan import PCS
 
 mongodb_backup_helper = Helper_mongodb()
 filepath = mongodb_backup_helper.dump()

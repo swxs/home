@@ -1,6 +1,6 @@
 import os
 import settings
-from common.Helpers.Helper_productor import Productor
+from commons.Helpers.Helper_productor import Productor
 from .UserAuthTtypeBase import BaseTtypeUserAuth
 
 

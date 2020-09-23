@@ -6,7 +6,7 @@ import bson
 from dao import fields
 from ..BaseDAO import BaseDAO
 from . import consts
-from common.Utils.log_utils import getLogger
+from commons.Utils.log_utils import getLogger
 
 log = getLogger("dao")
 

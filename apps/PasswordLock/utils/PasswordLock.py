@@ -5,7 +5,7 @@
 from ..models import PasswordLock as PasswordLockModel
 from ..dao import PasswordLock as BasePasswordLock
 from marshmallow import Schema, fields
-from common.Helpers.Helper_encryption import Encryption
+from commons.Helpers.Helper_encryption import Encryption
 
 PasswordLockSchema = PasswordLockModel.schema.as_marshmallow_schema()
 

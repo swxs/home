@@ -9,7 +9,7 @@ import urllib.parse
 import collections
 from web.result import SuccessData, ExceptionData, ResultData
 from web.exceptions import ApiException, ApiUnknowException, Info
-from common.Utils.log_utils import getLogger
+from commons.Utils.log_utils import getLogger
 
 log = getLogger("views.render")
 

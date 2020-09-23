@@ -9,9 +9,9 @@ import threading
 import hashlib
 import weakref
 from functools import wraps
-from common.Helpers.DBHelper_Memcache import MemcacheDBHelper
-from common.Metaclass.Singleton import Singleton
-from common.Utils.log_utils import getLogger
+from commons.Helpers.DBHelper_Memcache import MemcacheDBHelper
+from commons.Metaclass.Singleton import Singleton
+from commons.Utils.log_utils import getLogger
 from ..BaseDocument import undefined
 
 log = getLogger("memorize")

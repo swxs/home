@@ -2,9 +2,9 @@
 
 # from envoy import run  #不知为何，用envoy.run，程序不能正确执行，会挂起
 import os
-from common.Utils.mqtt_utils import watch_msg
+from commons.Utils.mqtt_utils import watch_msg
 
-# from common.Utils.log_utils import getLogger
+# from commons.Utils.log_utils import getLogger
 
 # log = getLogger('mqtt_listener')
 

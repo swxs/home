@@ -1,5 +1,4 @@
 tornado
-fire
 click
 umongo[motor]
 umongo[mongomock]
@@ -23,12 +22,8 @@ msgpack
 openpyxl
 pyjwt
 pycryptodomex
-itsdangerous
 thriftpy2
 aiohttp
 aiofiles
 async-lru
 async_property
-
-autopep8
-tox
