@@ -8,14 +8,14 @@ import requests
 from tornado.httpclient import AsyncHTTPClient
 
 
-async def aio_get(url, headers=None):
+async def get(url, headers=None):
     if headers is None:
         headers = {}
     response = await AsyncHTTPClient().fetch(url, headers=headers)
     return response
 
 
-async def aio_post(url, body="", headers=None):
+async def post(url, body="", headers=None):
     if headers is None:
         headers = {}
     response = await AsyncHTTPClient().fetch(url, method='POST', body=body, headers=headers)

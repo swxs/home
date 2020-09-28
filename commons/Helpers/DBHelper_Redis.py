@@ -2,7 +2,6 @@
 
 import redis
 import hashlib
-import settings
 
 
 class RedisDBHelper(object):
@@ -48,8 +47,3 @@ class RedisDBHelper(object):
             hashcode = self.script_load(lua)
             self.scripts_map[hashcode] = True
         return self.evalsha(hashcode, keys, args)
-
-
-redis_helper = RedisDBHelper(
-    db=settings.REDIS_DB, host=settings.REDIS_HOST, port=settings.REDIS_PORT, password=settings.REDIS_PASSWORD
-)

@@ -1,6 +1,5 @@
 # coding=utf-8
 
-from functools import wraps
 import re
 import time
 import json
@@ -12,6 +11,7 @@ import random
 import base64
 import platform
 import subprocess
+from functools import wraps
 from urllib import parse as urlparse
 from urllib.parse import urlencode
 from hashlib import md5

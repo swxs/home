@@ -4,7 +4,7 @@ import os
 import shutil
 import io
 import zipfile
-from commons.Helpers.Helper_folder import get_path_split
+from commons.Utils import path_utils
 
 
 class ZipHelper(object):
@@ -40,7 +40,7 @@ class ZipHelper(object):
         folder, filename = os.path.split(file)
 
         if exclude_parent:
-            base_path, pathname = get_path_split(folder)
+            base_path, pathname = path_utils.get_path_split(folder)
             if zipname is None:
                 zipname = os.path.join(base_path, "{0}.zip".format(pathname))
             ZipHelper.zip(file, zipname, arcname=None)
@@ -56,7 +56,7 @@ class ZipHelper(object):
         if not os.path.isdir(folder):
             return False
 
-        base_path, pathname = get_path_split(folder)
+        base_path, pathname = path_utils.get_path_split(folder)
 
         if zipname is None:
             zipname = os.path.join(base_path, "{0}.zip".format(pathname))

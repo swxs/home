@@ -1,15 +1,10 @@
 import json
 import requests
+import logging
 from enum import IntEnum
-from commons.Helpers import AioHelper_http
-from commons.Utils.log_utils import getLogger
+from commons.Helpers import Helper_aiohttp
 
-log = getLogger("Exception.UrlConvertFailedException")
-
-
-class URL_CONVERT(IntEnum):
-    LONG_TO_SHORT = 1
-    SHORT_TO_LONG = 2
+log = logging.getLogger("ApiHelper_Baidudwz")
 
 
 class UrlConvertFailedException(Exception):
@@ -42,49 +37,54 @@ class UrlShortToLongConvertFailedException(UrlConvertFailedException):
         log.error(self)
 
 
-SHORT_TO_LONG_URL = "http://dwz.cn/admin/create"
-LONG_TO_SHORT_URL = "http://dwz.cn/admin/query"
+class Baidudwz_Helper:
+    SHORT_TO_LONG_URL = "http://dwz.cn/admin/create"
+    LONG_TO_SHORT_URL = "http://dwz.cn/admin/query"
 
+    @classmethod
+    async def aio_convert_short_url(cls, url):
+        data = {"url": url}
+        body = json.dumps(data)
+        response = await Helper_aiohttp.post(cls.SHORT_TO_LONG_URL, body=body)
+        result = json.loads(response.body)
+        if result["Code"] != 0:
+            raise UrlShortToLongConvertFailedException(
+                code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"]
+            )
+        return result["ShortUrl"]
 
-async def aio_convert_short_url(url):
-    data = {"url": url}
-    body = json.dumps(data)
-    response = await AioHelper_http.aio_post(SHORT_TO_LONG_URL, body=body)
-    result = json.loads(response.body)
-    if result["Code"] != 0:
-        raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"])
-    return result["ShortUrl"]
+    @classmethod
+    async def aio_query_origin_url(cls, shorturl):
+        data = {"shortUrl": shorturl}
+        body = json.dumps(data)
+        response = await Helper_aiohttp.post(cls.LONG_TO_SHORT_URL, body=body)
+        result = json.loads(response.body)
+        if result["Code"] != 0:
+            raise UrlLongToShortConvertFailedException(
+                code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
+            )
+        return result["LongUrl"]
 
+    @classmethod
+    def convert_short_url(cls, url):
+        data = {"url": url}
+        body = json.dumps(data)
+        response = requests.post(cls.SHORT_TO_LONG_URL, data=body)
+        result = response.json()
+        if result["Code"] != 0:
+            raise UrlShortToLongConvertFailedException(
+                code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"]
+            )
+        return result["ShortUrl"]
 
-async def aio_query_origin_url(shorturl):
-    data = {"shortUrl": shorturl}
-    body = json.dumps(data)
-    response = await AioHelper_http.aio_post(LONG_TO_SHORT_URL, body=body)
-    result = json.loads(response.body)
-    if result["Code"] != 0:
-        raise UrlLongToShortConvertFailedException(
-            code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
-        )
-    return result["LongUrl"]
-
-
-def convert_short_url(url):
-    data = {"url": url}
-    body = json.dumps(data)
-    response = requests.post(SHORT_TO_LONG_URL, data=body)
-    result = response.json()
-    if result["Code"] != 0:
-        raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"])
-    return result["ShortUrl"]
-
-
-def query_origin_url(shorturl):
-    data = {"shorturl": shorturl}
-    body = json.dumps(data)
-    response = requests.post(LONG_TO_SHORT_URL, data=body)
-    result = response.json()
-    if result["Code"] != 0:
-        raise UrlLongToShortConvertFailedException(
-            code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
-        )
-    return result["LongUrl"]
+    @classmethod
+    def query_origin_url(cls, shorturl):
+        data = {"shorturl": shorturl}
+        body = json.dumps(data)
+        response = requests.post(cls.LONG_TO_SHORT_URL, data=body)
+        result = response.json()
+        if result["Code"] != 0:
+            raise UrlLongToShortConvertFailedException(
+                code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
+            )
+        return result["LongUrl"]

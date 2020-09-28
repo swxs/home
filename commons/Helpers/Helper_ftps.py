@@ -6,7 +6,11 @@
 
 import ssl
 import socket
+import logging
 from ftplib import FTP_TLS
+
+
+logger = logging.getLogger("Helper_ftps")
 
 
 class FTPS(FTP_TLS):
@@ -29,13 +33,13 @@ class FTPS(FTP_TLS):
         try:
             self.sock = socket.create_connection((self.host, self.port), self.timeout)
             self.af = self.sock.family
-            # add this line!!! # 这里做过修改
+            # !这里做过修改
             self.sock = ssl.wrap_socket(self.sock, self.keyfile, self.certfile, ssl_version=ssl.PROTOCOL_TLSv1)
-            # add end
+            # !修改结束
             self.file = self.sock.makefile('rb')
             self.welcome = self.getresp()
         except Exception as e:
-            print(e)
+            logger.exception("ftp连接失败！")
         return self.welcome
 
     def storbinary(self, cmd, fp, blocksize=8192, callback=None, rest=None):
@@ -51,8 +55,9 @@ class FTPS(FTP_TLS):
                     callback(buf)
             # shutdown ssl layer
             if isinstance(conn, ssl.SSLSocket):
-                pass  # 这里做过修改
-                # conn.unwrap()
+                # !这里做过修改
+                pass
+                # !修改结束
         finally:
             conn.close()
         return self.voidresp()
