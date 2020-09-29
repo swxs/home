@@ -3,15 +3,15 @@
 # @AUTH    : swxs
 # @Time    : 2019/9/20 15:05
 
+import logging
 import asyncio
 import functools
 import urllib.parse
 import collections
 from web.result import SuccessData, ExceptionData, ResultData
 from web.exceptions import ApiException, ApiUnknowException, Info
-from commons.Utils.log_utils import getLogger
 
-log = getLogger("views.render")
+logger = logging.getLogger("views.render")
 
 
 def render(func):
@@ -22,11 +22,11 @@ def render(func):
             if isinstance(result_data, collections.Awaitable):
                 result_data = await result_data
         except ApiException as ae:
-            log.exception(self.request.body)
+            logger.exception(self.request.body)
             result_data = ExceptionData(ae)
         except Exception as e:
             ae = ApiUnknowException(e, Info.Base)
-            log.exception(self.request.body)
+            logger.exception(self.request.body)
             result_data = ExceptionData(ae)
         finally:
             if isinstance(result_data, ResultData):
@@ -74,11 +74,11 @@ def render_file(func):
                         break
                 data = result_data
         except ApiException as ae:
-            log.exception(self.request.body)
+            logger.exception(self.request.body)
             errors = ExceptionData(ae).to_json()
         except (Exception, NotImplementedError) as e:
             ae = ApiUnknowException(e, Info.Base)
-            log.exception(self.request.body)
+            logger.exception(self.request.body)
             errors = ExceptionData(ae).to_json()
         finally:
             if errors is not None:

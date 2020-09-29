@@ -145,13 +145,3 @@ def rsa_verify(data: str, public_key: str, signature: str) -> bool:
         return True
     except (ValueError, TypeError):
         return False
-
-
-if __name__ == '__main__':
-    priv_key, pub_key = create_rsa_key()
-    priv_key = priv_key.decode('utf8')
-    pub_key = pub_key.decode('utf8')
-    enc_data = encrypt(b'123456abc', pub_key)
-    print(decrypt(enc_data, priv_key))
-    sign = rsa_sign(b'123456abd', priv_key)
-    print(rsa_verify(b'123456abd', pub_key, sign))

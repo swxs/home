@@ -4,16 +4,16 @@
 
 import bson
 import json
+import logging
 from tornado.web import url
 from web.web import BaseHandler, BaseAuthedHanlder
 from web.consts import undefined
 from web.result import SuccessData
 from web.decorator.render import render
 from commons.Helpers.Helper_pagenate import Page
-from commons.Utils.log_utils import getLogger
 from .utils.Word import Word, word_schema
 
-log = getLogger("views")
+logger = logging.getLogger("views")
 
 
 class WordHandler(BaseAuthedHanlder):

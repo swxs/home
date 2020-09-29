@@ -5,8 +5,10 @@
 
 import os
 import time
-from logging.handlers import TimedRotatingFileHandler
+from tornado import options
 from stat import ST_MTIME, ST_CTIME
+from logging.handlers import TimedRotatingFileHandler
+from concurrent_log_handler import ConcurrentRotatingFileHandler
 
 
 class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
@@ -32,3 +34,12 @@ class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
             return 1
 
         return 0
+
+
+class RFHandler(ConcurrentRotatingFileHandler):
+    def __init__(
+        self, filename, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False, atTime=None
+    ):
+        super(MyTimedRotatingFileHandler, self).__init__(
+            options.LOG_PATH, when, interval, backupCount, encoding, delay, utc, atTime
+        )

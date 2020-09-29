@@ -5,9 +5,6 @@ from PIL import ImageFont
 import random
 import os
 import io
-import settings
-from caches.redis_utils import AsyncRedisCache as RedisCache
-from apps.errors import AppValidationError as ValidationError
 
 
 img_captcha_prefix = 'img_captcha_'
@@ -28,7 +25,7 @@ class ImageChar:
         self,
         fontColor=(0, 0, 0),
         size=(100, 40),
-        fontPath=os.path.join(settings.SITE_ROOT, 'res', 'TAHOMABD.TTF'),
+        fontPath='./TAHOMABD.TTF',
         bgColor=(255, 255, 255),
         fontSize=22,
     ):
@@ -83,7 +80,7 @@ class ImageChinese(ImageChar):
         self,
         fontColor=(0, 0, 0),
         size=(110, 40),
-        fontPath=os.path.join(settings.SITE_ROOT, 'res', 'msyh.TTF'),
+        fontPath='./msyh.TTF',
         bgColor=(255, 255, 255),
         fontSize=22,
     ):
@@ -117,42 +114,3 @@ class ImageChinese(ImageChar):
             self.drawText((x, random.randint(-3, 3)), tmpchr, self.randRGB(30))
         self.randLine(5)
         return uchr
-
-
-async def gen_img_captcha(key):
-    """
-    生成英文数字验证码
-    """
-    ic = ImageChar(fontColor=(100, 211, 90))
-    uchr = ic.randChinese(4)
-    stream = io.BytesIO()
-    ic.save(stream, format='png')
-    stream.seek(0)
-    await RedisCache.set(img_captcha_prefix + key, uchr, timeout=6000)
-    return uchr, stream.read()
-
-
-async def gen_img_captcha2(key):
-    """
-    生成中文验证码
-    """
-    ic = ImageChinese(fontColor=(100, 211, 90))
-    uchr = ic.randChinese(4)
-    stream = io.BytesIO()
-    ic.save(stream, format='png')
-    stream.seek(0)
-    await RedisCache.set(img_captcha_prefix + key, uchr, timeout=6000)
-    return uchr, stream.read()
-
-
-async def check_img_captcha(key, code):
-    cache_code = await RedisCache.get(img_captcha_prefix + key)
-    if cache_code.decode('utf8').lower() != code.lower():
-        raise ValidationError(ValidationError.CaptchaError, '图形验证码错误,请重新输入')
-    return True
-
-
-if __name__ == '__main__':
-    ic = ImageChinese(fontColor=(100, 211, 90))
-    uchr = ic.randChinese(4)
-    ic.save(os.path.join(settings.SITE_ROOT, 'common', "vcode/%s.png" % uchr), 'png')

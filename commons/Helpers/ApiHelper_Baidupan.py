@@ -1,9 +1,9 @@
 # coding=utf-8
 
+import os
 import re
 import time
 import json
-import os
 import logging
 import pickle
 import string
@@ -20,15 +20,12 @@ import requests
 import rsa
 import tempfile
 from commons.Helpers.Helper_BufferReader import BufferReader
-
 try:
     requests.packages.urllib3.disable_warnings()
 except Exception:
     pass
 
-'''
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s', datefmt='%a, %d %b %Y %H:%M:%S')
-'''
+logger = logging.getLogger("ApiHelper_Baidupan")
 
 BAIDUPAN_SERVER = 'pan.baidu.com'
 BAIDUPCS_SERVER = 'pcs.baidu.com'
@@ -50,7 +47,6 @@ def default_captcha_handler(image_url):
     captcha_file.flush()
 
     filename = captcha_file.name
-    print(filename)
     os_name = platform.system()
 
     if os_name == 'Windows':
@@ -60,7 +56,7 @@ def default_captcha_handler(image_url):
     elif os_name == 'Darwin':
         subprocess.call(['open', filename])
     else:
-        print("Please enter the verification code in:" + filename)
+        logger.warning("Please enter the verification code in:" + filename)
 
     verify_code = input('Input verify code > ')
 
@@ -105,7 +101,7 @@ def check_login(func):
             try:
                 foo = json.loads(ret.content.decode('utf-8'))
                 if 'errno' in foo and foo['errno'] == -6:
-                    logging.debug('Offline, deleting cookies file then relogin.')
+                    logger.debug('Offline, deleting cookies file then relogin.')
                     path = '.{0}.cookies'.format(args[0].username)
                     if os.path.exists(path):
                         os.remove(path)
@@ -139,7 +135,7 @@ class PCSBase(object):
         else:
             self.verify_func = input
         # 设置pcs服务器
-        logging.debug('setting pcs server')
+        logger.debug('setting pcs server')
         self.set_pcs_server(self.get_fastest_pcs_server())
         self._initiate()
 
@@ -157,7 +153,7 @@ class PCSBase(object):
             requests.get(url_pattern.format(server))
             end = time.time() * 1000
             time_record.append((end - start, server))
-            logging.info('TEST %s %s ms' % (server, int(end - start)))
+            logger.info('TEST %s %s ms' % (server, int(end - start)))
         return min(time_record)[1]
 
     @staticmethod
@@ -207,12 +203,12 @@ class PCSBase(object):
 
     def _load_cookies(self):
         cookies_file = f'.{self.username}.cookies'
-        logging.debug('cookies file:' + cookies_file)
+        logger.debug('cookies file:' + cookies_file)
         if os.path.exists(cookies_file):
-            logging.debug(f'{self.username} cookies file has already existed.')
+            logger.debug(f'{self.username} cookies file has already existed.')
             with open(cookies_file, 'rb') as cookies_file:
                 cookies = requests.utils.cookiejar_from_dict(pickle.load(cookies_file))
-                logging.debug(str(cookies))
+                logger.debug(str(cookies))
                 self.session.cookies = cookies
                 self.user['BDUSS'] = self.session.cookies['BDUSS']
                 self.user['token'] = self._get_token()
@@ -226,7 +222,7 @@ class PCSBase(object):
             'https://passport.baidu.com/v2/api/?getapi&tpl=mn&apiver=v3&class=login&tt=%s&logintype=dialogLogin&callback=0'
         ).text.replace('\'', '\"')
         foo = json.loads(ret)
-        logging.info('token %s' % foo['data']['token'])
+        logger.info('token %s' % foo['data']['token'])
         return foo['data']['token']
 
     def _get_captcha(self, code_string):
@@ -288,7 +284,7 @@ class PCSBase(object):
             if b'err_no=257' in result.content or b'err_no=6' in result.content:
                 code_string = re.findall(b'codeString=(.*?)&', result.content)[0]
                 self.codeString = code_string
-                logging.debug('need captcha, codeString=' + code_string.decode('utf-8'))
+                logger.debug('need captcha, codeString=' + code_string.decode('utf-8'))
                 captcha = self._get_captcha(code_string)
                 continue
 
@@ -299,12 +295,12 @@ class PCSBase(object):
 
         if not result.ok:
             raise LoginFailed('Logging failed.')
-        logging.info('COOKIES' + str(self.session.cookies))
+        logger.info('COOKIES' + str(self.session.cookies))
         try:
             self.user['BDUSS'] = self.session.cookies['BDUSS']
         except Exception:
             raise LoginFailed('Logging failed.')
-        logging.info('user %s Logged in BDUSS: %s' % (self.username, self.user['BDUSS']))
+        logger.info('user %s Logged in BDUSS: %s' % (self.username, self.user['BDUSS']))
 
         self.user['token'] = self._get_token()
 
@@ -715,7 +711,7 @@ class PCS(PCSBase):
         jdata = json.loads(self.meta(remote_path).content)
         if jdata['errno'] != 0:
             jdata = self.__err_handler('generic', jdata['errno'], self.meta, args=(remote_path,))
-        logging.debug('[*]' + str(jdata))
+        logger.debug('[*]' + str(jdata))
         for i, entry in enumerate(jdata['info']):
             url = entry['dlink']
             foo = get_url(url)
@@ -1081,7 +1077,7 @@ class PCS(PCSBase):
         while True:
             ret = self._request('file', 'streaming', url=url, extra_params=params, **kwargs)
             if not ret.ok:
-                logging.debug('get_streaming ret_status_code %s' % ret.status_code)
+                logger.debug('get_streaming ret_status_code %s' % ret.status_code)
                 jdata = json.loads(ret.content)
                 if jdata['error_code'] == 31345:
                     # 再试一次
@@ -1218,7 +1214,7 @@ class PCS(PCSBase):
         params = {'opera': 'rename'}
 
         url = 'http://{0}/api/filemanager'.format(BAIDUPAN_SERVER)
-        logging.debug('rename ' + str(data) + 'URL:' + url)
+        logger.debug('rename ' + str(data) + 'URL:' + url)
         return self._request('filemanager', 'rename', url=url, data=data, extra_params=params, **kwargs)
 
     def copy(self, path_list, dest, **kwargs):
@@ -1403,7 +1399,7 @@ class PCS(PCSBase):
 
         response = self.upload('/', torrent_handler, basename).json()
         remote_path = response['path']
-        logging.debug('REMOTE PATH:' + remote_path)
+        logger.debug('REMOTE PATH:' + remote_path)
 
         # 获取种子信息
         response = self._get_torrent_info(remote_path).json()
@@ -1799,7 +1795,7 @@ class PCS(PCSBase):
             'slice-md5': slice_md5,
             'content-crc32': '%d' % (content_crc32.conjugate() & 0xFFFFFFFF),
         }
-        logging.debug('RAPIDUPLOAD DATA ' + str(data))
+        logger.debug('RAPIDUPLOAD DATA ' + str(data))
         # url = 'http://pan.baidu.com/api/rapidupload'
         return self._request('rapidupload', 'rapidupload', data=data, **kwargs)
 

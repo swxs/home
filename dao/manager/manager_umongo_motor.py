@@ -3,6 +3,7 @@
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:55
 
+import logging
 import asyncio
 from collections import defaultdict
 from pymongo import ASCENDING, DESCENDING
@@ -12,12 +13,12 @@ from pymongo.errors import (
 from mongoengine import NotUniqueError, ValidationError, DoesNotExist
 from web.consts import undefined
 from web.exceptions import ApiException, Info
-from ..fields import DictField
-from .manager_base import BaseManager, BaseManagerQuerySet
 from commons.Metaclass.Singleton import Singleton
-from commons.Utils.log_utils import getLogger
+from .manager_base import BaseManager, BaseManagerQuerySet
+from ..fields import DictField
 
-logger = getLogger("manager.manager_umongo_motor")
+
+logger = logging.getLogger("manager.manager_umongo_motor")
 
 NAME_DICT = defaultdict(dict)
 

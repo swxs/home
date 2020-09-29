@@ -15,11 +15,14 @@ scrapy
 arrow
 faker
 qrcode
+Pillow
+pyzbar
 beautifulsoup4
 lxml
 pyyaml
 msgpack
 openpyxl
+bson
 pyjwt
 pycryptodomex
 thriftpy2
@@ -27,3 +30,4 @@ aiohttp
 aiofiles
 async-lru
 async_property
+concurrent_log_handler

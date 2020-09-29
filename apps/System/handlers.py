@@ -4,17 +4,17 @@
 
 import bson
 import json
+import logging
 from tornado.web import url
 from web.web import BaseHandler, BaseAuthedHanlder
 from web.consts import undefined
 from web.result import SuccessData
 from web.decorator.render import render
 from commons.Helpers.Helper_pagenate import Page
-from commons.Utils.log_utils import getLogger
 from .utils.User import User, user_schema
 from .utils.UserAuth import UserAuth, user_auth_schema
 
-log = getLogger("views")
+logger = logging.getLogger("views")
 
 
 class UserHandler(BaseAuthedHanlder):

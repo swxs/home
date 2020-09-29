@@ -2,8 +2,8 @@
 
 import json
 import os
-from re import template
 import uuid
+import logging
 import binascii
 import datetime
 import functools
@@ -19,12 +19,13 @@ import settings
 from web.decorator.render import render
 from web.exceptions import ApiException, ApiUnknowException, Info
 from web.result import ExceptionData, ResultData
+from commons.Helpers import RegEnum
+from commons.Helpers.Helper_validate import Validate
 from commons.Helpers.Helper_JWT import AuthTokner, InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
-from commons.Helpers.Helper_validate import Validate, RegType
 from commons.Utils.pycket.session import SessionMixin
-from commons.Utils.log_utils import getLogger
 
-log = getLogger("web")
+
+logger = logging.getLogger("web")
 
 tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_TIMEOUT)
 refresh_tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_REFRESH_TIMEOUT)
@@ -40,12 +41,12 @@ class BaseHandler(tornado.web.RequestHandler):
     """
 
     def prepare(self):
-        log.info(
+        logger.info(
             f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} start'
         )
 
     def on_finish(self):
-        log.info(
+        logger.info(
             f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S.%f} - {self.request.remote_ip}:[{self.request.method}]{self.request.uri} finished'
         )
 

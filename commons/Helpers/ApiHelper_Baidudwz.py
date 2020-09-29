@@ -4,15 +4,15 @@ import logging
 from enum import IntEnum
 from commons.Helpers import Helper_aiohttp
 
-log = logging.getLogger("ApiHelper_Baidudwz")
+logger = logging.getLogger("ApiHelper_Baidudwz")
 
 
 class UrlConvertFailedException(Exception):
-    def __init__(self, code=0, message=""):
+    def __init__(self, code=0, message="", url=None, base_url_type=None):
         self.code = code
         self.message = message
-        self.url = ""
-        self.base_url_type = "unknow"
+        self.url = url
+        self.base_url_type = base_url_type
 
     def __str__(self):
         return f"url [{self.url}] {self.base_url_type} convert failed! With msg {self.message}"
@@ -23,18 +23,12 @@ class UrlConvertFailedException(Exception):
 
 class UrlLongToShortConvertFailedException(UrlConvertFailedException):
     def __init__(self, code=0, message="", url=""):
-        super(UrlLongToShortConvertFailedException, self).__init__(code, message)
-        self.url = url
-        self.base_url_type = "LongToShort"
-        log.error(self)
+        super(UrlLongToShortConvertFailedException, self).__init__(code, message, url, "LongToShort")
 
 
 class UrlShortToLongConvertFailedException(UrlConvertFailedException):
     def __init__(self, code=0, message="", url=""):
-        super(UrlShortToLongConvertFailedException, self).__init__(code, message)
-        self.url = url
-        self.base_url_type = "ShortToLong"
-        log.error(self)
+        super(UrlShortToLongConvertFailedException, self).__init__(code, message, url, "ShortToLong")
 
 
 class Baidudwz_Helper:
@@ -45,11 +39,11 @@ class Baidudwz_Helper:
     async def aio_convert_short_url(cls, url):
         data = {"url": url}
         body = json.dumps(data)
-        response = await Helper_aiohttp.post(cls.SHORT_TO_LONG_URL, body=body)
+        response = await Helper_aiohttp.post(cls.LONG_TO_SHORT_URL, body=body)
         result = json.loads(response.body)
         if result["Code"] != 0:
             raise UrlShortToLongConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"]
+                code=result["Code"], message=result["ErrMsg"], url=url
             )
         return result["ShortUrl"]
 
@@ -57,11 +51,11 @@ class Baidudwz_Helper:
     async def aio_query_origin_url(cls, shorturl):
         data = {"shortUrl": shorturl}
         body = json.dumps(data)
-        response = await Helper_aiohttp.post(cls.LONG_TO_SHORT_URL, body=body)
+        response = await Helper_aiohttp.post(cls.SHORT_TO_LONG_URL, body=body)
         result = json.loads(response.body)
         if result["Code"] != 0:
             raise UrlLongToShortConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
+                code=result["Code"], message=result["ErrMsg"], url=shorturl
             )
         return result["LongUrl"]
 
@@ -69,11 +63,11 @@ class Baidudwz_Helper:
     def convert_short_url(cls, url):
         data = {"url": url}
         body = json.dumps(data)
-        response = requests.post(cls.SHORT_TO_LONG_URL, data=body)
+        response = requests.post(cls.LONG_TO_SHORT_URL, data=body)
         result = response.json()
         if result["Code"] != 0:
             raise UrlShortToLongConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=result["LongUrl"]
+                code=result["Code"], message=result["ErrMsg"], url=url
             )
         return result["ShortUrl"]
 
@@ -81,10 +75,10 @@ class Baidudwz_Helper:
     def query_origin_url(cls, shorturl):
         data = {"shorturl": shorturl}
         body = json.dumps(data)
-        response = requests.post(cls.LONG_TO_SHORT_URL, data=body)
+        response = requests.post(cls.SHORT_TO_LONG_URL, data=body)
         result = response.json()
         if result["Code"] != 0:
             raise UrlLongToShortConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=result["shortUrl"]
+                code=result["Code"], message=result["ErrMsg"], url=shorturl
             )
         return result["LongUrl"]

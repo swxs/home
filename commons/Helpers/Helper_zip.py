@@ -126,18 +126,5 @@ class InMemoryZip(object):
 
     def writetofile(self, filename):
         '''Writes the in-memory zip to a file.'''
-        f = file(filename, "wb")
-        f.write(self.read())
-        f.close()
-
-
-if __name__ == '__main__':
-    for root, path, file in os.walk(os.path.join("L://", "1", "3", "U.R.C(桃屋しょう猫)", "U.R.C(桃屋しょう猫)")):
-        if path != []:
-            continue
-        else:
-            ZipHelper.zip_folder(root)
-            # src = os.path.join("L://", "1", "1", "loli1", "0-Distance Love")
-            # # ZipHelper.zip(src, dist)
-            # # ZipHelper.zip_file(src, exclude_parent=False)
-            # ZipHelper.zip_folder(src)
+        with open(filename, "wb") as f:
+            f.write(self.read())

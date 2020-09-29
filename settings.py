@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
+import logging.config
 from commons.Utils.path_utils import get_dir_path
 
 OS = 'linux'
@@ -76,25 +78,14 @@ if SITE_PORT == 80:
     SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}'
 else:
     SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}:{SITE_PORT}'
+
 MEMCACHE_HOSTS = (f'{MEMCACHE_HOST}:{MEMCACHE_PORT}',)
 
 DB_CONNECTED = False
 
+script_path = os.path.dirname(os.path.abspath(__file__))
 
-def connect_db(db_name=MONGODB_DBNAME, mock=False):
-    global DB_CONNECTED
-    from motor.motor_asyncio import AsyncIOMotorClient
-    from umongo import Instance, Document, fields, ValidationError, set_gettext
-    from umongo.marshmallow_bonus import SchemaFromUmongo
-
-    db = AsyncIOMotorClient()[db_name]
-    return Instance(db)
-    # if mock:
-    #     host = f"{MONGODB_ADDRESS}:mock"
-    # else:
-    #     host = MONGODB_ADDRESS
-    # connect(db_name, host=host, port=MONGODB_PORT, is_slave=False, slaves=None)
-    # DB_CONNECTED = True
+logging.config.fileConfig(os.path.join(script_path, 'logging.ini'))
 
 
 def connect_db_mysql():
@@ -116,6 +107,16 @@ def connect_db_mysql():
         "mysql://root:swxs@localhost/runoob", strategy=ASYNCIO_STRATEGY, encoding='latin1', echo=False
     )
     return engine
+
+
+def connect_db(db_name=MONGODB_DBNAME, mock=False):
+    global DB_CONNECTED
+    from motor.motor_asyncio import AsyncIOMotorClient
+    from umongo import Instance, Document, fields, ValidationError, set_gettext
+    from umongo.marshmallow_bonus import SchemaFromUmongo
+
+    db = AsyncIOMotorClient()[db_name]
+    return Instance(db)
 
 
 try:

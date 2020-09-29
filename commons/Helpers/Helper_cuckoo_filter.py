@@ -1,7 +1,7 @@
 import os
 import asyncio
 import uuid
-from .DBHelper_Redis import redis_helper as redis
+from . import redis_helper as redis
 
 
 class CuckooFilter:
@@ -101,4 +101,3 @@ class CuckooFilter:
             return False
 
 
-cuckoo_filter = CuckooFilter("CUCKOOFILTER", number_of_buckets=2 ** 16)

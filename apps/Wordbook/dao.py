@@ -3,12 +3,12 @@
 # @AUTH    : model_creater
 
 import bson
+import logging
 from dao import fields
 from ..BaseDAO import BaseDAO
 from . import consts
-from commons.Utils.log_utils import getLogger
 
-log = getLogger("dao")
+logger = logging.getLogger("dao")
 
 
 class Word(BaseDAO):

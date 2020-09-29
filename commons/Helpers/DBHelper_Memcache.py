@@ -4,14 +4,13 @@
 # @Time    : 2018/7/28 21:24
 
 import memcache
-import settings
 from commons.Metaclass.Singleton import Singleton
 
 
 class MemcacheDBHelper(object):
     __metaclass__ = Singleton
 
-    def __init__(self, host=settings.MEMCACHE_HOST, port=settings.MEMCACHE_PORT):
+    def __init__(self, host, port):
         """
         连接数据库
         :param host:
@@ -19,7 +18,7 @@ class MemcacheDBHelper(object):
         """
         self.client = memcache.Client([f"{host}:{port}"])
 
-    def set(self, key, value, time=settings.MEMCACHE_EXPIRE_TIME):
+    def set(self, key, value, time):
         """time为过期时间，以秒为单位"""
         return self.client.set(str(key), value, time)
 

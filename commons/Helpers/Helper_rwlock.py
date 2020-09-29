@@ -2,7 +2,7 @@ import os
 import uuid
 import time
 import asyncio
-from .DBHelper_Redis import redis_helper as redis
+from . import redis_helper as redis
 
 
 class Locked:
@@ -145,8 +145,3 @@ class WriteLocked:
 
     async def force_unlock(self):
         return await redis.run_script(self.unlock_lua, [self.key], [])
-
-
-locked = Locked
-read_locked = ReadLocked
-write_locked = WriteLocked

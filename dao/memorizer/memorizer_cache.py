@@ -5,16 +5,16 @@
 
 import time
 import uuid
+import logging
 import threading
 import hashlib
 import weakref
 from functools import wraps
-from commons.Helpers.DBHelper_Memcache import MemcacheDBHelper
+from commons.Helpers import memcache_helper
 from commons.Metaclass.Singleton import Singleton
-from commons.Utils.log_utils import getLogger
 from ..BaseDocument import undefined
 
-log = getLogger("memorize")
+logger = logging.getLogger("memorize")
 
 __all__ = ["clear", "upgrade", "cache", "memorize"]
 
@@ -31,7 +31,7 @@ class MemorizeHelper:
         self.DEFAULT_EXPIRE_SECONDS = 300
         self.DEFAULT_VERSION_EXPIRE_SECONDS = 60 * 60 * 24
         self.MEMORY_CLEANER_PERIOD = 600
-        self.memcache_helper = MemcacheDBHelper()
+        self.memcache_helper = memcache_helper
         self.memory_cleaner_thread_started = False
         self.start_memory_cleaner_thread()
 
@@ -54,7 +54,7 @@ class MemorizeHelper:
             del self.OBJ_VERSION_DICT[key]
         except KeyError:
             pass
-            # log.debug('%s keys deleted, %s keys remain' % (len(keys_to_remove), len(OBJ_DICT)),)
+            # logger.debug('%s keys deleted, %s keys remain' % (len(keys_to_remove), len(OBJ_DICT)),)
 
     def version_expired(self, key):
         local_version = self.get_local_obj_version(key)
@@ -80,7 +80,7 @@ class MemorizeHelper:
                     del self.OBJ_VERSION_DICT[key]
                 except KeyError:
                     pass
-                    # log.debug('%s keys deleted, %s keys remain' % (len(keys_to_remove), len(OBJ_DICT)),)
+                    # logger.debug('%s keys deleted, %s keys remain' % (len(keys_to_remove), len(OBJ_DICT)),)
 
     def make_memcache_key(self, function, *args):
         args_str = []

@@ -4,10 +4,9 @@
 # @Time    : 2019/2/27 16:07
 
 import time
+import arrow
 import datetime
 import calendar
-import arrow
-import settings
 from functools import wraps
 
 DAY_OF_WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -141,7 +140,3 @@ def shift_day(n, base=None):
     if base is None:
         base = arrow.utcnow()
     return arrow.get(base).shift(days=n).date()
-
-
-if __name__ == "__main__":
-    print(get_timestamp(shift_day(1, base="2019-04-03 00:01:12")))

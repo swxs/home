@@ -6,13 +6,12 @@
 import os
 import glob
 import math
+import logging
 import datetime
-import pandas as pd
-import numpy as np
 import tables
 import collections
-import settings
-from commons.Helpers import Helper_daterange as date_range
+import numpy as np
+import pandas as pd
 
 try:
     Period = pd.Period
@@ -20,9 +19,7 @@ except AttributeError:
     Period = pd._period.Period
 
 
-from commonss import log_utils
-
-logger = log_utils.get_logging(name='df_utils', file_name='df_utils.log')
+logger = logging.getLogger(name='df_utils')
 
 
 def data_filter_type_changer(obj):
@@ -187,33 +184,3 @@ def get_concat_dateframe_by_timestamp(abs_filename_list, timestamp_start=None, t
         return pd.concat(df_list, sort=False, ignore_index=True)
     else:
         return pd.DataFrame()
-
-
-def get_column_col_list(filepath):
-    newpath = os.path.join(settings.DATA_FILE_PATH, filepath)
-    try:
-        df1 = pd.read_csv(os.path.join(newpath, 'All_Data_Original.csv'), encoding='utf8', skiprows=0, nrows=None)
-    except UnicodeDecodeError:
-        df1 = pd.read_csv(os.path.join(newpath, 'All_Data_Original.csv'), encoding='gb18030', skiprows=0, nrows=None)
-    try:
-        df2 = pd.read_csv(os.path.join(newpath, 'All_Data_Readable.csv'), encoding='utf8', skiprows=0, nrows=None)
-    except UnicodeDecodeError:
-        df2 = pd.read_csv(os.path.join(newpath, 'All_Data_Readable.csv'), encoding='gb18030', skiprows=0, nrows=None)
-    df2.drop('答题时长', axis=1, inplace=True)
-    return df1.columns, df2.columns
-
-
-def make_data_clean(data):
-    max_length = 0
-    length_dict = {}
-    for k, v in data.items():
-        length = len(v)
-        length_dict[k] = length
-        if length > max_length:
-            max_length = length
-
-    for k, v in data.items():
-        for _ in range(max_length - length_dict[k]):
-            data[k].append(np.nan)
-
-    return data

@@ -2,6 +2,7 @@
 # @File    : User.py
 # @AUTH    : model
 
+import logging
 from tornado.web import url
 import settings
 from web.web import BaseHandler, BaseAuthedHanlder, tokener, refresh_tokener
@@ -10,14 +11,12 @@ from web.result import SuccessData
 from web.exceptions import ApiException, Info
 from web.decorator.render import render
 from commons.Helpers.Helper_pagenate import Page
-
 from commons.Utils import encrypt_utils
-from commons.Utils.log_utils import getLogger
 from .System.utils.User import User, user_schema
 from .System.utils.UserAuth import UserAuth, user_auth_schema
 
 
-log = getLogger("views/user")
+logger = logging.getLogger("views/user")
 
 
 class UserAuthHandler(BaseHandler):
