@@ -15,7 +15,6 @@ import settings
 class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
     def __init__(self, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False, atTime=None):
         filename = os.path.join(settings.LOG_PATH, "log.out")
-
         super(MyTimedRotatingFileHandler, self).__init__(
             filename, when, interval, backupCount, encoding, delay, utc, atTime
         )
@@ -32,8 +31,35 @@ class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
 
 class RFHandler(ConcurrentRotatingFileHandler):
     def __init__(
-        self, filename, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False, atTime=None
+        self,
+        mode='a',
+        maxBytes=1024 * 1024,
+        backupCount=20,
+        encoding=None,
+        debug=False,
+        delay=None,
+        use_gzip=False,
+        owner=None,
+        chmod=None,
+        umask=None,
+        newline=None,
+        terminator="\n",
+        unicode_error_policy='ignore',
     ):
-        super(MyTimedRotatingFileHandler, self).__init__(
-            options.LOG_PATH, when, interval, backupCount, encoding, delay, utc, atTime
+        filename = os.path.join(settings.LOG_PATH, "clog.out")
+        super(RFHandler, self).__init__(
+            filename,
+            mode=mode,
+            maxBytes=maxBytes,
+            backupCount=backupCount,
+            encoding=encoding,
+            debug=debug,
+            delay=delay,
+            use_gzip=use_gzip,
+            owner=owner,
+            chmod=chmod,
+            umask=umask,
+            newline=newline,
+            terminator=terminator,
+            unicode_error_policy=unicode_error_policy,
         )
