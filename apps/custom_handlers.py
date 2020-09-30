@@ -16,7 +16,7 @@ from .System.utils.User import User, user_schema
 from .System.utils.UserAuth import UserAuth, user_auth_schema
 
 
-logger = logging.getLogger("views/user")
+logger = logging.getLogger("main.user.custom_handlers")
 
 
 class UserAuthHandler(BaseHandler):

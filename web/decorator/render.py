@@ -11,7 +11,7 @@ import collections
 from web.result import SuccessData, ExceptionData, ResultData
 from web.exceptions import ApiException, ApiUnknowException, Info
 
-logger = logging.getLogger("views.render")
+logger = logging.getLogger("main.web.render")
 
 
 def render(func):

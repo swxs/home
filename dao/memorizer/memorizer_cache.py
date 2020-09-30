@@ -14,7 +14,7 @@ from commons.Helpers import memcache_helper
 from commons.Metaclass.Singleton import Singleton
 from ..BaseDocument import undefined
 
-logger = logging.getLogger("memorize")
+logger = logging.getLogger("main.dao.memorize")
 
 __all__ = ["clear", "upgrade", "cache", "memorize"]
 

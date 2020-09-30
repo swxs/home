@@ -13,7 +13,7 @@ from web.decorator.render import render
 from commons.Helpers.Helper_pagenate import Page
 from .utils.Word import Word, word_schema
 
-logger = logging.getLogger("views")
+logger = logging.getLogger("main.wordbook.views")
 
 
 class WordHandler(BaseAuthedHanlder):

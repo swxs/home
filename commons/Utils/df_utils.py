@@ -19,7 +19,7 @@ except AttributeError:
     Period = pd._period.Period
 
 
-logger = logging.getLogger(name='df_utils')
+logger = logging.getLogger('helper.df_utils')
 
 
 def data_filter_type_changer(obj):

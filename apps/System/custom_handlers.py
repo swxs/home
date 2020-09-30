@@ -5,6 +5,6 @@
 import logging
 from tornado.web import url
 
-logger = logging.getLogger("custom.handlers")
+logger = logging.getLogger("main.system.custom_handlers")
 
 URL_MAPPING_LIST = []

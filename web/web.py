@@ -25,7 +25,7 @@ from commons.Helpers.Helper_JWT import AuthTokner, InvalidSignatureError, Expire
 from commons.Utils.pycket.session import SessionMixin
 
 
-logger = logging.getLogger("web")
+logger = logging.getLogger("main.web")
 
 tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_TIMEOUT)
 refresh_tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_REFRESH_TIMEOUT)
@@ -66,8 +66,8 @@ class BaseHandler(tornado.web.RequestHandler):
         if not hasattr(self, "_normal_argument"):
             self._normal_argument = (
                 (self.request.method.upper() in ("GET", "DELETE"))
-                or (Validate.has(str(self.request.headers), reg_type=RegType.FORM_GET))
-                or (Validate.has(str(self.request.headers), reg_type=RegType.FORM_FILE))
+                or (Validate.has(str(self.request.headers), reg_type=RegEnum.FORM_GET))
+                or (Validate.has(str(self.request.headers), reg_type=RegEnum.FORM_FILE))
             )
         return self._normal_argument
 

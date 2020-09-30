@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import logging
-import logging.config
 from commons.Utils.path_utils import get_dir_path
 
 OS = 'linux'
@@ -83,10 +81,6 @@ MEMCACHE_HOSTS = (f'{MEMCACHE_HOST}:{MEMCACHE_PORT}',)
 
 DB_CONNECTED = False
 
-script_path = os.path.dirname(os.path.abspath(__file__))
-
-logging.config.fileConfig(os.path.join(script_path, 'logging.ini'))
-
 
 def connect_db_mysql():
     import asyncio
@@ -120,13 +114,15 @@ def connect_db(db_name=MONGODB_DBNAME, mock=False):
 
 
 try:
-    engine = connect_db_mysql()
+    MYSQL_INSTANCE = connect_db_mysql()
 except Exception:
+    MYSQL_INSTANCE = None
     print("mysql db connect failed!")
 
 try:
     MONGO_INSTANCE = connect_db()
 except Exception:
+    MONGO_INSTANCE = None
     print("mongo db connect failed!")
 
 settings = dict(

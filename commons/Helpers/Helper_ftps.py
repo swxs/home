@@ -10,7 +10,7 @@ import logging
 from ftplib import FTP_TLS
 
 
-logger = logging.getLogger("Helper_ftps")
+logger = logging.getLogger("helper.Helper_ftps")
 
 
 class FTPS(FTP_TLS):

@@ -4,6 +4,7 @@
 # @Time    : 2018/4/30 14:55
 
 import asyncio
+import logging
 from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Text, MetaData, Table
@@ -17,9 +18,8 @@ from web.exceptions import ApiException, Info
 from ..fields import DictField
 from .manager_base import BaseManager, BaseManagerQuerySet
 from commons.Metaclass.Singleton import Singleton
-from commons.Utils.log_utils import getLogger
 
-log = getLogger("manager.manager_sqlalchemy")
+logger = logging.getLogger("main.dao.manager.manager_sqlalchemy")
 
 Base = declarative_base()
 NAME_DICT = defaultdict(dict)
@@ -31,7 +31,7 @@ class ManagerQuerySet(BaseManagerQuerySet):
 
 class Manager(BaseManager, metaclass=Singleton):
     name = "sqlalchemy"
-    Session = sessionmaker(bind=settings.engine)
+    Session = sessionmaker(bind=settings.MYSQL_INSTANCE)
 
     @classmethod
     def _get_model(cls, klass):

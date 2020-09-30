@@ -3,19 +3,20 @@
 # @AUTH    : swxs
 # @Time    : 2018/5/7 22:40
 
+import os
 import logging
 import hashlib
 import datetime
-from settings import MONGO_INSTANCE
 from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
+import settings
 from web.consts import undefined
 from .fields import BaseField, DateTimeField, DictField
 from .manager_productor import manager_productor
 from .memorizer.memorizer_cache import clear, upgrade, cache
 
-logger = logging.getLogger("BaseDocument")
+logger = logging.getLogger("main.dao.base_document")
 
 
 class BaseMetaDocuemnt(type):

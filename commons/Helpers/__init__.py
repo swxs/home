@@ -2,6 +2,7 @@ import enum
 import settings
 from . import DBHelper_Redis
 from . import DBHelper_Memcache
+from . import Helper_mongodb_dumper
 
 
 class RegEnum(enum.Enum):
@@ -40,6 +41,14 @@ redis_helper = DBHelper_Redis.RedisDBHelper(
     db=settings.REDIS_DB, host=settings.REDIS_HOST, port=settings.REDIS_PORT, password=settings.REDIS_PASSWORD
 )
 
-memcache_helper = DBHelper_Memcache.MemcacheDBHelper(
-    host=settings.MEMCACHE_HOST, port=settings.MEMCACHE_PORT
+memcache_helper = DBHelper_Memcache.MemcacheDBHelper(host=settings.MEMCACHE_HOST, port=settings.MEMCACHE_PORT)
+
+mongodb_dumper_helper = Helper_mongodb_dumper.MongodbDumperHelper(
+    settings.MONGODB_ADDRESS,
+    settings.MONGODB_PORT,
+    settings.MONGODB_DBNAME,
+    settings.MONGODB_USERNAME,
+    settings.MONGODB_PASSWORD,
+    settings.MONGODB_AUTHDB,
+    settings.STATIC_DBBACK_PATH,
 )

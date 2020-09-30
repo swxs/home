@@ -18,7 +18,7 @@ from .manager_base import BaseManager, BaseManagerQuerySet
 from ..fields import DictField
 
 
-logger = logging.getLogger("manager.manager_umongo_motor")
+logger = logging.getLogger("main.dao.manager.manager_umongo_motor")
 
 NAME_DICT = defaultdict(dict)
 

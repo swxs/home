@@ -8,7 +8,7 @@ from dao import fields
 from ..BaseDAO import BaseDAO
 from . import consts
 
-logger = logging.getLogger("dao")
+logger = logging.getLogger("main.wordbook.dao")
 
 
 class Word(BaseDAO):

@@ -14,7 +14,7 @@ from commons.Helpers.Helper_pagenate import Page
 from .utils.User import User, user_schema
 from .utils.UserAuth import UserAuth, user_auth_schema
 
-logger = logging.getLogger("views")
+logger = logging.getLogger("main.system.views")
 
 
 class UserHandler(BaseAuthedHanlder):

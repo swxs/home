@@ -10,7 +10,7 @@ from enum import IntEnum
 from urllib.parse import urlencode
 from . import Helper_aiohttp
 
-logger = logging.get_logging('ApiHelper_wjlink')
+logger = logging.get_logging('helper.ApiHelper_wjlink')
 
 
 class UrlConvertFailedException(Exception):

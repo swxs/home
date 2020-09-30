@@ -3,19 +3,21 @@
 import os
 import sys
 import logging
+import logging.config
 import tornado.ioloop
 import tornado.locale
 import tornado.escape
 from tornado.httpserver import HTTPServer
 from tornado.netutil import bind_sockets
-
 import settings
-from web.web import IBApplication
+
+logging.config.fileConfig('logging.ini')
+logger = logging.getLogger("main")
+
 
 if __name__ == "__main__":
     ''''''
-    
-    logger = logging.getLogger("main")
+    from web.web import IBApplication
 
     if len(sys.argv) > 1:
         MAIN_SITE_PORT = int(sys.argv[1])

@@ -20,12 +20,13 @@ import requests
 import rsa
 import tempfile
 from commons.Helpers.Helper_BufferReader import BufferReader
+
 try:
     requests.packages.urllib3.disable_warnings()
 except Exception:
     pass
 
-logger = logging.getLogger("ApiHelper_Baidupan")
+logger = logging.getLogger("helper.ApiHelper_Baidupan")
 
 BAIDUPAN_SERVER = 'pan.baidu.com'
 BAIDUPCS_SERVER = 'pcs.baidu.com'

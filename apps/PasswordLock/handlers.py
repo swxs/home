@@ -13,7 +13,7 @@ from web.decorator.render import render
 from commons.Helpers.Helper_pagenate import Page
 from .utils.PasswordLock import PasswordLock, password_lock_schema
 
-logger = logging.getLogger("views")
+logger = logging.getLogger("main.password_lock.views")
 
 
 class PasswordLockHandler(BaseAuthedHanlder):

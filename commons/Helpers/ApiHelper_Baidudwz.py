@@ -4,7 +4,7 @@ import logging
 from enum import IntEnum
 from commons.Helpers import Helper_aiohttp
 
-logger = logging.getLogger("ApiHelper_Baidudwz")
+logger = logging.getLogger("helper.ApiHelper_Baidudwz")
 
 
 class UrlConvertFailedException(Exception):
@@ -42,9 +42,7 @@ class Baidudwz_Helper:
         response = await Helper_aiohttp.post(cls.LONG_TO_SHORT_URL, body=body)
         result = json.loads(response.body)
         if result["Code"] != 0:
-            raise UrlShortToLongConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=url
-            )
+            raise UrlShortToLongConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=url)
         return result["ShortUrl"]
 
     @classmethod
@@ -54,9 +52,7 @@ class Baidudwz_Helper:
         response = await Helper_aiohttp.post(cls.SHORT_TO_LONG_URL, body=body)
         result = json.loads(response.body)
         if result["Code"] != 0:
-            raise UrlLongToShortConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=shorturl
-            )
+            raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=shorturl)
         return result["LongUrl"]
 
     @classmethod
@@ -66,9 +62,7 @@ class Baidudwz_Helper:
         response = requests.post(cls.LONG_TO_SHORT_URL, data=body)
         result = response.json()
         if result["Code"] != 0:
-            raise UrlShortToLongConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=url
-            )
+            raise UrlShortToLongConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=url)
         return result["ShortUrl"]
 
     @classmethod
@@ -78,7 +72,5 @@ class Baidudwz_Helper:
         response = requests.post(cls.SHORT_TO_LONG_URL, data=body)
         result = response.json()
         if result["Code"] != 0:
-            raise UrlLongToShortConvertFailedException(
-                code=result["Code"], message=result["ErrMsg"], url=shorturl
-            )
+            raise UrlLongToShortConvertFailedException(code=result["Code"], message=result["ErrMsg"], url=shorturl)
         return result["LongUrl"]
