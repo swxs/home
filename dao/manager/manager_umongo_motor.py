@@ -10,7 +10,6 @@ from pymongo import ASCENDING, DESCENDING
 from pymongo.errors import (
     DuplicateKeyError,
 )
-from mongoengine import NotUniqueError, ValidationError, DoesNotExist
 from web.consts import undefined
 from web.exceptions import ApiException, Info
 from commons.Metaclass.Singleton import Singleton
@@ -72,9 +71,9 @@ class Manager(BaseManager, metaclass=Singleton):
     async def _save(cls, model):
         try:
             return await model.commit()
-        except ValidationError as e:
-            raise ApiException(Info.ParamsValidate, message=model.__class__.__name__)
-        except (NotUniqueError, DuplicateKeyError) as e:
+        # except ValidationError as e:
+        #     raise ApiException(Info.ParamsValidate, message=model.__class__.__name__)
+        except (DuplicateKeyError,) as e:
             raise ApiException(Info.Existed, message=model.__class__.__name__)
         except Exception as e:
             raise e
@@ -98,8 +97,8 @@ class Manager(BaseManager, metaclass=Singleton):
     async def find(cls, klass, finds):
         try:
             model = await cls._get_model(klass).find_one(finds)
-        except DoesNotExist:
-            raise ApiException(Info.NotExist, message=klass.__name__)
+        # except DoesNotExist:
+        #     raise ApiException(Info.NotExist, message=klass.__name__)
         except Exception as e:
             raise e
         if model is None:

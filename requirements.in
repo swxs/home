@@ -1,4 +1,6 @@
 tornado
+thriftpy2
+scrapy
 click
 umongo[motor]
 umongo[mongomock]
@@ -11,9 +13,8 @@ pandas
 scipy
 tables
 pyarrow
-scrapy
-arrow
 faker
+arrow
 qrcode
 Pillow
 pyzbar
@@ -24,8 +25,7 @@ msgpack
 openpyxl
 bson
 pyjwt
-pycryptodomex
-thriftpy2
+pycryptodome
 aiohttp
 aiofiles
 async-lru

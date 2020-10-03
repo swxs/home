@@ -3,6 +3,7 @@ logs/
 docs/
 apps/auto/
 data_file/
+static/dbback/
 .tox
 .vscode/settings.json
 

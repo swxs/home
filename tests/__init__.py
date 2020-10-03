@@ -6,7 +6,6 @@ import sys
 import datetime
 import unittest
 import functools
-from mongoengine.connection import connect
 
 
 class MyLoader(unittest.TestLoader):

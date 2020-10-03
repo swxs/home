@@ -8,10 +8,11 @@ import settings
 from web.web import BaseHandler, BaseAuthedHanlder, tokener, refresh_tokener
 from web.consts import undefined
 from web.result import SuccessData
-from web.exceptions import ApiException, Info
+from web.exceptions import ApiException, ApiUnknowException, Info
 from web.decorator.render import render
-from commons.Helpers.Helper_pagenate import Page
 from commons.Utils import encrypt_utils
+from commons.Helpers.Helper_pagenate import Page
+from commons.Helpers.Helper_JWT import AuthTokner, InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
 from .System.utils.User import User, user_schema
 from .System.utils.UserAuth import UserAuth, user_auth_schema
 
@@ -58,10 +59,21 @@ class AuthTokenHandler(BaseHandler):
         return SuccessData(token=token, refresh_token=refresh_token)
 
 
-class RefreshTokenHandler(BaseAuthedHanlder):
+class RefreshTokenHandler(BaseHandler):
     @render
     async def post(self):
-        user_id = self.tokens.get('user_id')
+        refresh_token = self.arguments.get('refresh_token')
+        try:
+            header, payload = refresh_tokener.decode(refresh_token)
+            user_id = payload.get('user_id')
+        except InvalidSignatureError:
+            raise ApiException(Info.TokenIllegal, template='Invalid Token.')
+        except ExpiredSignatureError:
+            raise ApiException(Info.TokenTimeout, template='Token expire date.')
+        except ImmatureSignatureError:
+            raise ApiException(Info.TokenIllegal, template='Immature signature.')
+        except Exception as e:
+            raise ApiUnknowException(e, Info.Base)
         # 生成jwt
         token = refresh_tokener.encode(
             user_id=str(user_id),
