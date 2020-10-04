@@ -125,7 +125,7 @@ except Exception:
     MONGO_INSTANCE = None
     print("mongo db connect failed!")
 
-settings = dict(
+web = dict(
     cookie_secret=SECRET_KEY,
     login_url="/login/",
     template_path=TEMPLATE_PATH,
@@ -138,15 +138,9 @@ settings = dict(
     translations=TRANSLATIONS_PATH,
     # static_url_prefix='', #启用CDN后可修改此定义, 例如: "http://cdn.abc.com/static/"
     pycket={
-        'engine': 'memcached',
-        'storage': {'servers': MEMCACHE_HOSTS},
-        'cookies': {
-            'expires_days': 6,
-        },
+        'engine': 'redis',
+        'storage': {'host': REDIS_HOST, 'port': REDIS_PORT, 'db_sessions': 10, 'db_notifications': 11},
     },
 )
 
-settings['pycket'] = {
-    'engine': 'redis',
-    'storage': {'host': REDIS_HOST, 'port': REDIS_PORT, 'db_sessions': 10, 'db_notifications': 11},
-}
+rpc = dict(host="0.0.0.0", port=6000, client_timeout=None)

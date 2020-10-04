@@ -281,7 +281,7 @@ class IBApplication(Application):
     def __init__(self, default_host=None, transforms=None, **settings):
         super(IBApplication, self).__init__(default_host=default_host, transforms=transforms, **settings)
 
-    def register_handlers(self, path):
+    def register(self, path):
         """
         简介
         ----------
