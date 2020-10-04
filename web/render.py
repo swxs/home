@@ -4,12 +4,10 @@
 # @Time    : 2019/9/20 15:05
 
 import logging
-import asyncio
 import functools
-import urllib.parse
 import collections
-from web.result import SuccessData, ExceptionData, ResultData
-from web.exceptions import ApiException, ApiUnknowException, Info
+import urllib.parse
+from . import ResultData, ExceptionData, ApiException, ApiUnknowException, Info
 
 logger = logging.getLogger("main.web.render")
 

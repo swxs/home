@@ -3,6 +3,7 @@ import settings
 from . import DBHelper_Redis
 from . import DBHelper_Memcache
 from . import Helper_mongodb_dumper
+from . import Helper_JWT
 
 
 class RegEnum(enum.Enum):
@@ -52,3 +53,6 @@ mongodb_dumper_helper = Helper_mongodb_dumper.MongodbDumperHelper(
     settings.MONGODB_AUTHDB,
     settings.STATIC_DBBACK_PATH,
 )
+
+tokener = Helper_JWT.AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_TIMEOUT)
+refresh_tokener = Helper_JWT.AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_REFRESH_TIMEOUT)

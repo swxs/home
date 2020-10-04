@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import json
 import os
 import uuid
+import json
 import logging
 import binascii
 import datetime
-import functools
 import traceback
 import tornado.web
 import tornado.escape
@@ -15,20 +14,14 @@ from importlib import import_module
 from tornado import locale, concurrent
 from tornado.web import url, escape, Application
 
-import settings
-from web.decorator.render import render
-from web.exceptions import ApiException, ApiUnknowException, Info
-from web.result import ExceptionData, ResultData
-from commons.Helpers import RegEnum
+from commons.Helpers import RegEnum, tokener, refresh_tokener
 from commons.Helpers.Helper_validate import Validate
-from commons.Helpers.Helper_JWT import AuthTokner, InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
-from commons.Utils.pycket.session import SessionMixin
+from commons.Helpers.Helper_JWT import InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
+from .exceptions import ApiException, ApiUnknowException, Info
+from .render import render
 
 
-logger = logging.getLogger("main.web")
-
-tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_TIMEOUT)
-refresh_tokener = AuthTokner(key=settings.JWT_SECRET_KEY, timeout=settings.JWT_REFRESH_TIMEOUT)
+logger = logging.getLogger("main.web.core")
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -73,6 +66,15 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @property
     def arguments(self):
+        """
+        简介
+        ----------
+        尝试整合所有的外部参数
+
+        返回
+        ----------
+
+        """
         if not hasattr(self, "_arguments"):
             self._arguments = {}
             for key, value in self.request.query_arguments.items():
@@ -265,10 +267,35 @@ class PageNotFoundHandler(BaseHandler):
 
 
 class IBApplication(Application):
+    """
+    简介
+    ----------
+    主入口， 尝试加载所有的Handler， 并运行
+
+    参数
+    ----------
+    Application :
+
+    """
+
     def __init__(self, default_host=None, transforms=None, **settings):
         super(IBApplication, self).__init__(default_host=default_host, transforms=transforms, **settings)
 
     def register_handlers(self, path):
+        """
+        简介
+        ----------
+        加载指定路径下的所有Handler
+
+        参数
+        ----------
+        path :
+
+
+        返回
+        ----------
+
+        """
         base_handlers = []
         for root, dirs, files in os.walk(os.path.join(path, "apps")):
             for filename in files:
@@ -281,6 +308,7 @@ class IBApplication(Application):
         for handlers in base_handlers:
             self.add_handlers('.*$', handlers)
         self.add_handlers(".*$", [url(r".*", PageNotFoundHandler)])
+        return self
 
     @staticmethod
     def _path_2_module(path='', root=''):

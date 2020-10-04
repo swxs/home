@@ -10,8 +10,9 @@ import datetime
 from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
+
 import settings
-from web.consts import undefined
+from web import undefined
 from .fields import BaseField, DateTimeField, DictField
 from .manager_productor import manager_productor
 from .memorizer.memorizer_cache import clear, upgrade, cache

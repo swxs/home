@@ -13,11 +13,10 @@ from sqlalchemy.orm import sessionmaker
 
 
 import settings
-from web.consts import undefined
-from web.exceptions import ApiException, Info
+from web import ApiException, Info, undefined
+from commons.Metaclass.Singleton import Singleton
 from ..fields import DictField
 from .manager_base import BaseManager, BaseManagerQuerySet
-from commons.Metaclass.Singleton import Singleton
 
 logger = logging.getLogger("main.dao.manager.manager_sqlalchemy")
 

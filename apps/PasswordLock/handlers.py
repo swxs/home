@@ -6,10 +6,7 @@ import bson
 import json
 import logging
 from tornado.web import url
-from web.web import BaseHandler, BaseAuthedHanlder
-from web.consts import undefined
-from web.result import SuccessData
-from web.decorator.render import render
+from web import BaseHandler, BaseAuthedHanlder, SuccessData, render, undefined
 from commons.Helpers.Helper_pagenate import Page
 from .utils.PasswordLock import PasswordLock, password_lock_schema
 

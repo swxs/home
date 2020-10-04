@@ -5,11 +5,8 @@
 import logging
 from tornado.web import url
 import settings
-from web.web import BaseHandler, BaseAuthedHanlder, tokener, refresh_tokener
-from web.consts import undefined
-from web.result import SuccessData
-from web.exceptions import ApiException, ApiUnknowException, Info
-from web.decorator.render import render
+from web import BaseHandler, render, SuccessData, ApiException, ApiUnknowException, Info
+from commons.Helpers import tokener, refresh_tokener
 from commons.Utils import encrypt_utils
 from commons.Helpers.Helper_pagenate import Page
 from commons.Helpers.Helper_JWT import AuthTokner, InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
