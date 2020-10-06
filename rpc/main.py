@@ -5,43 +5,36 @@ import sys
 import signal
 import logging
 from functools import partial
-
-from thriftpy2.contrib.aio.protocol.binary import TAsyncBinaryProtocolFactory
-from thriftpy2.contrib.aio.transport.buffered import TAsyncBufferedTransportFactory
 from thriftpy2.contrib.aio.socket import TAsyncServerSocket
 
 import settings
-from .server import TAsyncServer
+from . import TAsyncProcessor, TAsyncServer
 
 logger = logging.getLogger("main.rpc")
 
 
 def run(port):
-
-    process = .register(module_list)
+    process = TAsyncProcessor.register(os.path.join(settings.SITE_ROOT))
     sockets = TAsyncServerSocket(host="0.0.0.0", port=port, client_timeout=None).listen()
-    
     server = TAsyncServer(
         process,
         sockets,
-        iprot_factory=TAsyncBinaryProtocolFactory(),
-        itrans_factory=TAsyncBufferedTransportFactory(),
     )
-    server.start()
-    logger.debug('thriftpy2 server started on port %s.' % port)
-    server.serve()
-    logger.debug('thriftpy2 server finished on port %s.' % port)
+    return server
 
 
 def force_exit(server, sig):
-    server.shutdown()
-    sys.exit(-1)
+    logger.debug('thriftpy2 server stoped %s.sig' % sig)
+    server.close()
 
 
 def main(port):
     server = run(port=port)
     signal.signal(signal.SIGINT, partial(force_exit, server))
-    server
+    logger.debug('thriftpy2 server started on port %s.' % port)
+    server.serve()
+    logger.debug('thriftpy2 server finished on port %s.' % port)
+    sys.exit(0)
 
 
 if __name__ == '__main__':

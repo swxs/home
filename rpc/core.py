@@ -1,4 +1,6 @@
 import os
+import asyncio
+from thriftpy2.contrib.aio.processor import TAsyncProcessor as TProcessor, TApplicationException
 from .dispatcher import BaseDispatcher
 
 
@@ -32,52 +34,58 @@ class TAsyncProcessor(TProcessor):
         if not result.oneway:
             await self.send_result(oprot, api, result, seqid)
 
-
-    def gen_dispatcher(self, path):
-        def find_services(thrift):
-            services = set()
-            thrifts = []
-            for key, val in vars(thrift).items():
-                if type(val) == type:
-                    for base in val.__bases__[::-1]:
-                        if hasattr(base, 'thrift_service'):
-                            services.update(base.thrift_services)
-                    services.update(val.thrift_services)
-                    thrifts.append(val)
-            return thrifts, services
-
-        thrifts_list = []
-        dispatchers = []
-        services_set = set()
-        for root, dirs, files in os.walk(os.path.join(path, "apps")):
+    def register(self, path):
+        thrifts = set()
+        services = set()
+        dispatchers = set()
+        for root, dirs, files in os.walk(os.path.join(path, "rpc")):
             for filename in files:
                 if filename.endswith('.py') or filename.endswith('.PY'):
                     module_dispatchers = []
-                    module = self._path_2_module(path=os.path.join(root, filename), root=path)    
-                    for key, val in vars(module).items():
-                        is_dispatcher = False
-                        try:
-                            is_dispatcher = issubclass(val, BaseDispatcher)
-                        except TypeError:
-                            pass
-                        if is_dispatcher:
-                            module_dispatchers.append(val)
-                        elif hasattr(val, '__thrift_meta__'):
-                            (thrifts, services) = find_services(val)
-                            thrifts_list.extend(thrifts)
-                            services_set.update(services)
-
-            base_dispatchers = []
-            for idx, d1 in enumerate(module_dispatchers, 1):
-                for d2 in module_dispatchers[idx:]:
-                    if issubclass(d1, d2):
-                        base_dispatchers.append(d2)
-                    elif issubclass(d2, d1):
-                        base_dispatchers.append(d1)
-            dispatchers.extend(list(set(module_dispatchers) - set(base_dispatchers)))
+                    module = self._path_2_module(path=os.path.join(root, filename), root=path)
+                    if module:
+                        for key, val in vars(module).items():
+                            is_dispatcher = False
+                            try:
+                                is_dispatcher = issubclass(val, BaseDispatcher)
+                            except TypeError:
+                                pass
+                            if is_dispatcher:
+                                dispatchers.add(val)
+                            elif hasattr(val, '__thrift_meta__'):
+                                (__thrifts, __services) = self.find_services(val)
+                                thrifts.update(__thrifts)
+                                services.update(__services)
 
         Dispatcher = type('Dispatcher', tuple(dispatchers), {})
-        Service = type('Service', tuple(thrifts_list), {'thrift_services': services_set})
-        
+        Service = type('Service', tuple(services), {'thrift_services': services})
+
         self.processor = TAsyncProcessor(Service, Dispatcher())
         return self
+
+    @staticmethod
+    def find_services(thrift):
+        services = set()
+        thrifts = []
+        for key, val in vars(thrift).items():
+            if type(val) == type:
+                for base in val.__bases__[::-1]:
+                    if hasattr(base, 'thrift_service'):
+                        services.update(base.thrift_services)
+                services.update(val.thrift_services)
+                thrifts.append(val)
+        return thrifts, services
+
+    @staticmethod
+    def _path_2_module(path='', root=''):
+        if path:
+            module = path.replace('\\', '/').replace(root.replace('\\', '/'), '')
+            if module.startswith('/'):
+                module = module[1:]
+            module = module.replace('.py', '').replace('.PY', '')
+            if set('.#~') & set(module):
+                return None
+            module = module.replace('/', '.').strip()
+            if module:
+                return module
+        return None

@@ -5,7 +5,6 @@ import sys
 import signal
 import logging
 from functools import partial
-
 import tornado.ioloop
 import tornado.locale
 import tornado.escape
@@ -24,20 +23,23 @@ def run(port):
     sockets = bind_sockets(port)
     server = HTTPServer(application, xheaders=True)
     server.add_sockets(sockets)
-    logger.debug('Tornado server started on port %s.' % port)
-    tornado.ioloop.IOLoop.instance().start()
-    logger.debug('Tornado server finished on port %s.' % port)
+    return server
 
 
 def force_exit(server, sig):
-    server.shutdown()
-    sys.exit(-1)
+    logger.debug('Tornado server stoped %s.sig' % sig)
+    server.stop()
 
 
 def main(port):
     server = run(port=port)
     signal.signal(signal.SIGINT, partial(force_exit, server))
-    server
+    logger.debug('Tornado server started on port %s.' % port)
+    try:
+        tornado.ioloop.IOLoop.instance().start()
+    except Exception as e:
+        logger.exception('unknown!')
+    logger.debug('Tornado server finished on port %s.' % port)
 
 
 if __name__ == "__main__":
