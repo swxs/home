@@ -20,6 +20,7 @@ JWT_TIMEOUT_LEEWAY_TIME = 60  # Token超时时间检验误差阀值，单位: s
 JWT_ENCODER = None
 JWT_ISSUER = 'AuthTokener'  # 发行者信息
 
+DecodeError = jwt.DecodeError
 InvalidSignatureError = jwt.InvalidSignatureError
 ExpiredSignatureError = jwt.ExpiredSignatureError
 ImmatureSignatureError = jwt.ImmatureSignatureError

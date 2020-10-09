@@ -12,6 +12,13 @@
             "console": "integratedTerminal",
             "justMyCode": false
         }, {
+            "name": "RUN[HOME-web]",
+            "type": "python",
+            "request": "launch",
+            "module": "web.main",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }, {
             "name": "DEV[HOME-create]",
             "type": "python",
             "request": "launch",

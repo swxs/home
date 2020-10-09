@@ -16,7 +16,7 @@ from tornado.web import url, escape, Application
 
 from commons.Helpers import RegEnum, tokener, refresh_tokener
 from commons.Helpers.Helper_validate import Validate
-from commons.Helpers.Helper_JWT import InvalidSignatureError, ExpiredSignatureError, ImmatureSignatureError
+from commons.Helpers.Helper_JWT import InvalidSignatureError, DecodeError, ExpiredSignatureError, ImmatureSignatureError
 from .exceptions import ApiException, ApiUnknowException, Info
 from .render import render
 
@@ -226,7 +226,7 @@ class BaseAuthedHanlder(BaseHandler):
                 self.__token_header.update(header)
             if payload:
                 self.__token_payload.update(payload)
-        except InvalidSignatureError:
+        except (InvalidSignatureError, DecodeError):
             raise ApiException(Info.TokenIllegal, template='Invalid Token.')
         except ExpiredSignatureError:
             raise ApiException(Info.TokenTimeout, template='Token expire date.')

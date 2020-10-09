@@ -27,6 +27,7 @@ def run(port):
 
 
 def force_exit(server, sig):
+    print("here!")
     logger.debug('Tornado server stoped %s.sig' % sig)
     server.stop()
 
@@ -43,9 +44,15 @@ def main(port):
 
 
 if __name__ == "__main__":
+    import logging.config
+
+    logging.config.fileConfig(os.path.join(settings.SITE_ROOT, 'logging.ini'))
+    logger = logging.getLogger("main")
+
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
     else:
         port = settings.SITE_PORT
 
+    signal.signal(signal.SIGINT, partial(print, "Ctrl + c"))
     main(port)
