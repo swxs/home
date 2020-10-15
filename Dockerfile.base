@@ -1,0 +1,8 @@
+FROM python:3.8
+WORKDIR /
+COPY ./requirements.in ./requirements.in
+RUN pip install pip-tools \
+    && pip-compile requirements.in -o requirements.txt \
+    && pip install -r requirements.txt \
+    && rm -f ./requirements.in \
+    && rm -f ./requirements.txt

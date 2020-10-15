@@ -115,12 +115,14 @@ def connect_db(db_name=MONGODB_DBNAME, mock=False):
 
 try:
     MYSQL_INSTANCE = connect_db_mysql()
+    print("mongo db connect success!")
 except Exception:
     MYSQL_INSTANCE = None
     print("mysql db connect failed!")
 
 try:
     MONGO_INSTANCE = connect_db()
+    print("mongo db connect success!")
 except Exception:
     MONGO_INSTANCE = None
     print("mongo db connect failed!")
