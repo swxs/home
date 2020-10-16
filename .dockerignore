@@ -2,8 +2,8 @@
 logs/
 docs/
 static/dbback/
+.git
 .tox
-.idea
 .vscode/settings.json
 
 # Byte-compiled / optimized / DLL files
