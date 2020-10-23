@@ -2,6 +2,7 @@ import os
 import uuid
 import time
 import asyncio
+from functools import wraps
 from . import redis_helper as redis
 
 
@@ -40,6 +41,15 @@ class ReadLocked:
         self.key = key
         self.timeout = timeout
         self.name = str(uuid.uuid4())
+
+    def __call__(self, func):
+        @wraps(func)
+        async def inner(_key, *args, **kwds):
+            self.key = _key
+            async with self:
+                return await func(_key, *args, **kwds)
+
+        return inner
 
     @property
     def rdlock_lua(self):
@@ -101,6 +111,15 @@ class WriteLocked:
         self.locked = False
         self.key = key
         self.timeout = timeout
+
+    def __call__(self, func):
+        @wraps(func)
+        async def inner(_key, *args, **kwds):
+            self.key = _key
+            async with self:
+                return await func(_key, *args, **kwds)
+
+        return inner
 
     @property
     def wtlock_lua(self):
