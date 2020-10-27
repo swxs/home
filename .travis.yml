@@ -1,12 +1,7 @@
-language: python # 构建所需的语言环境
 branches:
   only:
     - master # 构建的分支
-services:
-  - docker
-before_install:
-  - export TZ='Asia/Shanghai' # 设置时区before_install:
-after_deploy:
+script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t swxs/home .
   - docker push swxs/home
