@@ -32,22 +32,15 @@ logger = logging.getLogger("main")
     default='START',
     show_default=True,
 )
-@click.argument('ports', nargs=-1, type=int)
+@click.argument('ports', nargs=1, type=int)
 def main(mode, task, ports):
     if mode == "WEB" and task == "START":
         from web import main as web_main
 
         if not ports:
-            ports = [settings.SITE_PORT]
+            ports = settings.SITE_PORT
 
-        workers = len(ports) if multiprocessing.cpu_count() > len(ports) else multiprocessing.cpu_count()
-        executor = ProcessPoolExecutor(max_workers=workers)
-        all_task = [executor.submit(web_main.main, port) for port in ports]
-
-        for future in as_completed(all_task):
-            logger.debug(future.result())
-
-    sys.exit(0)
+        web_main.main(ports)
 
 
 if __name__ == "__main__":

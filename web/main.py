@@ -20,24 +20,23 @@ logger = logging.getLogger("main.web")
 def run(port):
     tornado.locale.load_translations(settings.web.get('translations'))
     application = IBApplication(**settings.web).register(os.path.join(settings.SITE_ROOT))
-    sockets = bind_sockets(port)
     server = HTTPServer(application, xheaders=True)
-    server.add_sockets(sockets)
-    return server
+    server.listen(port)
+    loop = tornado.ioloop.IOLoop.instance()
+    return loop
 
 
-def force_exit(server, sig):
-    print("here!")
-    logger.debug('Tornado server stoped %s.sig' % sig)
-    server.stop()
+def force_exit(loop, signum, frame):
+    logger.debug('Tornado server stoped %s.sig' % signum)
+    loop.stop()
 
 
 def main(port):
-    server = run(port=port)
-    signal.signal(signal.SIGINT, partial(force_exit, server))
+    loop = run(port=port)
     logger.debug('Tornado server started on port %s.' % port)
+    signal.signal(signal.SIGINT, partial(force_exit, loop))
     try:
-        tornado.ioloop.IOLoop.instance().start()
+        loop.start()
     except Exception as e:
         logger.exception('unknown!')
     logger.debug('Tornado server finished on port %s.' % port)

@@ -45,8 +45,7 @@ class ReadLocked:
     def __call__(self, func):
         @wraps(func)
         async def inner(_key, *args, **kwds):
-            self.key = _key
-            async with self:
+            async with ReadLocked(_key, self.timeout):
                 return await func(_key, *args, **kwds)
 
         return inner
@@ -115,8 +114,7 @@ class WriteLocked:
     def __call__(self, func):
         @wraps(func)
         async def inner(_key, *args, **kwds):
-            self.key = _key
-            async with self:
+            async with WriteLocked(_key, self.timeout):
                 return await func(_key, *args, **kwds)
 
         return inner
