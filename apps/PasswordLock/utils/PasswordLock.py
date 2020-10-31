@@ -2,9 +2,10 @@
 # @File    : PasswordLock.py
 # @AUTH    : model_creater
 
-from ..models import PasswordLock as PasswordLockModel
-from ..dao import PasswordLock as BasePasswordLock
 from marshmallow import Schema, fields
+from .. import consts
+from ..dao import PasswordLock as BasePasswordLock
+from ..models import PasswordLock as PasswordLockModel
 from commons.Helpers.Helper_encryption import Encryption
 
 PasswordLockSchema = PasswordLockModel.schema.as_marshmallow_schema()
@@ -18,8 +19,13 @@ class PasswordLock(BasePasswordLock):
 
     @property
     def password(self):
-        if self.key:
-            return Encryption.get_password(name=self.key, salt="b8862e668e5abbc99d8390347e7ac749")
+        if self.ttype == consts.PASSWORD_LOCK_TTYPE_COMMON:
+            if self.key:
+                return Encryption.get_password(name=self.key, salt="b8862e668e5abbc99d8390347e7ac749")
+            else:
+                return None
+        elif self.ttype == consts.PASSWORD_LOCK_TTYPE_CUSTOM:
+            return self.custom.get('password', None)
         else:
             return None
 

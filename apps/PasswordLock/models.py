@@ -17,6 +17,11 @@ class PasswordLock(BaseModelDocument):
     key = fields.StringField(allow_none=True)
     website = fields.StringField(allow_none=True)
     user_id = fields.ObjectIdField(allow_none=True)
+    used = fields.IntField(allow_none=True, default=0)
+    ttype = fields.IntField(
+        allow_none=True, enums=consts.PASSWORD_LOCK_TTYPE_LIST, default=consts.PASSWORD_LOCK_TTYPE_COMMON
+    )
+    custom = fields.DictField(allow_none=True)
 
     class Meta:
         indexes = [

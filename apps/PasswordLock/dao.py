@@ -16,6 +16,9 @@ class PasswordLock(BaseDAO):
     key = fields.StringField()
     website = fields.StringField()
     user_id = fields.ObjectIdField()
+    used = fields.IntField(default=0)
+    ttype = fields.IntField(enums=consts.PASSWORD_LOCK_TTYPE_LIST, default=consts.PASSWORD_LOCK_TTYPE_COMMON)
+    custom = fields.DictField()
 
     def __init__(self, **kwargs):
         super(PasswordLock, self).__init__(**kwargs)
