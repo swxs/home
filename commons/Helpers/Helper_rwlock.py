@@ -1,9 +1,11 @@
 import os
 import uuid
-import time
 import asyncio
+import logging
 from functools import wraps
 from . import redis_helper as redis
+
+logger = logging.getLogger("helper.Helper_rwlock")
 
 
 class Locked:
@@ -43,12 +45,22 @@ class ReadLocked:
         self.name = str(uuid.uuid4())
 
     def __call__(self, func):
-        @wraps(func)
-        async def inner(_key, *args, **kwds):
-            async with ReadLocked(_key, self.timeout):
-                return await func(_key, *args, **kwds)
+        if asyncio.iscoroutinefunction(func):
 
-        return inner
+            @wraps(func)
+            async def inner(_key, *args, **kwds):
+                async with ReadLocked(_key, self.timeout):
+                    return await func(_key, *args, **kwds)
+
+            return inner
+        else:
+
+            @wraps(func)
+            async def inner(_key, *args, **kwds):
+                async with ReadLocked(_key, self.timeout):
+                    return func(_key, *args, **kwds)
+
+            return inner
 
     @property
     def rdlock_lua(self):
@@ -76,7 +88,7 @@ class ReadLocked:
             result = await redis.run_script(self.rdlock_lua, [self.key], [self.timeout, self.name])
             if result is None:
                 self.locked = True
-                print(f"获得{self.key}读锁")
+                logger.debug(f"获得{self.key}读锁")
                 break
             else:
                 await asyncio.sleep(0.1)
@@ -85,11 +97,11 @@ class ReadLocked:
         if self.locked:
             result = await redis.run_script(self.rdunlock_lua, [self.key], [self.name])
             if result is None:
-                print(f"释放{self.key}读锁")
+                logger.debug(f"释放{self.key}读锁")
             elif result == 0:
-                print(f"释放{self.key}读锁， 释放失败")
+                logger.warning(f"释放{self.key}读锁， 释放失败")
             elif result == 1:
-                print(f"释放{self.key}读锁， 完全释放")
+                logger.debug(f"释放{self.key}读锁， 完全释放")
 
     async def force_unlock(self):
         return await redis.run_script(self.unlock_lua, [self.key], [])
@@ -145,7 +157,7 @@ class WriteLocked:
             result = await redis.run_script(self.wtlock_lua, [self.key], [self.timeout])
             if result is None:
                 self.locked = True
-                print(f"获得{self.key}写锁")
+                logger.debug(f"获得{self.key}写锁")
                 break
             else:
                 await asyncio.sleep(0.1)
@@ -154,11 +166,11 @@ class WriteLocked:
         if self.locked:
             result = await redis.run_script(self.wtunlock_lua, [self.key], [])
             if result is None:
-                print(f"释放{self.key}写锁")
+                logger.debug(f"释放{self.key}写锁")
             elif result == 0:
-                print(f"释放{self.key}写锁， 释放失败")
+                logger.warning(f"释放{self.key}写锁， 释放失败")
             elif result == 1:
-                print(f"释放{self.key}写锁， 完全释放")
+                logger.debug(f"释放{self.key}写锁， 完全释放")
 
     async def force_unlock(self):
         return await redis.run_script(self.unlock_lua, [self.key], [])

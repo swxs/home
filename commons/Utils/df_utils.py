@@ -4,13 +4,8 @@
 # @Time    : 2018/8/30 9:57
 
 import os
-import glob
-import math
 import logging
-import datetime
 import tables
-import collections
-import numpy as np
 import pandas as pd
 
 try:
@@ -18,70 +13,25 @@ try:
 except AttributeError:
     Period = pd._period.Period
 
+from ..Helpers.Helper_rwlock import ReadLocked, WriteLocked
+
 
 logger = logging.getLogger('helper.df_utils')
 
 
-def data_filter_type_changer(obj):
-    if isinstance(obj, (np.int, np.int8, np.int16, np.int32, np.int64, np.long)):
-        return str(int(obj))
-    elif isinstance(obj, (np.float, np.float16, np.float32, np.float64)):
-        if math.isnan(obj):
-            return
-        elif np.isinf(obj):
-            return
-        else:
-            return float(obj)
-
-    else:
-        return obj
-
-
-def encode_data(obj):
-    if isinstance(obj, (np.int, np.int8, np.int16, np.int32, np.int64, np.long)):
-        return str(int(obj))
-    elif isinstance(obj, (np.float, np.float16, np.float32, np.float64)):
-        if math.isnan(obj):
-            return "N/A"
-        elif np.isinf(obj):
-            return "Inf"
-        else:
-            return float(obj)
-    elif isinstance(obj, np.ndarray):
-        return obj.tolist()
-    elif isinstance(obj, np.datetime64):
-        try:
-            return pd.to_datetime(str(obj)).strftime('%Y-%m-%d %H:%M:%S')
-        except Exception:
-            return "N/A"
-    elif isinstance(obj, (datetime.datetime, Period)):
-        return obj.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        return obj
-
-
-def _get_hdf_keys(fname):
+@ReadLocked(timeout=1000 * 60)
+async def _get_hdf_keys(fname):
+    key_list = []
     try:
-        with pd.HDFStore(fname, mode="r+") as hdf:
+        with pd.HDFStore(fname, mode="r") as hdf:
             key_list = hdf.keys()
     except Exception:
-        key_list = []
+        pass
     return key_list
 
 
-def copy_dataframe_by_filename(src_filename, dst_filename):
-    ext = os.path.splitext(src_filename)[1].lower()
-    if ext in ['.h5']:
-        key_list = _get_hdf_keys(src_filename)
-        for key in key_list:
-            df = get_dataframe_by_file(src_filename, key=key)
-            save_dataframe_by_file(dst_filename, df, key=key, format="table")
-    else:
-        df = get_dataframe_by_file(src_filename)
-        save_dataframe_by_file(dst_filename, df)
-
-
-def save_dataframe_by_file(abs_filename, df, key="table", **kwargs):
+@WriteLocked(timeout=1000 * 60)
+async def save_dataframe_by_file(abs_filename, df, key="table", **kwargs):
     ext = os.path.splitext(abs_filename)[1].lower()
     if ext == '.csv':
         kwargs["index"] = kwargs.get("index", False)
@@ -95,36 +45,160 @@ def save_dataframe_by_file(abs_filename, df, key="table", **kwargs):
         writer.close()
     elif ext in ['.h5']:
         kwargs["mode"] = kwargs.get("mode", "w")
-        df.to_hdf(abs_filename, key, **kwargs)
+        try:
+            df.to_hdf(abs_filename, key, **kwargs)
+        except ValueError as e:
+            closed = close_hdf_handlers(abs_filename)
+            if closed > 0:
+                df.to_hdf(abs_filename, key, **kwargs)
+            else:
+                raise e
+    elif ext in ['.parquet']:
+        kwargs.pop('format', None)
+        kwargs.pop('allow_truncated_timestamps', True)
+        df.to_parquet(abs_filename, **kwargs)
     else:
         raise Exception('not supported yet')
 
 
-def get_dataframe_by_file(abs_filename, key="table", **kwargs):
+@ReadLocked(timeout=1000 * 60)
+async def get_dataframe_by_file(abs_filename, key="table", raise_ext=False, **kwargs):
     ext = os.path.splitext(abs_filename)[1].lower()
-
     if ext == '.csv':
+        kwargs.pop('columns', None)
         try:
             df = pd.read_csv(abs_filename, encoding='utf8', **kwargs)
         except UnicodeDecodeError:
             df = pd.read_csv(abs_filename, encoding='gb18030', **kwargs)
     elif ext in ['.xlsx', '.xls']:
+        kwargs.pop('columns', None)
         df = pd.read_excel(abs_filename, **kwargs)
     elif ext in ['.h5']:
+        kwargs.pop('columns', None)
+        if not key:
+            logger.error(f"PID: {os.getpid()}, {abs_filename} key empty!")
+            key = "table"
         try:
             kwargs["mode"] = kwargs.get("mode", "r")
             df = pd.read_hdf(abs_filename, key=key, **kwargs)
             if df.empty:
                 logger.error(f"PID: {os.getpid()}, {abs_filename} key[{key}] has no data!")
-        except KeyError:
-            logger.error(f"PID: {os.getpid()}, {abs_filename} key[{key}] exception [KeyError]!")
+        except KeyError as e:
+            logger.exception(f"PID: {os.getpid()}, {abs_filename} key[{key}] exception [KeyError]!")
+            if raise_ext:
+                raise e
             df = pd.DataFrame()
-        except FileNotFoundError:
-            logger.error(f"PID: {os.getpid()}, {abs_filename} key[{key}] exception [FileNotFoundError]!")
+        except FileNotFoundError as e:
+            logger.exception(f"PID: {os.getpid()}, {abs_filename} key[{key}] exception [FileNotFoundError]!")
+            if raise_ext:
+                raise e
+            df = pd.DataFrame()
+        except Exception as e:
+            logger.exception(f"PID: {os.getpid()}, {abs_filename} key[{key}] exception [Unknown]!")
+            if raise_ext:
+                raise e
+            df = pd.DataFrame()
+    elif ext in ['.parquet']:
+        try:
+            if not kwargs.get("columns"):
+                kwargs.pop("columns", None)
+            df = pd.read_parquet(abs_filename, **kwargs)
+        except Exception as e:
+            logger.exception(f"PID: {os.getpid()}, {abs_filename} key[{key}] exception [Unknown]!")
+            if raise_ext:
+                raise e
             df = pd.DataFrame()
     else:
         raise Exception('not supported yet')
     return df
+
+
+async def append_dataframe_by_hdfs_file(abs_filename, df, key="table"):
+    """
+    简介
+    ----------
+    原子地追加数据
+
+    参数
+    ----------
+    abs_filename :
+
+    key :
+
+    df :
+
+
+    返回
+    ----------
+
+    """
+    async with WriteLocked(abs_filename, timeout=1000 * 60 * 2):
+        total_df = (await get_dataframe_by_file.__wrapped__(abs_filename, key=key)).append(df, sort=False)
+        if (not total_df.empty) and len(total_df) > 0:
+            await save_dataframe_by_file.__wrapped__(abs_filename, total_df, key=key, mode="a", format="table")
+            return True
+        else:
+            return False
+
+
+async def change_dataframe_by_hdf5_file(abs_filename, condition, changer, key="table"):
+    """
+    简介
+    ----------
+    原子地修改数据
+    todo: 完善condition、changer的机制， 允许动态判断条件及指定替换逻辑
+
+    参数
+    ----------
+    abs_filename :
+
+    time :
+
+    condition :
+
+    changer :
+
+
+    返回
+    ----------
+
+    """
+    async with WriteLocked(abs_filename, timeout=1000 * 60 * 2):
+        df = await get_dataframe_by_file.__wrapped__(abs_filename, key=key)
+        if (not df.empty) and len(df.loc[condition]) > 0:
+            df.loc[condition] = changer
+            await save_dataframe_by_file.__wrapped__(abs_filename, df, key=key, mode="a", format="table")
+            return True
+        return False
+
+
+async def delete_dataframe_by_hdf5_file(abs_filename, condition, key="table"):
+    """
+    简介
+    ----------
+    原子地删除数据
+    todo: 完善condition的机制， 允许动态判断条件
+
+    参数
+    ----------
+    abs_filename :
+
+    time :
+
+    condition :
+
+
+    返回
+    ----------
+
+    """
+    async with WriteLocked(abs_filename, timeout=1000 * 60 * 2):
+        df = await get_dataframe_by_file.__wrapped__(abs_filename, key=key)
+        if (not df.empty) and len(df.loc[condition]) > 0:
+            df = df[~(condition)]
+            await save_dataframe_by_file.__wrapped__(abs_filename, df, key=key, mode="a", format="table")
+            return True
+        return False
 
 
 def close_hdf_handlers(filename):
@@ -139,46 +213,40 @@ def close_hdf_handlers(filename):
     return count
 
 
-def get_signature_by_name(filename):
-    return f"{os.path.getctime(filename)}_{os.path.getmtime(filename)}_{os.path.getsize(filename)}"
-
-
-def get_filepath(filepath, filename):
-    if '..' in filename or '/' in filename or '\\' in filename:
-        raise Exception('bad df filename')
-    return os.path.join(filepath, filename)
-
-
-def get_dataframe_with_keylist(abs_filename, key_list):
-    df_list = [get_dataframe_by_file(abs_filename, key=x) for x in key_list]
+async def get_dateframe_in_keylist(abs_filename, key_list):
+    df_list = []
+    async with ReadLocked(abs_filename, timeout=1000 * 60 * len(key_list)):
+        for key in key_list:
+            df_list.append(await get_dataframe_by_file.__wrapped__(abs_filename, key=key))
     if df_list:
         return pd.concat(df_list, sort=False, ignore_index=True)
     else:
         return pd.DataFrame()
 
 
-def get_dateframe_by_timestamp(abs_filename, timestamp_start=None, timestamp_end=None):
-    all_key_list = _get_hdf_keys(abs_filename)
+async def get_dateframe_in_daterange(abs_filename, timestamp_start=None, timestamp_end=None):
+    all_key_list = await _get_hdf_keys(abs_filename)
     key_list = list()
     for key in all_key_list:
         try:
             tmp_key = int(key.replace("/", "").replace("df_", ""))
             if (timestamp_start is not None) and (tmp_key <= timestamp_start):
                 continue
-            if (timestamp_end is not None) and (tmp_key >= timestamp_end):
+            if (timestamp_end is not None) and (tmp_key > timestamp_end):
                 continue
             key_list.append(key)
         except Exception:
             pass
     if key_list:
-        return get_dataframe_with_keylist(abs_filename, key_list)
+        return await get_dateframe_in_keylist(abs_filename, key_list)
     else:
         return pd.DataFrame()
 
 
-def get_concat_dateframe_by_timestamp(abs_filename_list, timestamp_start=None, timestamp_end=None):
+async def get_dateframe_in_filelist_in_daterange(abs_filename_list, timestamp_start=None, timestamp_end=None):
     df_list = [
-        get_dateframe_by_timestamp(abs_filename, timestamp_start, timestamp_end) for abs_filename in abs_filename_list
+        await get_dateframe_in_daterange(abs_filename, timestamp_start, timestamp_end)
+        for abs_filename in abs_filename_list
     ]
     if df_list:
         return pd.concat(df_list, sort=False, ignore_index=True)

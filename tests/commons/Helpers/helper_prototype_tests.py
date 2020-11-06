@@ -6,7 +6,7 @@
 import time
 import math
 import unittest
-from commons.Metaclass.Prototype import Prototype
+from commons.Helper.Helper_prototype import Prototype
 
 
 class A(Prototype):
@@ -96,29 +96,3 @@ class SingletonHelperTestCase(unittest.TestCase):
         a = A()
         a.name = "b"
         self.assertEqual(a().name, "b")
-
-    def test_proto_change_after_call(self):
-        """
-        对对象每次调用会生成一个新的副本，对副本的修改， 不会作用到对象本身上
-        修改副本只会修改副本本身
-        :return:
-        """
-        a = A()
-        a().name = "b"
-        self.assertEqual(a.name, "a")
-        self.assertEqual(a().name, "a")
-
-        tmp = a()
-        tmp.name = "b"
-        self.assertEqual(tmp.name, "b")
-
-    def test_proto_change_after_call2(self):
-        """
-        对对象每次调用会生成一个新的副本，对副本的修改， 不会作用到对象本身上
-        修改副本只会修改副本本身
-        :return:
-        """
-        a = A()
-        tmp = a(name="b")
-        self.assertEqual(a.name, "a")
-        self.assertEqual(tmp.name, "b")

@@ -5,8 +5,11 @@
 
 import os
 import sys
+import logging
 from fnmatch import fnmatch
 from importlib import import_module
+
+logger = logging.getLogger("helper.Helper_productor")
 
 
 class NoModule(Exception):
@@ -110,4 +113,4 @@ class Productor(object):
                             ):
                                 self.__load_module(obj, module_path)
                     except Exception as e:
-                        print(full_path, e)
+                        logger.warning(full_path, e)

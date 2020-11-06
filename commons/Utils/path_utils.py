@@ -14,3 +14,7 @@ def get_dir_path(path, *paths):
         except Exception as e:
             pass
     return dir_path
+
+
+def get_signature(filename):
+    return f"{os.path.getctime(filename)}_{os.path.getmtime(filename)}_{os.path.getsize(filename)}"
