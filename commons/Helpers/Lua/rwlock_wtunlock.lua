@@ -1,7 +1,7 @@
 --[[
     # None：释放成功
-# 0：释放失败
-# 1：释放成功，且锁释放
+    # 0：释放失败
+    # 1：释放成功，且锁释放
 --]]
 local write_key = 'write'
 local mode = redis.call('hget', KEYS[1], 'mode')

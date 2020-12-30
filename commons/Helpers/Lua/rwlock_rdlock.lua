@@ -12,6 +12,10 @@ if (mode == false) then
     return nil
 end
 if (mode == 'read') then
+    local ws = redis.call('hget', KEYS[1], write_key)
+    if (ws ~= '0') then
+        return redis.call('pttl', KEYS[1])
+    end
     local ind = redis.call('hincrby', KEYS[1], ARGV[2], 1)
     local remainTime = redis.call('pttl', KEYS[1])
     redis.call('pexpire', KEYS[1], math.max(remainTime, ARGV[1]))
