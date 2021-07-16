@@ -144,8 +144,11 @@ class Manager(BaseManager, metaclass=Singleton):
             value = updates.get(attr, undefined)
             if value != undefined:
                 if isinstance(klass.__fields__[attr], DictField):
-                    model.__getitem__(attr).update(value)
-                    model.__setattr__(attr, model.__getitem__(attr))
+                    attr_ = model.__getitem__(attr)
+                    if not attr_:
+                        attr_ = {}
+                    attr_.update(value)
+                    model.__setattr__(attr, attr_)
                 else:
                     model.__setattr__(attr, value)
         await cls._save(model)
