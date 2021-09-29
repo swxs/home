@@ -1,33 +1,39 @@
-tornado
-thriftpy2
-scrapy
-click
-umongo[motor]
-umongo[mongomock]
-aioredis
-fakeredis
-python-memcached
-requests
-numpy
-pandas
-scipy
-tables
-pyarrow
-faker
-arrow
-qrcode
-Pillow
-pyzbar
-beautifulsoup4
-lxml
-pyyaml
-msgpack
-openpyxl
-bson
-pyjwt
-pycryptodome
-aiohttp
-aiofiles
-async-lru
-async_property
-concurrent_log_handler
+fastapi
+uvicorn
+SQLAlchemy
+mysql-connector
+pymysql
+# tornado
+# thriftpy2
+# scrapy
+# click
+# umongo[motor]
+# umongo[mongomock]
+# aioredis
+# fakeredis
+# python-memcached
+# requests
+# environs
+# arrow
+# numpy
+# pandas
+# scipy
+# tables
+# pyarrow
+# faker
+# qrcode
+# Pillow
+# pyzbar
+# beautifulsoup4
+# lxml
+# pyyaml
+# msgpack
+# openpyxl
+# bson
+# pyjwt
+# pycryptodome
+# aiohttp
+# aiofiles
+# async-lru
+# async_property
+# concurrent_log_handler
