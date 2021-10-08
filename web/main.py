@@ -34,7 +34,7 @@ def force_exit(loop, signum, frame):
 def main(port):
     loop = run(port=port)
     logger.debug('Tornado server started on port %s.' % port)
-    signal.signal(signal.SIGINT, partial(force_exit, loop))
+    # signal.signal(signal.SIGINT, partial(force_exit, loop))
     try:
         loop.start()
     except Exception as e:

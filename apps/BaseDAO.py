@@ -10,5 +10,5 @@ import dao as model
 class BaseDAO(model.BaseDocument):
     __manager__ = "umongo_motor"
 
-    created = model.DateTimeField(create=False)
-    updated = model.DateTimeField(create=False, pre_update=datetime.datetime.now)
+    # created = model.DateTimeField(create=False)
+    # updated = model.DateTimeField(create=False, pre_update=datetime.datetime.now)

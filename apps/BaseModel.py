@@ -11,8 +11,5 @@ from umongo.marshmallow_bonus import SchemaFromUmongo
 
 @MONGO_INSTANCE.register
 class BaseModelDocument(Document):
-    
     created = fields.DateTimeField(default=datetime.datetime.now)
     updated = fields.DateTimeField(default=datetime.datetime.now)
-
-    

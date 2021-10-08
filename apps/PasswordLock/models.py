@@ -12,7 +12,7 @@ from settings import MONGO_INSTANCE
 
 
 @MONGO_INSTANCE.register
-class PasswordLock(BaseModelDocument):
+class PasswordLock(Document):
     name = fields.StringField(allow_none=True)
     key = fields.StringField(allow_none=True)
     website = fields.StringField(allow_none=True)

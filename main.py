@@ -43,5 +43,38 @@ def main(mode, task, ports):
         web_main.main(ports)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
+
+import uvicorn
+from fastapi import Depends, FastAPI
+
+from apps.PasswordLock.handlers import router
+
+app = FastAPI()
+
+from motor.motor_asyncio import AsyncIOMotorClient
+from settings import database
+
+
+@app.on_event("startup")
+async def event_startup():
+    logging.info("connect to database....")
+    database.client = AsyncIOMotorClient()
+    logging.info("Connected to database!")
+
+
+@app.on_event("shutdown")
+async def event_shutdown():
+    logging.info("close mongodb connection....")
+    database.client.close()
+    logging.info("connection to mongodb has been closed!")
+
+
+app.include_router(router)
+
+
+if __name__ == '__main__':
+    # uvicorn.run(app, host="127.0.0.1", port=8895)
+    uvicorn.run("main:app", host="127.0.0.1", port=8895)
+    # uvicorn.run("main:app", host="127.0.0.1", port=8895, reload=True)

@@ -2,6 +2,8 @@
 
 import os
 from commons.Utils.path_utils import get_dir_path
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from umongo import Instance, MotorAsyncIOInstance
 
 OS = 'linux'
 DEBUG = False
@@ -106,26 +108,38 @@ def connect_db_mysql():
 def connect_db(db_name=MONGODB_DBNAME, mock=False):
     global DB_CONNECTED
     from motor.motor_asyncio import AsyncIOMotorClient
-    from umongo import Instance, Document, fields, ValidationError, set_gettext
+    from umongo import Instance, MotorAsyncIOInstance, Document, fields, ValidationError, set_gettext
     from umongo.marshmallow_bonus import SchemaFromUmongo
 
-    db = AsyncIOMotorClient()[db_name]
-    return Instance(db)
+    return get_database()
 
+class DataBase:
+    client: AsyncIOMotorClient = None
+
+
+database = DataBase()
+
+
+def get_database() -> AsyncIOMotorDatabase:
+    if database.client:
+        return database.client['home']
+    return AsyncIOMotorClient()['home']
 
 try:
     MYSQL_INSTANCE = connect_db_mysql()
     print("mongo db connect success!")
-except Exception:
+except Exception as e:
     MYSQL_INSTANCE = None
     print("mysql db connect failed!")
 
 try:
-    MONGO_INSTANCE = connect_db()
+    db = connect_db()
+    MONGO_INSTANCE = Instance(db)
     print("mongo db connect success!")
-except Exception:
+except Exception as e:
     MONGO_INSTANCE = None
     print("mongo db connect failed!")
+    raise e
 
 web = dict(
     cookie_secret=SECRET_KEY,
