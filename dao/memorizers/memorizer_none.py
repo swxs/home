@@ -1,0 +1,2 @@
+class NoneMemorizer:
+    name = "none"

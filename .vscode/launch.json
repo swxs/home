@@ -8,8 +8,8 @@
             "name": "RUN[HOME-MAIN]",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
-            "args": ["8090"],
+            "module": "uvicorn",
+            "args": ["main:app", "--port", "8090"],
             "console": "integratedTerminal",
             "justMyCode": false
         }, {

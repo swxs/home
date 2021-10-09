@@ -3,5 +3,6 @@
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:54
 
-from .fields import *
+from . import fields
 from .BaseDocument import BaseDocument
+

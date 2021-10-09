@@ -4,7 +4,6 @@
 
 import logging
 from tornado.web import url
-import settings
 from web import BaseHandler, render, SuccessData, ApiException, ApiUnknowException, Info
 from commons.Helpers import tokener, refresh_tokener
 from commons.Helpers.Helper_pagenate import Page

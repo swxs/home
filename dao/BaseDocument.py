@@ -11,11 +11,10 @@ from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
 
-import settings
-from web import undefined
+from web.consts import undefined
 from .fields import BaseField, DateTimeField, DictField
-from .manager_productor import manager_productor
-from .memorizer.memorizer_cache import clear, upgrade, cache
+from .managers import manager_productor
+from .memorizers import memorizer_productor
 
 logger = logging.getLogger("main.dao.base_document")
 
@@ -51,11 +50,14 @@ class BaseMetaDocuemnt(type):
         attrs["__searches__"] = dict()  # 记录搜索的方法字段
         attrs["__subclass__"] = dict()  # 记录子类
         attrs["__model_name__"] = name  # 记录model的名称
-        if 'meta' in attrs:
-            meta_data: dict = attrs.get('meta', {})
-            attrs["__base_model_name__"] = meta_data.get('inheritance', name)
-        else:
-            attrs["__base_model_name__"] = name
+
+        attrs["_manager"] = None
+        attrs["_memorizer"] = None
+
+        if attrs.get('Meta'):
+            attrs["__model__"] = attrs.get("Meta").model
+            attrs["__manager__"] = attrs.get("Meta").manager
+            attrs["__memorizer__"] = attrs.get("Meta").memorizer
 
         current_class = super(BaseMetaDocuemnt, cls).__new__(cls, name, bases, attrs)
         if parent is not None:
@@ -64,7 +66,15 @@ class BaseMetaDocuemnt(type):
 
     @property
     def manager(cls):
-        return manager_productor[cls.__manager__]
+        if cls._manager is None:
+            cls._manager = manager_productor[cls.__manager__](cls)
+        return cls._manager
+
+    @property
+    def memorizer(cls):
+        if cls._memorizer is None:
+            cls._memorizer = memorizer_productor[cls.__memorizer__]()
+        return cls._memorizer
 
 
 class BaseDocument(object, metaclass=BaseMetaDocuemnt):
@@ -128,125 +138,86 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return await self.to_dict(dict_factory=dict_factory)
 
     @classmethod
-    # @cache
-    async def find(cls, finds: dict):
-        if "id" in finds:
-            finds["_id"] = ObjectId(finds.pop("id"))
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [select] <{getattr(cls, '__model_name__')}>: kwargs - {str(finds)}"
-        )
-        return await cls.manager.find(cls, finds)
+    async def find(cls, finds, limit=0, skip=0):
+        logger.info(f"[select] <{cls.__model_name__}>: finds - {finds}")
 
-    @classmethod
-    async def is_exist(cls, finds: dict):
-        try:
-            await cls.find(finds)
-            return True
-        except Exception as e:
-            logger.exception(e)
-            return False
-
-    @classmethod
-    def search(cls, searches, limit=0, skip=0):
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [search] <{getattr(cls, '__model_name__')}>: kwargs - {str(searches)}"
-        )
-        key = cls.get_key_with_params(searches)
-        if key in getattr(cls, "__searches__"):
-            return getattr(cls, "__searches__")[key](cls, searches)
+        if not isinstance(finds, dict):
+            finds = {"_id": finds}
+            return await cls.manager.find_one(finds, limit=limit, skip=skip)
         else:
-            return cls.manager.search(cls, searches, limit=limit, skip=skip)
+            return await cls.manager.find_many(finds, limit=limit, skip=skip)
 
     @classmethod
-    async def count(cls, searches):
+    async def count(cls, finds):
         try:
-            return await cls.manager.count(cls, searches)
+            return await cls.manager.count(finds)
         except Exception as e:
-            logger.exception(e)
+            logger.info(e)
             return 0
 
     @classmethod
-    async def create(cls, creates: dict):
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [create] <{getattr(cls, '__model_name__')}>: kwargs - {str(creates)}"
-        )
-        return await cls.manager.create(cls, creates)
-
-    async def copy(self, copies):
-        params = await self.to_dict()
-        for attr in self.__fields__:
-            value = copies.get(attr, undefined)
-            if value != undefined:
-                if isinstance(self.__fields__[attr], DictField):
-                    params[attr].update(value)
-                else:
-                    params[attr] = value
-        return await self.__class__.create(params)
+    async def is_exist(cls, finds):
+        ret = await cls.count(finds)
+        return ret > 0
 
     @classmethod
-    async def find_and_copy(cls, finds: dict, copies: dict):
-        if "id" in finds:
-            finds["_id"] = ObjectId(finds.pop("id"))
-        instance = await cls.find(finds)
-        return await instance.copy(copies)
+    async def search(cls, searches, limit=0, skip=0):
+        logger.info(f"[search] <{cls.__model_name__}>: searches - {searches}")
 
-    async def update(self, updates: dict):
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}; updates - {str(updates)}"
-        )
-        return await self.__class__.manager.update(self.__class__, self, updates)
+        key = cls.get_key_with_params(searches)
+        if key in getattr(cls, "__searches__"):
+            return getattr(cls, "__searches__")[key](searches, limit=limit, skip=skip)
+        else:
+            # 没有找到追加规则会退化到find
+            return cls.find(searches, limit=limit, skip=skip)
 
     @classmethod
-    async def find_and_update(cls, finds: dict, updates: dict):
-        if "id" in finds:
-            finds["_id"] = ObjectId(finds.pop("id"))
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}; updates - {str(updates)}"
-        )
-        return await cls.manager.find_and_update(cls, finds, updates)
+    async def create(cls, params):
+        logger.info(f"[create] <{cls.__model_name__}>: params - {params}")
+
+        return await cls.manager.create(params)
 
     @classmethod
-    async def search_and_update(cls, searches: dict, updates: dict):
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [update] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}; updates - {str(updates)}"
-        )
-        return await cls.manager.searches_and_update(cls, searches, updates)
+    async def update(cls, finds, params):
+        logger.info(f"[update] <{cls.__model_name__}>: finds - {finds}; params - {params}")
 
-    async def delete(self):
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(self, '__model_name__')}>: finds - {str(dict(id=self.id))}"
-        )
-        return await self.__class__.manager.delete(self.__class__, self)
+        if not isinstance(finds, dict):
+            finds = {"_id": finds}
+            return await cls.manager.find_one_and_update(finds, params)
+        else:
+            # 暂不支持
+            raise Exception
 
     @classmethod
-    async def find_and_delete(cls, finds: dict):
-        if "id" in finds:
-            finds["_id"] = ObjectId(finds.pop("id"))
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(cls, '__model_name__')}>: finds - {str(finds)}"
-        )
-        return await cls.manager.find_and_delete(cls, finds)
+    async def copy(cls, finds, params):
+        model = cls.find(finds)
+        params_ = model.to_dict(updates=params)
+        return await cls.update(finds, params_)
 
     @classmethod
-    async def search_and_delete(cls, searches: dict):
-        logger.info(
-            f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S:%f} [delete] <{getattr(cls, '__model_name__')}>: searches - {str(searches)}"
-        )
-        return await cls.manager.searches_and_delete(cls, searches)
+    async def delete(cls, finds):
+        logger.info(f"[delete] <{cls.__model_name__}>: finds - {finds}")
+
+        if not isinstance(finds, dict):
+            finds = {"_id": finds}
+            return await cls.manager.find_one_and_delete(cls, finds)
+        else:
+            # 暂不支持
+            raise Exception
 
     @classmethod
-    def add_search(cls, *args):
-        key = cls.get_key_with_list(list(args))
-        if key not in getattr(cls, "__searches__"):
+    def add_search(cls, *keys):
+        key = cls.get_key_with_list(list(keys))
+        if key not in cls.__searches__:
 
             def wrapper(function):
                 @wraps(function)
                 def inner_wrapper(*args, **kwargs):
                     return function(*args, **kwargs)
 
-                getattr(cls, "__searches__")[key] = inner_wrapper
+                cls.__searches__[key] = inner_wrapper
                 return inner_wrapper
 
             return wrapper
         else:
-            return getattr(cls, "__searches__")[key]
+            return cls.__searches__[key]

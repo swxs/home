@@ -1,0 +1,2 @@
+class BaseMemorizer(object):
+    pass

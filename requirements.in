@@ -1,39 +1,34 @@
 fastapi
 uvicorn
-SQLAlchemy
-mysql-connector
+click
+environs
+concurrent_log_handler
 pymysql
-# tornado
-# thriftpy2
-# scrapy
-# click
-# umongo[motor]
-# umongo[mongomock]
-# aioredis
-# fakeredis
-# python-memcached
-# requests
-# environs
-# arrow
-# numpy
-# pandas
-# scipy
-# tables
-# pyarrow
-# faker
-# qrcode
-# Pillow
-# pyzbar
-# beautifulsoup4
-# lxml
-# pyyaml
-# msgpack
-# openpyxl
-# bson
-# pyjwt
-# pycryptodome
-# aiohttp
-# aiofiles
-# async-lru
-# async_property
-# concurrent_log_handler
+mysql-connector
+SQLAlchemy
+umongo[motor]
+aioredis
+scrapy
+aiohttp
+aiofiles
+async-lru
+async_property
+lxml
+pyyaml
+openpyxl
+bson
+msgpack
+arrow
+faker
+qrcode
+Pillow
+requests
+beautifulsoup4
+pyzbar
+pyjwt
+pycryptodome
+tables
+pyarrow
+numpy
+pandas
+scipy
