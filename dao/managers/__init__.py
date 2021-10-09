@@ -1,7 +1,7 @@
 import os
+import core
 from .manager_base import BaseManager
 from commons.Helpers.Helper_productor import Productor
-from core import config
 
 
 class ManagerProductor(Productor):
@@ -10,4 +10,4 @@ class ManagerProductor(Productor):
 
 
 base_name = os.path.join(os.path.dirname(__file__))
-manager_productor = ManagerProductor(config.SITE_ROOT, base_name, BaseManager, BaseManager, "*.py")
+manager_productor = ManagerProductor(core.path.SITE_ROOT, base_name, BaseManager, BaseManager, "*.py")

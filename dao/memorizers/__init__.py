@@ -1,7 +1,7 @@
 import os
+import core
 from .memorizer_base import BaseMemorizer
 from commons.Helpers.Helper_productor import Productor
-from core import config
 
 
 class MemorizerProductor(Productor):
@@ -10,4 +10,4 @@ class MemorizerProductor(Productor):
 
 
 base_name = os.path.join(os.path.dirname(__file__))
-memorizer_productor = MemorizerProductor(config.SITE_ROOT, base_name, BaseMemorizer, BaseMemorizer, "*.py")
+memorizer_productor = MemorizerProductor(core.path.SITE_ROOT, base_name, BaseMemorizer, BaseMemorizer, "*.py")

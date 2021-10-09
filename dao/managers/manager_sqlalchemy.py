@@ -29,7 +29,7 @@ class ManagerQuerySet(BaseManagerQuerySet):
 
 class SqlalchemyManager(BaseManager, metaclass=Singleton):
     name = "sqlalchemy"
-    Session = sessionmaker(bind=config.MYSQL_INSTANCE)
+    # Session = sessionmaker(bind=config.MYSQL_INSTANCE)
 
     @classmethod
     def _get_model(cls, klass):

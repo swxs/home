@@ -1,5 +1,5 @@
 import enum
-from core import config
+import core
 from . import DBHelper_Redis
 from . import DBHelper_Memcache
 from . import Helper_mongodb_dumper
@@ -39,20 +39,32 @@ class RegEnum(enum.Enum):
 
 
 redis_helper = DBHelper_Redis.RedisDBHelper(
-    db=config.REDIS_DB, host=config.REDIS_HOST, port=config.REDIS_PORT, password=config.REDIS_PASSWORD
+    db=core.config.REDIS_DB,
+    host=core.config.REDIS_HOST,
+    port=core.config.REDIS_PORT,
+    password=core.config.REDIS_PASSWORD,
 )
 
-memcache_helper = DBHelper_Memcache.MemcacheDBHelper(host=config.MEMCACHE_HOST, port=config.MEMCACHE_PORT)
+memcache_helper = DBHelper_Memcache.MemcacheDBHelper(
+    host=core.config.MEMCACHE_HOST,
+    port=core.config.MEMCACHE_PORT,
+)
 
 mongodb_dumper_helper = Helper_mongodb_dumper.MongodbDumperHelper(
-    config.MONGODB_ADDRESS,
-    config.MONGODB_PORT,
-    config.MONGODB_DBNAME,
-    config.MONGODB_USERNAME,
-    config.MONGODB_PASSWORD,
-    config.MONGODB_AUTHDB,
-    config.STATIC_DBBACK_PATH,
+    core.config.MONGODB_ADDRESS,
+    core.config.MONGODB_PORT,
+    core.config.MONGODB_DBNAME,
+    core.config.MONGODB_USERNAME,
+    core.config.MONGODB_PASSWORD,
+    core.config.MONGODB_AUTHDB,
+    core.path.STATIC_DBBACK_PATH,
 )
 
-tokener = Helper_JWT.AuthTokner(key=config.JWT_SECRET_KEY, timeout=config.JWT_TIMEOUT)
-refresh_tokener = Helper_JWT.AuthTokner(key=config.JWT_SECRET_KEY, timeout=config.JWT_REFRESH_TIMEOUT)
+tokener = Helper_JWT.AuthTokner(
+    key=core.config.JWT_SECRET_KEY,
+    timeout=core.config.JWT_TIMEOUT,
+)
+refresh_tokener = Helper_JWT.AuthTokner(
+    key=core.config.JWT_SECRET_KEY,
+    timeout=core.config.JWT_REFRESH_TIMEOUT,
+)

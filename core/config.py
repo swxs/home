@@ -1,144 +1,55 @@
 # -*- coding: utf-8 -*-
 
-import os
-from commons.Utils.path_utils import get_dir_path
+from environs import Env
 
+env = Env()
+env.read_env()
 
-OS = 'linux'
-DEBUG = False
-XSRF = '__xsrf'
-DEFAULT_LOCAL = 'zh_CN'
-ACCESS_TOKEN_EXPIRE = 60 * 60 * 2
-REFRESH_TOKEN_EXPIRE = 60 * 60 * 24 * 7
-SUPER_PASSWORD = 'bc8720e67deb87b2a32131b07605813f'
-SECRET_KEY = '2f3c330a-7557-4705-9a61-8a4cc8d8698c'
-SALT = 'cf70538d-46a6-47f7-bc99-51c3e45126ea'
+DEBUG = env.bool("DEBUG", False)
 
-JWT_SECRET_KEY = '7f8512a4-afe7-4941-a0c0-62e75dc8edd4'  # 密钥
-JWT_TIMEOUT = 2 * 60 * 60  # 超时时间，单位: s
-JWT_REFRESH_TIMEOUT = 7 * 24 * 60 * 60  # 超时时间，单位: s
+XSRF = env.str("XSRF", '__xsrf')
+DEFAULT_LOCAL = env.str("DEFAULT_LOCAL", 'zh_CN')  # 默认语言
+ACCESS_TOKEN_EXPIRE = env.int("ACCESS_TOKEN_EXPIRE", 60 * 60 * 2)
+REFRESH_TOKEN_EXPIRE = env.int("REFRESH_TOKEN_EXPIRE", 60 * 60 * 24 * 7)
+SUPER_PASSWORD = env.str("SUPER_PASSWORD", 'bc8720e67deb87b2a32131b07605813f')
+SECRET_KEY = env.str("SECRET_KEY", '2f3c330a-7557-4705-9a61-8a4cc8d8698c')
+SALT = env.str("SALT", 'cf70538d-46a6-47f7-bc99-51c3e45126ea')
 
-SITE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SITE_PROTOCOL = 'http'
-SITE_DOMAIN = '127.0.0.1'
-SITE_PORT = 8088
+JWT_SECRET_KEY = env.str("JWT_SECRET_KEY", '7f8512a4-afe7-4941-a0c0-62e75dc8edd4')  # 密钥
+JWT_TIMEOUT = env.int("JWT_TIMEOUT", 2 * 60 * 60)  # 超时时间，单位: s
+JWT_REFRESH_TIMEOUT = env.int("JWT_REFRESH_TIMEOUT", 7 * 24 * 60 * 60)  # 超时时间，单位: s
 
-RPC_MODULE_LIST = []
+SITE_PROTOCOL = env.str("SITE_PROTOCOL", 'http')
+SITE_DOMAIN = env.str("SITE_DOMAIN", '127.0.0.1')
+SITE_PORT = env.int("SITE_PORT", 8088)
 
-LOG_PATH = get_dir_path(SITE_ROOT, 'logs')
-STATIC_PATH = get_dir_path(SITE_ROOT, 'static')
-DATAFILE_PATH = get_dir_path(SITE_ROOT, 'static', 'data_file')
-STATIC_ZIPFILE_PATH = get_dir_path(SITE_ROOT, 'static', 'zipfile')
-STATIC_DBBACK_PATH = get_dir_path(SITE_ROOT, 'static', 'dbback')
-TEMP_PATH = get_dir_path(SITE_ROOT, 'temp')
-TEMPLATE_PATH = get_dir_path(SITE_ROOT, 'template')
-TRANSLATIONS_PATH = get_dir_path(SITE_ROOT, "translations")
-SPIDER_LOG_PATH = get_dir_path(SITE_ROOT, 'model_spider', 'model_spider', 'logs')
+MEMCACHE_HOST = env.str("MEMCACHE_HOST", '127.0.0.1')
+MEMCACHE_PORT = env.int("MEMCACHE_PORT", 11211)
+MEMCACHE_EXPIRE_TIME = env.int("MEMCACHE_EXPIRE_TIME", 120)
 
-INIT_SETTINGS_FILE = os.path.join(SITE_ROOT, "init.yaml")
+REDIS_HOST = env.str("REDIS_HOST", 'db_redis')
+REDIS_PORT = env.int("REDIS_PORT", 6379)
+REDIS_DB = env.int("REDIS_DB", 0)
+REDIS_PASSWORD = env.str("REDIS_PASSWORD", None)
 
-MEMCACHE_HOST = '127.0.0.1'
-MEMCACHE_PORT = 11211
-MEMCACHE_EXPIRE_TIME = 120
+MONGODB_ADDRESS = env.str("MONGODB_ADDRESS", '127.0.0.1')
+MONGODB_PORT = env.int("MONGODB_PORT", 27017)
+MONGODB_URI = f'{MONGODB_ADDRESS}:{MONGODB_PORT}'
+MONGODB_DBNAME = env.str("MONGODB_DBNAME", 'home')
+MONGODB_USERNAME = env.str("MONGODB_USERNAME", None)
+MONGODB_PASSWORD = env.str("MONGODB_PASSWORD", None)
+MONGODB_AUTHDB = env.str("MONGODB_AUTHDB", None)
 
-REDIS_HOST = 'db_redis'
-REDIS_PORT = 6379
-REDIS_DB = 0
-REDIS_PASSWORD = None
-REDIS_TOKEN_BLOCK_DB = 3
+MAIL_SERVER_IP = env.str("MAIL_SERVER_IP", "")
+MAIL_SERVER_USER = env.str("MAIL_SERVER_USER", "")
+MAIL_SERVER_USER_MAIL = env.str("MAIL_SERVER_USER_MAIL", "")
+MAIL_SENDER_NAME = env.str("MAIL_SENDER_NAME", "")
 
-MONGODB_ADDRESS = 'db_mongo'
-MONGODB_PORT = 27017
-MONGODB_URI = '127.0.0.1:27017'
-MONGODB_DBNAME = 'home'
-MONGODB_USERNAME = None
-MONGODB_PASSWORD = None
-MONGODB_AUTHDB = None
+WECHAT_ACCESS_TOKEN_URL = env.str("WECHAT_ACCESS_TOKEN_URL", "")
+WECHAT_REFRESH_ACCESS_TOKEN_URL = env.str("WECHAT_REFRESH_ACCESS_TOKEN_URL", "")
+WECHAT_USERINFO_URL = env.str("WECHAT_USERINFO_URL", "")
+WECHAT_APPID = env.str("WECHAT_APPID", "")
+WECHAT_SECRET = env.str("WECHAT_SECRET", "")
 
-MAIL_SERVER_IP = ""
-MAIL_SERVER_USER = ""
-MAIL_SERVER_USER_MAIL = ""
-MAIL_SENDER_NAME = ""
-
-WECHAT_ACCESS_TOKEN_URL = ""
-WECHAT_REFRESH_ACCESS_TOKEN_URL = ""
-WECHAT_USERINFO_URL = ""
-WECHAT_APPID = ""
-WECHAT_SECRET = ""
-
-RPC_SERVER_HOST = 'db_redis'
-RPC_SERVER_PORT = 6000
-
-try:
-    from local_settings import *  # noqa: F403
-except Exception:
-    print('load local settings faild.')
-
-if SITE_PORT == 80:
-    SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}'
-else:
-    SITE_URL = f'{SITE_PROTOCOL}://{SITE_DOMAIN}:{SITE_PORT}'
-
-MEMCACHE_HOSTS = (f'{MEMCACHE_HOST}:{MEMCACHE_PORT}',)
-
-DB_CONNECTED = False
-
-
-def connect_db_mysql():
-    import asyncio
-    import pymysql
-
-    pymysql.install_as_MySQLdb()
-
-    from sqlalchemy import create_engine
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy import Column, Integer, String, Text, MetaData, Table
-    from sqlalchemy.schema import CreateTable
-    from sqlalchemy.orm import sessionmaker
-
-    from sqlalchemy_aio import ASYNCIO_STRATEGY, TRIO_STRATEGY
-    from sqlalchemy_aio.asyncio import AsyncioEngine
-
-    engine = create_engine(
-        "mysql://root:swxs@localhost/runoob", strategy=ASYNCIO_STRATEGY, encoding='latin1', echo=False
-    )
-    return engine
-
-
-# def connect_db(db_name=MONGODB_DBNAME, mock=False):
-#     global DB_CONNECTED
-#     from motor.motor_asyncio import AsyncIOMotorClient
-#     from umongo.frameworks import MotorAsyncIOInstance
-
-#     return get_database()
-
-# class DataBase:
-#     client: AsyncIOMotorClient = None
-
-
-# database = DataBase()
-
-
-# def get_database() -> AsyncIOMotorDatabase:
-#     if database.client:
-#         return database.client['home']
-#     return AsyncIOMotorClient('127.0.0.1:27017')['home']
-
-try:
-    MYSQL_INSTANCE = connect_db_mysql()
-    print("mongo db connect success!")
-except Exception as e:
-    MYSQL_INSTANCE = None
-    print("mysql db connect failed!")
-
-# try:
-#     db = connect_db()
-#     MONGO_INSTANCE = MotorAsyncIOInstance(db)
-#     print("mongo db connect success!")
-# except Exception as e:
-#     MONGO_INSTANCE = None
-#     print("mongo db connect failed!")
-#     raise e
-
-
-rpc = dict(host="0.0.0.0", port=6000, client_timeout=None)
+RPC_SERVER_HOST = env.str("RPC_SERVER_HOST", 'db_redis')
+RPC_SERVER_PORT = env.int("RPC_SERVER_PORT", 6000)

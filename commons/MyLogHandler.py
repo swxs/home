@@ -9,12 +9,12 @@ from tornado import options
 from stat import ST_MTIME, ST_CTIME
 from logging.handlers import TimedRotatingFileHandler
 from concurrent_log_handler import ConcurrentRotatingFileHandler
-from core import config
+import core
 
 
 class MyTimedRotatingFileHandler(TimedRotatingFileHandler):
     def __init__(self, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False, atTime=None):
-        filename = os.path.join(config.LOG_PATH, "log.out")
+        filename = os.path.join(core.path.LOG_PATH, "log.out")
         super(MyTimedRotatingFileHandler, self).__init__(
             filename, when, interval, backupCount, encoding, delay, utc, atTime
         )
@@ -46,7 +46,7 @@ class RFHandler(ConcurrentRotatingFileHandler):
         terminator="\n",
         unicode_error_policy='ignore',
     ):
-        filename = os.path.join(config.LOG_PATH, "clog.out")
+        filename = os.path.join(core.path.LOG_PATH, "clog.out")
         super(RFHandler, self).__init__(
             filename,
             mode=mode,

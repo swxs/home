@@ -66,10 +66,6 @@ async def create_passwordlock(
     password_lock = await PasswordLock.create(
         params=password_lock_schema.dict(),
     )
-    try:
-        ls = await password_lock.to_front()
-    except Exception as e:
-        print(e)
     return {
         "data": await password_lock.to_front(),
     }
