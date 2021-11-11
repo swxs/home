@@ -1,1 +1,0 @@
-Column_id = str

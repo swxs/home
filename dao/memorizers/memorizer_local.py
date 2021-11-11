@@ -11,7 +11,6 @@ import hashlib
 import weakref
 from functools import wraps
 from commons.Helpers import memcache_helper
-from ..BaseDocument import undefined
 
 logger = logging.getLogger("main.dao.memorize")
 
@@ -111,128 +110,7 @@ class LocalMemorizer:
             return hashlib.md5(raw_str).hexdigest()
 
         def _open_api_signature(**kwargs):
-            lis = [kwargs[k] for k in sorted(kwargs.keys()) if kwargs[k] not in [None, undefined]]
+            lis = [kwargs[k] for k in sorted(kwargs.keys()) if kwargs[k] not in (None, )]
             return md5(''.join(lis))
 
         return f"{_model_name}_{_open_api_signature(**kwargs)}"
-
-
-memorize_helper = MemorizeHelper()
-
-
-def clear(function):
-    @wraps(function)
-    def helper(*args, **kwargs):
-        obj = args[0]
-        key = memorize_helper.make_model_main_key(obj.__model_name__, obj.id)
-        try:
-            obj = function(*args, **kwargs)
-        except Exception as e:
-            raise e
-        memorize_helper.clear_key(key)
-        memorize_helper.set_obj_new_version(obj, key, 0)
-        return obj
-
-    return helper
-
-
-def upgrade(function):
-    @wraps(function)
-    async def helper(*args, **kwargs):
-        try:
-            obj = await function(*args, **kwargs)
-        except Exception as e:
-            raise e
-        key = memorize_helper.make_model_main_key(obj.__model_name__, obj.id)
-        memorize_helper.clear_key(key)
-        remote_version = memorize_helper.set_obj_new_version(obj, key)
-        obj.__version__ = remote_version
-        return obj
-
-    return helper
-
-
-def cache(function):
-    @wraps(function)
-    async def helper(*args, **kwargs):
-        if "id" in kwargs:
-            key = memorize_helper.make_model_main_key(args[0].__model_name__, kwargs.get("id"))  # 获取key
-            remote_version = memorize_helper.get_remote_obj_version(key)  # 获取当前版本号
-            if remote_version == 0:  # 如果远程无版本
-                obj = await function(*args, **kwargs)  # 查询获取对象
-                remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
-            else:  # 如果远程有版本
-                local_version = memorize_helper.get_local_obj_version(key)  # 获取当前版本
-                if local_version != remote_version:  # 当前版本与远程版本不同
-                    obj = await function(*args, **kwargs)  # 查询获取对象
-                    remote_version = memorize_helper.set_obj_new_version(obj, key, remote_version)  # 同步版本至远程版本
-                else:  # 版本相同
-                    if key in memorize_helper.OBJ_DICT:  # key 存在
-                        obj = memorize_helper.OBJ_DICT[key]  # 获取缓存对象
-                    else:  # key 不存在, 可能被删掉了？
-                        obj = await function(*args, **kwargs)  # 查询获取对象
-                        remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
-            obj.__version__ = remote_version
-            return memorize_helper.OBJ_DICT[key]
-        else:
-            sub_key = memorize_helper.make_model_sub_key(args[0].__model_name__, **kwargs)  # 获取key
-
-            new_obj = False
-            if sub_key in memorize_helper.OBJ_DICT:
-                obj = memorize_helper.OBJ_DICT[sub_key]
-                try:
-                    print(obj.id)
-                except Exception:
-                    obj = function(*args, **kwargs)  # 查询获取对象
-                    new_obj = True
-            else:
-                obj = function(*args, **kwargs)  # 查询获取对象
-                new_obj = True
-
-            key = memorize_helper.make_model_main_key(obj.__model_name__, obj.id)  # 获取key
-
-            remote_version = memorize_helper.get_remote_obj_version(key)  # 获取当前版本号
-            if remote_version == 0:  # 如果远程无版本
-                remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
-            else:  # 如果远程有版本
-                local_version = memorize_helper.get_local_obj_version(key)  # 获取当前版本
-                if local_version != remote_version:  # 当前版本与远程版本不同
-                    if not new_obj:
-                        obj = function(*args, **kwargs)  # 查询获取对象
-                    remote_version = memorize_helper.set_obj_new_version(obj, key, remote_version)  # 同步版本至远程版本
-                else:  # 版本相同
-                    if key in memorize_helper.OBJ_DICT:  # key 存在
-                        obj = memorize_helper.OBJ_DICT[key]  # 获取缓存对象
-                    else:  # key 不存在, 可能被删掉了？
-                        if not new_obj:
-                            obj = function(*args, **kwargs)  # 查询获取对象
-                        remote_version = memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
-            memorize_helper.OBJ_DICT[sub_key] = weakref.proxy(memorize_helper.OBJ_DICT[key])
-            obj.__version__ = remote_version
-            return memorize_helper.OBJ_DICT[key]
-
-    return helper
-
-
-def memorize(function):
-    @wraps(function)
-    def helper(*args, **kwargs):
-        key = memorize_helper.make_memcache_key(function, *args)  # 获取key
-        remote_version = memorize_helper.get_remote_obj_version(key)  # 获取当前版本号
-        if remote_version == 0:  # 如果远程无版本
-            obj = function(*args, **kwargs)  # 查询获取对象
-            memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
-        else:  # 如果远程有版本
-            local_version = memorize_helper.get_local_obj_version(key)  # 获取当前版本
-            if local_version != remote_version:  # 当前版本与远程版本不同
-                obj = function(*args, **kwargs)  # 查询获取对象
-                memorize_helper.set_obj_new_version(obj, key, remote_version)  # 同步版本至远程版本
-            else:  # 版本相同
-                if key in memorize_helper.OBJ_DICT:  # key 存在
-                    obj = memorize_helper.OBJ_DICT[key]  # 获取缓存对象
-                else:  # key 不存在, 可能被删掉了？
-                    obj = function(*args, **kwargs)  # 查询获取对象
-                    memorize_helper.set_obj_new_version(obj, key)  # 创建缓存， 并同步到远程
-        return obj
-
-    return helper

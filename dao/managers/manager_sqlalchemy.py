@@ -4,13 +4,11 @@
 # @Time    : 2018/4/30 14:55
 
 import asyncio
+import pymysql
 import logging
 from collections import defaultdict
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Text, MetaData, Table
-from sqlalchemy.schema import CreateTable
-from sqlalchemy.orm import sessionmaker
-
 
 from core import config
 from commons.Metaclass.Singleton import Singleton
@@ -19,7 +17,7 @@ from .manager_base import BaseManager, BaseManagerQuerySet
 
 logger = logging.getLogger("main.dao.manager.manager_sqlalchemy")
 
-Base = declarative_base()
+
 NAME_DICT = defaultdict(dict)
 
 
@@ -29,7 +27,14 @@ class ManagerQuerySet(BaseManagerQuerySet):
 
 class SqlalchemyManager(BaseManager, metaclass=Singleton):
     name = "sqlalchemy"
-    # Session = sessionmaker(bind=config.MYSQL_INSTANCE)
+
+    def __init__(self):
+        super().__init__()
+        pymysql.install_as_MySQLdb()
+        self.base = declarative_base()
+        self.engine = create_engine(
+            "mysql://root:swxs@localhost/runoob", strategy=ASYNCIO_STRATEGY, encoding='latin1', echo=False
+        )
 
     @classmethod
     def _get_model(cls, klass):

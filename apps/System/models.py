@@ -5,10 +5,9 @@
 import bson
 import datetime
 from umongo import Instance, Document, fields
-from dao.manager.manager_umongo_motor import NAME_DICT
-from ..BaseModel import BaseModelDocument
+import core
+from dao.managers.manager_umongo_motor import NAME_DICT
 from . import consts
-from core.db import instance
 
 
 @instance.register

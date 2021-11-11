@@ -10,8 +10,6 @@ import datetime
 from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
-
-from web.consts import undefined
 from .fields import BaseField, DateTimeField, DictField
 from .managers import manager_productor
 from .memorizers import memorizer_productor
@@ -81,14 +79,14 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     metaclass = BaseMetaDocuemnt
 
     def __init__(self, **kwargs):
-        self.id = kwargs.get("_id", undefined)
-        self.oid = kwargs.get("_oid", undefined)
-        self.__raw__ = kwargs.get("__raw__", undefined)
+        self.id = kwargs.get("_id", None)
+        self.oid = kwargs.get("_oid", None)
+        self.__raw__ = kwargs.get("__raw__", None)
         self.__fields__ = getattr(self.__class__, "__fields__")
         self.__searches__ = getattr(self.__class__, "__searches__")
 
         for attr in self.__fields__:
-            self.__dict__[attr] = kwargs.get(attr, undefined)
+            self.__dict__[attr] = kwargs.get(attr, None)
 
         self._data = {}
         for key, value in kwargs.items():
@@ -130,7 +128,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         data = dict_factory()
         data["id"] = self.__dict__["id"]
         for field_name in self.__fields__:
-            if self.__getattribute__(field_name) != undefined:
+            if self.__getattribute__(field_name) is not None:
                 data[field_name] = self.__getattribute__(field_name)
         return data
 

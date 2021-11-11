@@ -9,12 +9,11 @@ from fastapi.param_functions import Depends
 from web.dependencies.pagination import get_pagination
 from ..schemas.password_lock import PasswordLockSchema
 from ..dao.password_lock import PasswordLock
-from ..utils import password_lock_utils
 
 
 router = APIRouter()
 
-logger = logging.getLogger("main.password_lock.api.password_lock")
+logger = logging.getLogger("main.apps.password_lock.api.password_lock")
 
 
 @router.get("/{password_lock_id}")

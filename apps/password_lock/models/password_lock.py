@@ -6,11 +6,11 @@ import bson
 import datetime
 from umongo import Document, fields
 
-from core.db import instance
+import core
 from ..consts import common_enum
 
 
-@instance.register
+@core.mongodb_instance.register
 class PasswordLock(Document):
     name = fields.StringField(allow_none=True)
     key = fields.StringField(allow_none=True)

@@ -6,7 +6,7 @@ import bson
 import json
 import logging
 from tornado.web import url
-from web import BaseHandler, BaseAuthedHanlder, SuccessData, render, undefined
+from web import BaseHandler, BaseAuthedHanlder, SuccessData, render
 from commons.Helpers.Helper_pagenate import Page
 from .utils.User import User, user_schema
 from .utils.UserAuth import UserAuth, user_auth_schema
