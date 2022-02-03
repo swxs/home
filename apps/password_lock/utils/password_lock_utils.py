@@ -1,15 +1,15 @@
 from commons.Helpers.Helper_encryption import Encryption
 from ..dao.password_lock import PasswordLock
-from ..consts import common_enum
+from .. import consts
 
 
 def password(self):
-    if self.ttype == common_enum.PASSWORD_LOCK_TTYPE_COMMON:
+    if self.ttype == consts.PASSWORD_LOCK_TTYPE_COMMON:
         if self.key:
             return Encryption.get_password(name=self.key, salt="b8862e668e5abbc99d8390347e7ac749")
         else:
             return None
-    elif self.ttype == common_enum.PASSWORD_LOCK_TTYPE_CUSTOM:
+    elif self.ttype == consts.PASSWORD_LOCK_TTYPE_CUSTOM:
         return self.custom.get('password', None)
     else:
         return None

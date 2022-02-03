@@ -7,7 +7,7 @@ import datetime
 from umongo import Document, fields
 
 import core
-from ..consts import common_enum
+from .. import consts
 
 
 @core.mongodb_instance.register
@@ -18,7 +18,7 @@ class PasswordLock(Document):
     user_id = fields.ObjectIdField(allow_none=True)
     used = fields.IntField(allow_none=True, default=0)
     ttype = fields.IntField(
-        allow_none=True, enums=common_enum.PASSWORD_LOCK_TTYPE_LIST, default=common_enum.PASSWORD_LOCK_TTYPE_COMMON
+        allow_none=True, enums=consts.PASSWORD_LOCK_TTYPE_LIST, default=consts.PASSWORD_LOCK_TTYPE_COMMON
     )
     custom = fields.DictField(allow_none=True)
     created = fields.DateTimeField(allow_none=True, default=datetime.datetime.now)

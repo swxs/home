@@ -7,8 +7,8 @@ from fastapi import APIRouter, Path, Query, Body
 from fastapi.param_functions import Depends
 
 from web.dependencies.pagination import get_pagination
-from ..schemas.password_lock import PasswordLockSchema
 from ..dao.password_lock import PasswordLock
+from ..schemas.password_lock import PasswordLockSchema
 
 
 router = APIRouter()
