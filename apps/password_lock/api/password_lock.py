@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-# @File    : views.py
-# @AUTH    : model
+# @File    : api/password_lock.py
+# @AUTH    : code_creater
 
 import logging
-from fastapi import APIRouter, Path, Query, Body
+
+from fastapi import Body, Path, Query, APIRouter
 from fastapi.param_functions import Depends
 
 from web.dependencies.pagination import get_pagination
+
+# 本模块方法
 from ..dao.password_lock import PasswordLock
 from ..schemas.password_lock import PasswordLockSchema
-
 
 router = APIRouter()
 
@@ -17,7 +19,7 @@ logger = logging.getLogger("main.apps.password_lock.api.password_lock")
 
 
 @router.get("/{password_lock_id}")
-async def get_passwordlock(
+async def get_password_lock(
     password_lock_id: str = Path(...),
 ):
     password_lock = await PasswordLock.find(
@@ -29,7 +31,7 @@ async def get_passwordlock(
 
 
 @router.get("/")
-async def get_passwordlock_list(
+async def get_password_lock_list(
     password_lock_schema=Query(...),
     pagination=Depends(get_pagination),
 ):
@@ -44,8 +46,20 @@ async def get_passwordlock_list(
     }
 
 
-@router.post("/{passwordlock_id}")
-async def copy_passwordlock(
+@router.post("/")
+async def create_password_lock(
+    password_lock_schema: PasswordLockSchema = Body(...),
+):
+    password_lock = await PasswordLock.create(
+        params=password_lock_schema.dict(),
+    )
+    return {
+        "data": await password_lock.to_front(),
+    }
+
+
+@router.post("/{password_lock_id}")
+async def copy_password_lock(
     password_lock_id: str = Path(...),
     password_lock_schema: PasswordLockSchema = Body(...),
 ):
@@ -58,20 +72,8 @@ async def copy_passwordlock(
     }
 
 
-@router.post("/")
-async def create_passwordlock(
-    password_lock_schema: PasswordLockSchema = Body(...),
-):
-    password_lock = await PasswordLock.create(
-        params=password_lock_schema.dict(),
-    )
-    return {
-        "data": await password_lock.to_front(),
-    }
-
-
-@router.put("/{passwordlock_id}")
-async def change_passwordlock(
+@router.put("/{password_lock_id}")
+async def change_password_lock(
     password_lock_id: str = Path(...),
     password_lock_schema: PasswordLockSchema = Body(...),
 ):
@@ -84,8 +86,8 @@ async def change_passwordlock(
     }
 
 
-@router.delete("/{passwordlock_id}")
-async def delete_passwordlick(
+@router.delete("/{password_lock_id}")
+async def delete_password_lock(
     password_lock_id: str = Path(...),
 ):
     count = await PasswordLock.delete(
@@ -96,8 +98,8 @@ async def delete_passwordlick(
     }
 
 
-@router.patch("/{passwordlock_id}")
-async def modify_passwordlick(
+@router.patch("/{password_lock_id}")
+async def modify_password_lock(
     password_lock_id: str = Path(...),
     password_lock_schema: PasswordLockSchema = Body(...),
 ):

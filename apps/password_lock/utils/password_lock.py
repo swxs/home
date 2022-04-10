@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
+# @FILE    : utils/password_lock.py
+# @AUTH    : model_creater
+
+# 通用方法
 from commons.Helpers.Helper_encryption import Encryption
-from ..dao.password_lock import PasswordLock
+
+# 本模块方法
 from .. import consts
+from ..dao.password_lock import PasswordLock
 
 
 def password(self):

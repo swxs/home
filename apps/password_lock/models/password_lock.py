@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-# @FILE    : models.py
-# @AUTH    : model_creater
+# @FILE    : models/password_lock.py
+# @AUTH    : code_creater
+
+import datetime
 
 import bson
-import datetime
 from umongo import Document, fields
 
 import core
+
+# 本模块方法
 from .. import consts
 
 
@@ -21,8 +24,6 @@ class PasswordLock(Document):
         allow_none=True, enums=consts.PASSWORD_LOCK_TTYPE_LIST, default=consts.PASSWORD_LOCK_TTYPE_COMMON
     )
     custom = fields.DictField(allow_none=True)
-    created = fields.DateTimeField(allow_none=True, default=datetime.datetime.now)
-    updated = fields.DateTimeField(allow_none=True, default=datetime.datetime.now)
 
     class Meta:
         indexes = [

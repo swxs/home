@@ -13,3 +13,20 @@ exclude = '''
   | __pycache__
 )/
 '''
+
+[tool.isort]
+profile = "black"
+length_sort = true
+case_sensitive = true
+group_by_package = true
+combine_as_imports = true
+sections = [
+  'FUTURE',
+  'STDLIB',
+  'THIRDPARTY',
+  'FIRSTPARTY',
+  'COMMONS',
+  'LOCALFOLDER',
+]
+known_commons = ['commons']
+import_headings = { commons = "通用方法", localfolder = "本模块方法" }

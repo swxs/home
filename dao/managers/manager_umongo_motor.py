@@ -3,20 +3,21 @@
 # @AUTH    : swxs
 # @Time    : 2018/4/30 14:55
 
-import logging
 import asyncio
+import logging
 from collections import defaultdict
+
 from pymongo import ASCENDING, DESCENDING
-from pymongo.errors import (
-    DuplicateKeyError,
-)
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pymongo.errors import DuplicateKeyError
 from umongo.frameworks import MotorAsyncIOInstance
-from . import config
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+
+# 通用方法
 from commons.Metaclass.Singleton import Singleton
+
+# 本模块方法
 from ..fields import DictField
 from .manager_base import BaseManager, BaseManagerQuerySet
-
 
 logger = logging.getLogger("main.dao.manager.manager_umongo_motor")
 

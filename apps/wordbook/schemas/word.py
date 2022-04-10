@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @FILE    : schemas/password_lock.py
+# @FILE    : schemas/word.py
 # @AUTH    : model_creater
 
 from typing import Dict, List, Optional
