@@ -7,11 +7,9 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 
 
-class PasswordLockSchema(BaseModel):
-    name: Optional[str] = None
-    key: Optional[str] = None
-    website: Optional[str] = None
+class WordSchema(BaseModel):
+    en: Optional[str] = None
+    cn: Optional[str] = None
+    number: Optional[int] = 0
+    last_time: Optional[str] = None
     user_id: Optional[str] = None
-    used: Optional[int] = 0
-    ttype: Optional[int] = 0
-    custom: Optional[Dict] = None

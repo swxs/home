@@ -3,15 +3,16 @@
 import os
 import sys
 import typing
-import click
-import uvicorn
 import logging
 import multiprocessing
+
+import click
+import uvicorn
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 
 import core
-from apps.password_lock.api import router as password_lock_router
+from apps import api_router
 
 logger = logging.getLogger("main")
 
@@ -32,4 +33,4 @@ async def event_shutdown():
     logging.info("connection to mongodb has been closed!")
 
 
-app.include_router(prefix="/api", router=password_lock_router)
+app.include_router(router=api_router)
