@@ -2,18 +2,6 @@
 # @FILE    : consts.py
 # @AUTH    : model_creater
 
-USER_AUTH_TTYPE_PHONE = 1
-USER_AUTH_TTYPE_EMAIL = 2
 
-USER_AUTH_TTYPE_LIST = [
-    (USER_AUTH_TTYPE_PHONE, '手机号'),
-    (USER_AUTH_TTYPE_EMAIL, '邮箱'),
-]
+from .model_consts import *
 
-USER_AUTH_IFVERIFIED_TRUE = 1
-USER_AUTH_IFVERIFIED_FALSE = 2
-
-USER_AUTH_IFVERIFIED_LIST = [
-    (USER_AUTH_IFVERIFIED_TRUE, '是'),
-    (USER_AUTH_IFVERIFIED_FALSE, '否'),
-]

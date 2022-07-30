@@ -17,9 +17,15 @@ logger = logging.getLogger("main.apps.system.dao.user")
 
 
 class User(BaseDocument):
-    username = fields.StringField(allow_none=True)
-    description = fields.StringField(allow_none=True)
-    avatar = fields.ObjectIdField(allow_none=True)
+    username = fields.StringField(
+        allow_none=False,
+    )
+    description = fields.StringField(
+        allow_none=True,
+    )
+    avatar = fields.ObjectIdField(
+        allow_none=True,
+    )
 
     class Meta:
         model = UserModel

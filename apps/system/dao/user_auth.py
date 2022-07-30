@@ -17,12 +17,23 @@ logger = logging.getLogger("main.apps.system.dao.user_auth")
 
 
 class UserAuth(BaseDocument):
-    user_id = fields.ObjectIdField(allow_none=True)
-    ttype = fields.IntField(allow_none=True, enums=consts.USER_AUTH_TTYPE_LIST)
-    identifier = fields.StringField(allow_none=True)
-    credential = fields.StringField(allow_none=True)
+    user_id = fields.ObjectIdField(
+        allow_none=True,
+    )
+    ttype = fields.IntField(
+        allow_none=True,
+        enums=consts.USER_AUTH_TTYPE_LIST,
+    )
+    identifier = fields.StringField(
+        allow_none=True,
+    )
+    credential = fields.StringField(
+        allow_none=True,
+    )
     ifverified = fields.IntField(
-        allow_none=True, enums=consts.USER_AUTH_IFVERIFIED_LIST, default=consts.USER_AUTH_IFVERIFIED_FALSE
+        allow_none=True,
+        enums=consts.USER_AUTH_IFVERIFIED_LIST,
+        default=consts.USER_AUTH_IFVERIFIED_FALSE,
     )
 
     class Meta:

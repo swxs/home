@@ -3,11 +3,20 @@
 # @AUTH    : model_creater
 
 from typing import Dict, List, Optional
+from bson import ObjectId
+import pydantic
 
-from pydantic import BaseModel
 
+class UserSchema(pydantic.BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
 
-class UserSchema(BaseModel):
     username: Optional[str] = None
     description: Optional[str] = None
     avatar: Optional[str] = None
+
+    @pydantic.validator('avatar')
+    def avatar_objectid(cls, v):
+        if isinstance(v, str):
+            return ObjectId(v)
+        return ObjectId(v)

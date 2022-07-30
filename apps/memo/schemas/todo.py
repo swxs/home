@@ -3,11 +3,14 @@
 # @AUTH    : model_creater
 
 from typing import Dict, List, Optional
+from bson import ObjectId
+import pydantic
 
-from pydantic import BaseModel
 
+class TodoSchema(pydantic.BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
 
-class TodoSchema(BaseModel):
     title: Optional[str] = None
     summary: Optional[str] = None
     document: Optional[str] = None
@@ -15,3 +18,15 @@ class TodoSchema(BaseModel):
     status: Optional[int] = 0
     priority: Optional[int] = 0
     user_id: Optional[str] = None
+
+    @pydantic.validator('user_id')
+    def user_id_objectid(cls, v):
+        if isinstance(v, str):
+            return ObjectId(v)
+        return ObjectId(v)
+
+    @pydantic.validator('user_id')
+    def user_id_objectid(cls, v):
+        if isinstance(v, str):
+            return ObjectId(v)
+        return ObjectId(v)

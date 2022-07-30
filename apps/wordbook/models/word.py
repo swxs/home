@@ -15,11 +15,22 @@ from .. import consts
 
 @core.mongodb_instance.register
 class Word(Document):
-    en = fields.StringField(allow_none=True)
-    cn = fields.StringField(allow_none=True)
-    number = fields.IntField(allow_none=True, default=0)
-    last_time = fields.DateTimeField(allow_none=True)
-    user_id = fields.ObjectIdField(allow_none=True)
+    en = fields.StringField(
+        requirement=False,
+    )
+    cn = fields.StringField(
+        requirement=False,
+    )
+    number = fields.IntField(
+        requirement=False,
+        default=0,
+    )
+    last_time = fields.DateTimeField(
+        requirement=False,
+    )
+    user_id = fields.ObjectIdField(
+        requirement=False,
+    )
 
     class Meta:
         indexes = [

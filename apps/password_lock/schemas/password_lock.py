@@ -3,11 +3,14 @@
 # @AUTH    : model_creater
 
 from typing import Dict, List, Optional
+from bson import ObjectId
+import pydantic
 
-from pydantic import BaseModel
 
+class PasswordLockSchema(pydantic.BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
 
-class PasswordLockSchema(BaseModel):
     name: Optional[str] = None
     key: Optional[str] = None
     website: Optional[str] = None
@@ -15,3 +18,9 @@ class PasswordLockSchema(BaseModel):
     used: Optional[int] = 0
     ttype: Optional[int] = 0
     custom: Optional[Dict] = None
+
+    @pydantic.validator('user_id')
+    def user_id_objectid(cls, v):
+        if isinstance(v, str):
+            return ObjectId(v)
+        return ObjectId(v)

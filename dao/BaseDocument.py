@@ -7,6 +7,7 @@ import os
 import logging
 import hashlib
 import datetime
+from tkinter import E
 from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
@@ -129,11 +130,18 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         data["id"] = self.__dict__["id"]
         for field_name in self.__fields__:
             if self.__getattribute__(field_name) is not None:
-                data[field_name] = self.__getattribute__(field_name)
+                v = self.__getattribute__(field_name)
+                if isinstance(v, ObjectId):
+                    data[field_name] = str(v)
+                else:
+                    data[field_name] = v
         return data
 
     async def to_front(self, dict_factory=ObjectDict):
-        return await self.to_dict(dict_factory=dict_factory)
+        try:
+            return await self.to_dict(dict_factory=dict_factory)
+        except Exception as e:
+            print(e)
 
     @classmethod
     async def find(cls, finds, limit=0, skip=0):
@@ -173,7 +181,10 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     async def create(cls, params):
         logger.info(f"[create] <{cls.__model_name__}>: params - {params}")
 
-        return await cls.manager.create(params)
+        try:
+            return await cls.manager.create(params)
+        except Exception as e:
+            raise e
 
     @classmethod
     async def update(cls, finds, params):

@@ -1,14 +1,13 @@
 fastapi
 uvicorn
 click
-environs
+# environs
 concurrent_log_handler
 pymysql
 mysql-connector
 SQLAlchemy
 umongo[motor]
 aioredis
-scrapy
 aiohttp
 aiofiles
 async-lru
@@ -16,7 +15,6 @@ async_property
 lxml
 pyyaml
 openpyxl
-bson
 msgpack
 arrow
 faker
@@ -32,3 +30,4 @@ pyarrow
 numpy
 pandas
 scipy
+scrapy

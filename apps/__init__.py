@@ -6,5 +6,5 @@ from .password_lock.api import router as password_lock_router
 
 api_router = APIRouter(prefix="/api", tags=["api"])
 
-api_router.include_router(router=password_lock_router)
 api_router.include_router(router=system_router)
+api_router.include_router(router=password_lock_router)

@@ -19,6 +19,8 @@ JWT_SECRET_KEY = env.str("JWT_SECRET_KEY", '7f8512a4-afe7-4941-a0c0-62e75dc8edd4
 JWT_TIMEOUT = env.int("JWT_TIMEOUT", 2 * 60 * 60)  # 超时时间，单位: s
 JWT_REFRESH_TIMEOUT = env.int("JWT_REFRESH_TIMEOUT", 7 * 24 * 60 * 60)  # 超时时间，单位: s
 
+
+
 SITE_PROTOCOL = env.str("SITE_PROTOCOL", 'http')
 SITE_DOMAIN = env.str("SITE_DOMAIN", '127.0.0.1')
 SITE_PORT = env.int("SITE_PORT", 8088)

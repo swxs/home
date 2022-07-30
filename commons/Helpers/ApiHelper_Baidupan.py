@@ -1770,7 +1770,7 @@ class PCS(PCSBase):
 
         """
         file_handler.seek(0, 2)
-        _BLOCK_SIZE = 2 ** 20
+        _BLOCK_SIZE = 2**20
         content_length = file_handler.tell()
         file_handler.seek(0)
 

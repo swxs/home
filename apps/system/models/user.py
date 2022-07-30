@@ -15,6 +15,12 @@ from .. import consts
 
 @core.mongodb_instance.register
 class User(Document):
-    username = fields.StringField(allow_none=True)
-    description = fields.StringField(allow_none=True)
-    avatar = fields.ObjectIdField(allow_none=True)
+    username = fields.StringField(
+        requirement=True,
+    )
+    description = fields.StringField(
+        requirement=False,
+    )
+    avatar = fields.ObjectIdField(
+        requirement=False,
+    )

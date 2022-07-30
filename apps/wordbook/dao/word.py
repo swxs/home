@@ -17,11 +17,22 @@ logger = logging.getLogger("main.apps.wordbook.dao.word")
 
 
 class Word(BaseDocument):
-    en = fields.StringField(allow_none=True)
-    cn = fields.StringField(allow_none=True)
-    number = fields.IntField(allow_none=True, default=0)
-    last_time = fields.DateTimeField(allow_none=True)
-    user_id = fields.ObjectIdField(allow_none=True)
+    en = fields.StringField(
+        allow_none=True,
+    )
+    cn = fields.StringField(
+        allow_none=True,
+    )
+    number = fields.IntField(
+        allow_none=True,
+        default=0,
+    )
+    last_time = fields.DateTimeField(
+        allow_none=True,
+    )
+    user_id = fields.ObjectIdField(
+        allow_none=True,
+    )
 
     class Meta:
         model = WordModel

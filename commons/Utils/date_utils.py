@@ -9,20 +9,6 @@ import datetime
 import calendar
 from functools import wraps
 
-DAY_OF_WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-MON_SUN = 1
-SUN_SAT = 2
-WEEK_TYPE_LIST = [
-    (MON_SUN, '周一至周日'),
-    (SUN_SAT, '周日至周六'),
-]
-
-NEAR_HALF_YEAR = 1
-FRONT_HALF_YEAR = 2
-BEHAND_HALF_YEAR = 3
-HALF_YEAR_TYPE_LIST = [(NEAR_HALF_YEAR, '最近半年'), (FRONT_HALF_YEAR, '上半年'), (BEHAND_HALF_YEAR, '下半年')]
-
 
 def convert_date_to_datetime(func):
     @wraps(func)
@@ -30,10 +16,6 @@ def convert_date_to_datetime(func):
         return datetime.datetime.combine(func(*args, **kwargs), datetime.time(0, 0, 0))
 
     return wrapper
-
-
-def get_weekday(x):
-    return DAY_OF_WEEKDAY[x]
 
 
 def get_today(base=arrow.utcnow()):
