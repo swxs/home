@@ -22,11 +22,11 @@ logger = logging.getLogger("main.apps.user_auth.api.user_auth")
 async def get_user_auth(
     user_auth_id: str = Path(...),
 ):
-    user_auth = await UserAuth.find(
-        finds=user_auth_id,
+    user_auth = await UserAuth.find_one(
+        finds={"id": user_auth_id},
     )
     return {
-        "data": await user_auth.to_front(),
+        "data": await user_auth.to_dict(),
     }
 
 
@@ -41,7 +41,7 @@ async def get_user_auth_list(
         limit=pagination.limit,
     )
     return {
-        "data": await user_auth_list.to_front(),
+        "data": await user_auth_list.to_dict(),
         "pagination": await user_auth_list.get_pagination(),
     }
 
@@ -54,21 +54,7 @@ async def create_user_auth(
         params=user_auth_schema.dict(),
     )
     return {
-        "data": await user_auth.to_front(),
-    }
-
-
-@router.post("/{user_auth_id}")
-async def copy_user_auth(
-    user_auth_id: str = Path(...),
-    user_auth_schema: UserAuthSchema = Body(...),
-):
-    user_auth = await UserAuth.copy(
-        finds=user_auth_id,
-        params=user_auth_schema.dict(exclude_defaults=True),
-    )
-    return {
-        "data": await user_auth.to_front(),
+        "data": await user_auth.to_dict(),
     }
 
 
@@ -77,12 +63,12 @@ async def change_user_auth(
     user_auth_id: str = Path(...),
     user_auth_schema: UserAuthSchema = Body(...),
 ):
-    user_auth = await UserAuth.update(
+    user_auth = await UserAuth.update_one(
         find=user_auth_id,
         params=user_auth_schema.dict(),
     )
     return {
-        "data": await user_auth.to_front(),
+        "data": await user_auth.to_dict(),
     }
 
 
@@ -90,23 +76,9 @@ async def change_user_auth(
 async def delete_user_auth(
     user_auth_id: str = Path(...),
 ):
-    count = await UserAuth.delete(
+    count = await UserAuth.delete_one(
         find=user_auth_id,
     )
     return {
         "count": count,
-    }
-
-
-@router.patch("/{user_auth_id}")
-async def modify_user_auth(
-    user_auth_id: str = Path(...),
-    user_auth_schema: UserAuthSchema = Body(...),
-):
-    user_auth = await UserAuth.update(
-        find=user_auth_id,
-        params=user_auth_schema.dict(exclude_defaults=True),
-    )
-    return {
-        "data": await user_auth.to_front(),
     }

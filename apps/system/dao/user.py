@@ -6,7 +6,9 @@ import logging
 import datetime
 
 import bson
+import uuid
 
+import functools
 from dao import BaseDocument, fields
 
 # 本模块方法
@@ -32,6 +34,7 @@ class User(BaseDocument):
     )
     username = fields.StringField(
         allow_none=False,
+        default_create=uuid.uuid4,
     )
     description = fields.StringField(
         allow_none=True,
