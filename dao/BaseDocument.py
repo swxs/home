@@ -7,7 +7,6 @@ import os
 import logging
 import hashlib
 import datetime
-from tkinter import E
 from bson import ObjectId
 from functools import wraps
 from tornado.util import ObjectDict
@@ -45,6 +44,7 @@ class BaseMetaDocuemnt(type):
                 attr_value.name = attr_name
                 __fields__[attr_name] = attr_value
 
+        attrs["_data"] = dict()
         attrs["__fields__"] = __fields__
         attrs["__searches__"] = dict()  # 记录搜索的方法字段
         attrs["__subclass__"] = dict()  # 记录子类
@@ -72,7 +72,7 @@ class BaseMetaDocuemnt(type):
     @property
     def memorizer(cls):
         if cls._memorizer is None:
-            cls._memorizer = memorizer_productor[cls.__memorizer__]()
+            cls._memorizer = memorizer_productor[cls.__memorizer__](cls)
         return cls._memorizer
 
 
@@ -80,139 +80,54 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     metaclass = BaseMetaDocuemnt
 
     def __init__(self, **kwargs):
-        self.id = kwargs.get("_id", None)
-        self.oid = kwargs.get("_oid", None)
-        self.__raw__ = kwargs.get("__raw__", None)
-        self.__fields__ = getattr(self.__class__, "__fields__")
-        self.__searches__ = getattr(self.__class__, "__searches__")
-
-        for attr in self.__fields__:
-            self.__dict__[attr] = kwargs.get(attr, None)
-
-        self._data = {}
-        for key, value in kwargs.items():
-            self._data[key] = value
+        for __field_name, __field in getattr(self.__class__, "__fields__").items():
+            self.__dict__[__field_name] = kwargs.get(__field_name)
+            setattr(self, __field_name, kwargs.get(__field_name))
 
     @classmethod
-    def schema(cls):
-        return getattr(cls, "__raw__").schema.as_marshmallow_schema()()
+    def get_key_with_list(cls, params: list):
+        return hashlib.md5(b"".join(p.encode("utf8") for p in sorted(params))).hexdigest()
 
     @classmethod
-    def get_key_with_list(cls, params):
-        params.sort()
-        return hashlib.md5(b"".join(p.encode("utf8") for p in params)).hexdigest()
-
-    @classmethod
-    def get_key_with_params(cls, params: dict = None):
-        return cls.get_key_with_list(list(params.keys()))
-
-    @classmethod
-    def get_instance(cls, model, filters=None):
-        filters = dict() if filters is None else filters
-
-        data = dict()
-        if "only" in filters:
-            all_fields = filters["only"]
-        else:
-            all_fields = getattr(cls, "__fields__")
-
-        for attr in all_fields:
-            if attr not in filters.get("exclude", []):
-                data[attr] = getattr(model, attr)
-
-        data["_id"] = str(getattr(model, "id"))
-        data["_oid"] = getattr(model, "id")
-        data["__raw__"] = model
-        return cls(**data)
+    def get_key_with_params(cls, params: dict):
+        return cls.get_key_with_list(params.keys())
 
     async def to_dict(self, dict_factory=ObjectDict):
         data = dict_factory()
-        data["id"] = self.__dict__["id"]
-        for field_name in self.__fields__:
-            if self.__getattribute__(field_name) is not None:
-                v = self.__getattribute__(field_name)
-                if isinstance(v, ObjectId):
-                    data[field_name] = str(v)
-                else:
-                    data[field_name] = v
+        for __field_name, __field in getattr(self.__class__, "__fields__").items():
+            v = self.__getattribute__(__field_name)
+            if v is not None:
+                data[__field_name] = __field.to_dict(v)
         return data
-
-    async def to_front(self, dict_factory=ObjectDict):
-        try:
-            return await self.to_dict(dict_factory=dict_factory)
-        except Exception as e:
-            print(e)
-
-    @classmethod
-    async def find(cls, finds, limit=0, skip=0):
-        logger.info(f"[select] <{cls.__model_name__}>: finds - {finds}")
-
-        if not isinstance(finds, dict):
-            finds = {"_id": finds}
-            return await cls.manager.find_one(finds, limit=limit, skip=skip)
-        else:
-            return await cls.manager.find_many(finds, limit=limit, skip=skip)
 
     @classmethod
     async def count(cls, finds):
-        try:
-            return await cls.manager.count(finds)
-        except Exception as e:
-            logger.info(e)
-            return 0
+        logger.info(f"[count] <{cls.__model_name__}>: finds - {finds}")
+
+        return await cls.manager.count(finds)
 
     @classmethod
-    async def is_exist(cls, finds):
-        ret = await cls.count(finds)
-        return ret > 0
+    async def find_one(cls, finds):
+        logger.info(f"[find_one] <{cls.__model_name__}>: finds - {finds}")
+
+        return await cls.manager.find_one(finds)
 
     @classmethod
-    async def search(cls, searches, limit=0, skip=0):
+    async def find_many(cls, finds, *, limit=0, skip=0):
+        logger.info(f"[find_many] <{cls.__model_name__}>: finds - {finds}")
+
+        return await cls.manager.find_many(finds, limit=limit, skip=skip)
+
+    @classmethod
+    async def search(cls, searches, *, limit=0, skip=0):
         logger.info(f"[search] <{cls.__model_name__}>: searches - {searches}")
 
         key = cls.get_key_with_params(searches)
         if key in getattr(cls, "__searches__"):
             return getattr(cls, "__searches__")[key](searches, limit=limit, skip=skip)
         else:
-            # 没有找到追加规则会退化到find
-            return cls.find(searches, limit=limit, skip=skip)
-
-    @classmethod
-    async def create(cls, params):
-        logger.info(f"[create] <{cls.__model_name__}>: params - {params}")
-
-        try:
-            return await cls.manager.create(params)
-        except Exception as e:
-            raise e
-
-    @classmethod
-    async def update(cls, finds, params):
-        logger.info(f"[update] <{cls.__model_name__}>: finds - {finds}; params - {params}")
-
-        if not isinstance(finds, dict):
-            finds = {"_id": finds}
-            return await cls.manager.find_one_and_update(finds, params)
-        else:
-            # 暂不支持
-            raise Exception
-
-    @classmethod
-    async def copy(cls, finds, params):
-        model = cls.find(finds)
-        params_ = model.to_dict(updates=params)
-        return await cls.update(finds, params_)
-
-    @classmethod
-    async def delete(cls, finds):
-        logger.info(f"[delete] <{cls.__model_name__}>: finds - {finds}")
-
-        if not isinstance(finds, dict):
-            finds = {"_id": finds}
-            return await cls.manager.find_one_and_delete(cls, finds)
-        else:
-            # 暂不支持
-            raise Exception
+            # 没有找到追加规则会退化到find_many
+            return cls.find_many(searches, limit=limit, skip=skip)
 
     @classmethod
     def add_search(cls, *keys):
@@ -230,3 +145,33 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             return wrapper
         else:
             return cls.__searches__[key]
+
+    @classmethod
+    async def create(cls, params: dict):
+        logger.info(f"[create] <{cls.__model_name__}>: params - {params}")
+
+        return await cls.manager.create(params)
+
+    @classmethod
+    async def update_one(cls, finds: dict, params: dict):
+        logger.info(f"[update_one] <{cls.__model_name__}>: finds - {finds}; params - {params}")
+
+        return await cls.manager.update_one(finds, params)
+
+    @classmethod
+    async def update_many(cls, finds: dict, params: dict):
+        logger.info(f"[update_many] <{cls.__model_name__}>: finds - {finds}; params - {params}")
+
+        return await cls.manager.update_many(finds, params)
+
+    @classmethod
+    async def delete_one(cls, finds: dict):
+        logger.info(f"[delete_one] <{cls.__model_name__}>: finds - {finds}")
+
+        return await cls.manager.delete_one(cls, finds)
+
+    @classmethod
+    async def delete_many(cls, finds: dict):
+        logger.info(f"[delete_many] <{cls.__model_name__}>: finds - {finds}")
+
+        return await cls.manager.delete_many(cls, finds)

@@ -56,6 +56,7 @@ class Productor(object):
             if self.temp_module:
                 return self.temp_module
             else:
+                logger.warning(f"{item}不存在！")
                 raise ModuleNotFoundError(f"{item}不存在！")
 
     def __delitem__(self, item):

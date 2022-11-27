@@ -14,7 +14,6 @@ class BaseManagerQuerySet(object):
         """
         self.get_instance = get_instance
         self.cursor = cursor
-        self.filters = dict()
 
     def __iter__(self):
         """
@@ -66,7 +65,6 @@ class BaseManagerQuerySet(object):
         ----------
         排序对象
 
-
         返回
         -------
 
@@ -79,20 +77,26 @@ class BaseManager(object):
         self.dao = dao
         self.model = dao.__model__
 
-    async def find_one(self, finds, limit=0, skip=0):
-        pass
-
-    async def find_many(self, finds, limit=0, skip=0):
-        pass
-
     async def count(self, finds):
+        pass
+
+    async def find_one(self, finds):
+        pass
+
+    async def find_many(self, finds, *, limit=0, skip=0):
         pass
 
     async def create(self, params):
         pass
 
-    async def find_one_and_update(self, finds, params):
+    async def update_one(self, finds, params):
         pass
 
-    async def find_one_and_delete(self, finds):
+    async def update_many(self, finds):
+        pass
+
+    async def delete_one(self, finds, params):
+        pass
+
+    async def delete_many(self, finds):
         pass

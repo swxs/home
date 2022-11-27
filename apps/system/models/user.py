@@ -15,6 +15,14 @@ from .. import consts
 
 @core.mongodb_instance.register
 class User(Document):
+    created = fields.DateTimeField(
+        requirement=False,
+        default=datetime.datetime.now,
+    )
+    updated = fields.DateTimeField(
+        requirement=False,
+        default=datetime.datetime.now,
+    )    
     username = fields.StringField(
         requirement=True,
     )

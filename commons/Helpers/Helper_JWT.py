@@ -70,7 +70,7 @@ class Helper_JWT(object):
             algorithm=self.algorithm,
             headers=headers,
             json_encoder=self.json_encoder,
-        ).decode('utf-8')
+        )
 
     def decode(self, token):
         """

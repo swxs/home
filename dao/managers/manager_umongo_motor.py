@@ -71,64 +71,68 @@ class ManagerQuerySet(BaseManagerQuerySet):
 class UmongoMotorManager(BaseManager):
     name = "umongo_motor"
 
-    def __init__(self, dao) -> None:
-        super().__init__(dao)
-        self.dao = dao
-        self.model = dao.__model__
-
-    async def find_one(self, finds, limit=0, skip=0):
-        try:
-            model = await self.model.find(finds)
-        except Exception as e:
-            logging.warning(f"find failed with {finds}")
-            raise e
-        return self.dao.get_instance(model)
-
-    async def find_many(self, finds, limit=0, skip=0):
-        try:
-            model = await self.model.search(finds).limit(limit).skip(skip)
-        except Exception as e:
-            logging.warning(f"find failed with {finds}")
-            raise e
-        return ManagerQuerySet(model, self.dao.get_instance)
+    def get_instance(self, model):
+        if model is None:
+            return None
+        data = dict()
+        for attr in getattr(self.dao, "__fields__"):
+            data[attr] = getattr(model, attr)
+        data["id"] = getattr(model, "id")
+        return self.dao(**data)
 
     async def count(self, finds):
         try:
             return await self.model.count_documents(finds)
         except Exception as e:
-            raise e
+            logging.exception(f"count failed! finds = {finds}")
+            return None
+
+    async def find_one(self, finds):
+        try:
+            model = await self.model.find_one(finds)
+            return self.get_instance(model)
+        except Exception as e:
+            logging.exception(f"find_one failed! finds = {finds}")
+            return None
+
+    async def find_many(self, finds, limit=0, skip=0):
+        try:
+            cursor = self.model.find(finds).limit(limit).skip(skip)
+            return ManagerQuerySet(self.get_instance, cursor)
+        except Exception as e:
+            logging.exception(f"find_many failed! finds = {finds}")
+            return []
 
     async def create(self, params):
-        model = self.model()
-        for attr in self.dao.__fields__:
-            model.__setattr__(attr, params.get(attr))
         try:
+            model = self.model()
+            for __field_name, __field in getattr(self.dao, "__fields__").items():
+                setattr(model, __field_name, params.get(__field_name, __field.create_default))
             await model.commit()
-        # except (DuplicateKeyError,) as e:
-        #     raise ApiException(Info.Existed, message=self.model.__name__)
+            return self.get_instance(model)
         except Exception as e:
-            raise e
-        return self.dao.get_instance(model)
+            logging.exception(f"create failed! params = {params}")
+            return None
 
-    async def find_one_and_update(self, finds, params):
-        instance = await self.find(finds)
-        model = instance.__raw__
-        for attr in self.dao.__fields__:
-            model.__setattr__(attr, params.get(attr, getattr(instance, attr)))
-
+    async def update_one(self, finds, params):
         try:
+            model = await self.model.find_one(finds)
+            for __field_name, __field in getattr(self.dao, "__fields__").items():
+                if __field_name in params:
+                    setattr(model, __field_name, params.get(__field_name))
+                elif __field.default_update:
+                    setattr(model, __field_name, __field.update_default)
             await model.commit()
-        # except (DuplicateKeyError,) as e:
-        #     raise ApiException(Info.Existed, message=self.model.__name__)
+            return self.dao.get_instance(model)
         except Exception as e:
-            raise e
-        return self.dao.get_instance(model)
+            logging.exception(f"update_one failed! finds = {finds}, params = {params}")
+            return None
 
-    async def find_one_and_delete(self, finds):
-        instance = await self.find_one(finds)
-        model = instance.__raw__
+    async def delete_one(self, finds):
         try:
+            model = await self.model.find_one(finds)
             delete_result = await model.delete()
             return delete_result.deleted_count
         except Exception as e:
-            raise e
+            logging.exception(f"delete_one failed! finds = {finds}")
+            return 0

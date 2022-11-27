@@ -17,6 +17,19 @@ logger = logging.getLogger("main.apps.system.dao.user_auth")
 
 
 class UserAuth(BaseDocument):
+    id = fields.ObjectIdField(
+        allow_none=False,
+        default_create=bson.ObjectId,
+    )
+    created = fields.DateTimeField(
+        allow_none=False,
+        default_create=datetime.datetime.now,
+    )
+    updated = fields.DateTimeField(
+        allow_none=False,
+        default_create=datetime.datetime.now,
+        default_update=datetime.datetime.now,
+    )
     user_id = fields.ObjectIdField(
         allow_none=True,
     )
