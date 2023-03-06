@@ -4,13 +4,16 @@
 # @Time    : 2018/5/7 22:40
 
 import os
-import logging
 import hashlib
+import logging
 import datetime
-from bson import ObjectId
 from functools import wraps
+
+from bson import ObjectId
 from tornado.util import ObjectDict
-from .fields import BaseField, DateTimeField, DictField
+
+# 本模块方法
+from .fields import BaseField, DictField, DateTimeField
 from .managers import manager_productor
 from .memorizers import memorizer_productor
 
@@ -127,7 +130,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
             return getattr(cls, "__searches__")[key](searches, limit=limit, skip=skip)
         else:
             # 没有找到追加规则会退化到find_many
-            return cls.find_many(searches, limit=limit, skip=skip)
+            return await cls.find_many(searches, limit=limit, skip=skip)
 
     @classmethod
     def add_search(cls, *keys):

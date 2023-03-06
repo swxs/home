@@ -13,7 +13,7 @@ from ..dao.password_lock import PasswordLock
 def password(self):
     if self.ttype == consts.PASSWORD_LOCK_TTYPE_COMMON:
         if self.key:
-            return Encryption.get_password(name=self.key, salt="b8862e668e5abbc99d8390347e7ac749")
+            return Encryption.get_password(name=self.key, salt=self.salt)
         else:
             return None
     elif self.ttype == consts.PASSWORD_LOCK_TTYPE_CUSTOM:
@@ -22,7 +22,7 @@ def password(self):
         return None
 
 
-# @PasswordLock.reload
+@PasswordLock.reload
 async def to_front(self, *args, **kwargs):
     data_dict = await PasswordLock.to_front()
     data_dict["password"] = self.password

@@ -7,7 +7,8 @@ import logging
 from fastapi import Body, Path, Query, APIRouter
 from fastapi.param_functions import Depends
 
-from web.dependencies.pagination import get_pagination
+from web.dependencies.token import TokenSchema, get_token
+from web.dependencies.pagination import PageSchema, get_pagination
 
 # 本模块方法
 from ..dao.password_lock import PasswordLock
@@ -18,95 +19,78 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.password_lock.api.password_lock")
 
 
-@router.get("/{password_lock_id}")
+@router.get("/{password_lock_id}", response_model=PasswordLockSchema)
 async def get_password_lock(
+    token=Depends(get_token),
     password_lock_id: str = Path(...),
 ):
-    password_lock = await PasswordLock.find(
-        finds=password_lock_id,
+    password_lock = await PasswordLock.find_one(
+        finds={
+            "id": password_lock_id,
+        }
     )
-    return {
-        "data": await password_lock.to_front(),
-    }
+    return password_lock
 
 
 @router.get("/")
 async def get_password_lock_list(
-    password_lock_schema=Query(...),
-    pagination=Depends(get_pagination),
+    token: TokenSchema = Depends(get_token),
+    pagination: PageSchema = Depends(get_pagination),
 ):
     password_lock_list = await PasswordLock.search(
-        searches=password_lock_schema.dict(exclude_unset=True),
-        skip=pagination.skip,
+        searches={"user_id": token.user_id},
         limit=pagination.limit,
+        skip=pagination.skip,
     )
     return {
-        "data": await password_lock_list.to_front(),
-        "pagination": await password_lock_list.get_pagination(),
+        "data": password_lock_list,
     }
 
 
-@router.post("/")
+@router.post("/", response_model=PasswordLockSchema)
 async def create_password_lock(
+    token=Depends(get_token),
     password_lock_schema: PasswordLockSchema = Body(...),
 ):
+    password_lock_schema.user_id = token.user_id
     password_lock = await PasswordLock.create(
         params=password_lock_schema.dict(),
     )
-    return {
-        "data": await password_lock.to_front(),
-    }
+    return password_lock
 
 
-@router.post("/{password_lock_id}")
-async def copy_password_lock(
-    password_lock_id: str = Path(...),
-    password_lock_schema: PasswordLockSchema = Body(...),
-):
-    password_lock = await PasswordLock.copy(
-        finds=password_lock_id,
-        params=password_lock_schema.dict(exclude_defaults=True),
-    )
-    return {
-        "data": await password_lock.to_front(),
-    }
-
-
-@router.put("/{password_lock_id}")
+@router.put("/{password_lock_id}", response_model=PasswordLockSchema)
 async def change_password_lock(
+    token=Depends(get_token),
     password_lock_id: str = Path(...),
     password_lock_schema: PasswordLockSchema = Body(...),
 ):
-    password_lock = await PasswordLock.update(
-        find=password_lock_id,
-        params=password_lock_schema.dict(),
-    )
-    return {
-        "data": await password_lock.to_front(),
-    }
-
-
-@router.delete("/{password_lock_id}")
-async def delete_password_lock(
-    password_lock_id: str = Path(...),
-):
-    count = await PasswordLock.delete(
-        find=password_lock_id,
-    )
-    return {
-        "count": count,
-    }
-
-
-@router.patch("/{password_lock_id}")
-async def modify_password_lock(
-    password_lock_id: str = Path(...),
-    password_lock_schema: PasswordLockSchema = Body(...),
-):
-    password_lock = await PasswordLock.update(
-        find=password_lock_id,
+    password_lock = await PasswordLock.update_one(
+        finds={"id": password_lock_id},
         params=password_lock_schema.dict(exclude_defaults=True),
     )
-    return {
-        "data": await password_lock.to_front(),
-    }
+    return password_lock
+
+
+@router.delete("/{password_lock_id}", response_model=PasswordLockSchema)
+async def delete_password_lock(
+    token=Depends(get_token),
+    password_lock_id: str = Path(...),
+):
+    count = await PasswordLock.delete_one(
+        finds={"id": password_lock_id},
+    )
+    return count
+
+
+@router.patch("/{password_lock_id}", response_model=PasswordLockSchema)
+async def modify_password_lock(
+    token=Depends(get_token),
+    password_lock_id: str = Path(...),
+    password_lock_schema: PasswordLockSchema = Body(...),
+):
+    password_lock = await PasswordLock.update_one(
+        finds={"id": password_lock_id},
+        params=password_lock_schema.dict(exclude_defaults=True),
+    )
+    return password_lock

@@ -13,10 +13,13 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 import core
 from apps import api_router
+from web.handlers.unknown_exception_handler import unknown_exception_handler
 
 logger = logging.getLogger("main")
 
-app = FastAPI()
+app = FastAPI(
+    debug=core.config.DEBUG,
+)
 
 
 @app.on_event("startup")
@@ -32,5 +35,7 @@ async def event_shutdown():
     core.mongodb_database.client.close()
     logging.info("connection to mongodb has been closed!")
 
+
+app.add_exception_handler(Exception, unknown_exception_handler)
 
 app.include_router(router=api_router)

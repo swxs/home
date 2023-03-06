@@ -48,7 +48,8 @@ class UserAuth(Document):
                 'key': ['user_id'],
             },
             {
-                'key': ['ttype, identifier'],
+                'key': [('ttype', 1), ('identifier', 1)],
+                'unique': True,
             },
         ]
         pass

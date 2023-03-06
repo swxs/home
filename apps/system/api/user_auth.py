@@ -59,12 +59,12 @@ async def create_user_auth(
 
 
 @router.put("/{user_auth_id}")
-async def change_user_auth(
+async def update_user_auth(
     user_auth_id: str = Path(...),
     user_auth_schema: UserAuthSchema = Body(...),
 ):
     user_auth = await UserAuth.update_one(
-        find=user_auth_id,
+        finds={"id": user_auth_id},
         params=user_auth_schema.dict(),
     )
     return {
@@ -77,7 +77,7 @@ async def delete_user_auth(
     user_auth_id: str = Path(...),
 ):
     count = await UserAuth.delete_one(
-        find=user_auth_id,
+        finds={"id": user_auth_id},
     )
     return {
         "count": count,

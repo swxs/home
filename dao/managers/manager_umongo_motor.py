@@ -107,7 +107,9 @@ class UmongoMotorManager(BaseManager):
         try:
             model = self.model()
             for __field_name, __field in getattr(self.dao, "__fields__").items():
-                setattr(model, __field_name, params.get(__field_name, __field.create_default))
+                v = params.get(__field_name, __field.create_default)
+                if v is not None:
+                    setattr(model, __field_name, v)
             await model.commit()
             return self.get_instance(model)
         except Exception as e:

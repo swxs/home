@@ -1,9 +1,12 @@
 import asyncio
-from apps.System.utils.User import User
+
+from apps.system.models.user import User
+from apps.system.models.user_auth import UserAuth
 
 
 async def init_system():
-    pass
+    await User.ensure_indexes()
+    await UserAuth.ensure_indexes()
 
 
 async def main():
