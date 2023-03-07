@@ -25,37 +25,6 @@ NAME_DICT = defaultdict(dict)
 
 
 class ManagerQuerySet(BaseManagerQuerySet):
-    def __iter__(self):
-        if self.cursor is None:
-            return list()
-        else:
-            return self.cursor
-
-    def __next__(self, cursor):
-        return self.get_instance(cursor, filters=self.filters)
-
-    async def __aiter__(self):
-        if self.cursor is None:
-            yield []
-        else:
-            async for cursor in self.cursor:
-                yield self.get_instance(cursor, filters=self.filters)
-
-    async def __anext__(self):
-        return await self.get_instance(self.cursor, filters=self.filters)
-
-    async def to_list(self):
-        result_list = []
-        async for instance in self:
-            result_list.append(instance)
-        return result_list
-
-    async def first(self):
-        first_model = self.cursor.to_list(1)
-        if isinstance(first_model, asyncio.Future):
-            first_model = await first_model
-        return self.get_instance(first_model, filters=self.filters)
-
     def order_by(self, keys):
         if keys:
             key_list = []
@@ -66,6 +35,46 @@ class ManagerQuerySet(BaseManagerQuerySet):
                     key_list.append((key, ASCENDING))
             self.cursor.sort(key_list)
         return self
+
+    def __iter__(self):
+        if self.cursor is None:
+            return list()
+        else:
+            return self.cursor
+
+    def __next__(self, cursor):
+        return self.get_instance(cursor)
+
+    async def __aiter__(self):
+        if self.cursor is None:
+            yield []
+        else:
+            async for cursor in self.cursor:
+                yield self.get_instance(cursor)
+
+    async def __anext__(self):
+        return await self.get_instance(self.cursor)
+
+    async def to_list(self):
+        result_list = []
+        async for instance in self:
+            result_list.append(instance)
+        return result_list
+
+    async def to_dict(self):
+        result_list = []
+        async for instance in self:
+            result_list.append(instance.to_dict())
+        return result_list
+
+    async def first(self):
+        first_model = self.cursor.to_list(1)
+        if isinstance(first_model, asyncio.Future):
+            first_model = await first_model
+        return self.get_instance(first_model)
+
+    async def get_pagination(self):
+        return {}
 
 
 class UmongoMotorManager(BaseManager):
@@ -120,12 +129,12 @@ class UmongoMotorManager(BaseManager):
         try:
             model = await self.model.find_one(finds)
             for __field_name, __field in getattr(self.dao, "__fields__").items():
+                if __field.default_update:
+                    setattr(model, __field_name, __field.update_default)
                 if __field_name in params:
                     setattr(model, __field_name, params.get(__field_name))
-                elif __field.default_update:
-                    setattr(model, __field_name, __field.update_default)
             await model.commit()
-            return self.dao.get_instance(model)
+            return self.get_instance(model)
         except Exception as e:
             logging.exception(f"update_one failed! finds = {finds}, params = {params}")
             return None

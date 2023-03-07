@@ -28,7 +28,7 @@ class BaseField(object):
             return self.default_create
 
     @property
-    def udpate_default(self):
+    def update_default(self):
         if callable(self.default_update):
             return self.default_update()
         else:

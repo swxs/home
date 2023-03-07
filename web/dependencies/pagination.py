@@ -11,12 +11,12 @@ class PageSchema(pydantic.BaseModel):
 
 
 async def get_pagination(
-    use_pager: Optional[int] = Query(1),
-    limit: Optional[int] = Query(20),
-    skip: Optional[int] = Query(0),
-    orderby: Optional[str] = Query(...),
+    use_pager: int = Query(1),
+    page: int = Query(1),
+    page_number: int = Query(20),
+    orderby: Optional[str] = Query(""),
 ):
     if use_pager == 0:
         return PageSchema(**{"limit": 0, "skip": 0})
     else:
-        return PageSchema(**{"limit": limit, "skip": skip})
+        return PageSchema(**{"limit": page_number, "skip": (page - 1) * page_number})

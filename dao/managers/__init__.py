@@ -1,7 +1,12 @@
 import os
+
 import core
-from .manager_base import BaseManager
+
+# 通用方法
 from commons.Helpers.Helper_productor import Productor
+
+# 本模块方法
+from .manager_base import BaseManager, BaseManagerQuerySet
 
 
 class ManagerProductor(Productor):

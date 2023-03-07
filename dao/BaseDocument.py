@@ -14,7 +14,7 @@ from tornado.util import ObjectDict
 
 # 本模块方法
 from .fields import BaseField, DictField, DateTimeField
-from .managers import manager_productor
+from .managers import BaseManagerQuerySet, manager_productor
 from .memorizers import memorizer_productor
 
 logger = logging.getLogger("main.dao.base_document")
@@ -111,18 +111,32 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
 
     @classmethod
     async def find_one(cls, finds):
+        """
+        简介
+        ----------
+
+
+        参数
+        ----------
+        finds :
+
+
+        返回
+        ----------
+
+        """
         logger.info(f"[find_one] <{cls.__model_name__}>: finds - {finds}")
 
         return await cls.manager.find_one(finds)
 
     @classmethod
-    async def find_many(cls, finds, *, limit=0, skip=0):
+    async def find_many(cls, finds, *, limit=0, skip=0) -> BaseManagerQuerySet:
         logger.info(f"[find_many] <{cls.__model_name__}>: finds - {finds}")
 
         return await cls.manager.find_many(finds, limit=limit, skip=skip)
 
     @classmethod
-    async def search(cls, searches, *, limit=0, skip=0):
+    async def search(cls, searches, *, limit=0, skip=0) -> BaseManagerQuerySet:
         logger.info(f"[search] <{cls.__model_name__}>: searches - {searches}")
 
         key = cls.get_key_with_params(searches)
@@ -171,10 +185,10 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     async def delete_one(cls, finds: dict):
         logger.info(f"[delete_one] <{cls.__model_name__}>: finds - {finds}")
 
-        return await cls.manager.delete_one(cls, finds)
+        return await cls.manager.delete_one(finds)
 
     @classmethod
     async def delete_many(cls, finds: dict):
         logger.info(f"[delete_many] <{cls.__model_name__}>: finds - {finds}")
 
-        return await cls.manager.delete_many(cls, finds)
+        return await cls.manager.delete_many(finds)
