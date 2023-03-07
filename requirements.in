@@ -3,9 +3,10 @@ uvicorn
 click
 # environs
 concurrent_log_handler
-pymysql
-mysql-connector
-SQLAlchemy
+# pymysql
+# mysql-connector
+# SQLAlchemy
+# sqlalchemy_aio
 umongo[motor]
 aioredis
 aiohttp

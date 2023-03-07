@@ -31,9 +31,9 @@ logger = logging.getLogger("main.apps.user.api.user")
 
 @router.post("/refresh_token")
 async def get_refresh_token(
-    ttype: int = Body(...),
-    identifier: str = Body(...),
-    credential: str = Body(...),
+    ttype: int = Body(..., embed=True),
+    identifier: str = Body(..., embed=True),
+    credential: str = Body(..., embed=True),
 ):
     user_auth = await UserAuth.find_one(
         {
@@ -100,6 +100,6 @@ async def create_user_auth(
     )
     return success(
         {
-            "data": await user_auth.to_dict(),
+            "data": user_auth,
         }
     )

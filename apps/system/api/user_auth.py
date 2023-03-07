@@ -26,7 +26,7 @@ async def get_user_auth(
         finds={"id": user_auth_id},
     )
     return {
-        "data": await user_auth.to_dict(),
+        "data": user_auth,
     }
 
 
@@ -41,7 +41,7 @@ async def get_user_auth_list(
         limit=pagination.limit,
     )
     return {
-        "data": await user_auth_list.to_dict(),
+        "data": user_auth_list,
         "pagination": await user_auth_list.get_pagination(),
     }
 
@@ -54,7 +54,7 @@ async def create_user_auth(
         params=user_auth_schema.dict(),
     )
     return {
-        "data": await user_auth.to_dict(),
+        "data": user_auth,
     }
 
 
@@ -68,7 +68,7 @@ async def update_user_auth(
         params=user_auth_schema.dict(),
     )
     return {
-        "data": await user_auth.to_dict(),
+        "data": user_auth,
     }
 
 

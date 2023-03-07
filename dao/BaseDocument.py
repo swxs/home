@@ -95,7 +95,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
     def get_key_with_params(cls, params: dict):
         return cls.get_key_with_list(params.keys())
 
-    async def to_dict(self, dict_factory=ObjectDict):
+    def to_dict(self, dict_factory=ObjectDict):
         data = dict_factory()
         for __field_name, __field in getattr(self.__class__, "__fields__").items():
             v = self.__getattribute__(__field_name)

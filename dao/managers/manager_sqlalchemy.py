@@ -9,6 +9,7 @@ from collections import defaultdict
 
 import pymysql
 from sqlalchemy import create_engine
+from sqlalchemy_aio import ASYNCIO_STRATEGY
 from sqlalchemy.ext.declarative import declarative_base
 
 from core import config
@@ -39,6 +40,7 @@ class SqlalchemyManager(BaseManager, metaclass=Singleton):
         self.base = declarative_base()
         self.engine = create_engine(
             "mysql://root:swxs@localhost/runoob",
+            strategy=ASYNCIO_STRATEGY,
             encoding='latin1',
             echo=False,
         )

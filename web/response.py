@@ -5,12 +5,16 @@ import datetime
 from bson import ObjectId
 from fastapi.responses import JSONResponse
 
+from dao.BaseDocument import BaseDocument
+
 # 本模块方法
 from .exceptions.http_exception import BaseHttpException
 
 
 def encoder(obj):
-    if isinstance(obj, ObjectId):
+    if isinstance(obj, BaseDocument):
+        return obj.to_dict()
+    elif isinstance(obj, ObjectId):
         return str(obj)
     elif isinstance(obj, bytes):
         return obj.decode("utf8")
