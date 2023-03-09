@@ -4,7 +4,9 @@
 # @Time    : 2018/7/29 20:45
 
 from bson import ObjectId
-from . import BaseField
+
+# 本模块方法
+from .BaseField import BaseField
 
 
 class ListField(BaseField):

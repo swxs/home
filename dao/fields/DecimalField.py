@@ -3,7 +3,8 @@
 # @AUTH    : swxs
 # @Time    : 2019/4/2 13:49
 
-from . import BaseField
+# 本模块方法
+from .BaseField import BaseField
 
 
 class DecimalField(BaseField):

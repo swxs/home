@@ -4,7 +4,7 @@
 # @Time    : 2019/4/2 11:14
 
 # 本模块方法
-from . import BaseField
+from .BaseField import BaseField
 
 
 class PrimaryField(BaseField):

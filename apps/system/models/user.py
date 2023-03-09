@@ -2,15 +2,9 @@
 # @FILE    : models/user.py
 # @AUTH    : code_creater
 
-import datetime
-
-import bson
 from umongo import Document, fields
 
 import core
-
-# 本模块方法
-from .. import consts
 
 
 @core.mongodb_instance.register
@@ -40,3 +34,6 @@ class User(Document):
         unique=False,
         allow_none=True,
     )
+
+    class Meta:
+        pass

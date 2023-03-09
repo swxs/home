@@ -2,10 +2,8 @@
 # @File    : dao/word.py
 # @AUTH    : code_creater
 
-import logging
-import datetime
 
-import bson
+import logging
 
 from dao import BaseDocument, fields
 
@@ -17,22 +15,11 @@ logger = logging.getLogger("main.apps.wordbook.dao.word")
 
 
 class Word(BaseDocument):
-    en = fields.StringField(
-        allow_none=True,
-    )
-    cn = fields.StringField(
-        allow_none=True,
-    )
-    number = fields.IntField(
-        allow_none=True,
-        default=0,
-    )
-    last_time = fields.DateTimeField(
-        allow_none=True,
-    )
-    user_id = fields.ObjectIdField(
-        allow_none=True,
-    )
+    en = fields.StringField()
+    cn = fields.StringField()
+    number = fields.IntField()
+    last_time = fields.DateTimeField()
+    user_id = fields.ObjectIdField()
 
     class Meta:
         model = WordModel

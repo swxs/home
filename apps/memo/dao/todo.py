@@ -5,8 +5,6 @@
 import logging
 import datetime
 
-import bson
-
 from dao import BaseDocument, fields
 
 # 本模块方法
@@ -17,30 +15,25 @@ logger = logging.getLogger("main.apps.memo.dao.todo")
 
 
 class Todo(BaseDocument):
-    title = fields.StringField(
-        allow_none=True,
+    id = fields.PrimaryField()
+    created = fields.DateTimeField(
+        default_create=datetime.datetime.now,
     )
-    summary = fields.StringField(
-        allow_none=True,
+    updated = fields.DateTimeField(
+        default_create=datetime.datetime.now,
+        default_update=datetime.datetime.now,
     )
-    document = fields.StringField(
-        allow_none=True,
-    )
-    user_id = fields.ObjectIdField(
-        allow_none=True,
-    )
+    user_id = fields.ObjectIdField()
+    title = fields.StringField()
+    summary = fields.StringField()
+    document = fields.StringField()
     status = fields.IntField(
-        allow_none=True,
         enums=consts.TODO_STATUS_LIST,
-        default=consts.TODO_STATUS_NEW,
+        default_create=consts.TODO_STATUS_NEW,
     )
     priority = fields.IntField(
-        allow_none=True,
         enums=consts.TODO_PRIORITY_LIST,
-        default=consts.TODO_PRIORITY_LOW,
-    )
-    user_id = fields.ObjectIdField(
-        allow_none=True,
+        default_create=consts.TODO_PRIORITY_LOW,
     )
 
     class Meta:

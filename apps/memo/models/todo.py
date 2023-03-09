@@ -2,43 +2,52 @@
 # @FILE    : models/todo.py
 # @AUTH    : code_creater
 
-import datetime
-
-import bson
 from umongo import Document, fields
 
 import core
 
-# 本模块方法
-from .. import consts
-
 
 @core.mongodb_instance.register
 class Todo(Document):
+    created = fields.DateTimeField(
+        required=True,
+        unique=False,
+        allow_none=False,
+    )
+    updated = fields.DateTimeField(
+        required=True,
+        unique=False,
+        allow_none=False,
+    )
+    user_id = fields.ObjectIdField(
+        required=True,
+        unique=False,
+        allow_none=False,
+    )
     title = fields.StringField(
-        requirement=False,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     summary = fields.StringField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     document = fields.StringField(
-        requirement=False,
-    )
-    user_id = fields.ObjectIdField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     status = fields.IntField(
-        requirement=False,
-        enums=consts.TODO_STATUS_LIST,
-        default=consts.TODO_STATUS_NEW,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     priority = fields.IntField(
-        requirement=False,
-        enums=consts.TODO_PRIORITY_LIST,
-        default=consts.TODO_PRIORITY_LOW,
-    )
-    user_id = fields.ObjectIdField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
 
     class Meta:

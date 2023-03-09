@@ -2,44 +2,47 @@
 # @FILE    : models/user_auth.py
 # @AUTH    : code_creater
 
-import datetime
-
-import bson
 from umongo import Document, fields
 
 import core
-
-# 本模块方法
-from .. import consts
 
 
 @core.mongodb_instance.register
 class UserAuth(Document):
     created = fields.DateTimeField(
-        requirement=True,
-        default=datetime.datetime.now,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     updated = fields.DateTimeField(
-        requirement=True,
-        default=datetime.datetime.now,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     user_id = fields.ObjectIdField(
-        requirement=False,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     ttype = fields.IntField(
-        requirement=False,
-        enums=consts.USER_AUTH_TTYPE_LIST,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     identifier = fields.StringField(
-        requirement=False,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     credential = fields.StringField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     ifverified = fields.IntField(
-        requirement=False,
-        enums=consts.USER_AUTH_IFVERIFIED_LIST,
-        default=consts.USER_AUTH_IFVERIFIED_FALSE,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
 
     class Meta:
@@ -48,8 +51,7 @@ class UserAuth(Document):
                 'key': ['user_id'],
             },
             {
-                'key': [('ttype', 1), ('identifier', 1)],
-                'unique': True,
+                'key': ['ttype, identifier'],
             },
         ]
         pass

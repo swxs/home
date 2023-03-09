@@ -4,7 +4,7 @@
 # @Time    : 2018/7/29 21:03
 
 # 本模块方法
-from . import BaseField
+from .BaseField import BaseField
 
 
 class IntField(BaseField):

@@ -4,46 +4,52 @@
 
 import logging
 
+from bson import ObjectId
 from fastapi import Body, Path, Query, APIRouter
 from fastapi.param_functions import Depends
 
-from web.dependencies.pagination import get_pagination
+from web.response import success
+from web.custom_types import OID
+from web.dependencies.pagination import PageSchema, get_pagination
 
 # 本模块方法
 from ..dao.user_auth import UserAuth
-from ..schemas.user_auth import UserAuthSchema
+from ..schemas.user_auth import UserAuthSchema, get_user_auth_schema
 
 router = APIRouter()
 
 logger = logging.getLogger("main.apps.user_auth.api.user_auth")
 
 
-@router.get("/{user_auth_id}")
-async def get_user_auth(
-    user_auth_id: str = Path(...),
-):
-    user_auth = await UserAuth.find_one(
-        finds={"id": user_auth_id},
-    )
-    return {
-        "data": user_auth,
-    }
-
-
 @router.get("/")
 async def get_user_auth_list(
-    user_auth_schema=Query(...),
-    pagination=Depends(get_pagination),
+    user_auth_schema: UserAuthSchema = Depends(get_user_auth_schema),
+    pagination: PageSchema = Depends(get_pagination),
 ):
     user_auth_list = await UserAuth.search(
         searches=user_auth_schema.dict(exclude_unset=True),
         skip=pagination.skip,
         limit=pagination.limit,
     )
-    return {
-        "data": user_auth_list,
-        "pagination": await user_auth_list.get_pagination(),
-    }
+    return success(
+        {
+            "data": await user_auth_list.to_dict(),
+        }
+    )
+
+
+@router.get("/{user_auth_id}")
+async def get_user_auth(
+    user_auth_id: OID = Path(..., regex="[0-9a-f]{24}"),
+):
+    user_auth = await UserAuth.find_one(
+        finds={"id": ObjectId(user_auth_id)},
+    )
+    return success(
+        {
+            "data": user_auth,
+        }
+    )
 
 
 @router.post("/")
@@ -53,32 +59,38 @@ async def create_user_auth(
     user_auth = await UserAuth.create(
         params=user_auth_schema.dict(),
     )
-    return {
-        "data": user_auth,
-    }
+    return success(
+        {
+            "data": user_auth,
+        }
+    )
 
 
 @router.put("/{user_auth_id}")
-async def update_user_auth(
-    user_auth_id: str = Path(...),
+async def modify_user_auth(
+    user_auth_id: OID = Path(..., regex="[0-9a-f]{24}"),
     user_auth_schema: UserAuthSchema = Body(...),
 ):
     user_auth = await UserAuth.update_one(
-        finds={"id": user_auth_id},
-        params=user_auth_schema.dict(),
+        finds={"id": ObjectId(user_auth_id)},
+        params=user_auth_schema.dict(exclude_defaults=True),
     )
-    return {
-        "data": user_auth,
-    }
+    return success(
+        {
+            "data": user_auth,
+        }
+    )
 
 
 @router.delete("/{user_auth_id}")
 async def delete_user_auth(
-    user_auth_id: str = Path(...),
+    user_auth_id: OID = Path(..., regex="[0-9a-f]{24}"),
 ):
     count = await UserAuth.delete_one(
-        finds={"id": user_auth_id},
+        finds={"id": ObjectId(user_auth_id)},
     )
-    return {
-        "count": count,
-    }
+    return success(
+        {
+            "count": count,
+        }
+    )

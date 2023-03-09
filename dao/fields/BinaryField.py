@@ -3,7 +3,8 @@
 # @AUTH    : swxs
 # @Time    : 2019/4/2 14:08
 
-from . import BaseField
+# 本模块方法
+from .BaseField import BaseField
 
 
 class BinaryField(BaseField):

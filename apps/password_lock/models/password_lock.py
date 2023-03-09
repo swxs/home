@@ -2,42 +2,57 @@
 # @FILE    : models/password_lock.py
 # @AUTH    : code_creater
 
-import datetime
-
-import bson
 from umongo import Document, fields
 
 import core
 
-# 本模块方法
-from .. import consts
-
 
 @core.mongodb_instance.register
 class PasswordLock(Document):
-    name = fields.StringField(
-        requirement=False,
+    created = fields.DateTimeField(
+        required=True,
+        unique=False,
+        allow_none=False,
     )
-    key = fields.StringField(
-        requirement=False,
-    )
-    website = fields.StringField(
-        requirement=False,
+    updated = fields.DateTimeField(
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     user_id = fields.ObjectIdField(
-        requirement=False,
+        required=True,
+        unique=False,
+        allow_none=False,
+    )
+    name = fields.StringField(
+        required=True,
+        unique=False,
+        allow_none=False,
+    )
+    key = fields.StringField(
+        required=True,
+        unique=True,
+        allow_none=False,
+    )
+    website = fields.StringField(
+        required=False,
+        unique=False,
+        allow_none=True,
     )
     used = fields.IntField(
-        requirement=False,
-        default=0,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     ttype = fields.IntField(
-        requirement=False,
-        enums=consts.PASSWORD_LOCK_TTYPE_LIST,
-        default=consts.PASSWORD_LOCK_TTYPE_COMMON,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     custom = fields.DictField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
 
     class Meta:

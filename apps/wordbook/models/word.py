@@ -2,34 +2,37 @@
 # @FILE    : models/word.py
 # @AUTH    : code_creater
 
-import datetime
-
-import bson
 from umongo import Document, fields
 
 import core
-
-# 本模块方法
-from .. import consts
 
 
 @core.mongodb_instance.register
 class Word(Document):
     en = fields.StringField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     cn = fields.StringField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     number = fields.IntField(
-        requirement=False,
-        default=0,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     last_time = fields.DateTimeField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
     user_id = fields.ObjectIdField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=False,
     )
 
     class Meta:

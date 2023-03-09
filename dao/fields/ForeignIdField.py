@@ -3,8 +3,9 @@
 # @AUTH    : swxs
 # @Time    : 2018/6/22 17:32
 
-from . import BaseField
-from . import ObjectIdField
+# 本模块方法
+from .BaseField import BaseField
+from .ObjectIdField import ObjectIdField
 
 
 class ForeignIdField(ObjectIdField):

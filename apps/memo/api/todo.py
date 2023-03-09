@@ -4,46 +4,52 @@
 
 import logging
 
+from bson import ObjectId
 from fastapi import Body, Path, Query, APIRouter
 from fastapi.param_functions import Depends
 
-from web.dependencies.pagination import get_pagination
+from web.response import success
+from web.custom_types import OID
+from web.dependencies.pagination import PageSchema, get_pagination
 
 # 本模块方法
 from ..dao.todo import Todo
-from ..schemas.todo import TodoSchema
+from ..schemas.todo import TodoSchema, get_todo_schema
 
 router = APIRouter()
 
 logger = logging.getLogger("main.apps.todo.api.todo")
 
 
-@router.get("/{todo_id}")
-async def get_todo(
-    todo_id: str = Path(...),
-):
-    todo = await Todo.find(
-        finds=todo_id,
-    )
-    return {
-        "data": await todo.to_front(),
-    }
-
-
 @router.get("/")
 async def get_todo_list(
-    todo_schema=Query(...),
-    pagination=Depends(get_pagination),
+    todo_schema: TodoSchema = Depends(get_todo_schema),
+    pagination: PageSchema = Depends(get_pagination),
 ):
     todo_list = await Todo.search(
         searches=todo_schema.dict(exclude_unset=True),
         skip=pagination.skip,
         limit=pagination.limit,
     )
-    return {
-        "data": await todo_list.to_front(),
-        "pagination": await todo_list.get_pagination(),
-    }
+    return success(
+        {
+            "data": await todo_list.to_dict(),
+        }
+    )
+
+
+@router.get("/{todo_id}")
+async def get_todo(
+    todo_id: OID = Path(..., regex="[0-9a-f]{24}"),
+):
+    todo = await Todo.find_one(
+        finds={"id": ObjectId(todo_id)},
+    )
+    return success(
+        {
+            "data": todo,
+        }
+    )
 
 
 @router.post("/")
@@ -53,60 +59,38 @@ async def create_todo(
     todo = await Todo.create(
         params=todo_schema.dict(),
     )
-    return {
-        "data": await todo.to_front(),
-    }
-
-
-@router.post("/{todo_id}")
-async def copy_todo(
-    todo_id: str = Path(...),
-    todo_schema: TodoSchema = Body(...),
-):
-    todo = await Todo.copy(
-        finds=todo_id,
-        params=todo_schema.dict(exclude_defaults=True),
+    return success(
+        {
+            "data": todo,
+        }
     )
-    return {
-        "data": await todo.to_front(),
-    }
 
 
 @router.put("/{todo_id}")
-async def change_todo(
-    todo_id: str = Path(...),
+async def modify_todo(
+    todo_id: OID = Path(..., regex="[0-9a-f]{24}"),
     todo_schema: TodoSchema = Body(...),
 ):
-    todo = await Todo.update(
-        find=todo_id,
-        params=todo_schema.dict(),
+    todo = await Todo.update_one(
+        finds={"id": ObjectId(todo_id)},
+        params=todo_schema.dict(exclude_defaults=True),
     )
-    return {
-        "data": await todo.to_front(),
-    }
+    return success(
+        {
+            "data": todo,
+        }
+    )
 
 
 @router.delete("/{todo_id}")
 async def delete_todo(
-    todo_id: str = Path(...),
+    todo_id: OID = Path(..., regex="[0-9a-f]{24}"),
 ):
-    count = await Todo.delete(
-        find=todo_id,
+    count = await Todo.delete_one(
+        finds={"id": ObjectId(todo_id)},
     )
-    return {
-        "count": count,
-    }
-
-
-@router.patch("/{todo_id}")
-async def modify_todo(
-    todo_id: str = Path(...),
-    todo_schema: TodoSchema = Body(...),
-):
-    todo = await Todo.update(
-        find=todo_id,
-        params=todo_schema.dict(exclude_defaults=True),
+    return success(
+        {
+            "count": count,
+        }
     )
-    return {
-        "data": await todo.to_front(),
-    }

@@ -4,7 +4,7 @@
 # @Time    : 2019/4/2 11:19
 
 # 本模块方法
-from . import BaseField
+from .BaseField import BaseField
 
 
 class FloatField(BaseField):

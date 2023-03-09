@@ -5,8 +5,6 @@
 import logging
 import datetime
 
-import bson
-
 from dao import BaseDocument, fields
 
 # 本模块方法
@@ -17,30 +15,26 @@ logger = logging.getLogger("main.apps.password_lock.dao.password_lock")
 
 
 class PasswordLock(BaseDocument):
-    name = fields.StringField(
-        allow_none=True,
+    id = fields.PrimaryField()
+    created = fields.DateTimeField(
+        default_create=datetime.datetime.now,
     )
-    key = fields.StringField(
-        allow_none=True,
+    updated = fields.DateTimeField(
+        default_create=datetime.datetime.now,
+        default_update=datetime.datetime.now,
     )
-    website = fields.StringField(
-        allow_none=True,
-    )
-    user_id = fields.ObjectIdField(
-        allow_none=True,
-    )
+    user_id = fields.ObjectIdField()
+    name = fields.StringField()
+    key = fields.StringField()
+    website = fields.StringField()
     used = fields.IntField(
-        allow_none=True,
-        default=0,
+        default_create=0,
     )
     ttype = fields.IntField(
-        allow_none=True,
         enums=consts.PASSWORD_LOCK_TTYPE_LIST,
-        default=consts.PASSWORD_LOCK_TTYPE_COMMON,
+        default_create=consts.PASSWORD_LOCK_TTYPE_COMMON,
     )
-    custom = fields.DictField(
-        allow_none=True,
-    )
+    custom = fields.DictField()
 
     class Meta:
         model = PasswordLockModel

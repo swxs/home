@@ -5,8 +5,6 @@
 import logging
 import datetime
 
-import bson
-
 from dao import BaseDocument, fields
 
 # 本模块方法
@@ -17,36 +15,23 @@ logger = logging.getLogger("main.apps.system.dao.user_auth")
 
 
 class UserAuth(BaseDocument):
-    id = fields.ObjectIdField(
-        allow_none=False,
-        default_create=bson.ObjectId,
-    )
+    id = fields.PrimaryField()
     created = fields.DateTimeField(
-        allow_none=False,
         default_create=datetime.datetime.now,
     )
     updated = fields.DateTimeField(
-        allow_none=False,
         default_create=datetime.datetime.now,
         default_update=datetime.datetime.now,
     )
-    user_id = fields.ObjectIdField(
-        allow_none=True,
-    )
+    user_id = fields.ObjectIdField()
     ttype = fields.IntField(
-        allow_none=True,
         enums=consts.USER_AUTH_TTYPE_LIST,
     )
-    identifier = fields.StringField(
-        allow_none=True,
-    )
-    credential = fields.StringField(
-        allow_none=True,
-    )
+    identifier = fields.StringField()
+    credential = fields.StringField()
     ifverified = fields.IntField(
-        allow_none=True,
         enums=consts.USER_AUTH_IFVERIFIED_LIST,
-        default=consts.USER_AUTH_IFVERIFIED_FALSE,
+        default_create=consts.USER_AUTH_IFVERIFIED_FALSE,
     )
 
     class Meta:

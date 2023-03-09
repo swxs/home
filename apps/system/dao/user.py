@@ -2,12 +2,8 @@
 # @File    : dao/user.py
 # @AUTH    : code_creater
 
-import uuid
 import logging
 import datetime
-import functools
-
-import bson
 
 from dao import BaseDocument, fields
 
@@ -19,15 +15,11 @@ logger = logging.getLogger("main.apps.system.dao.user")
 
 
 class User(BaseDocument):
-    id = fields.PrimaryField(
-        virtual=3,
-    )
+    id = fields.PrimaryField()
     created = fields.DateTimeField(
-        virtual=1,
         default_create=datetime.datetime.now,
     )
     updated = fields.DateTimeField(
-        virtual=1,
         default_create=datetime.datetime.now,
         default_update=datetime.datetime.now,
     )

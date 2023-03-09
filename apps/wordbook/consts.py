@@ -3,4 +3,4 @@
 # @AUTH    : model_creater
 
 
-from .model_consts import *
+from enum import Enum

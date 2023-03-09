@@ -3,7 +3,8 @@
 # @AUTH    : swxs
 # @Time    : 2018/7/29 20:46
 
-from . import BaseField
+# 本模块方法
+from .BaseField import BaseField
 
 
 class DictField(BaseField):

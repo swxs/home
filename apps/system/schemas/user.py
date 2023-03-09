@@ -2,6 +2,7 @@
 # @FILE    : schemas/user.py
 # @AUTH    : model_creater
 
+import datetime
 from typing import Dict, List, Optional
 
 import pydantic
@@ -19,17 +20,17 @@ class UserSchema(pydantic.BaseModel):
     description: Optional[str] = None
     avatar: Optional[OID] = None
 
-    # @pydantic.validator('avatar')
-    # def avatar_objectid(cls, v):
-    #     if isinstance(v, str):
-    #         return ObjectId(v)
-    #     return ObjectId(v)
+    @pydantic.validator('avatar')
+    def avatar_objectid(cls, v):
+        if isinstance(v, str):
+            return ObjectId(v)
+        return ObjectId(v)
 
 
 async def get_user_schema(
     username: Optional[str] = Query(None),
     description: Optional[str] = Query(None),
-    avatar: Optional[OID] = Query(None),
+    avatar: Optional[str] = Query(None),
 ):
     params = {}
     if username is not None:

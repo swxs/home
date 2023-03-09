@@ -4,46 +4,52 @@
 
 import logging
 
+from bson import ObjectId
 from fastapi import Body, Path, Query, APIRouter
 from fastapi.param_functions import Depends
 
-from web.dependencies.pagination import get_pagination
+from web.response import success
+from web.custom_types import OID
+from web.dependencies.pagination import PageSchema, get_pagination
 
 # 本模块方法
 from ..dao.word import Word
-from ..schemas.word import WordSchema
+from ..schemas.word import WordSchema, get_word_schema
 
 router = APIRouter()
 
 logger = logging.getLogger("main.apps.word.api.word")
 
 
-@router.get("/{word_id}")
-async def get_word(
-    word_id: str = Path(...),
-):
-    word = await Word.find(
-        finds=word_id,
-    )
-    return {
-        "data": await word.to_front(),
-    }
-
-
 @router.get("/")
 async def get_word_list(
-    word_schema=Query(...),
-    pagination=Depends(get_pagination),
+    word_schema: WordSchema = Depends(get_word_schema),
+    pagination: PageSchema = Depends(get_pagination),
 ):
     word_list = await Word.search(
         searches=word_schema.dict(exclude_unset=True),
         skip=pagination.skip,
         limit=pagination.limit,
     )
-    return {
-        "data": await word_list.to_front(),
-        "pagination": await word_list.get_pagination(),
-    }
+    return success(
+        {
+            "data": await word_list.to_dict(),
+        }
+    )
+
+
+@router.get("/{word_id}")
+async def get_word(
+    word_id: OID = Path(..., regex="[0-9a-f]{24}"),
+):
+    word = await Word.find_one(
+        finds={"id": ObjectId(word_id)},
+    )
+    return success(
+        {
+            "data": word,
+        }
+    )
 
 
 @router.post("/")
@@ -53,60 +59,38 @@ async def create_word(
     word = await Word.create(
         params=word_schema.dict(),
     )
-    return {
-        "data": await word.to_front(),
-    }
-
-
-@router.post("/{word_id}")
-async def copy_word(
-    word_id: str = Path(...),
-    word_schema: WordSchema = Body(...),
-):
-    word = await Word.copy(
-        finds=word_id,
-        params=word_schema.dict(exclude_defaults=True),
+    return success(
+        {
+            "data": word,
+        }
     )
-    return {
-        "data": await word.to_front(),
-    }
 
 
 @router.put("/{word_id}")
-async def change_word(
-    word_id: str = Path(...),
+async def modify_word(
+    word_id: OID = Path(..., regex="[0-9a-f]{24}"),
     word_schema: WordSchema = Body(...),
 ):
-    word = await Word.update(
-        find=word_id,
-        params=word_schema.dict(),
+    word = await Word.update_one(
+        finds={"id": ObjectId(word_id)},
+        params=word_schema.dict(exclude_defaults=True),
     )
-    return {
-        "data": await word.to_front(),
-    }
+    return success(
+        {
+            "data": word,
+        }
+    )
 
 
 @router.delete("/{word_id}")
 async def delete_word(
-    word_id: str = Path(...),
+    word_id: OID = Path(..., regex="[0-9a-f]{24}"),
 ):
-    count = await Word.delete(
-        find=word_id,
+    count = await Word.delete_one(
+        finds={"id": ObjectId(word_id)},
     )
-    return {
-        "count": count,
-    }
-
-
-@router.patch("/{word_id}")
-async def modify_word(
-    word_id: str = Path(...),
-    word_schema: WordSchema = Body(...),
-):
-    word = await Word.update(
-        find=word_id,
-        params=word_schema.dict(exclude_defaults=True),
+    return success(
+        {
+            "count": count,
+        }
     )
-    return {
-        "data": await word.to_front(),
-    }

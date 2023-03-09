@@ -3,7 +3,8 @@
 # @AUTH    : swxs
 # @Time    : 2018/6/22 17:35
 
-from . import BaseField
+# 本模块方法
+from .BaseField import BaseField
 
 
 class DateTimeField(BaseField):
