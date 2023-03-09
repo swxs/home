@@ -55,6 +55,12 @@ class ManagerQuerySet(BaseManagerQuerySet):
     async def __anext__(self):
         return await self.get_instance(self.cursor)
 
+    async def first(self):
+        first_model = self.cursor.to_list(1)
+        if isinstance(first_model, asyncio.Future):
+            first_model = await first_model
+        return self.get_instance(first_model)
+
     async def to_list(self):
         result_list = []
         async for instance in self:
@@ -66,12 +72,6 @@ class ManagerQuerySet(BaseManagerQuerySet):
         async for instance in self:
             result_list.append(instance.to_dict())
         return result_list
-
-    async def first(self):
-        first_model = self.cursor.to_list(1)
-        if isinstance(first_model, asyncio.Future):
-            first_model = await first_model
-        return self.get_instance(first_model)
 
     async def get_pagination(self):
         return {}
@@ -129,7 +129,7 @@ class UmongoMotorManager(BaseManager):
         try:
             model = await self.model.find_one(finds)
             for __field_name, __field in getattr(self.dao, "__fields__").items():
-                if __field.default_update:
+                if __field._default_update:
                     setattr(model, __field_name, __field.update_default)
                 if __field_name in params:
                     setattr(model, __field_name, params.get(__field_name))

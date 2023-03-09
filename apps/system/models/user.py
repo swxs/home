@@ -16,19 +16,27 @@ from .. import consts
 @core.mongodb_instance.register
 class User(Document):
     created = fields.DateTimeField(
-        requirement=True,
-        default=datetime.datetime.now,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     updated = fields.DateTimeField(
-        requirement=True,
-        default=datetime.datetime.now,
+        required=True,
+        unique=False,
+        allow_none=False,
     )
     username = fields.StringField(
-        requirement=True,
+        required=True,
+        unique=True,
+        allow_none=False,
     )
     description = fields.StringField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=True,
     )
     avatar = fields.ObjectIdField(
-        requirement=False,
+        required=False,
+        unique=False,
+        allow_none=True,
     )

@@ -2,13 +2,13 @@
 # @File    : dao/user.py
 # @AUTH    : code_creater
 
+import uuid
 import logging
 import datetime
+import functools
 
 import bson
-import uuid
 
-import functools
 from dao import BaseDocument, fields
 
 # 本模块方法
@@ -19,29 +19,21 @@ logger = logging.getLogger("main.apps.system.dao.user")
 
 
 class User(BaseDocument):
-    id = fields.ObjectIdField(
-        allow_none=False,
-        default_create=bson.ObjectId,
+    id = fields.PrimaryField(
+        virtual=3,
     )
     created = fields.DateTimeField(
-        allow_none=False,
+        virtual=1,
         default_create=datetime.datetime.now,
     )
     updated = fields.DateTimeField(
-        allow_none=False,
+        virtual=1,
         default_create=datetime.datetime.now,
         default_update=datetime.datetime.now,
     )
-    username = fields.StringField(
-        allow_none=False,
-        default_create=uuid.uuid4,
-    )
-    description = fields.StringField(
-        allow_none=True,
-    )
-    avatar = fields.ObjectIdField(
-        allow_none=True,
-    )
+    username = fields.StringField()
+    description = fields.StringField()
+    avatar = fields.ObjectIdField()
 
     class Meta:
         model = UserModel

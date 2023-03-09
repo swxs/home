@@ -15,6 +15,17 @@ class BaseManagerQuerySet(object):
         self.get_instance = get_instance
         self.cursor = cursor
 
+    def order_by(self, keys):
+        """
+        简介
+        ----------
+        排序对象
+
+        返回
+        -------
+
+        """
+
     def __iter__(self):
         """
         简介
@@ -55,20 +66,28 @@ class BaseManagerQuerySet(object):
         """
         简介
         ----------
-        获取第一个对象，并包装
+        获取第一个对象
 
         """
 
-    def order_by(self, keys):
+    async def to_list(self):
         """
         简介
         ----------
-        排序对象
-
-        返回
-        -------
+        获取对象列表
 
         """
+
+    async def to_dict(self):
+        """
+        简介
+        ----------
+        获取对象列表的前端字典
+
+        """
+
+    async def get_pagination(self):
+        return {}
 
 
 class BaseManager(object):

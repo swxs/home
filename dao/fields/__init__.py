@@ -3,19 +3,19 @@
 # @AUTH    : swxs
 # @Time    : 2018/5/8 14:44
 
-from .BaseField import BaseField
-
+# 本模块方法
 from .IntField import IntField
-from .FloatField import FloatField
-from .DecimalField import DecimalField
-from .BinaryField import BinaryField
-from .BooleanField import BooleanField
-from .StringField import StringField
-from .ObjectIdField import ObjectIdField
-from .DateTimeField import DateTimeField
-from .ListField import ListField
+from .BaseField import BaseField
 from .DictField import DictField
-
+from .ListField import ListField
+from .FloatField import FloatField
+from .BinaryField import BinaryField
+from .StringField import StringField
+from .BooleanField import BooleanField
+from .DecimalField import DecimalField
+from .PrimaryField import PrimaryField
+from .DateTimeField import DateTimeField
+from .ObjectIdField import ObjectIdField
 from .ForeignIdField import ForeignIdField
 
 __all__ = [
@@ -30,5 +30,6 @@ __all__ = [
     "DateTimeField",
     "ListField",
     "DictField",
+    "PrimaryField",
     "ForeignIdField",
 ]
