@@ -10,3 +10,6 @@ from .BaseField import BaseField
 class DictField(BaseField):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def to_dict(self, value):
+        return dict(value)
