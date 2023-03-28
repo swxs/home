@@ -24,12 +24,6 @@ class PasswordLockSchema(pydantic.BaseModel):
     ttype: Optional[int] = None
     custom: Optional[Dict] = None
 
-    @pydantic.validator('user_id')
-    def user_id_objectid(cls, v):
-        if isinstance(v, str):
-            return ObjectId(v)
-        return ObjectId(v)
-
 
 async def get_password_lock_schema(
     user_id: Optional[str] = Query(None),

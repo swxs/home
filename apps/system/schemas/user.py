@@ -20,12 +20,6 @@ class UserSchema(pydantic.BaseModel):
     description: Optional[str] = None
     avatar: Optional[OID] = None
 
-    @pydantic.validator('avatar')
-    def avatar_objectid(cls, v):
-        if isinstance(v, str):
-            return ObjectId(v)
-        return ObjectId(v)
-
 
 async def get_user_schema(
     username: Optional[str] = Query(None),

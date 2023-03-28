@@ -23,12 +23,6 @@ class TodoSchema(pydantic.BaseModel):
     status: Optional[int] = None
     priority: Optional[int] = None
 
-    @pydantic.validator('user_id')
-    def user_id_objectid(cls, v):
-        if isinstance(v, str):
-            return ObjectId(v)
-        return ObjectId(v)
-
 
 async def get_todo_schema(
     user_id: Optional[str] = Query(None),

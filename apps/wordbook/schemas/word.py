@@ -22,12 +22,6 @@ class WordSchema(pydantic.BaseModel):
     last_time: Optional[datetime.datetime] = None
     user_id: Optional[OID] = None
 
-    @pydantic.validator('user_id')
-    def user_id_objectid(cls, v):
-        if isinstance(v, str):
-            return ObjectId(v)
-        return ObjectId(v)
-
 
 async def get_word_schema(
     en: Optional[str] = Query(None),
