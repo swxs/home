@@ -2,23 +2,26 @@
 
 import os
 import re
-import time
 import json
-import logging
-import pickle
-import string
-import random
+import time
 import base64
+import pickle
+import random
+import string
+import logging
 import platform
-import subprocess
-from functools import wraps
-from urllib import parse as urlparse
-from urllib.parse import urlencode
-from hashlib import md5
-from zlib import crc32
-import requests
-import rsa
 import tempfile
+import subprocess
+from zlib import crc32
+from urllib import parse as urlparse
+from hashlib import md5
+from functools import wraps
+from urllib.parse import urlencode
+
+import rsa
+import requests
+
+# 通用方法
 from commons.Helpers.Helper_BufferReader import BufferReader
 
 try:
@@ -1770,7 +1773,7 @@ class PCS(PCSBase):
 
         """
         file_handler.seek(0, 2)
-        _BLOCK_SIZE = 2**20
+        _BLOCK_SIZE = 2 ** 20
         content_length = file_handler.tell()
         file_handler.seek(0)
 

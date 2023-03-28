@@ -26,6 +26,7 @@ app = FastAPI(
 async def event_startup():
     logging.info("connect to database....")
     core.mongodb_database.client = AsyncIOMotorClient(core.config.MONGODB_URI)
+    # 检查索引
     logging.info(f"Connected to database!")
 
 

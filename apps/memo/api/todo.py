@@ -10,6 +10,7 @@ from fastapi.param_functions import Depends
 
 from web.response import success
 from web.custom_types import OID
+from web.dependencies.token import TokenSchema, get_token
 from web.dependencies.pagination import PageSchema, get_pagination
 
 # 本模块方法
@@ -23,6 +24,7 @@ logger = logging.getLogger("main.apps.todo.api.todo")
 
 @router.get("/")
 async def get_todo_list(
+    token_schema: TokenSchema = Depends(get_token),
     todo_schema: TodoSchema = Depends(get_todo_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
@@ -40,6 +42,7 @@ async def get_todo_list(
 
 @router.get("/{todo_id}")
 async def get_todo(
+    token_schema: TokenSchema = Depends(get_token),
     todo_id: OID = Path(..., regex="[0-9a-f]{24}"),
 ):
     todo = await Todo.find_one(
@@ -54,10 +57,11 @@ async def get_todo(
 
 @router.post("/")
 async def create_todo(
+    token_schema: TokenSchema = Depends(get_token),
     todo_schema: TodoSchema = Body(...),
 ):
     todo = await Todo.create(
-        params=todo_schema.dict(),
+        params=todo_schema.dict(exclude_defaults=True),
     )
     return success(
         {
@@ -68,6 +72,7 @@ async def create_todo(
 
 @router.put("/{todo_id}")
 async def modify_todo(
+    token_schema: TokenSchema = Depends(get_token),
     todo_id: OID = Path(..., regex="[0-9a-f]{24}"),
     todo_schema: TodoSchema = Body(...),
 ):
@@ -84,6 +89,7 @@ async def modify_todo(
 
 @router.delete("/{todo_id}")
 async def delete_todo(
+    token_schema: TokenSchema = Depends(get_token),
     todo_id: OID = Path(..., regex="[0-9a-f]{24}"),
 ):
     count = await Todo.delete_one(

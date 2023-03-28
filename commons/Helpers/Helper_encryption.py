@@ -17,7 +17,7 @@ class Encryption:
         return data.hexdigest()
 
     def get_password(self, name=None):
-        password = self.get_md5(name)
+        password = self._get_md5(name)
         for c in password:
             if c.isalpha():
                 password_begin = password.index(c)
