@@ -12,6 +12,13 @@
             "args": ["main:app", "--port", "8090"],
             "console": "integratedTerminal",
             "justMyCode": false
+        }{
+            "name": "RUN[HOME-INIT]",
+            "type": "python",
+            "request": "launch",
+            "module": "init.init_system",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }, {
             "name": "DEV[HOME-create]",
             "type": "python",
