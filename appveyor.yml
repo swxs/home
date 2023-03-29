@@ -2,7 +2,7 @@
 ---
 environment:
   matrix:
-  - TOXENV: py36, py37
+  - TOXENV: py38
 
 build: off
 
