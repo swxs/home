@@ -1,12 +1,8 @@
 fastapi
 uvicorn
 click
-# environs
+environs
 concurrent_log_handler
-# pymysql
-# mysql-connector
-# SQLAlchemy
-# sqlalchemy_aio
 umongo[motor]
 aioredis
 aiohttp
@@ -26,9 +22,3 @@ beautifulsoup4
 pyzbar
 pyjwt
 pycryptodome
-tables
-pyarrow
-numpy
-pandas
-scipy
-scrapy
