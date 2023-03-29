@@ -28,11 +28,14 @@ async def get_todo_list(
     todo_schema: TodoSchema = Depends(get_todo_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
-    todo_list = await Todo.search(
-        searches=todo_schema.dict(exclude_unset=True),
-        skip=pagination.skip,
-        limit=pagination.limit,
-    )
+    todo_list = (
+        await Todo.search(
+            searches=todo_schema.dict(exclude_unset=True),
+            skip=pagination.skip,
+            limit=pagination.limit,
+        )
+    ).order_by(pagination.order_by)
+
     return success(
         {
             "data": await todo_list.to_dict(),
@@ -48,6 +51,7 @@ async def get_todo(
     todo = await Todo.find_one(
         finds={"id": ObjectId(todo_id)},
     )
+
     return success(
         {
             "data": todo,
@@ -63,6 +67,7 @@ async def create_todo(
     todo = await Todo.create(
         params=todo_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": todo,
@@ -80,6 +85,7 @@ async def modify_todo(
         finds={"id": ObjectId(todo_id)},
         params=todo_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": todo,
@@ -95,6 +101,7 @@ async def delete_todo(
     count = await Todo.delete_one(
         finds={"id": ObjectId(todo_id)},
     )
+
     return success(
         {
             "count": count,

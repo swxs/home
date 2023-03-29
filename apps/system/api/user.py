@@ -28,11 +28,14 @@ async def get_user_list(
     user_schema: UserSchema = Depends(get_user_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
-    user_list = await User.search(
-        searches=user_schema.dict(exclude_unset=True),
-        skip=pagination.skip,
-        limit=pagination.limit,
-    )
+    user_list = (
+        await User.search(
+            searches=user_schema.dict(exclude_unset=True),
+            skip=pagination.skip,
+            limit=pagination.limit,
+        )
+    ).order_by(pagination.order_by)
+
     return success(
         {
             "data": await user_list.to_dict(),
@@ -48,6 +51,7 @@ async def get_user(
     user = await User.find_one(
         finds={"id": ObjectId(user_id)},
     )
+
     return success(
         {
             "data": user,
@@ -63,6 +67,7 @@ async def create_user(
     user = await User.create(
         params=user_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": user,
@@ -80,6 +85,7 @@ async def modify_user(
         finds={"id": ObjectId(user_id)},
         params=user_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": user,
@@ -95,6 +101,7 @@ async def delete_user(
     count = await User.delete_one(
         finds={"id": ObjectId(user_id)},
     )
+
     return success(
         {
             "count": count,

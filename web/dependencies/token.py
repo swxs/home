@@ -14,12 +14,11 @@ from commons.Helpers.Helper_JWT import (
 )
 
 # 本模块方法
-from ..custom_types import OID
 from ..exceptions.http_401_unauthorized_exception import Http401UnauthorizedException
 
 
 class TokenSchema(pydantic.BaseModel):
-    user_id: Optional[OID] = None
+    user_id: Optional[str] = None
 
 
 async def get_token(

@@ -28,11 +28,14 @@ async def get_password_lock_list(
     password_lock_schema: PasswordLockSchema = Depends(get_password_lock_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
-    password_lock_list = await PasswordLock.search(
-        searches=password_lock_schema.dict(exclude_unset=True),
-        skip=pagination.skip,
-        limit=pagination.limit,
-    )
+    password_lock_list = (
+        await PasswordLock.search(
+            searches=password_lock_schema.dict(exclude_unset=True),
+            skip=pagination.skip,
+            limit=pagination.limit,
+        )
+    ).order_by(pagination.order_by)
+
     return success(
         {
             "data": await password_lock_list.to_dict(),
@@ -48,6 +51,7 @@ async def get_password_lock(
     password_lock = await PasswordLock.find_one(
         finds={"id": ObjectId(password_lock_id)},
     )
+
     return success(
         {
             "data": password_lock,
@@ -63,6 +67,7 @@ async def create_password_lock(
     password_lock = await PasswordLock.create(
         params=password_lock_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": password_lock,
@@ -80,6 +85,7 @@ async def modify_password_lock(
         finds={"id": ObjectId(password_lock_id)},
         params=password_lock_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": password_lock,
@@ -95,6 +101,7 @@ async def delete_password_lock(
     count = await PasswordLock.delete_one(
         finds={"id": ObjectId(password_lock_id)},
     )
+
     return success(
         {
             "count": count,

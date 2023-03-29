@@ -28,11 +28,14 @@ async def get_word_list(
     word_schema: WordSchema = Depends(get_word_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
-    word_list = await Word.search(
-        searches=word_schema.dict(exclude_unset=True),
-        skip=pagination.skip,
-        limit=pagination.limit,
-    )
+    word_list = (
+        await Word.search(
+            searches=word_schema.dict(exclude_unset=True),
+            skip=pagination.skip,
+            limit=pagination.limit,
+        )
+    ).order_by(pagination.order_by)
+
     return success(
         {
             "data": await word_list.to_dict(),
@@ -48,6 +51,7 @@ async def get_word(
     word = await Word.find_one(
         finds={"id": ObjectId(word_id)},
     )
+
     return success(
         {
             "data": word,
@@ -63,6 +67,7 @@ async def create_word(
     word = await Word.create(
         params=word_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": word,
@@ -80,6 +85,7 @@ async def modify_word(
         finds={"id": ObjectId(word_id)},
         params=word_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": word,
@@ -95,6 +101,7 @@ async def delete_word(
     count = await Word.delete_one(
         finds={"id": ObjectId(word_id)},
     )
+
     return success(
         {
             "count": count,

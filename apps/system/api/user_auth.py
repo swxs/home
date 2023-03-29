@@ -28,11 +28,14 @@ async def get_user_auth_list(
     user_auth_schema: UserAuthSchema = Depends(get_user_auth_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
-    user_auth_list = await UserAuth.search(
-        searches=user_auth_schema.dict(exclude_unset=True),
-        skip=pagination.skip,
-        limit=pagination.limit,
-    )
+    user_auth_list = (
+        await UserAuth.search(
+            searches=user_auth_schema.dict(exclude_unset=True),
+            skip=pagination.skip,
+            limit=pagination.limit,
+        )
+    ).order_by(pagination.order_by)
+
     return success(
         {
             "data": await user_auth_list.to_dict(),
@@ -48,6 +51,7 @@ async def get_user_auth(
     user_auth = await UserAuth.find_one(
         finds={"id": ObjectId(user_auth_id)},
     )
+
     return success(
         {
             "data": user_auth,
@@ -63,6 +67,7 @@ async def create_user_auth(
     user_auth = await UserAuth.create(
         params=user_auth_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": user_auth,
@@ -80,6 +85,7 @@ async def modify_user_auth(
         finds={"id": ObjectId(user_auth_id)},
         params=user_auth_schema.dict(exclude_defaults=True),
     )
+
     return success(
         {
             "data": user_auth,
@@ -95,6 +101,7 @@ async def delete_user_auth(
     count = await UserAuth.delete_one(
         finds={"id": ObjectId(user_auth_id)},
     )
+
     return success(
         {
             "count": count,

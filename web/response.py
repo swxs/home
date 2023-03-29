@@ -1,5 +1,6 @@
 import json
 import typing
+import logging
 import datetime
 
 from bson import ObjectId
@@ -9,6 +10,8 @@ from dao.BaseDocument import BaseDocument
 
 # 本模块方法
 from .exceptions.http_exception import BaseHttpException
+
+logger = logging.getLogger("web.response")
 
 
 def encoder(obj):
@@ -113,4 +116,5 @@ def exception(exc):
     if isinstance(exc, BaseHttpException):
         return response(exc.status_code, exc.code, exc.message, exc.data)
     else:
+        logger.exception(f"未知异常")
         return response(500, -1, exc.args[0], {})

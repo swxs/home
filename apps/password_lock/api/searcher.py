@@ -29,15 +29,18 @@ async def get_password_lock_list(
     password_lock_schema: PasswordLockSchema = Depends(get_password_lock_schema),
     pagination: PageSchema = Depends(get_pagination),
 ):
-    searches = {}
-    searches.update(token_schema.dict(exclude_unset=True))
+    searches = {
+        "user_id": ObjectId(token_schema.user_id),
+    }
     searches.update(password_lock_schema.dict(exclude_unset=True))
 
-    password_lock_list = await PasswordLock.search(
-        searches=searches,
-        skip=pagination.skip,
-        limit=pagination.limit,
-    )
+    password_lock_list = (
+        await PasswordLock.search(
+            searches=searches,
+            skip=pagination.skip,
+            limit=pagination.limit,
+        )
+    ).order_by(pagination.order_by)
 
     result_list = []
     async for password_lock in password_lock_list:
