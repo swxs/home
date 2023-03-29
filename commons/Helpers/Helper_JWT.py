@@ -11,8 +11,9 @@
 
 """
 
-import jwt
 import datetime
+
+import jwt
 
 DecodeError = jwt.DecodeError
 InvalidSignatureError = jwt.InvalidSignatureError
@@ -88,7 +89,9 @@ class Helper_JWT(object):
 
         """
         header = jwt.get_unverified_header(token if isinstance(token, bytes) else token.encode('utf-8'))
-        payload = jwt.decode(token, key=self.key, verify=self.verify, leeway=self.leeway_time)
+        payload = jwt.decode(
+            token, key=self.key, verify=self.verify, leeway=self.leeway_time, algorithms=[self.algorithm]
+        )
         del payload['exp']
         del payload['nbf']
         del payload['iat']

@@ -1,14 +1,7 @@
 import core
 
 # 本模块方法
-from . import Helper_JWT, DBHelper_Redis, Helper_encryption
-
-redis_helper = DBHelper_Redis.RedisDBHelper(
-    db=core.config.REDIS_DB,
-    host=core.config.REDIS_HOST,
-    port=core.config.REDIS_PORT,
-    password=core.config.REDIS_PASSWORD,
-)
+from . import Helper_JWT, Helper_encryption
 
 encryption = Helper_encryption.Encryption(
     salt="b8862e668e5abbc99d8390347e7ac749",

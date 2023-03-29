@@ -7,10 +7,10 @@ import os
 import hashlib
 import logging
 import datetime
+from typing import Any, Dict
 from functools import wraps
 
 from bson import ObjectId
-from tornado.util import ObjectDict
 
 # 本模块方法
 from .fields import BaseField, DictField, DateTimeField
@@ -18,6 +18,19 @@ from .managers import BaseManagerQuerySet, manager_productor
 from .memorizers import memorizer_productor
 
 logger = logging.getLogger("main.dao.base_document")
+
+
+class ObjectDict(Dict[str, Any]):
+    """Makes a dictionary behave like an object, with attribute-style access."""
+
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self[name] = value
 
 
 class BaseMetaDocuemnt(type):
