@@ -22,5 +22,5 @@ jobs:
 
       - name: build and push docker image to aliyuncs
         run: |
-          docker build -t ${{ secrets.DOCKER_REGISTRY }}/swxs/main .
-          docker push ${{ secrets.DOCKER_REGISTRY }}/swxs/main
+          docker build -t ${{ secrets.DOCKER_REGISTRY }}/swxs/home .
+          docker push ${{ secrets.DOCKER_REGISTRY }}/swxs/home
