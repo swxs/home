@@ -8,4 +8,3 @@ RUN python -m pip install --upgrade pip \
     && pip-compile requirements.in -o requirements.txt \
     && pip install -r requirements.txt \
     && rm -f ./requirements.in \
-    && rm -f ./requirements.txt
