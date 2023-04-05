@@ -11,7 +11,7 @@ from fastapi.param_functions import Depends
 from web.response import success
 from web.custom_types import OID
 from web.dependencies.token import TokenSchema, get_token
-from web.dependencies.pagination import PageSchema, get_pagination
+from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
 
 # 本模块方法
 from ..dao.password_lock import PasswordLock
@@ -26,19 +26,30 @@ logger = logging.getLogger("main.apps.password_lock.api.password_lock")
 async def get_password_lock_list(
     token_schema: TokenSchema = Depends(get_token),
     password_lock_schema: PasswordLockSchema = Depends(get_password_lock_schema),
-    pagination: PageSchema = Depends(get_pagination),
+    page_schema: PageSchema = Depends(get_pagination),
 ):
     password_lock_list = (
         await PasswordLock.search(
             searches=password_lock_schema.dict(exclude_unset=True),
-            skip=pagination.skip,
-            limit=pagination.limit,
+            skip=page_schema.skip,
+            limit=page_schema.limit,
         )
-    ).order_by(pagination.order_by)
+    ).order_by(page_schema.order_by)
+
+    pagination = PaginationSchema(
+        total=await PasswordLock.count(
+            finds=password_lock_schema.dict(exclude_unset=True),
+        ),
+        order_by=page_schema.order_by,
+        use_pager=page_schema.use_pager,
+        page=page_schema.page,
+        page_number=page_schema.page_number,
+    )
 
     return success(
         {
             "data": await password_lock_list.to_dict(),
+            "pagination": pagination.dict(),
         }
     )
 

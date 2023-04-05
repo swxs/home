@@ -11,7 +11,7 @@ from fastapi.param_functions import Depends
 from web.response import success
 from web.custom_types import OID
 from web.dependencies.token import TokenSchema, get_token
-from web.dependencies.pagination import PageSchema, get_pagination
+from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
 
 # 本模块方法
 from ..dao.word import Word
@@ -26,19 +26,30 @@ logger = logging.getLogger("main.apps.word.api.word")
 async def get_word_list(
     token_schema: TokenSchema = Depends(get_token),
     word_schema: WordSchema = Depends(get_word_schema),
-    pagination: PageSchema = Depends(get_pagination),
+    page_schema: PageSchema = Depends(get_pagination),
 ):
     word_list = (
         await Word.search(
             searches=word_schema.dict(exclude_unset=True),
-            skip=pagination.skip,
-            limit=pagination.limit,
+            skip=page_schema.skip,
+            limit=page_schema.limit,
         )
-    ).order_by(pagination.order_by)
+    ).order_by(page_schema.order_by)
+
+    pagination = PaginationSchema(
+        total=await Word.count(
+            finds=word_schema.dict(exclude_unset=True),
+        ),
+        order_by=page_schema.order_by,
+        use_pager=page_schema.use_pager,
+        page=page_schema.page,
+        page_number=page_schema.page_number,
+    )
 
     return success(
         {
             "data": await word_list.to_dict(),
+            "pagination": pagination.dict(),
         }
     )
 

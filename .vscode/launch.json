@@ -12,7 +12,7 @@
             "args": ["main:app", "--port", "8090"],
             "console": "integratedTerminal",
             "justMyCode": false
-        }{
+        }, {
             "name": "RUN[HOME-INIT]",
             "type": "python",
             "request": "launch",
