@@ -42,12 +42,27 @@ async def get_password_lock_list(
         )
     ).order_by(pagination.order_by)
 
-    result_list = []
-    async for password_lock in password_lock_list:
-        result_list.append(await password_lock_utils.to_front(password_lock))
+    return success(
+        {
+            "data": await password_lock_list.to_dict(),
+        }
+    )
+
+
+@router.get('/self/{password_lock_id}')
+async def get_password(
+    token_schema: TokenSchema = Depends(get_token),
+    password_lock_id: OID = Path(..., regex="[0-9a-f]{24}"),
+):
+    password_lock = await PasswordLock.find_one(
+        finds={
+            "user_id": ObjectId(token_schema.user_id),
+            "id": ObjectId(password_lock_id),
+        },
+    )
 
     return success(
         {
-            "data": result_list,
+            "password": await password_lock_utils.get_password(password_lock),
         }
     )
