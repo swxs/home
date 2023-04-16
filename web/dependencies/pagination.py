@@ -32,7 +32,7 @@ async def get_pagination(
     use_pager: int = Query(1),
     page: int = Query(1),
     page_number: int = Query(20),
-    order_by: Optional[List[str]] = Query([]),
+    order_by: Optional[List[str]] = Query([], alias="order_by[]"),
 ):
     if use_pager == 0:
         return PageSchema(
