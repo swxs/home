@@ -29,7 +29,7 @@ async def get_token(
     token = Authorization[7:]
     try:
         header, payload = tokener.decode(token)
-    except InvalidSignatureError:
+    except (InvalidSignatureError, DecodeError):
         raise Http401UnauthorizedException(Http401UnauthorizedException.TokenIllegal, "token不合法")
     except ExpiredSignatureError:
         raise Http401UnauthorizedException(Http401UnauthorizedException.TokenTimeout, "token已过期")
