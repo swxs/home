@@ -19,7 +19,7 @@ from ..schemas.user import UserSchema, get_user_schema
 
 router = APIRouter()
 
-logger = logging.getLogger("main.apps.user.api.user")
+logger = logging.getLogger("main.apps.system.api.user")
 
 
 @router.get("/")

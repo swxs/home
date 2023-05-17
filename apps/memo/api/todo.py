@@ -19,7 +19,7 @@ from ..schemas.todo import TodoSchema, get_todo_schema
 
 router = APIRouter()
 
-logger = logging.getLogger("main.apps.todo.api.todo")
+logger = logging.getLogger("main.apps.memo.api.todo")
 
 
 @router.get("/")

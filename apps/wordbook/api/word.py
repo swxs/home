@@ -19,7 +19,7 @@ from ..schemas.word import WordSchema, get_word_schema
 
 router = APIRouter()
 
-logger = logging.getLogger("main.apps.word.api.word")
+logger = logging.getLogger("main.apps.wordbook.api.word")
 
 
 @router.get("/")

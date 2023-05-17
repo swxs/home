@@ -19,7 +19,7 @@ from ..schemas.user_auth import UserAuthSchema, get_user_auth_schema
 
 router = APIRouter()
 
-logger = logging.getLogger("main.apps.user_auth.api.user_auth")
+logger = logging.getLogger("main.apps.system.api.user_auth")
 
 
 @router.get("/")
