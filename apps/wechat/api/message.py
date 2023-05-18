@@ -86,7 +86,7 @@ async def post_message(
         ).dict(exclude_defaults=True),
     )
 
-    content = 'hello world'
+    content = ''
 
     if isinstance(msg, TextMessage):
         if msg.content == "体力":

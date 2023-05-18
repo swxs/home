@@ -42,6 +42,7 @@ class UserAuth(Document):
         indexes = [
             {
                 'key': ['user_id'],
+                'sparse': True,
             },
             {
                 'key': ['ttype', 'identifier'],
