@@ -12,9 +12,9 @@ from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse
 from wechatpy import parse_message
 from wechatpy.crypto import WeChatCrypto
-from wechatpy.events import BaseEvent
+from wechatpy.events import BaseEvent, SubscribeEvent, UnsubscribeEvent
 from wechatpy.exceptions import InvalidAppIdException, InvalidSignatureException
-from wechatpy.messages import BaseMessage
+from wechatpy.messages import BaseMessage, TextMessage
 from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
@@ -22,6 +22,10 @@ from core import config
 from web.response import success
 
 # 本模块方法
+from ...system import consts
+from ...system.dao.user import User
+from ...system.dao.user_auth import UserAuth
+from ...system.schemas.user_auth import UserAuthSchema
 from ..dao.wechat_msg import WechatMsg
 from ..schemas.wechat_msg import WechatMsgSchema
 
@@ -32,7 +36,6 @@ logger = logging.getLogger("main.apps.wechat.api.message")
 
 @router.get("/")
 async def get_message(
-    request: Request,
     echostr: Optional[str] = Query(None),
     nonce: Optional[str] = Query(None),
     signature: Optional[str] = Query(None),
@@ -74,7 +77,7 @@ async def post_message(
     else:
         event = None
 
-    wechat_msg = await WechatMsg.create(
+    await WechatMsg.create(
         params=WechatMsgSchema(
             msg_id=msg.id,
             msg_type=msg.type,
@@ -83,9 +86,35 @@ async def post_message(
         ).dict(exclude_defaults=True),
     )
 
-    reply = TextReply(content='hello world', message=msg)
-    xml = reply.render()
+    content = 'hello world'
 
+    if isinstance(msg, TextMessage):
+        if msg.content == "体力":
+            content = "暂未开发完成"
+
+    elif isinstance(msg, SubscribeEvent):
+        await UserAuth.create(
+            params=UserAuthSchema(
+                ttype=consts.USER_AUTH_TTYPE_WECHAT,
+                identifier=openid,
+                credential=openid,
+                ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
+            ).dict(exclude_defaults=True),
+        )
+    elif isinstance(msg, UnsubscribeEvent):
+        await UserAuth.update_one(
+            finds={
+                "ttype": consts.USER_AUTH_TTYPE_WECHAT,
+                "identifier": openid,
+                "credential": openid,
+            },
+            params=UserAuthSchema(
+                ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
+            ).dict(exclude_defaults=True),
+        )
+
+    reply = TextReply(content=content, message=msg)
+    xml = reply.render()
     encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
 
     return PlainTextResponse(content=encrypted_xml)
