@@ -12,12 +12,18 @@ from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse
 from wechatpy import parse_message
 from wechatpy.crypto import WeChatCrypto
+from wechatpy.events import BaseEvent
 from wechatpy.exceptions import InvalidAppIdException, InvalidSignatureException
+from wechatpy.messages import BaseMessage
 from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
 from core import config
 from web.response import success
+
+# 本模块方法
+from ..dao.wechat_msg import WechatMsg
+from ..schemas.wechat_msg import WechatMsgSchema
 
 router = APIRouter()
 
@@ -32,38 +38,54 @@ async def get_message(
     signature: Optional[str] = Query(None),
     timestamp: Optional[str] = Query(None),
 ):
-    # if echostr is not None:
-    #     try:
-    #         check_signature(config.WECHAT_TOKEN, signature, timestamp, nonce)
-    #         return PlainTextResponse(content=echostr)
-    #     except InvalidSignatureException:
-    #         # 处理异常情况或忽略
-    #         return PlainTextResponse(content="")
+    try:
+        check_signature(config.WECHAT_TOKEN, signature, timestamp, nonce)
+        logger.debug(f"check_signature: {signature}, return: {echostr}")
+        return PlainTextResponse(content=echostr)
+    except (InvalidAppIdException, InvalidSignatureException) as e:
+        logger.exception(e)
+        return PlainTextResponse(content="")
 
-    if echostr is not None:
-        try:
-            check_signature(config.WECHAT_TOKEN, signature, timestamp, nonce)
-            logger.debug(f"check_signature: {signature}, return: {echostr}")
-            return PlainTextResponse(content=echostr)
-        except (InvalidAppIdException, InvalidSignatureException) as e:
-            logger.exception(e)
-            return PlainTextResponse(content="")
+
+@router.post("/")
+async def post_message(
+    request: Request,
+    signature: Optional[str] = Query(None),
+    timestamp: Optional[str] = Query(None),
+    nonce: Optional[str] = Query(None),
+    openid: Optional[str] = Query(None),
+    encrypt_type: Optional[str] = Query(None),
+    msg_signature: Optional[str] = Query(None),
+):
+    try:
+        xml = await request.body()
+        logger.info(f"xml: {xml}")
+        crypto = WeChatCrypto(config.WECHAT_TOKEN, config.WECHAT_ENCODING_AES_KEY, config.WECHAT_APPID)
+        decrypted_xml = crypto.decrypt_message(xml, msg_signature, timestamp, nonce)
+    except (InvalidAppIdException, InvalidSignatureException):
+        # 处理异常或忽略
+        return PlainTextResponse(content="")
+
+    msg = parse_message(decrypted_xml)
+    logger.info(f"msg: {msg}")
+
+    if isinstance(msg, BaseEvent):
+        event = msg.event
     else:
-        try:
-            xml = await request.body()
-            logger.info(f"xml: {xml}")
-            crypto = WeChatCrypto(config.WECHAT_TOKEN, config.WECHAT_ENCODING_AES_KEY, config.WECHAT_APPID)
-            decrypted_xml = crypto.decrypt_message(xml, signature, timestamp, nonce)
-        except (InvalidAppIdException, InvalidSignatureException):
-            # 处理异常或忽略
-            return PlainTextResponse(content="")
+        event = None
 
-        msg = parse_message(decrypted_xml)
-        logger.info(f"msg: {msg}")
+    wechat_msg = await WechatMsg.create(
+        params=WechatMsgSchema(
+            msg_id=msg.id,
+            msg_type=msg.type,
+            msg_event=event,
+            msg=xml.decode("utf8"),
+        ).dict(exclude_defaults=True),
+    )
 
-        reply = TextReply(content='hello world', message=msg)
-        xml = reply.render()
+    reply = TextReply(content='hello world', message=msg)
+    xml = reply.render()
 
-        encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+    encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
 
-        return PlainTextResponse(content=encrypted_xml)
+    return PlainTextResponse(content=encrypted_xml)
