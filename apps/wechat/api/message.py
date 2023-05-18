@@ -27,10 +27,10 @@ logger = logging.getLogger("main.apps.wechat.api.message")
 @router.get("/")
 async def get_message(
     request: Request,
-    signature: Optional[str] = Query(None),
     echostr: Optional[str] = Query(None),
-    timestamp: Optional[int] = Query(None),
     nonce: Optional[str] = Query(None),
+    signature: Optional[str] = Query(None),
+    timestamp: Optional[str] = Query(None),
 ):
     # if echostr is not None:
     #     try:
@@ -40,21 +40,19 @@ async def get_message(
     #         # 处理异常情况或忽略
     #         return PlainTextResponse(content="")
 
-    xml = await request.body()
-
-    crypto = WeChatCrypto(config.WECHAT_TOKEN, config.WECHAT_ENCODING_AES_KEY, config.WECHAT_APPID)
-
-    logger.info(f"xml: {xml}")
-
     if echostr is not None:
         try:
-            decrypted_xml = crypto.decrypt_message(xml, signature, timestamp, nonce)
+            check_signature(config.WECHAT_TOKEN, signature, timestamp, nonce)
+            logger.debug(f"check_signature: {signature}, return: {echostr}")
             return PlainTextResponse(content=echostr)
-        except (InvalidAppIdException, InvalidSignatureException):
-            # 处理异常或忽略
+        except (InvalidAppIdException, InvalidSignatureException) as e:
+            logger.exception(e)
             return PlainTextResponse(content="")
     else:
         try:
+            xml = await request.body()
+            logger.info(f"xml: {xml}")
+            crypto = WeChatCrypto(config.WECHAT_TOKEN, config.WECHAT_ENCODING_AES_KEY, config.WECHAT_APPID)
             decrypted_xml = crypto.decrypt_message(xml, signature, timestamp, nonce)
         except (InvalidAppIdException, InvalidSignatureException):
             # 处理异常或忽略
@@ -63,7 +61,7 @@ async def get_message(
         msg = parse_message(decrypted_xml)
         logger.info(f"msg: {msg}")
 
-        reply = TextReply(content='text reply', message=msg)
+        reply = TextReply(content='hello world', message=msg)
         xml = reply.render()
 
         encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
