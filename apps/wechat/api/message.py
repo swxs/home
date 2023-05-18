@@ -10,6 +10,7 @@ from fastapi import Body, Path, Query, APIRouter
 from wechatpy import parse_message
 from wechatpy.utils import check_signature
 from wechatpy.crypto import WeChatCrypto
+from fastapi.requests import Request
 from wechatpy.replies import TextReply
 from fastapi.responses import PlainTextResponse
 from wechatpy.exceptions import InvalidAppIdException, InvalidSignatureException
@@ -25,11 +26,11 @@ logger = logging.getLogger("main.apps.wechat.api.message")
 
 @router.get("/")
 async def get_message(
+    request: Request,
     signature: Optional[str] = Query(None),
     echostr: Optional[str] = Query(None),
     timestamp: Optional[int] = Query(None),
     nonce: Optional[str] = Query(None),
-    xml: Optional[str] = Body(None),
 ):
     # if echostr is not None:
     #     try:
@@ -38,6 +39,8 @@ async def get_message(
     #     except InvalidSignatureException:
     #         # 处理异常情况或忽略
     #         return PlainTextResponse(content="")
+
+    xml = await request.body()
 
     crypto = WeChatCrypto(config.WECHAT_TOKEN, config.WECHAT_ENCODING_AES_KEY, config.WECHAT_APPID)
 
