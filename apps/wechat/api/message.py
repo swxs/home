@@ -6,15 +6,15 @@ import logging
 from typing import Dict, List, Optional
 
 from bson import ObjectId
-from fastapi import Body, Path, Query, APIRouter
-from wechatpy import parse_message
-from wechatpy.utils import check_signature
-from wechatpy.crypto import WeChatCrypto
-from fastapi.requests import Request
-from wechatpy.replies import TextReply
-from fastapi.responses import PlainTextResponse
-from wechatpy.exceptions import InvalidAppIdException, InvalidSignatureException
+from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
+from fastapi.requests import Request
+from fastapi.responses import PlainTextResponse
+from wechatpy import parse_message
+from wechatpy.crypto import WeChatCrypto
+from wechatpy.exceptions import InvalidAppIdException, InvalidSignatureException
+from wechatpy.replies import TextReply
+from wechatpy.utils import check_signature
 
 from core import config
 from web.response import success
