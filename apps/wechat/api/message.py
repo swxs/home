@@ -3,19 +3,20 @@
 # @AUTH    : code_creater
 
 import logging
+from typing import Dict, List, Optional
 
 from bson import ObjectId
 from fastapi import Body, Path, Query, APIRouter
+from wechatpy import parse_message
+from wechatpy.utils import check_signature
+from wechatpy.crypto import WeChatCrypto
+from wechatpy.replies import TextReply
+from fastapi.responses import PlainTextResponse
+from wechatpy.exceptions import InvalidAppIdException, InvalidSignatureException
 from fastapi.param_functions import Depends
 
+from core import config
 from web.response import success
-from web.custom_types import OID
-from web.dependencies.token import TokenSchema, get_token
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-
-# 本模块方法
-from ..dao.wechat_msg import WechatMsg
-from ..schemas.wechat_msg import WechatMsgSchema, get_wechat_msg_schema
 
 router = APIRouter()
 
@@ -23,32 +24,45 @@ logger = logging.getLogger("main.apps.wechat.api.message")
 
 
 @router.get("/")
-async def get_message_list(
-    token_schema: TokenSchema = Depends(get_token),
-    wechat_msg_schema: WechatMsgSchema = Depends(get_wechat_msg_schema),
-    page_schema: PageSchema = Depends(get_pagination),
+async def get_message(
+    signature: Optional[str] = Query(None),
+    echostr: Optional[str] = Query(None),
+    timestamp: Optional[int] = Query(None),
+    nonce: Optional[str] = Query(None),
+    xml: Optional[str] = Body(None),
 ):
-    wechat_msg_list = (
-        await WechatMsg.search(
-            searches=wechat_msg_schema.dict(exclude_unset=True),
-            skip=page_schema.skip,
-            limit=page_schema.limit,
-        )
-    ).order_by(page_schema.order_by)
+    # if echostr is not None:
+    #     try:
+    #         check_signature(config.WECHAT_TOKEN, signature, timestamp, nonce)
+    #         return PlainTextResponse(content=echostr)
+    #     except InvalidSignatureException:
+    #         # 处理异常情况或忽略
+    #         return PlainTextResponse(content="")
 
-    pagination = PaginationSchema(
-        total=await WechatMsg.count(
-            finds=wechat_msg_schema.dict(exclude_unset=True),
-        ),
-        order_by=page_schema.order_by,
-        use_pager=page_schema.use_pager,
-        page=page_schema.page,
-        page_number=page_schema.page_number,
-    )
+    crypto = WeChatCrypto(config.WECHAT_TOKEN, config.WECHAT_ENCODING_AES_KEY, config.WECHAT_APPID)
 
-    return success(
-        {
-            "data": await wechat_msg_list.to_dict(),
-            "pagination": pagination.dict(),
-        }
-    )
+    logger.info(f"xml: {xml}")
+
+    if echostr is not None:
+        try:
+            decrypted_xml = crypto.decrypt_message(xml, signature, timestamp, nonce)
+            return PlainTextResponse(content=echostr)
+        except (InvalidAppIdException, InvalidSignatureException):
+            # 处理异常或忽略
+            return PlainTextResponse(content="")
+    else:
+        try:
+            decrypted_xml = crypto.decrypt_message(xml, signature, timestamp, nonce)
+        except (InvalidAppIdException, InvalidSignatureException):
+            # 处理异常或忽略
+            return PlainTextResponse(content="")
+
+        msg = parse_message(decrypted_xml)
+        logger.info(f"msg: {msg}")
+
+        reply = TextReply(content='text reply', message=msg)
+        xml = reply.render()
+
+        encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+
+        return PlainTextResponse(content=encrypted_xml)
