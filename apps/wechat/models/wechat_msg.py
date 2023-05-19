@@ -39,7 +39,6 @@ class WechatMsg(Document):
             {
                 'key': ['msg_id'],
                 'sparse': True,
-                'unique': True,
             },
         ]
         pass

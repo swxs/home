@@ -18,7 +18,7 @@ class UserAuth(Document):
         allow_none=False,
     )
     user_id = fields.ObjectIdField(
-        required=True,
+        required=False,
         allow_none=False,
     )
     ttype = fields.IntField(
