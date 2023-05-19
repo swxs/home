@@ -93,25 +93,33 @@ async def post_message(
             content = "暂未开发完成"
 
     elif isinstance(msg, SubscribeEvent):
-        await UserAuth.create(
-            params=UserAuthSchema(
-                ttype=consts.USER_AUTH_TTYPE_WECHAT,
-                identifier=openid,
-                credential=openid,
-                ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
-            ).dict(exclude_defaults=True),
-        )
+        try:
+            await UserAuth.create(
+                params=UserAuthSchema(
+                    ttype=consts.USER_AUTH_TTYPE_WECHAT,
+                    identifier=openid,
+                    credential=openid,
+                    ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
+                ).dict(exclude_defaults=True),
+            )
+        except Exception as e:
+            logger.info(f"openid: {openid} 创建用户信息失败！")
+            pass
     elif isinstance(msg, UnsubscribeEvent):
-        await UserAuth.update_one(
-            finds={
-                "ttype": consts.USER_AUTH_TTYPE_WECHAT,
-                "identifier": openid,
-                "credential": openid,
-            },
-            params=UserAuthSchema(
-                ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
-            ).dict(exclude_defaults=True),
-        )
+        try:
+            await UserAuth.update_one(
+                finds={
+                    "ttype": consts.USER_AUTH_TTYPE_WECHAT,
+                    "identifier": openid,
+                    "credential": openid,
+                },
+                params=UserAuthSchema(
+                    ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
+                ).dict(exclude_defaults=True),
+            )
+        except Exception as e:
+            logger.info(f"openid: {openid} 解绑用户信息失败！")
+            pass
 
     reply = TextReply(content=content, message=msg)
     xml = reply.render()
