@@ -1,16 +1,19 @@
 from typing import List, Optional
 
 import pydantic
-from fastapi import Query, Header
+from fastapi import Header, Query
 from pydantic import BaseModel
 
+from apps.system import consts
+from apps.system.dao.user_auth import UserAuth
+
 # 通用方法
-from commons.Helpers import tokener, refresh_tokener
+from commons.Helpers import refresh_tokener, tokener
 from commons.Helpers.Helper_JWT import (
     DecodeError,
     ExpiredSignatureError,
-    InvalidSignatureError,
     ImmatureSignatureError,
+    InvalidSignatureError,
 )
 
 # 本模块方法
@@ -34,3 +37,22 @@ async def get_token(
     except ExpiredSignatureError:
         raise Http401UnauthorizedException(Http401UnauthorizedException.TokenTimeout, "token已过期")
     return TokenSchema(**payload)
+
+
+async def get_token_by_openid(
+    openid: Optional[str] = Query(None),
+):
+    if openid:
+        user_auth = await UserAuth.find_one(
+            finds={
+                "ttype": consts.USER_AUTH_TTYPE_WECHAT,
+                "identifier": openid,
+                "ifverified": consts.USER_AUTH_IFVERIFIED_TRUE,
+            },
+        )
+        if user_auth:
+            return TokenSchema(user_id=str(user_auth.user_id))
+        else:
+            return TokenSchema(user_id=None)
+    else:
+        return TokenSchema(user_id=None)

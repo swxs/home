@@ -18,14 +18,15 @@ from wechatpy.messages import BaseMessage, TextMessage
 from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
+from apps.system import consts
+from apps.system.dao.user import User
+from apps.system.dao.user_auth import UserAuth
+from apps.system.schemas.user_auth import UserAuthSchema
 from core import config
+from web.dependencies.token import TokenSchema, get_token_by_openid
 from web.response import success
 
 # 本模块方法
-from ...system import consts
-from ...system.dao.user import User
-from ...system.dao.user_auth import UserAuth
-from ...system.schemas.user_auth import UserAuthSchema
 from ..dao.wechat_msg import WechatMsg
 from ..schemas.wechat_msg import WechatMsgSchema
 
@@ -59,6 +60,7 @@ async def post_message(
     openid: Optional[str] = Query(None),
     encrypt_type: Optional[str] = Query(None),
     msg_signature: Optional[str] = Query(None),
+    token_schema: TokenSchema = Depends(get_token_by_openid),
 ):
     try:
         xml = await request.body()
@@ -89,8 +91,12 @@ async def post_message(
     content = ''
 
     if isinstance(msg, TextMessage):
-        if msg.content == "体力":
-            content = "暂未开发完成"
+        if msg.content == "早安":
+            if token_schema.user_id:
+                user = await User.find_one(
+                    finds={"id": ObjectId(token_schema.user_id)},
+                )
+                content = f'{user.username}您好，该功能暂未开发完成！'
 
     elif isinstance(msg, SubscribeEvent):
         try:
