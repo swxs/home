@@ -26,6 +26,9 @@ from core import config
 from web.dependencies.token import TokenSchema, get_token_by_openid
 from web.response import success
 
+# 通用方法
+from commons.Helpers import reader_async
+
 # 本模块方法
 from ..dao.wechat_msg import WechatMsg
 from ..schemas.wechat_msg import WechatMsgSchema
@@ -96,7 +99,11 @@ async def post_message(
                 user = await User.find_one(
                     finds={"id": ObjectId(token_schema.user_id)},
                 )
-                content = f'{user.username}您好，该功能暂未开发完成！'
+                huntly_list = await reader_async.login_and_get_reader()
+                if huntly_list:
+                    content = f'{user.username}您好，目前有{len(huntly_list)}文章等待阅读'
+                else:
+                    content = f'{user.username}您好，该功能暂未开发完成！'
 
     elif isinstance(msg, SubscribeEvent):
         try:
