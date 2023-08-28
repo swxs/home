@@ -25,6 +25,7 @@ class BaseManagerQuerySet(object):
         -------
 
         """
+        return self
 
     def __iter__(self):
         """
@@ -33,6 +34,7 @@ class BaseManagerQuerySet(object):
         迭代器
 
         """
+        return list()
 
     def __next__(self, cursor):
         """
@@ -45,6 +47,7 @@ class BaseManagerQuerySet(object):
         cursor :
 
         """
+        return self.get_instance(cursor)
 
     async def __aiter__(self):
         """
@@ -53,6 +56,7 @@ class BaseManagerQuerySet(object):
         异步迭代器
 
         """
+        return list()
 
     async def __anext__(self):
         """
@@ -61,6 +65,7 @@ class BaseManagerQuerySet(object):
         应该在此处包装原始model
 
         """
+        return await self.get_instance(self.cursor)
 
     async def first(self):
         """

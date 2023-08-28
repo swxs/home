@@ -1,32 +1,32 @@
 import uuid
 import logging
 
-from fastapi import Body, Path, Query, APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException, Path, Query
 from fastapi.param_functions import Depends
 
-from web.response import success
 from web.dependencies.token import TokenSchema
-from web.exceptions.http_403_forbidden_exception import Http403ForbiddenException
 from web.exceptions.http_401_unauthorized_exception import Http401UnauthorizedException
+from web.exceptions.http_403_forbidden_exception import Http403ForbiddenException
+from web.response import success
 
 # 通用方法
-from commons.Helpers import tokener, refresh_tokener
+from commons.Helpers import refresh_tokener, tokener
 from commons.Helpers.Helper_JWT import (
     DecodeError,
     ExpiredSignatureError,
-    InvalidSignatureError,
     ImmatureSignatureError,
+    InvalidSignatureError,
 )
 
 # 本模块方法
 from ..dao.user import User
-from ..schemas.user import UserSchema
 from ..dao.user_auth import UserAuth
+from ..schemas.user import UserSchema
 from ..schemas.user_auth import UserAuthSchema
 
 router = APIRouter()
 
-logger = logging.getLogger("main.apps.user.api.user")
+logger = logging.getLogger("main.apps.system.api.auth")
 
 
 @router.post("/refresh_token")
