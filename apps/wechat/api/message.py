@@ -5,7 +5,6 @@
 import logging
 from typing import Dict, List, Optional
 
-from bson import ObjectId
 from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 from fastapi.requests import Request
@@ -19,18 +18,15 @@ from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
 from apps.system import consts
-from apps.system.dao.user import User
 from apps.system.dao.user_auth import UserAuth
 from apps.system.schemas.user_auth import UserAuthSchema
 from core import config
 from web.dependencies.token import TokenSchema, get_token_by_openid
 from web.response import success
 
-# 通用方法
-from commons.Helpers import reader_async
-
 # 本模块方法
 from ..dao.wechat_msg import WechatMsg
+from ..messageContent import content_productor
 from ..schemas.wechat_msg import WechatMsgSchema
 
 router = APIRouter()
@@ -94,16 +90,15 @@ async def post_message(
     content = ''
 
     if isinstance(msg, TextMessage):
-        if msg.content == "早安":
-            if token_schema.user_id:
-                user = await User.find_one(
-                    finds={"id": ObjectId(token_schema.user_id)},
-                )
-                huntly_list = await reader_async.login_and_get_reader()
-                if huntly_list:
-                    content = f'{user.username}您好，目前有{len(huntly_list)}文章等待阅读'
-                else:
-                    content = f'{user.username}您好，该功能暂未开发完成！'
+        model = content_productor[msg.content]
+
+        content = await model.get_result(token_schema)
+
+        reply = TextReply(content=content, message=msg)
+        xml = reply.render()
+        encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+
+        return PlainTextResponse(content=encrypted_xml)
 
     elif isinstance(msg, SubscribeEvent):
         try:
