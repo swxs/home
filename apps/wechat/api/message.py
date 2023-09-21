@@ -21,13 +21,14 @@ from apps.system import consts
 from apps.system.dao.user_auth import UserAuth
 from apps.system.schemas.user_auth import UserAuthSchema
 from core import config
-from web.dependencies.token import TokenSchema, get_token_by_openid
+from web.dependencies.token import TokenSchema, get_token, get_token_by_openid
 from web.response import success
 
 # 本模块方法
 from ..dao.wechat_msg import WechatMsg
 from ..messageContent import content_productor
 from ..schemas.wechat_msg import WechatMsgSchema
+from ..schemas.wechat_msg_test import WechatMsgTestSchema
 
 router = APIRouter()
 
@@ -92,9 +93,8 @@ async def post_message(
     if isinstance(msg, TextMessage):
         model = content_productor[msg.content]
 
-        content = await model.get_result(token_schema)
+        reply = await model.get_reply(msg, token_schema)
 
-        reply = TextReply(content=content, message=msg)
         xml = reply.render()
         encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
 
@@ -134,3 +134,19 @@ async def post_message(
     encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
 
     return PlainTextResponse(content=encrypted_xml)
+
+
+@router.post("/test")
+async def post_message_test(
+    token_schema: TokenSchema = Depends(get_token),
+    msg_schema: WechatMsgTestSchema = Body(...),
+):
+    model = content_productor[msg_schema.msg]
+
+    reply = await model.get_reply(None, token_schema)
+
+    return success(
+        {
+            "reply": reply,
+        }
+    )

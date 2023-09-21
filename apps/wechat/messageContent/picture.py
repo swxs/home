@@ -1,27 +1,36 @@
+import uuid
+
 from bson import ObjectId
+from wechatpy.replies import ImageReply, TextReply
 
 from apps.system.dao.user import User
 
 # 通用方法
-from commons.Helpers import reader_async
+from commons.Helpers import gumengya_async, imgurl_helper, wechat_helper
 
 # 本模块方法
 from .content import Content
 
 
-class PictureContent:
-    name = "/图片"
+class PictureContent(Content):
+    name = "/随机图片"
 
     @classmethod
-    async def get_result(cls, token_schema):
+    async def get_result(cls, message, token_schema):
         content = f'您好，该功能暂未开发完成！'
 
         if token_schema.user_id:
             user = await User.find_one(
                 finds={"id": ObjectId(token_schema.user_id)},
             )
-            huntly_list = await reader_async.login_and_get_reader()
-            if huntly_list:
-                content = f'{user.username}您好，目前有{len(huntly_list)}文章等待阅读'
+            if user:
+                # 获取随即图片
+                buffer = await gumengya_async.get_mving()
+                # 获取路径
+                filepath = await imgurl_helper.upload_image(buffer, filename=f"{str(uuid.uuid4())}.jpg")
+                # 上传微信
+                media_id = await wechat_helper.upload_image(filepath)
+                # 返回
+                return ImageReply(media_id=media_id, message=message)
 
-        return content
+        return TextReply(content=content, message=message)
