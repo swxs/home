@@ -7,10 +7,7 @@ class WechatHelper:
         self.appsecret = appsecret
         self.client = WeChatClient(self.appid, self.appsecret)
 
-    async def upload_image(self, file_path):
-        try:
-            result = self.client.media.upload('image', file_path)
-            media_id = result['media_id']
-            return media_id
-        except Exception as e:
-            pass
+    async def upload_image(self, buffer):
+        result = self.client.media.upload('image', buffer)
+        media_id = result['media_id']
+        return media_id

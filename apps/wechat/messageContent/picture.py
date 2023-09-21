@@ -26,10 +26,8 @@ class PictureContent(Content):
             if user:
                 # 获取随即图片
                 buffer = await gumengya_async.get_mving()
-                # 获取路径
-                filepath = await imgurl_helper.upload_image(buffer, filename=f"{str(uuid.uuid4())}.jpg")
                 # 上传微信
-                media_id = await wechat_helper.upload_image(filepath)
+                media_id = await wechat_helper.upload_image(buffer)
                 # 返回
                 return ImageReply(media_id=media_id, message=message)
 

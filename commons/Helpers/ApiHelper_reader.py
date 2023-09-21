@@ -35,7 +35,7 @@ class ReaderAsync:
             }
 
             # 使用获取的cookie携带请求调用接口2
-            async with session.get(api_url, params=api_params, cookies=self.cookies) as api_response:
+            async with session.get(api_url, params=api_params, cookies=self.cookies) as response:
                 # 处理接口2的响应数据
-                response_data = await api_response.json()
-                return response_data
+                data = await response.json()
+                return data
