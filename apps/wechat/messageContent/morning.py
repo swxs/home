@@ -14,7 +14,7 @@ class MorningContent(Content):
     name = "/早上好"
 
     @classmethod
-    async def get_result(cls, message, token_schema):
+    async def get_reply(cls, message, token_schema):
         content = f'您好，该功能暂未开发完成！'
 
         if token_schema.user_id:
