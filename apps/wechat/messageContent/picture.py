@@ -27,7 +27,7 @@ class PictureContent(Content):
                 # 获取随即图片
                 buffer = await gumengya_async.get_mving()
                 # 上传微信
-                media_id = await wechat_helper.upload_image(buffer)
+                media_id = await wechat_helper.upload_image((f'{str(uuid.uuid4())}.jpg', buffer, "image/jpeg"))
                 # 返回
                 return ImageReply(media_id=media_id, message=message)
 
