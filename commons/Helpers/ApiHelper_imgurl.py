@@ -1,5 +1,9 @@
 import aiohttp
 
+from web.exceptions.http_500_internal_server_error_exception import (
+    Http500InternalServerErrorException,
+)
+
 
 class ImgurlHelper:
     def __init__(self, uid, token, domain):
@@ -17,8 +21,10 @@ class ImgurlHelper:
             form_data.add_field('token', self.token)
 
             async with session.post(api_url, data=form_data) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data["data"]["url"]
-                else:
-                    return None
+                if response.status != 200:
+                    raise Http500InternalServerErrorException(
+                        Http500InternalServerErrorException.HelperServerError,
+                        "ImgurlHelper Error",
+                    )
+                data = await response.json()
+                return data["data"]["url"]

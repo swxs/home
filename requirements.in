@@ -16,3 +16,4 @@ requests==2.28.2
 pyjwt==2.6.0
 pycryptodome==3.17
 wechatpy==1.8.14
+beautifulsoup4==4.10.0

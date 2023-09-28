@@ -4,7 +4,7 @@ from wechatpy.replies import TextReply
 from apps.system.dao.user import User
 
 # 通用方法
-from commons.Helpers import reader_async
+from commons.Helpers import reader_async_helper
 
 # 本模块方法
 from .content import Content
@@ -23,7 +23,7 @@ class MorningContent(Content):
             )
             if user:
                 # 获取待读文章数量, 并返回
-                huntly_list = await reader_async.login_and_get_reader()
+                huntly_list = await reader_async_helper.login_and_get_reader()
                 if huntly_list:
                     content = f'{user.username}您好，目前有{len(huntly_list)}文章等待阅读'
                     return TextReply(content=content, message=message)

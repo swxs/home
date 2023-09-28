@@ -5,6 +5,7 @@ from . import (
     ApiHelper_gumengya,
     ApiHelper_imgurl,
     ApiHelper_reader,
+    ApiHelper_vvhan,
     ApiHelper_wechat,
     Helper_JWT,
     Helper_encryption,
@@ -35,12 +36,16 @@ imgurl_helper = ApiHelper_imgurl.ImgurlHelper(
     domain='https://www.imgurl.org',
 )
 
-reader_async = ApiHelper_reader.ReaderAsync(
+reader_async_helper = ApiHelper_reader.ReaderAsyncHelper(
     username='swxs',
     password='D6051da2199b',
     domain='https://reader.moveright.top',
 )
 
-gumengya_async = ApiHelper_gumengya.GumengyaAsync(
+gumengya_async_helper = ApiHelper_gumengya.GumengyaAsyncHelper(
     domain='https://api.gumengya.com',
+)
+
+vvhan_async_helper = ApiHelper_vvhan.VVhanAsyncHelper(
+    domain='https://api.vvhan.com',
 )

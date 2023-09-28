@@ -6,7 +6,7 @@ from wechatpy.replies import ImageReply, TextReply
 from apps.system.dao.user import User
 
 # 通用方法
-from commons.Helpers import gumengya_async, imgurl_helper, wechat_helper
+from commons.Helpers import gumengya_async_helper, imgurl_helper, wechat_helper
 
 # 本模块方法
 from .content import Content
@@ -25,7 +25,7 @@ class PictureContent(Content):
             )
             if user:
                 # 获取随即图片
-                buffer = await gumengya_async.get_mving()
+                buffer = await gumengya_async_helper.get_mving()
                 # 上传微信
                 media_id = await wechat_helper.upload_image((f'{str(uuid.uuid4())}.jpg', buffer, "image/jpeg"))
                 # 返回

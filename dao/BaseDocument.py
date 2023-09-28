@@ -7,13 +7,13 @@ import os
 import hashlib
 import logging
 import datetime
-from typing import Any, Dict
 from functools import wraps
+from typing import Any, Dict
 
 from bson import ObjectId
 
 # 本模块方法
-from .fields import BaseField, DictField, DateTimeField
+from .fields import BaseField, DateTimeField, DictField
 from .managers import BaseManagerQuerySet, manager_productor
 from .memorizers import memorizer_productor
 
@@ -73,6 +73,10 @@ class BaseMetaDocuemnt(type):
             attrs["__model__"] = attrs.get("Meta").model
             attrs["__manager__"] = attrs.get("Meta").manager
             attrs["__memorizer__"] = attrs.get("Meta").memorizer
+        else:
+            attrs["__model__"] = None
+            attrs["__manager__"] = "none"
+            attrs["__memorizer__"] = "none"
 
         current_class = super(BaseMetaDocuemnt, cls).__new__(cls, name, bases, attrs)
         if parent is not None:

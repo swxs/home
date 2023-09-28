@@ -16,7 +16,7 @@ class WechatMsgTestSchema(pydantic.BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    msg: Optional[str] = None
+    msg: str = ""
 
 
 async def get_wechat_msg_test_schema(
