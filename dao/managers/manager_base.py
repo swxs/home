@@ -101,20 +101,16 @@ class BaseManager(object):
         self.dao = dao
         self.model = dao.__model__
 
+    async def initialize(self, app):
+        pass
+
+    async def finish(self, app):
+        pass
+
     async def count(self, finds):
         pass
 
     async def find_one(self, finds):
-        """
-        简介
-        ----------
-
-
-        参数
-        ----------
-        finds :
-
-        """
         pass
 
     async def find_many(self, finds, *, limit=0, skip=0):

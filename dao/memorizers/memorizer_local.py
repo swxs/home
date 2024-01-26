@@ -5,22 +5,23 @@
 
 import time
 import uuid
-import logging
-import threading
 import hashlib
+import logging
 import weakref
+import threading
 from functools import wraps
-from commons.Helpers import memcache_helper
+
+# from commons.Helpers import memcache_helper
 
 logger = logging.getLogger("main.dao.memorize")
 
-__all__ = ["clear", "upgrade", "cache", "memorize"]
+# __all__ = ["clear", "upgrade", "cache", "memorize"]
 
 
 class LocalMemorizer:
     name = "local"
 
-    def __init__(self):
+    def __init__(self, dao):
         self.OBJ_VERSION_DICT = {}
         self.OBJ_DICT = {}
         self.OBJ_EXPIRE_DICT = {}
@@ -29,7 +30,8 @@ class LocalMemorizer:
         self.DEFAULT_EXPIRE_SECONDS = 300
         self.DEFAULT_VERSION_EXPIRE_SECONDS = 60 * 60 * 24
         self.MEMORY_CLEANER_PERIOD = 600
-        self.memcache_helper = memcache_helper
+        # self.memcache_helper = memcache_helper
+        self.memcache_helper = None
         self.memory_cleaner_thread_started = False
         self.start_memory_cleaner_thread()
 
@@ -110,7 +112,7 @@ class LocalMemorizer:
             return hashlib.md5(raw_str).hexdigest()
 
         def _open_api_signature(**kwargs):
-            lis = [kwargs[k] for k in sorted(kwargs.keys()) if kwargs[k] not in (None, )]
+            lis = [kwargs[k] for k in sorted(kwargs.keys()) if kwargs[k] not in (None,)]
             return md5(''.join(lis))
 
         return f"{_model_name}_{_open_api_signature(**kwargs)}"

@@ -6,11 +6,15 @@
 import asyncio
 import logging
 from collections import defaultdict
+from typing import Optional
 
+from motor.core import AgnosticClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo import ASCENDING, DESCENDING
 from pymongo.errors import DuplicateKeyError
 from umongo.frameworks import MotorAsyncIOInstance
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+
+import core
 
 # 通用方法
 from commons.Metaclass.Singleton import Singleton
@@ -22,6 +26,28 @@ from .manager_base import BaseManager, BaseManagerQuerySet
 logger = logging.getLogger("main.dao.manager.manager_umongo_motor")
 
 NAME_DICT = defaultdict(dict)
+
+
+class UmongoMotorConnector(object, metaclass=Singleton):
+    client = None
+    database = None
+    instance = None
+
+    def initialize(self):
+        logging.info("connect to mongo database....")
+        if self.client is None:
+            self.client = AsyncIOMotorClient(f'{core.config.MONGODB_ADDRESS}:{core.config.MONGODB_PORT}')
+        if self.database is None:
+            self.database = self.client[core.config.MONGODB_DBNAME]
+        if self.instance is None:
+            self.instance = MotorAsyncIOInstance(self.database)
+        logging.info(f"Connected to mongo database!")
+
+    async def finish(self, app):
+        logging.info(f"close mongodb connection....")
+        if self.client is not None:
+            self.client.close()
+        logging.info("connection to mongodb has been closed!")
 
 
 class ManagerQuerySet(BaseManagerQuerySet):
@@ -79,6 +105,13 @@ class ManagerQuerySet(BaseManagerQuerySet):
 
 class UmongoMotorManager(BaseManager):
     name = "umongo_motor"
+
+    def __init__(self, dao) -> None:
+        super().__init__(dao)
+        self.connector = UmongoMotorConnector()
+        self.connector.initialize()
+        logging.info(f"注册{self.model}")
+        self.model = self.connector.instance.register(self.model)
 
     def get_instance(self, model):
         if model is None:

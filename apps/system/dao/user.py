@@ -15,6 +15,7 @@ logger = logging.getLogger("main.apps.system.dao.user")
 
 
 class User(BaseDocument):
+
     id = fields.PrimaryField()
     created = fields.DateTimeField(
         default_create=datetime.datetime.now,
@@ -29,7 +30,7 @@ class User(BaseDocument):
 
     class Meta:
         model = UserModel
-        manager = "umongo_motor"
+        manager = "sqlalchemy"
         memorizer = "none"
 
     def __init__(self, **kwargs):

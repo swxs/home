@@ -14,10 +14,8 @@ from starlette.exceptions import HTTPException
 
 import core
 from apps import api_router
-from web.exceptions.http_404_not_found_exception import Http404NotFoundException
 from web.handlers.unknown_exception_handler import unknown_exception_handler
 from web.handlers.unknown_http_handler import unknown_http_handler
-from web.response import exception
 
 logger = logging.getLogger("main")
 
@@ -28,17 +26,17 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def event_startup():
-    logging.info("connect to database....")
-    core.mongodb_database.client = AsyncIOMotorClient(core.config.MONGODB_URI)
-    # 检查索引
-    logging.info(f"Connected to database!")
+    # 扫描所有model, 实例化manager\memorizer , 触发manager\memorizer的初始化方法
+    logging.info("app startup begin....")
+
+    logging.info("app startup finish....")
 
 
 @app.on_event("shutdown")
 async def event_shutdown():
-    logging.info(f"close mongodb connection....")
-    core.mongodb_database.client.close()
-    logging.info("connection to mongodb has been closed!")
+    logging.info("app shutdown begin....")
+
+    logging.info("app shutdown finish....")
 
 
 app.add_exception_handler(HTTPException, unknown_http_handler)

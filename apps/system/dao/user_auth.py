@@ -9,7 +9,7 @@ from dao import BaseDocument, fields
 
 # 本模块方法
 from .. import consts
-from ..models.user_auth import UserAuth as UserAuthModel
+from ..models.user import UserAuth as UserAuthModel
 
 logger = logging.getLogger("main.apps.system.dao.user_auth")
 
@@ -36,7 +36,7 @@ class UserAuth(BaseDocument):
 
     class Meta:
         model = UserAuthModel
-        manager = "umongo_motor"
+        manager = "sqlalchemy"
         memorizer = "none"
 
     def __init__(self, **kwargs):

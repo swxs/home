@@ -1,0 +1,2 @@
+class LocalMemorizer:
+    name = "redis"
