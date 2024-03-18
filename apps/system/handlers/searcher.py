@@ -17,7 +17,7 @@ from web.response import success
 from .. import user_utils
 from ..dao.user import User
 from ..dao.user_auth import UserAuth
-from ..schemas.user import UserSchema, get_user_schema
+from ..schemas.user_schema import UserSchema, get_user_schema
 
 router = APIRouter()
 

@@ -9,7 +9,7 @@ from dao import BaseDocument, fields
 
 # 本模块方法
 from .. import consts
-from ..models.user import User as UserModel
+from ..models.user_model import User as UserModel
 
 logger = logging.getLogger("main.apps.system.dao.user")
 

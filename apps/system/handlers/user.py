@@ -5,17 +5,17 @@
 import logging
 
 from bson import ObjectId
-from fastapi import Body, Path, Query, APIRouter
+from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 
-from web.response import success
 from web.custom_types import OID
-from web.dependencies.token import TokenSchema, get_token
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
+from web.dependencies.token import TokenSchema, get_token
+from web.response import success
 
 # 本模块方法
 from ..dao.user import User
-from ..schemas.user import UserSchema, get_user_schema
+from ..schemas.user_schema import UserSchema, get_user_schema
 
 router = APIRouter()
 

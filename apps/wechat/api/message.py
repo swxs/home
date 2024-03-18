@@ -19,7 +19,7 @@ from wechatpy.utils import check_signature
 
 from apps.system import consts
 from apps.system.dao.user_auth import UserAuth
-from apps.system.schemas.user_auth import UserAuthSchema
+from apps.system.schemas.user_auth_schema import UserAuthSchema
 from core import config
 from web.dependencies.token import TokenSchema, get_token, get_token_by_openid
 from web.response import success

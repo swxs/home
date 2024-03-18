@@ -8,7 +8,7 @@
 from fastapi import APIRouter
 
 # 本模块方法
-from .auth import router as auth_router
+from .auth_api import router as auth_router
 from .searcher import router as searcher_router
 from .user import router as user_router
 from .user_auth import router as user_auth_router

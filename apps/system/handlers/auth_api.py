@@ -21,8 +21,8 @@ from commons.Helpers.Helper_JWT import (
 # 本模块方法
 from ..dao.user import User
 from ..dao.user_auth import UserAuth
-from ..schemas.user import UserSchema
-from ..schemas.user_auth import UserAuthSchema
+from ..schemas.user_auth_schema import UserAuthSchema
+from ..schemas.user_schema import UserSchema
 
 router = APIRouter()
 
