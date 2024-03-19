@@ -3,6 +3,7 @@
 # @AUTH    : code_creater
 
 import logging
+from typing import Any
 
 from bson import ObjectId
 from fastapi import APIRouter, Body, Path, Query
@@ -10,6 +11,7 @@ from fastapi.param_functions import Depends
 
 from web.custom_types import OID
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
+from web.dependencies.search import SearchSchema, get_search
 from web.dependencies.token import TokenSchema, get_token
 from web.response import success
 
@@ -27,12 +29,15 @@ logger = logging.getLogger("main.apps.password_lock.api.searcher")
 async def get_password_lock_list(
     token_schema: TokenSchema = Depends(get_token),
     password_lock_schema: PasswordLockSchema = Depends(get_password_lock_schema),
+    search_schema: SearchSchema = Depends(get_search),
     page_schema: PageSchema = Depends(get_pagination),
 ):
-    searches = {
+    searches: dict[str, Any] = {
         "user_id": ObjectId(token_schema.user_id),
     }
     searches.update(password_lock_schema.dict(exclude_unset=True))
+    if search_schema.search:
+        searches.update({"name": {"$regex": search_schema.search}})
 
     password_lock_list = (
         await PasswordLock.search(
