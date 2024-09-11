@@ -6,7 +6,7 @@ from wechatpy.replies import ImageReply, TextReply
 from apps.system.dao.user import User
 
 # 通用方法
-from commons.Helpers import gumengya_async_helper, imgurl_helper, wechat_helper
+from commons.Helpers import gumengya_async_helper, wechat_helper
 
 # 本模块方法
 from .content import Content

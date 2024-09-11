@@ -9,13 +9,17 @@ from commons.Helpers import reader_async_helper
 # 本模块方法
 from .content import Content
 
+TEMPLATE = """\
+您好，该功能暂未开发完成！
+"""
+
 
 class MorningContent(Content):
     name = "/早上好"
 
     @classmethod
     async def get_reply(cls, message, token_schema):
-        content = f'您好，该功能暂未开发完成！'
+        content = TEMPLATE
 
         if token_schema.user_id:
             user = await User.find_one(

@@ -4,6 +4,7 @@ import core
 from . import (
     ApiHelper_gumengya,
     ApiHelper_imgurl,
+    ApiHelper_million365,
     ApiHelper_reader,
     ApiHelper_vvhan,
     ApiHelper_wechat,
@@ -33,19 +34,15 @@ wechat_helper = ApiHelper_wechat.WechatHelper(
 imgurl_helper = ApiHelper_imgurl.ImgurlHelper(
     uid=core.config.IMAGEURL_UID,
     token=core.config.IMAGEURL_TOKEN,
-    domain='https://www.imgurl.org',
 )
 
 reader_async_helper = ApiHelper_reader.ReaderAsyncHelper(
     username='swxs',
     password='D6051da2199b',
-    domain='https://reader.moveright.top',
 )
 
-gumengya_async_helper = ApiHelper_gumengya.GumengyaAsyncHelper(
-    domain='https://api.gumengya.com',
-)
+gumengya_async_helper = ApiHelper_gumengya.GumengyaAsyncHelper()
 
-vvhan_async_helper = ApiHelper_vvhan.VVhanAsyncHelper(
-    domain='https://api.vvhan.com',
-)
+vvhan_async_helper = ApiHelper_vvhan.VVhanAsyncHelper()
+
+million365_async_helper = ApiHelper_million365.Million365AsyncHelper()
