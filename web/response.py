@@ -1,10 +1,14 @@
+import os
 import json
 import typing
 import logging
 import datetime
+from urllib.parse import quote
 
 from bson import ObjectId
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from starlette.background import BackgroundTask
+from starlette.types import Receive, Scope, Send
 
 from dao.BaseDocument import BaseDocument
 
@@ -45,6 +49,56 @@ class CustomJSONResponse(JSONResponse):
             separators=(",", ":"),
             cls=ComplexEncoder,
         ).encode("utf-8")
+
+
+class CustomFileresponse(Response):
+    def __init__(
+        self,
+        data: str,
+        status_code: int = 200,
+        headers: typing.Optional[typing.Mapping[str, str]] = None,
+        media_type: typing.Optional[str] = None,
+        background: typing.Optional[BackgroundTask] = None,
+        filename: typing.Optional[str] = None,
+        content_disposition_type: str = "attachment",
+    ) -> None:
+        self.data = data
+        self.status_code = status_code
+        self.filename = filename
+        if media_type is None:
+            media_type = "text/plain"
+        self.media_type = media_type
+        self.background = background
+        self.init_headers(headers)
+        if self.filename is not None:
+            content_disposition_filename = quote(self.filename)
+            if content_disposition_filename != self.filename:
+                content_disposition = "{}; filename*=utf-8''{}".format(
+                    content_disposition_type, content_disposition_filename
+                )
+            else:
+                content_disposition = '{}; filename="{}"'.format(content_disposition_type, self.filename)
+            self.headers.setdefault("content-disposition", content_disposition)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": self.raw_headers,
+            }
+        )
+
+        await send(
+            {
+                "type": "http.response.body",
+                "body": self.data,
+                "more_body": False,
+            }
+        )
+
+        if self.background is not None:
+            await self.background()
 
 
 def response(status_code, code, message, data=None):
