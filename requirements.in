@@ -18,3 +18,4 @@ pycryptodome==3.17
 wechatpy==1.8.14
 beautifulsoup4==4.10.0
 productor==0.1.0
+oss2==2.19.0
