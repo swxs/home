@@ -49,8 +49,8 @@ vvhan_async_helper = ApiHelper_vvhan.VVhanAsyncHelper()
 million365_async_helper = ApiHelper_million365.Million365AsyncHelper()
 
 oss2_helper = ApiHelper_oss2.Oss2Helper(
-    key_id=core.config.OSS_KEY_ID,
-    secret=core.config.OSS_SECRET,
+    key_id=core.config.OSS_ACCESS_KEY_ID,
+    secret=core.config.OSS_ACCESS_KEY_SECRET,
     host=core.config.OSS_HOST,
     bucket=core.config.OSS_BUCKET,
     root_dir=core.config.OSS_ROOT_DIR,

@@ -5,13 +5,13 @@
 import logging
 
 from bson import ObjectId
-from fastapi import Body, Path, Query, APIRouter
+from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 
-from web.response import success
 from web.custom_types import OID
-from web.dependencies.token import TokenSchema, get_token
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
+from web.dependencies.token import TokenSchema, get_token
+from web.response import success
 
 # 本模块方法
 from ..dao.word import Word
@@ -61,6 +61,7 @@ async def get_word(
 ):
     word = await Word.find_one(
         finds={"id": ObjectId(word_id)},
+        nullable=False,
     )
 
     return success(

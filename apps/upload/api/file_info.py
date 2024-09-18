@@ -61,6 +61,7 @@ async def get_file_info(
 ):
     file_info = await FileInfo.find_one(
         finds={"id": ObjectId(file_info_id)},
+        nullable=False,
     )
 
     return success(

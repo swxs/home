@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote
 
 import oss2
 
@@ -16,9 +17,6 @@ class Oss2Helper:
             return f'{self.root}{path}'
         else:
             return f'{self.root}/{path}'
-
-    def _get_download_path(self, file_path):
-        return os.path.join(self.host, self._get_path(file_path))
 
     def exists(self, path: str) -> bool:
         path = self._get_path(path)
@@ -59,7 +57,7 @@ class Oss2Helper:
             self.bucket.append_object(path, result.content_length, data)
         elif mode == 'w':
             self.bucket.put_object(path, data)
-        return self._get_download_path(path)
+        return True
 
     def download(self, path):
         """
@@ -79,6 +77,15 @@ class Oss2Helper:
         path = self._get_path(path)
         result = self.bucket.get_object(path)
         return result.read()
+
+    def get_sign_download_path(self, path, filename, expires=3600):
+        path = self._get_path(path)
+        content_disposition_filename = quote(filename)
+        params = {
+            "response-content-disposition": f"attachment; filename*=utf-8''{content_disposition_filename}",
+        }
+        url = self.bucket.sign_url('GET', path, expires, slash_safe=True, headers=None, params=params)
+        return url
 
     def delete(self, path):
         path = self._get_path(path)

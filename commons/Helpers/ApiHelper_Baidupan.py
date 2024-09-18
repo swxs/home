@@ -12,11 +12,11 @@ import logging
 import platform
 import tempfile
 import subprocess
-from zlib import crc32
-from urllib import parse as urlparse
-from hashlib import md5
 from functools import wraps
+from hashlib import md5
+from urllib import parse as urlparse
 from urllib.parse import urlencode
+from zlib import crc32
 
 import rsa
 import requests

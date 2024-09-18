@@ -75,6 +75,7 @@ async def get_password(
             "user_id": ObjectId(token_schema.user_id),
             "id": ObjectId(password_lock_id),
         },
+        nullable=False,
     )
 
     return success(

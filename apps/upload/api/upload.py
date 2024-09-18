@@ -36,35 +36,68 @@ logger = logging.getLogger("main.apps.upload")
 async def upload_file(file: UploadFile):
     data = await file.read()
     file_id = hashlib.md5(data).hexdigest()
+    filename = file.filename if file.filename else "unknown"
     try:
         oss2_helper.upload(f'{file_id[:4]}/{file_id[4:]}', data)
-        file_info = await FileInfo.create(
-            params={
-                "file_id": file_id,
-                "file_name": file.filename,
-                "file_size": file.size,
-                "ext": os.path.splitext(file.filename)[1],
-                "policy": consts.FILE_INFO_POLICY_ALIOSS,
-            }
-        )
-        return success(data=file_info)
     except Exception as e:
-        file_info = await FileInfo.find_one(
-            finds={"file_id": file_id},
-        )
-        return success(data=file_info)
+        raise e
+    file_info = await FileInfo.create(
+        params={
+            "file_id": file_id,
+            "file_name": filename,
+            "file_size": file.size,
+            "ext": os.path.splitext(filename)[1],
+            "policy": consts.FILE_INFO_POLICY_ALIOSS,
+        }
+    )
+    return success(data=file_info)
 
 
-@router.get("/download/{file_info_id}")
-async def download(
+@router.get("/{file_info_id}")
+async def download_file(
     file_info_id: OID = Path(..., regex="[0-9a-f]{24}"),
 ):
     file_info = await FileInfo.find_one(
         finds={"id": ObjectId(file_info_id)},
+        nullable=False,
     )
-    file_id = file_info.file_id
-    file_name = file_info.file_name
     return CustomFileresponse(
-        data=oss2_helper.download(f'{file_id[:4]}/{file_id[4:]}'),
-        filename=file_name,
+        data=oss2_helper.download(f'{file_info.file_id[:4]}/{file_info.file_id[4:]}'),
+        filename=file_info.file_name,
+    )
+
+
+@router.delete("/{file_info_id}")
+async def delete_file(
+    file_info_id: OID = Path(..., regex="[0-9a-f]{24}"),
+):
+    file_info = await FileInfo.find_one(
+        finds={"id": ObjectId(file_info_id)},
+        nullable=False,
+    )
+    oss2_helper.delete(f'{file_info.file_id[:4]}/{file_info.file_id[4:]}')
+    count = await FileInfo.delete_one(finds={"id": ObjectId(file_info_id)})
+    return success(
+        {
+            "count": count,
+        }
+    )
+
+
+@router.get("/path/{file_info_id}")
+async def path(
+    file_info_id: OID = Path(..., regex="[0-9a-f]{24}"),
+):
+    file_info = await FileInfo.find_one(
+        finds={"id": ObjectId(file_info_id)},
+        nullable=False,
+    )
+
+    return success(
+        data={
+            "path": oss2_helper.get_sign_download_path(
+                f'{file_info.file_id[:4]}/{file_info.file_id[4:]}',
+                file_info.file_name,
+            ),
+        },
     )

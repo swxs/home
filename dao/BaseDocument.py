@@ -12,6 +12,8 @@ from typing import Any, Dict
 
 from bson import ObjectId
 
+from web.exceptions.http_400_bad_request_exception import Http400BadRequestException
+
 # 本模块方法
 from .fields import BaseField, DateTimeField, DictField
 from .managers import BaseManagerQuerySet, manager_productor
@@ -127,7 +129,7 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         return await cls.manager.count(finds)
 
     @classmethod
-    async def find_one(cls, finds):
+    async def find_one(cls, finds, *, nullable=True):
         """
         简介
         ----------
@@ -144,7 +146,11 @@ class BaseDocument(object, metaclass=BaseMetaDocuemnt):
         """
         logger.info(f"[find_one] <{cls.__model_name__}>: finds - {finds}")
 
-        return await cls.manager.find_one(finds)
+        element = await cls.manager.find_one(finds)
+
+        if not nullable and element is None:
+            raise Http400BadRequestException(Http400BadRequestException.NoResource, "资源不存在")
+        return element
 
     @classmethod
     async def find_many(cls, finds, *, limit=0, skip=0) -> BaseManagerQuerySet:

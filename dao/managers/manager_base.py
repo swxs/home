@@ -105,16 +105,6 @@ class BaseManager(object):
         pass
 
     async def find_one(self, finds):
-        """
-        简介
-        ----------
-
-
-        参数
-        ----------
-        finds :
-
-        """
         pass
 
     async def find_many(self, finds, *, limit=0, skip=0):
