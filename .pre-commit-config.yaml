@@ -1,15 +1,11 @@
 repos:
   - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+    rev: 6.0.1
     hooks:
       - id: isort
-        exclude: ^.*/models.py$|^.*/model_utils.py$|^.*/model_utils_test.py$|^.*/model_handlers.py$|^.*/model_enums.py$|^.*/utils.py$|^.*/base_client.py$|^.*/base_server.py$|^.*_pb2\.py$|^.*pb2_grpc\.py$
-  - repo: https://github.com/ambv/black
-    rev: stable
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.7
     hooks:
-      - id: black
-        exclude: ^.*/models.py$|^.*/model_utils.py$|^.*/model_utils_test.py$|^.*/model_handlers.py$|^.*/model_enums.py$|^.*/utils.py$|^.*/base_client.py$|^.*/base_server.py$|^.*_pb2\.py$|^.*pb2_grpc\.py$
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v1.2.3
-    hooks:
-      - id: flake8
+      - id: ruff-check
+        args: [ --fix ]
+      - id: ruff-format

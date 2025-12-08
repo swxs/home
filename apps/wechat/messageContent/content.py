@@ -10,6 +10,8 @@ TEMPLATE = """\
 class Content:
     name = "/"
 
-    @classmethod
-    async def get_reply(cls, message, token_schema):
+    def __init__(self, db) -> None:
+        self.db = db
+
+    async def get_reply(self, message, token_schema):
         return TextReply(content=TEMPLATE, message=message)

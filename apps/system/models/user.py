@@ -2,39 +2,30 @@
 # @FILE    : models/user.py
 # @AUTH    : code_creater
 
-from umongo import Document, fields
+from typing import Optional
 
-import core
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from mysqlengine import baseModel
+from mysqlengine.fields import ObjectIdType
 
 
-@core.mongodb_instance.register
-class User(Document):
-    created = fields.DateTimeField(
-        required=True,
-        allow_none=False,
+class User(baseModel):
+    __tablename__ = "user"  # 数据库表名
+    username: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        unique=True,
+        comment="用户姓名",
     )
-    updated = fields.DateTimeField(
-        required=True,
-        allow_none=False,
+    description: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        comment="个人备注",
     )
-    username = fields.StringField(
-        required=True,
-        allow_none=False,
+    avatar: Mapped[Optional[str]] = mapped_column(
+        ObjectIdType,
+        nullable=True,
+        comment="头像文件ID",
     )
-    description = fields.StringField(
-        required=False,
-        allow_none=True,
-    )
-    avatar = fields.ObjectIdField(
-        required=False,
-        allow_none=True,
-    )
-
-    class Meta:
-        indexes = [
-            {
-                'key': ['username'],
-                'unique': True,
-            },
-        ]
-        pass

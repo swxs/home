@@ -2,43 +2,35 @@
 # @FILE    : models/wechat_msg.py
 # @AUTH    : code_creater
 
-from umongo import Document, fields
+from typing import Optional
 
-import core
+from sqlalchemy import Index, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
+from mysqlengine import baseModel
 
 
-@core.mongodb_instance.register
-class WechatMsg(Document):
-    created = fields.DateTimeField(
-        required=True,
-        allow_none=False,
+class WechatMsg(baseModel):
+    __tablename__ = "wechat_msg"  # 数据库表名
+    msg_id: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        comment="消息ID",
     )
-    updated = fields.DateTimeField(
-        required=True,
-        allow_none=False,
+    msg_type: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        nullable=True,
+        comment="消息类型",
     )
-    msg_id = fields.StringField(
-        required=False,
-        allow_none=False,
+    msg_event: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        nullable=True,
+        comment="消息事件",
     )
-    msg_type = fields.StringField(
-        required=False,
-        allow_none=False,
-    )
-    msg_event = fields.StringField(
-        required=False,
-        allow_none=False,
-    )
-    msg = fields.StringField(
-        required=False,
-        allow_none=False,
+    msg: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="消息内容",
     )
 
-    class Meta:
-        indexes = [
-            {
-                'key': ['msg_id'],
-                'sparse': True,
-            },
-        ]
-        pass
+    __table_args__ = (Index("idx_msg_id", "msg_id"),)

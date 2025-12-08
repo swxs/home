@@ -4,17 +4,18 @@
 
 import logging
 
-from bson import ObjectId
 from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.custom_types import OID
+from web.dependencies.db import get_db
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
 from web.dependencies.token import TokenSchema, get_token
+from web.exceptions import Http400BadRequestException
 from web.response import success
 
 # 本模块方法
-from ..dao.file_info import FileInfo
+from ..repositories.file_info_repository import FileInfoRepository
 from ..schemas.file_info import FileInfoSchema, get_file_info_schema
 
 router = APIRouter()
@@ -27,29 +28,20 @@ async def get_file_info_list(
     token_schema: TokenSchema = Depends(get_token),
     file_info_schema: FileInfoSchema = Depends(get_file_info_schema),
     page_schema: PageSchema = Depends(get_pagination),
+    db: AsyncSession = Depends(get_db),
 ):
-    file_info_list = (
-        await FileInfo.search(
-            searches=file_info_schema.dict(exclude_unset=True),
-            skip=page_schema.skip,
-            limit=page_schema.limit,
-        )
-    ).order_by(page_schema.order_by)
+    file_info_repo = FileInfoRepository(db)
 
-    pagination = PaginationSchema(
-        total=await FileInfo.count(
-            finds=file_info_schema.dict(exclude_unset=True),
-        ),
-        order_by=page_schema.order_by,
-        use_pager=page_schema.use_pager,
-        page=page_schema.page,
-        page_number=page_schema.page_number,
-    )
+    # 使用Repository搜索方法
+    result = await file_info_repo.search(file_info_schema, page_schema)
+
+    # 转换为 Schema
+    file_info_list = [FileInfoSchema.model_validate(fi).model_dump() for fi in result["data"]]
 
     return success(
         {
-            "data": await file_info_list.to_dict(),
-            "pagination": pagination.dict(),
+            "data": file_info_list,
+            "pagination": result["pagination"].model_dump(),
         }
     )
 
@@ -57,16 +49,20 @@ async def get_file_info_list(
 @router.get("/{file_info_id}")
 async def get_file_info(
     token_schema: TokenSchema = Depends(get_token),
-    file_info_id: OID = Path(..., regex="[0-9a-f]{24}"),
+    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    db: AsyncSession = Depends(get_db),
 ):
-    file_info = await FileInfo.find_one(
-        finds={"id": ObjectId(file_info_id)},
-        nullable=False,
-    )
+    file_info_repo = FileInfoRepository(db)
+
+    # 使用Repository查找方法
+    file_info = await file_info_repo.find_one(file_info_id, "文件信息不存在")
+
+    # 转换为 Schema
+    file_info_response = FileInfoSchema.model_validate(file_info)
 
     return success(
         {
-            "data": file_info,
+            "data": file_info_response.model_dump(),
         }
     )
 
@@ -75,14 +71,18 @@ async def get_file_info(
 async def create_file_info(
     token_schema: TokenSchema = Depends(get_token),
     file_info_schema: FileInfoSchema = Body(...),
+    db: AsyncSession = Depends(get_db),
 ):
-    file_info = await FileInfo.create(
-        params=file_info_schema.dict(exclude_defaults=True),
-    )
+    file_info_repo = FileInfoRepository(db)
+
+    # 使用Repository创建方法
+    file_info = await file_info_repo.create_one(file_info_schema, "文件信息创建失败")
+
+    file_info_response = FileInfoSchema.model_validate(file_info)
 
     return success(
         {
-            "data": file_info,
+            "data": file_info_response.model_dump(),
         }
     )
 
@@ -90,17 +90,26 @@ async def create_file_info(
 @router.put("/{file_info_id}")
 async def modify_file_info(
     token_schema: TokenSchema = Depends(get_token),
-    file_info_id: OID = Path(..., regex="[0-9a-f]{24}"),
+    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     file_info_schema: FileInfoSchema = Body(...),
+    db: AsyncSession = Depends(get_db),
 ):
-    file_info = await FileInfo.update_one(
-        finds={"id": ObjectId(file_info_id)},
-        params=file_info_schema.dict(exclude_defaults=True),
+    file_info_repo = FileInfoRepository(db)
+
+    # 使用Repository更新方法
+    file_info = await file_info_repo.update_one(
+        file_info_id,
+        file_info_schema,
+        "文件信息不存在",
+        "文件信息更新失败",
     )
+
+    # 转换为 Schema
+    file_info_response = FileInfoSchema.model_validate(file_info)
 
     return success(
         {
-            "data": file_info,
+            "data": file_info_response.model_dump(),
         }
     )
 
@@ -108,11 +117,13 @@ async def modify_file_info(
 @router.delete("/{file_info_id}")
 async def delete_file_info(
     token_schema: TokenSchema = Depends(get_token),
-    file_info_id: OID = Path(..., regex="[0-9a-f]{24}"),
+    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    db: AsyncSession = Depends(get_db),
 ):
-    count = await FileInfo.delete_one(
-        finds={"id": ObjectId(file_info_id)},
-    )
+    file_info_repo = FileInfoRepository(db)
+
+    # 使用Repository删除方法
+    count = await file_info_repo.delete_one(file_info_id, "文件信息不存在", "文件信息删除失败")
 
     return success(
         {

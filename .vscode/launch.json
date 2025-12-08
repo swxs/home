@@ -1,32 +1,34 @@
 {
-    // 使用 IntelliSense 了解相关属性。 
-    // 悬停以查看现有属性的描述。
-    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "RUN[HOME-MAIN]",
-            "type": "python",
-            "request": "launch",
-            "module": "uvicorn",
-            "args": ["main:app", "--port", "8090"],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        }, {
-            "name": "RUN[HOME-INIT]",
-            "type": "python",
-            "request": "launch",
-            "module": "init.init_system",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        }, {
-            "name": "DEV[HOME-create]",
-            "type": "python",
-            "request": "launch",
-            "module": "code_creater.main",
-            "args": ["home.yaml"],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        }
-    ]
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "RUN[HOME-MAIN]",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["main:app", "--port", "8090"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "RUN[HOME-INIT]",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scripts.init_db",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "DEV[HOME-create]",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "code_creater.main",
+      "args": ["home.yaml"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
 }

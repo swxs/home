@@ -2,55 +2,58 @@
 # @FILE    : models/password_lock.py
 # @AUTH    : code_creater
 
-from umongo import Document, fields
+from typing import Optional
 
-import core
+from sqlalchemy import JSON, Index, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from mysqlengine import baseModel
+from mysqlengine.fields import IntEnumType, ObjectIdType
+from web.custom_types import objectId
+
+# 本模块方法
+from .. import consts
+from ..schemas.password_lock import PasswordLockCustom
 
 
-@core.mongodb_instance.register
-class PasswordLock(Document):
-    created = fields.DateTimeField(
-        required=True,
-        allow_none=False,
+class PasswordLock(baseModel):
+    __tablename__ = "password_lock"  # 数据库表名
+    user_id: Mapped[objectId] = mapped_column(
+        ObjectIdType,
+        nullable=False,
+        comment="用户ID",
     )
-    updated = fields.DateTimeField(
-        required=True,
-        allow_none=False,
+    key: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        comment="标识",
     )
-    user_id = fields.ObjectIdField(
-        required=True,
-        allow_none=False,
+    name: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        comment="名称",
     )
-    name = fields.StringField(
-        required=True,
-        allow_none=False,
+    website: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        comment="网址",
     )
-    key = fields.StringField(
-        required=True,
-        allow_none=False,
+    used: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="使用计数",
     )
-    website = fields.StringField(
-        required=False,
-        allow_none=True,
+    ttype: Mapped[consts.PasswordLock_Ttype] = mapped_column(
+        IntEnumType(consts.PasswordLock_Ttype),
+        default=consts.PasswordLock_Ttype.COMMON,
+        nullable=False,
+        comment="类型",
     )
-    used = fields.IntField(
-        required=False,
-        allow_none=False,
-    )
-    ttype = fields.IntField(
-        required=True,
-        allow_none=False,
-    )
-    custom = fields.DictField(
-        required=False,
-        allow_none=False,
+    custom: Mapped[Optional[PasswordLockCustom]] = mapped_column(
+        JSON,
+        nullable=True,
+        comment="自定义数据",
     )
 
-    class Meta:
-        indexes = [
-            {
-                'key': ['user_id', 'name'],
-                'unique': True,
-            },
-        ]
-        pass
+    __table_args__ = (Index("idx_user_id_key", "user_id", "key", unique=True),)

@@ -5,7 +5,9 @@ from fastapi import Header, Query
 from pydantic import BaseModel
 
 from apps.system import consts
-from apps.system.dao.user_auth import UserAuth
+from apps.system.repositories.user_auth_repository import UserAuthRepository
+from apps.system.schemas.user_auth import UserAuthSchema
+from mysqlengine import SessionLocal
 
 # 通用方法
 from commons.Helpers import refresh_tokener, tokener
@@ -43,13 +45,15 @@ async def get_token_by_openid(
     openid: Optional[str] = Query(None),
 ):
     if openid:
-        user_auth = await UserAuth.find_one(
-            finds={
-                "ttype": consts.USER_AUTH_TTYPE_WECHAT,
-                "identifier": openid,
-                "ifverified": consts.USER_AUTH_IFVERIFIED_TRUE,
-            },
-        )
+        async with SessionLocal() as session:
+            user_auth_repo = UserAuthRepository(session)
+            user_auth = await user_auth_repo.find_one_or_none(
+                UserAuthSchema(
+                    ttype=consts.UserAuth_Ttype.WECHAT,
+                    identifier=openid,
+                    ifverified=consts.UserAuth_Ifverified.VERIFIED,
+                )
+            )
         if user_auth:
             return TokenSchema(user_id=str(user_auth.user_id))
         else:

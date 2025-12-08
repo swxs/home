@@ -1,4 +1,4 @@
-hash=`md5sum ./requirements.in | cut -c 1-16`
+hash=`md5sum ./pyproject.toml | cut -c 1-16`
 
 docker build -f Dockerfile.base -t swxs/home_base:$hash . 
 docker push swxs/home_base:$hash

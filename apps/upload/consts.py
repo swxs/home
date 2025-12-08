@@ -3,10 +3,8 @@
 # @AUTH    : model_creater
 
 
-from enum import Enum
+from enum import IntEnum
 
-FILE_INFO_POLICY_ALIOSS = 1
 
-FILE_INFO_POLICY_LIST = [
-    (FILE_INFO_POLICY_ALIOSS, '阿里OSS'),
-]
+class FileInfo_Policy(IntEnum):
+    ALIOSS = 1

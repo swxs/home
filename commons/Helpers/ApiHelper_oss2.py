@@ -5,18 +5,18 @@ import oss2
 
 
 class Oss2Helper:
-    def __init__(self, key_id=None, secret=None, host=None, bucket=None, root_dir='dev'):
+    def __init__(self, key_id=None, secret=None, host=None, bucket=None, root_dir="dev"):
         self.auth = oss2.Auth(key_id, secret)
         self.bucket = oss2.Bucket(self.auth, host, bucket)
-        host = host.split('://', 1)[-1]
-        self.host = f'https://{bucket}.{host}/'
-        self.root = root_dir.strip('/')
+        host = host.split("://", 1)[-1]
+        self.host = f"https://{bucket}.{host}/"
+        self.root = root_dir.strip("/")
 
     def _get_path(self, path):
-        if path.startswith('/'):
-            return f'{self.root}{path}'
+        if path.startswith("/"):
+            return f"{self.root}{path}"
         else:
-            return f'{self.root}/{path}'
+            return f"{self.root}/{path}"
 
     def exists(self, path: str) -> bool:
         path = self._get_path(path)
@@ -45,21 +45,21 @@ class Oss2Helper:
             keys.append(obj.key)
         return keys
 
-    def upload(self, path, data, mode: str = 'w'):
+    def upload(self, path, data, mode: str = "w"):
         """
         @params path: 上传路径
         @params data: 上传数据
         @params mode: 模式
         """
         path = self._get_path(path)
-        if mode == 'a':
+        if mode == "a":
             result = self.bucket.head_object(path)
             self.bucket.append_object(path, result.content_length, data)
-        elif mode == 'w':
+        elif mode == "w":
             self.bucket.put_object(path, data)
         return True
 
-    def download(self, path):
+    def download(self, path) -> bytes:
         """
         简介
         ----------
@@ -84,7 +84,7 @@ class Oss2Helper:
         params = {
             "response-content-disposition": f"attachment; filename*=utf-8''{content_disposition_filename}",
         }
-        url = self.bucket.sign_url('GET', path, expires, slash_safe=True, headers=None, params=params)
+        url = self.bucket.sign_url("GET", path, expires, slash_safe=True, headers=None, params=params)
         return url
 
     def delete(self, path):
@@ -118,7 +118,7 @@ class Oss2Helper:
 
         parts = []
         # 读取Excel文件并划分为多个部分进行上传
-        with open(src_path, 'rb') as file:
+        with open(src_path, "rb") as file:
             part_number = 1
             offset = 0
             while offset < total_length:

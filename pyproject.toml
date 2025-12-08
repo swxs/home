@@ -1,18 +1,77 @@
-[tool.black]
+[project]
+name = "home"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiofiles>=25.1.0",
+    "aiohttp>=3.13.2",
+    "aiomysql>=0.3.2",
+    "arrow>=1.4.0",
+    "async-lru>=2.0.5",
+    "async-property>=0.2.2",
+    "beautifulsoup4>=4.14.3",
+    "bson>=0.5.10",
+    "click>=8.3.1",
+    "concurrent-log-handler>=0.9.28",
+    "environs>=14.5.0",
+    "fastapi>=0.123.5",
+    "oss2>=2.19.1",
+    "productor>=0.1.1",
+    "pycryptodome>=3.23.0",
+    "pyjwt>=2.10.1",
+    "pymysql>=1.1.2",
+    "python-multipart>=0.0.20",
+    "requests>=2.32.5",
+    "sqlalchemy[asyncio]>=2.0.44",
+    "uvicorn>=0.38.0",
+    "wechatpy>=1.8.18",
+]
+
+
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "isort>=7.0.0",
+    "pre-commit>=4.5.0",
+    "ruff>=0.14.7",
+    "tox>=4.32.0",
+]
+
+
+[tool.ruff]
 line-length = 120
-py36 = true
-skip-string-normalization = true
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | __pycache__
-)/
-'''
+
+exclude = [
+    ".git",
+    ".github",
+    ".mypy_cache",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pycache__",
+]
+
+[tool.ruff.lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+ignore = ["E501", "F401", "F403", "F405", "F541", "F841"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = ["B"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
 
 [tool.isort]
 profile = "black"
@@ -22,12 +81,12 @@ case_sensitive = true
 group_by_package = true
 combine_as_imports = true
 sections = [
-  'FUTURE',
-  'STDLIB',
-  'THIRDPARTY',
-  'FIRSTPARTY',
-  'COMMONS',
-  'LOCALFOLDER',
+    'FUTURE',
+    'STDLIB',
+    'THIRDPARTY',
+    'FIRSTPARTY',
+    'COMMONS',
+    'LOCALFOLDER',
 ]
 known_commons = ['commons']
 import_headings = { commons = "通用方法", localfolder = "本模块方法" }

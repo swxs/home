@@ -9,22 +9,20 @@ import pydantic
 from bson import ObjectId
 from fastapi import Query
 
-from web.custom_types import OID
+from web.custom_types import objectId
+from web.schemas import BaseSchema
 
 
-class UserSchema(pydantic.BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
+class UserSchema(BaseSchema):
     username: Optional[str] = None
     description: Optional[str] = None
-    avatar: Optional[OID] = None
+    avatar: Optional[objectId] = None
 
 
 async def get_user_schema(
     username: Optional[str] = Query(None),
     description: Optional[str] = Query(None),
-    avatar: Optional[str] = Query(None),
+    avatar: Optional[objectId] = Query(None),
 ):
     params = {}
     if username is not None:

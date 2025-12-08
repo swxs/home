@@ -23,6 +23,8 @@ def encoder(obj):
         return obj.to_dict()
     elif isinstance(obj, ObjectId):
         return str(obj)
+    elif isinstance(obj, datetime.datetime):
+        return obj.strftime("%Y/%m/%d %H:%M:%S")
     elif isinstance(obj, bytes):
         return obj.decode("utf8")
     else:
@@ -54,7 +56,7 @@ class CustomJSONResponse(JSONResponse):
 class CustomFileresponse(Response):
     def __init__(
         self,
-        data: str,
+        data: bytes,
         status_code: int = 200,
         headers: typing.Optional[typing.Mapping[str, str]] = None,
         media_type: typing.Optional[str] = None,
@@ -132,7 +134,7 @@ def response(status_code, code, message, data=None):
     )
 
 
-def success(data=None, message=''):
+def success(data=None, message=""):
     """
     简介
     ----------

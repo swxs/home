@@ -3,26 +3,26 @@
 # @AUTH    : model_creater
 
 import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, TypedDict
 
-import pydantic
-from bson import ObjectId
 from fastapi import Query
 
-from web.custom_types import OID
+from web.custom_types import objectId
+from web.schemas import BaseSchema
 
 
-class PasswordLockSchema(pydantic.BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+class PasswordLockCustom(TypedDict):
+    password: Optional[str] = None
 
-    user_id: Optional[OID] = None
+
+class PasswordLockSchema(BaseSchema):
+    user_id: Optional[objectId] = None
     name: Optional[str] = None
     key: Optional[str] = None
     website: Optional[str] = None
     used: Optional[int] = None
     ttype: Optional[int] = None
-    custom: Optional[Dict] = None
+    custom: Optional[PasswordLockCustom] = None
 
 
 async def get_password_lock_schema(

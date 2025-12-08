@@ -5,17 +5,12 @@
 import datetime
 from typing import Dict, List, Optional
 
-import pydantic
-from bson import ObjectId
 from fastapi import Query
 
-from web.custom_types import OID
+from web.schemas import BaseSchema
 
 
-class FileInfoSchema(pydantic.BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
+class FileInfoSchema(BaseSchema):
     file_id: Optional[str] = None
     file_name: Optional[str] = None
     file_size: Optional[int] = None

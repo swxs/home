@@ -3,32 +3,31 @@
 # @AUTH    : model_creater
 
 import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
-import pydantic
-from bson import ObjectId
 from fastapi import Query
 
-from web.custom_types import OID
+from web.custom_types import objectId
+from web.schemas import BaseSchema
+
+# 本模块方法
+from .. import consts
 
 
-class UserAuthSchema(pydantic.BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    user_id: Optional[OID] = None
-    ttype: Optional[int] = None
+class UserAuthSchema(BaseSchema):
+    user_id: Optional[objectId] = None
+    ttype: Optional[consts.UserAuth_Ttype] = None
     identifier: Optional[str] = None
     credential: Optional[str] = None
-    ifverified: Optional[int] = None
+    ifverified: Optional[consts.UserAuth_Ifverified] = None
 
 
 async def get_user_auth_schema(
     user_id: Optional[str] = Query(None),
-    ttype: Optional[str] = Query(None),
+    ttype: Optional[int] = Query(None),
     identifier: Optional[str] = Query(None),
     credential: Optional[str] = Query(None),
-    ifverified: Optional[str] = Query(None),
+    ifverified: Optional[int] = Query(None),
 ):
     params = {}
     if user_id is not None:

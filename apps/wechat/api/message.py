@@ -9,6 +9,7 @@ from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 from wechatpy import parse_message
 from wechatpy.crypto import WeChatCrypto
 from wechatpy.events import BaseEvent, SubscribeEvent, UnsubscribeEvent
@@ -18,15 +19,18 @@ from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
 from apps.system import consts
-from apps.system.dao.user_auth import UserAuth
+from apps.system.consts import UserAuth_Ifverified, UserAuth_Ttype
+from apps.system.models.user_auth import UserAuth
+from apps.system.repositories.user_auth_repository import UserAuthRepository
 from apps.system.schemas.user_auth import UserAuthSchema
 from core import config
+from web.dependencies.db import get_db
 from web.dependencies.token import TokenSchema, get_token, get_token_by_openid
 from web.response import success
 
 # 本模块方法
-from ..dao.wechat_msg import WechatMsg
 from ..messageContent import content_productor
+from ..repositories.wechat_msg_repository import WechatMsgRepository
 from ..schemas.wechat_msg import WechatMsgSchema
 from ..schemas.wechat_msg_test import WechatMsgTestSchema
 
@@ -61,6 +65,7 @@ async def post_message(
     encrypt_type: Optional[str] = Query(None),
     msg_signature: Optional[str] = Query(None),
     token_schema: TokenSchema = Depends(get_token_by_openid),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
         xml = await request.body()
@@ -79,19 +84,20 @@ async def post_message(
     else:
         event = None
 
-    await WechatMsg.create(
-        params=WechatMsgSchema(
+    wechat_msg_repo = WechatMsgRepository(db)
+    await wechat_msg_repo.create_one(
+        WechatMsgSchema(
             msg_id=msg.id,
             msg_type=msg.type,
             msg_event=event,
             msg=xml.decode("utf8"),
-        ).dict(exclude_defaults=True),
+        ),
     )
 
-    content = ''
+    content = ""
 
     if isinstance(msg, TextMessage):
-        model = content_productor[msg.content]
+        model = content_productor[msg.content](db)
 
         reply = await model.get_reply(msg, token_schema)
 
@@ -102,28 +108,35 @@ async def post_message(
 
     elif isinstance(msg, SubscribeEvent):
         try:
-            await UserAuth.create(
-                params=UserAuthSchema(
-                    ttype=consts.USER_AUTH_TTYPE_WECHAT,
+            user_auth_repo = UserAuthRepository(db)
+            await user_auth_repo.create_one(
+                UserAuthSchema(
+                    ttype=consts.UserAuth_Ttype.WECHAT,
                     identifier=openid,
                     credential=openid,
-                    ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
-                ).dict(exclude_defaults=True),
+                    ifverified=consts.UserAuth_Ifverified.VERIFIED,
+                )
             )
         except Exception as e:
             logger.info(f"openid: {openid} 创建用户信息失败！")
             pass
     elif isinstance(msg, UnsubscribeEvent):
         try:
-            await UserAuth.update_one(
-                finds={
-                    "ttype": consts.USER_AUTH_TTYPE_WECHAT,
-                    "identifier": openid,
-                    "credential": openid,
-                },
-                params=UserAuthSchema(
-                    ifverified=consts.USER_AUTH_IFVERIFIED_FALSE,
-                ).dict(exclude_defaults=True),
+            user_auth_repo = UserAuthRepository(db)
+            user_auth = await user_auth_repo.find_one_or_none(
+                UserAuthSchema(
+                    ttype=consts.UserAuth_Ttype.WECHAT,
+                    identifier=openid,
+                    credential=openid,
+                )
+            )
+            if user_auth is None:
+                raise Exception("用户信息不存在！")
+            await user_auth_repo.update_one(
+                user_auth.id,
+                UserAuthSchema(
+                    ifverified=consts.UserAuth_Ifverified.UNVERIFIED,
+                ),
             )
         except Exception as e:
             logger.info(f"openid: {openid} 解绑用户信息失败！")
