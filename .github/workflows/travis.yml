@@ -23,11 +23,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: build and push base docker image to aliyuncs
-        run: |
-          docker build -f Dockerfile.base -t ${{ secrets.DOCKER_REGISTRY }}/swxs/home_base .
-          docker push ${{ secrets.DOCKER_REGISTRY }}/swxs/home_base
-
       - name: build and push docker image to aliyuncs
         run: |
           docker build -t ${{ secrets.DOCKER_REGISTRY }}/swxs/home .
