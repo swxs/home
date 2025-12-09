@@ -37,17 +37,15 @@ else:
     MONGODB_URI = f"mongodb://{MONGODB_ADDRESS}:{MONGODB_PORT}/{MONGODB_DBNAME}"
 MYSQL_POOL_SIZE = env.int("MONGODB_PORT", 20)
 
-MYSQL_HOST = env.str("MYSQL_ADDRESS", "127.0.0.1")
+MYSQL_HOST = env.str("MYSQL_HOST", "127.0.0.1")
 MYSQL_PORT = env.int("MYSQL_PORT", 3306)
 MYSQL_USERNAME = env.str("MYSQL_USERNAME", None)
 MYSQL_PASSWORD = env.str("MYSQL_PASSWORD", None)
-MYSQL_DBNAME = env.str("MYSQL_DBNAME", "home")
+MYSQL_DATABASE = env.str("MYSQL_DATABASE", "home")
 if MYSQL_USERNAME and MYSQL_PASSWORD:
-    MYSQL_URL = (
-        f"mysql+aiomysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DBNAME}?charset=utf8mb4"
-    )
+    MYSQL_URL = f"mariadb+aiomysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
 else:
-    MYSQL_URL = f"mysql+aiomysql://{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DBNAME}?charset=utf8mb4"
+    MYSQL_URL = f"mariadb+aiomysql://{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
 
 REDIS_HOST = env.str("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = env.int("REDIS_PORT", 6379)
