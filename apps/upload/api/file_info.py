@@ -8,14 +8,13 @@ from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db
+from web.dependencies.db import get_db, get_single_worker
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
 from web.dependencies.token import TokenSchema, get_token
-from web.exceptions import Http400BadRequestException
 from web.response import success
 
 # 本模块方法
-from ..repositories.file_info_repository import FileInfoRepository
+from ..models.file_info import FileInfo
 from ..schemas.file_info import FileInfoSchema, get_file_info_schema
 
 router = APIRouter()
@@ -30,10 +29,9 @@ async def get_file_info_list(
     page_schema: PageSchema = Depends(get_pagination),
     db: AsyncSession = Depends(get_db),
 ):
-    file_info_repo = FileInfoRepository(db)
-
-    # 使用Repository搜索方法
-    result = await file_info_repo.search(file_info_schema, page_schema)
+    single_worker = await get_single_worker(db, FileInfo)
+    async with single_worker as worker:
+        result = await worker.repository.search(file_info_schema, page_schema)
 
     # 转换为 Schema
     file_info_list = [FileInfoSchema.model_validate(fi).model_dump() for fi in result["data"]]
@@ -52,10 +50,9 @@ async def get_file_info(
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
 ):
-    file_info_repo = FileInfoRepository(db)
-
-    # 使用Repository查找方法
-    file_info = await file_info_repo.find_one(file_info_id, "文件信息不存在")
+    single_worker = await get_single_worker(db, FileInfo)
+    async with single_worker as worker:
+        file_info = await worker.repository.find_one(file_info_id)
 
     # 转换为 Schema
     file_info_response = FileInfoSchema.model_validate(file_info)
@@ -73,10 +70,9 @@ async def create_file_info(
     file_info_schema: FileInfoSchema = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
-    file_info_repo = FileInfoRepository(db)
-
-    # 使用Repository创建方法
-    file_info = await file_info_repo.create_one(file_info_schema, "文件信息创建失败")
+    single_worker = await get_single_worker(db, FileInfo)
+    async with single_worker as worker:
+        file_info = await worker.repository.create_one(file_info_schema)
 
     file_info_response = FileInfoSchema.model_validate(file_info)
 
@@ -94,15 +90,9 @@ async def modify_file_info(
     file_info_schema: FileInfoSchema = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
-    file_info_repo = FileInfoRepository(db)
-
-    # 使用Repository更新方法
-    file_info = await file_info_repo.update_one(
-        file_info_id,
-        file_info_schema,
-        "文件信息不存在",
-        "文件信息更新失败",
-    )
+    single_worker = await get_single_worker(db, FileInfo)
+    async with single_worker as worker:
+        file_info = await worker.repository.update_one(file_info_id, file_info_schema)
 
     # 转换为 Schema
     file_info_response = FileInfoSchema.model_validate(file_info)
@@ -120,10 +110,9 @@ async def delete_file_info(
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
 ):
-    file_info_repo = FileInfoRepository(db)
-
-    # 使用Repository删除方法
-    count = await file_info_repo.delete_one(file_info_id, "文件信息不存在", "文件信息删除失败")
+    single_worker = await get_single_worker(db, FileInfo)
+    async with single_worker as worker:
+        count = await worker.repository.delete_one(file_info_id)
 
     return success(
         {

@@ -16,10 +16,7 @@ class UserRepository(BaseRepository[User]):
     可以在这里添加User特定的查询方法
     """
 
-    name = "User"
-
-    def __init__(self, db: AsyncSession):
-        super().__init__(User, db)
+    name = "user"
 
     # 如果需要User特定的方法，可以在这里添加
     # 例如：

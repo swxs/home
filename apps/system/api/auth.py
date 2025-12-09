@@ -112,13 +112,13 @@ async def create_user_auth(
         user_repo = uw.get_repository(User)
         user_auth_repo = uw.get_repository(UserAuth)
         # 创建用户
-        user = await user_repo.create_one(user_schema, "用户创建失败")
+        user = await user_repo.create_one(user_schema)
 
         # 创建用户认证信息
         user_auth_data = user_auth_schema.model_dump()
         user_auth_data["user_id"] = user.id
         user_auth_schema_with_user_id = UserAuthSchema(**user_auth_data)
-        user_auth = await user_auth_repo.create_one(user_auth_schema_with_user_id, "用户认证信息创建失败")
+        user_auth = await user_auth_repo.create_one(user_auth_schema_with_user_id)
 
     user_auth_response = UserAuthSchema.model_validate(user_auth)
 

@@ -5,7 +5,7 @@
 from typing import Optional
 
 from pydantic import BaseModel as PydanticBaseModel
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager
 
@@ -22,10 +22,7 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
     可以在这里添加PasswordLock特定的查询方法
     """
 
-    name = "PasswordLock"
-
-    def __init__(self, db: AsyncSession):
-        super().__init__(PasswordLock, db)
+    name = "password_lock"
 
     async def search_with_name_like(
         self,
@@ -65,8 +62,14 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
         # 应用排序
         if page_schema.order_by:
             for order_field in page_schema.order_by:
-                if hasattr(PasswordLock, order_field):
-                    query = query.order_by(getattr(PasswordLock, order_field))
+                if order_field.startswith("-"):
+                    _order_field = order_field[1:]
+                    if hasattr(PasswordLock, _order_field):
+                        query = query.order_by(getattr(PasswordLock, _order_field).desc())
+                else:
+                    _order_field = order_field
+                    if hasattr(PasswordLock, _order_field):
+                        query = query.order_by(getattr(PasswordLock, _order_field).asc())
 
         # 应用分页
         if page_schema.use_pager and page_schema.limit > 0:

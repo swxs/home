@@ -8,13 +8,14 @@ from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db
+from web.dependencies.db import get_db, get_single_worker
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
 from web.dependencies.token import TokenSchema, get_token
 from web.exceptions import Http400BadRequestException
 from web.response import success
 
 # 本模块方法
+from ..models.password_lock import PasswordLock
 from ..repositories.password_lock_repository import PasswordLockRepository
 from ..schemas.password_lock import PasswordLockSchema, get_password_lock_schema
 
@@ -30,10 +31,9 @@ async def get_password_lock_list(
     page_schema: PageSchema = Depends(get_pagination),
     db: AsyncSession = Depends(get_db),
 ):
-    password_lock_repo = PasswordLockRepository(db)
-
-    # 使用Repository搜索方法
-    result = await password_lock_repo.search(password_lock_schema, page_schema)
+    single_worker = await get_single_worker(db, PasswordLock)
+    async with single_worker as worker:
+        result = await worker.repository.search(password_lock_schema, page_schema)
 
     # 转换为 Schema
     password_lock_list = [PasswordLockSchema.model_validate(pl).model_dump() for pl in result["data"]]
@@ -52,10 +52,9 @@ async def get_password_lock(
     password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
 ):
-    password_lock_repo = PasswordLockRepository(db)
-
-    # 使用Repository查找方法
-    password_lock = await password_lock_repo.find_one(password_lock_id, "密码锁不存在")
+    single_worker = await get_single_worker(db, PasswordLock)
+    async with single_worker as worker:
+        password_lock = await worker.repository.find_one(password_lock_id)
 
     # 转换为 Schema
     password_lock_response = PasswordLockSchema.model_validate(password_lock)
@@ -73,10 +72,9 @@ async def create_password_lock(
     password_lock_schema: PasswordLockSchema = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
-    password_lock_repo = PasswordLockRepository(db)
-
-    # 使用Repository创建方法
-    password_lock = await password_lock_repo.create_one(password_lock_schema, "密码锁创建失败")
+    single_worker = await get_single_worker(db, PasswordLock)
+    async with single_worker as worker:
+        password_lock = await worker.repository.create_one(password_lock_schema)
 
     password_lock_response = PasswordLockSchema.model_validate(password_lock)
 
@@ -94,15 +92,9 @@ async def modify_password_lock(
     password_lock_schema: PasswordLockSchema = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
-    password_lock_repo = PasswordLockRepository(db)
-
-    # 使用Repository更新方法
-    password_lock = await password_lock_repo.update_one(
-        password_lock_id,
-        password_lock_schema,
-        "密码锁不存在",
-        "密码锁更新失败",
-    )
+    single_worker = await get_single_worker(db, PasswordLock)
+    async with single_worker as worker:
+        password_lock = await worker.repository.update_one(password_lock_id, password_lock_schema)
 
     # 转换为 Schema
     password_lock_response = PasswordLockSchema.model_validate(password_lock)
@@ -120,10 +112,9 @@ async def delete_password_lock(
     password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
 ):
-    password_lock_repo = PasswordLockRepository(db)
-
-    # 使用Repository删除方法
-    count = await password_lock_repo.delete_one(password_lock_id, "密码锁不存在", "密码锁删除失败")
+    single_worker = await get_single_worker(db, PasswordLock)
+    async with single_worker as worker:
+        count = await worker.repository.delete_one(password_lock_id)
 
     return success(
         {

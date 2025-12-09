@@ -8,14 +8,13 @@ from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db
+from web.dependencies.db import get_db, get_single_worker
 from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
 from web.dependencies.token import TokenSchema, get_token
-from web.exceptions import Http400BadRequestException
 from web.response import success
 
 # 本模块方法
-from ..repositories.wechat_msg_repository import WechatMsgRepository
+from ..models.wechat_msg import WechatMsg
 from ..schemas.wechat_msg import WechatMsgSchema, get_wechat_msg_schema
 
 router = APIRouter()
@@ -30,10 +29,9 @@ async def get_wechat_msg_list(
     page_schema: PageSchema = Depends(get_pagination),
     db: AsyncSession = Depends(get_db),
 ):
-    wechat_msg_repo = WechatMsgRepository(db)
-
-    # 使用Repository搜索方法
-    result = await wechat_msg_repo.search(wechat_msg_schema, page_schema)
+    single_worker = await get_single_worker(db, WechatMsg)
+    async with single_worker as worker:
+        result = await worker.repository.search(wechat_msg_schema, page_schema)
 
     # 转换为 Schema
     wechat_msg_list = [WechatMsgSchema.model_validate(wm).model_dump() for wm in result["data"]]
@@ -52,10 +50,9 @@ async def get_wechat_msg(
     wechat_msg_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
 ):
-    wechat_msg_repo = WechatMsgRepository(db)
-
-    # 使用Repository查找方法
-    wechat_msg = await wechat_msg_repo.find_one(wechat_msg_id, "微信消息不存在")
+    single_worker = await get_single_worker(db, WechatMsg)
+    async with single_worker as worker:
+        wechat_msg = await worker.repository.find_one(wechat_msg_id)
 
     # 转换为 Schema
     wechat_msg_response = WechatMsgSchema.model_validate(wechat_msg)
@@ -73,10 +70,9 @@ async def create_wechat_msg(
     wechat_msg_schema: WechatMsgSchema = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
-    wechat_msg_repo = WechatMsgRepository(db)
-
-    # 使用Repository创建方法
-    wechat_msg = await wechat_msg_repo.create_one(wechat_msg_schema, "微信消息创建失败")
+    single_worker = await get_single_worker(db, WechatMsg)
+    async with single_worker as worker:
+        wechat_msg = await worker.repository.create_one(wechat_msg_schema)
 
     wechat_msg_response = WechatMsgSchema.model_validate(wechat_msg)
 
@@ -94,15 +90,9 @@ async def modify_wechat_msg(
     wechat_msg_schema: WechatMsgSchema = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
-    wechat_msg_repo = WechatMsgRepository(db)
-
-    # 使用Repository更新方法
-    wechat_msg = await wechat_msg_repo.update_one(
-        wechat_msg_id,
-        wechat_msg_schema,
-        "微信消息不存在",
-        "微信消息更新失败",
-    )
+    single_worker = await get_single_worker(db, WechatMsg)
+    async with single_worker as worker:
+        wechat_msg = await worker.repository.update_one(wechat_msg_id, wechat_msg_schema)
 
     # 转换为 Schema
     wechat_msg_response = WechatMsgSchema.model_validate(wechat_msg)
@@ -120,10 +110,9 @@ async def delete_wechat_msg(
     wechat_msg_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
 ):
-    wechat_msg_repo = WechatMsgRepository(db)
-
-    # 使用Repository删除方法
-    count = await wechat_msg_repo.delete_one(wechat_msg_id, "微信消息不存在", "微信消息删除失败")
+    single_worker = await get_single_worker(db, WechatMsg)
+    async with single_worker as worker:
+        count = await worker.repository.delete_one(wechat_msg_id)
 
     return success(
         {

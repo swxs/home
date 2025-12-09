@@ -32,11 +32,7 @@ class BaseRepository(Generic[T]):
         self.db = db
         self.model = model
 
-    async def find_one(
-        self,
-        id: str,
-        error_message: str = "资源不存在",
-    ) -> T:
+    async def find_one(self, id: str) -> Optional[T]:
         """
         根据ID查找单个资源
 
@@ -51,13 +47,9 @@ class BaseRepository(Generic[T]):
             Http400BadRequestException: 资源不存在时抛出
         """
         query = select(self.model).where(self.model.id == id)
+
         result = await self.db.execute(query)
-        instance = result.scalar_one_or_none()
-
-        if instance is None:
-            raise Http400BadRequestException(Http400BadRequestException.NoResource, error_message)
-
-        return instance
+        return result.scalar_one_or_none()
 
     async def find_one_or_none(self, schema: PydanticBaseModel) -> Optional[T]:
         """
@@ -70,8 +62,6 @@ class BaseRepository(Generic[T]):
             找到的资源实例或None
         """
         query = select(self.model)
-        result = await self.db.execute(query)
-
         filter_dict = schema.model_dump(exclude_unset=True, exclude_none=True)
         for key, value in filter_dict.items():
             if hasattr(self.model, key):
@@ -142,7 +132,6 @@ class BaseRepository(Generic[T]):
     async def create_one(
         self,
         schema: PydanticBaseModel,
-        error_message: str = "创建失败",
     ) -> T:
         """
         创建单个资源
@@ -150,31 +139,20 @@ class BaseRepository(Generic[T]):
 
         Args:
             schema: 资源数据的Schema对象
-            error_message: 创建失败时的错误消息
 
         Returns:
             创建的资源实例
-
-        Raises:
-            Http400BadRequestException: 创建失败时抛出
         """
         instance = self.model(**schema.model_dump())
         self.db.add(instance)
-        try:
-            await self.db.commit()
-        except Exception as e:
-            await self.db.rollback()
-            raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, error_message)
+        await self.db.flush()
         await self.db.refresh(instance)
-
         return instance
 
     async def update_one(
         self,
         id: str,
         schema: PydanticBaseModel,
-        error_message_not_found: str = "资源不存在",
-        error_message_update: str = "更新失败",
     ) -> T:
         """
         更新单个资源
@@ -183,8 +161,6 @@ class BaseRepository(Generic[T]):
         Args:
             id: 资源ID
             schema: 更新数据的Schema对象
-            error_message_not_found: 资源不存在时的错误消息
-            error_message_update: 更新失败时的错误消息
 
         Returns:
             更新后的资源实例
@@ -193,7 +169,10 @@ class BaseRepository(Generic[T]):
             Http400BadRequestException: 资源不存在或更新失败时抛出
         """
         # 查询资源
-        instance = await self.find_one(id, error_message_not_found)
+        instance = await self.find_one(id)
+
+        if not instance:
+            raise Http400BadRequestException(Http400BadRequestException.NoResource, "对象不存在")
 
         # 更新资源信息（通过反射，不依赖具体字段）
         update_data = schema.model_dump(exclude_unset=True, exclude_none=True)
@@ -201,47 +180,25 @@ class BaseRepository(Generic[T]):
             if hasattr(instance, key):
                 setattr(instance, key, value)
 
-        try:
-            await self.db.commit()
-        except Exception as e:
-            await self.db.rollback()
-            raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, error_message_update)
+        await self.db.flush()
         await self.db.refresh(instance)
-
         return instance
 
     async def delete_one(
         self,
         id: str,
-        error_message_not_found: str = "资源不存在",
-        error_message_delete: str = "删除失败",
-    ) -> int:
+    ):
         """
         删除单个资源
         不依赖具体表结构，通过Generic实现
 
         Args:
             id: 资源ID
-            error_message_not_found: 资源不存在时的错误消息
-            error_message_delete: 删除失败时的错误消息
 
         Returns:
             删除的行数
-
-        Raises:
-            Http400BadRequestException: 资源不存在或删除失败时抛出
         """
-        # 查询资源（验证存在性）
-        await self.find_one(id, error_message_not_found)
-
-        # 删除资源
-        try:
-            stmt = delete(self.model).where(self.model.id == id)
-            result = await self.db.execute(stmt)
-            await self.db.commit()
-            count = result.rowcount
-        except Exception as e:
-            await self.db.rollback()
-            raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, error_message_delete)
-
-        return count
+        stmt = delete(self.model).where(self.model.id == id)
+        result = await self.db.execute(stmt)
+        await self.db.flush()
+        return result.rowcount

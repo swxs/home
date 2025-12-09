@@ -3,7 +3,7 @@
 # @AUTH    : model_creater
 
 import datetime
-from typing import Dict, List, Optional, TypedDict
+from typing import Dict, List, NotRequired, Optional, TypedDict
 
 from fastapi import Query
 
@@ -12,7 +12,7 @@ from web.schemas import BaseSchema
 
 
 class PasswordLockCustom(TypedDict):
-    password: Optional[str] = None
+    password: NotRequired[str]
 
 
 class PasswordLockSchema(BaseSchema):

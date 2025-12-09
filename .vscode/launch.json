@@ -22,6 +22,14 @@
       "justMyCode": false
     },
     {
+      "name": "RUN[HOME-INITDATA]",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scripts.import_mongodb_data",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "DEV[HOME-create]",
       "type": "debugpy",
       "request": "launch",
