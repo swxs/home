@@ -12,7 +12,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
 from web.response import CustomFileresponse, success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 通用方法
@@ -22,13 +23,14 @@ from commons.Helpers import oss2_helper
 from .. import consts
 from ..models.file_info import FileInfo
 from ..schemas.file_info import FileInfoSchema
+from ..schemas.response import CountResponse, FileInfoResponse, FilePathResponse
 
 router = APIRouter()
 
 logger = logging.getLogger("main.apps.upload.api.upload")
 
 
-@router.post("/")
+@router.post("/", response_model=SuccessResponse[FileInfoResponse])
 async def upload_file(
     file: UploadFile,
     db: AsyncSession = Depends(get_db),
@@ -64,7 +66,7 @@ async def upload_file(
 async def download_file(
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
-):
+) -> CustomFileresponse:
     single_worker = await get_single_worker(db, FileInfo)
     async with single_worker as worker:
         file_info = await worker.repository.find_one(file_info_id)
@@ -75,7 +77,7 @@ async def download_file(
     )
 
 
-@router.delete("/{file_info_id}")
+@router.delete("/{file_info_id}", response_model=SuccessResponse[CountResponse])
 async def delete_file(
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
@@ -93,7 +95,7 @@ async def delete_file(
     )
 
 
-@router.get("/path/{file_info_id}")
+@router.get("/path/{file_info_id}", response_model=SuccessResponse[FilePathResponse])
 async def path(
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
     db: AsyncSession = Depends(get_db),
@@ -104,11 +106,9 @@ async def path(
 
     return success(
         {
-            "data": {
-                "path": oss2_helper.get_sign_download_path(
-                    f"{file_info.file_id[:4]}/{file_info.file_id[4:]}",
-                    file_info.file_name,
-                ),
-            },
+            "path": oss2_helper.get_sign_download_path(
+                f"{file_info.file_id[:4]}/{file_info.file_id[4:]}",
+                file_info.file_name,
+            ),
         }
     )

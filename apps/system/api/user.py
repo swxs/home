@@ -11,12 +11,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.user import User
 from ..repositories.user_repository import UserRepository
+from ..schemas.response import CountResponse, UserResponse, UserSearchResponse
 from ..schemas.user import UserSchema, get_user_schema
 
 router = APIRouter()
@@ -24,7 +26,7 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.system.api.user")
 
 
-@router.get("/")
+@router.get("/", response_model=SuccessResponse[UserSearchResponse])
 async def get_user_list(
     token_schema: TokenSchema = Depends(get_token),
     user_schema: UserSchema = Depends(get_user_schema),
@@ -44,7 +46,7 @@ async def get_user_list(
     )
 
 
-@router.get("/{user_id}")
+@router.get("/{user_id}", response_model=SuccessResponse[UserResponse])
 async def get_user(
     token_schema: TokenSchema = Depends(get_token),
     user_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -65,7 +67,7 @@ async def get_user(
     )
 
 
-@router.post("/")
+@router.post("/", response_model=SuccessResponse[UserResponse])
 async def create_user(
     token_schema: TokenSchema = Depends(get_token),
     user_schema: UserSchema = Body(...),
@@ -82,7 +84,7 @@ async def create_user(
     )
 
 
-@router.put("/{user_id}")
+@router.put("/{user_id}", response_model=SuccessResponse[UserResponse])
 async def modify_user(
     token_schema: TokenSchema = Depends(get_token),
     user_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -101,7 +103,7 @@ async def modify_user(
     )
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", response_model=SuccessResponse[CountResponse])
 async def delete_user(
     token_schema: TokenSchema = Depends(get_token),
     user_id: str = Path(..., regex="[0-9a-fA-F]{24}"),

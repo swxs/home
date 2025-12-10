@@ -10,7 +10,6 @@ from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 from wechatpy import parse_message
 from wechatpy.crypto import WeChatCrypto
 from wechatpy.events import BaseEvent, SubscribeEvent, UnsubscribeEvent
@@ -20,9 +19,10 @@ from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
 from core import config
-from web.dependencies.db import get_db, get_unit_worker
+from web.dependencies.db import get_unit_worker
 from web.dependencies.unit_worker import UnitWorker
 from web.response import success
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token, get_token_by_openid
 
 from apps.system import consts
@@ -37,6 +37,7 @@ from apps.system.schemas.user_auth import UserAuthSchema
 from ..messageContent import content_productor
 from ..models.wechat_msg import WechatMsg
 from ..repositories.wechat_msg_repository import WechatMsgRepository
+from ..schemas.response import WechatMsgTestResponse
 from ..schemas.wechat_msg import WechatMsgSchema
 from ..schemas.wechat_msg_test import WechatMsgTestSchema
 
@@ -51,7 +52,7 @@ async def get_message(
     nonce: Optional[str] = Query(None),
     signature: Optional[str] = Query(None),
     timestamp: Optional[str] = Query(None),
-):
+) -> PlainTextResponse:
     try:
         check_signature(config.WECHAT_TOKEN, signature, timestamp, nonce)
         logger.debug(f"check_signature: {signature}, return: {echostr}")
@@ -72,7 +73,7 @@ async def post_message(
     msg_signature: Optional[str] = Query(None),
     token_schema: TokenSchema = Depends(get_token_by_openid),
     unit_worker: UnitWorker = Depends(get_unit_worker),
-):
+) -> PlainTextResponse:
     try:
         xml = await request.body()
         logger.info(f"xml: {xml}")
@@ -179,7 +180,7 @@ async def post_message(
     return PlainTextResponse(content=encrypted_xml)
 
 
-@router.post("/test")
+@router.post("/test", response_model=SuccessResponse[WechatMsgTestResponse])
 async def post_message_test(
     token_schema: TokenSchema = Depends(get_token),
     msg_schema: WechatMsgTestSchema = Body(...),

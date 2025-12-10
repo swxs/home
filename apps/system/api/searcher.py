@@ -10,7 +10,8 @@ from fastapi.param_functions import Depends
 from web.dependencies.db import get_unit_worker
 from web.dependencies.unit_worker import UnitWorker
 from web.response import success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
@@ -18,6 +19,7 @@ from ..models.user import User
 from ..models.user_auth import UserAuth
 from ..repositories.user_auth_repository import UserAuthRepository
 from ..repositories.user_repository import UserRepository
+from ..schemas.response import UserWithAuthSearchResponse
 from ..schemas.user import UserSchema, get_user_schema
 from ..schemas.user_auth import UserAuthSchema
 
@@ -26,7 +28,7 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.system.api.searcher")
 
 
-@router.get("/self")
+@router.get("/self", response_model=SuccessResponse[UserWithAuthSearchResponse])
 async def get_user_with_user_auth_list(
     token_schema: TokenSchema = Depends(get_token),
     user_schema: UserSchema = Depends(get_user_schema),

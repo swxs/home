@@ -11,19 +11,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.file_info import FileInfo
 from ..schemas.file_info import FileInfoSchema, get_file_info_schema
+from ..schemas.response import CountResponse, FileInfoResponse, FileInfoSearchResponse
 
 router = APIRouter()
 
 logger = logging.getLogger("main.apps.upload.api.file_info")
 
 
-@router.get("/")
+@router.get("/", response_model=SuccessResponse[FileInfoSearchResponse])
 async def get_file_info_list(
     token_schema: TokenSchema = Depends(get_token),
     file_info_schema: FileInfoSchema = Depends(get_file_info_schema),
@@ -42,7 +44,7 @@ async def get_file_info_list(
     )
 
 
-@router.get("/{file_info_id}")
+@router.get("/{file_info_id}", response_model=SuccessResponse[FileInfoResponse])
 async def get_file_info(
     token_schema: TokenSchema = Depends(get_token),
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -62,7 +64,7 @@ async def get_file_info(
     )
 
 
-@router.post("/")
+@router.post("/", response_model=SuccessResponse[FileInfoResponse])
 async def create_file_info(
     token_schema: TokenSchema = Depends(get_token),
     file_info_schema: FileInfoSchema = Body(...),
@@ -79,7 +81,7 @@ async def create_file_info(
     )
 
 
-@router.put("/{file_info_id}")
+@router.put("/{file_info_id}", response_model=SuccessResponse[FileInfoResponse])
 async def modify_file_info(
     token_schema: TokenSchema = Depends(get_token),
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -97,7 +99,7 @@ async def modify_file_info(
     )
 
 
-@router.delete("/{file_info_id}")
+@router.delete("/{file_info_id}", response_model=SuccessResponse[CountResponse])
 async def delete_file_info(
     token_schema: TokenSchema = Depends(get_token),
     file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),

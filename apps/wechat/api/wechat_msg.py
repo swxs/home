@@ -11,11 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.wechat_msg import WechatMsg
+from ..schemas.response import CountResponse, WechatMsgResponse, WechatMsgSearchResponse
 from ..schemas.wechat_msg import WechatMsgSchema, get_wechat_msg_schema
 
 router = APIRouter()
@@ -23,7 +25,7 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.wechat.api.wechat_msg")
 
 
-@router.get("/")
+@router.get("/", response_model=SuccessResponse[WechatMsgSearchResponse])
 async def get_wechat_msg_list(
     token_schema: TokenSchema = Depends(get_token),
     wechat_msg_schema: WechatMsgSchema = Depends(get_wechat_msg_schema),
@@ -42,7 +44,7 @@ async def get_wechat_msg_list(
     )
 
 
-@router.get("/{wechat_msg_id}")
+@router.get("/{wechat_msg_id}", response_model=SuccessResponse[WechatMsgResponse])
 async def get_wechat_msg(
     token_schema: TokenSchema = Depends(get_token),
     wechat_msg_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -62,7 +64,7 @@ async def get_wechat_msg(
     )
 
 
-@router.post("/")
+@router.post("/", response_model=SuccessResponse[WechatMsgResponse])
 async def create_wechat_msg(
     token_schema: TokenSchema = Depends(get_token),
     wechat_msg_schema: WechatMsgSchema = Body(...),
@@ -79,7 +81,7 @@ async def create_wechat_msg(
     )
 
 
-@router.put("/{wechat_msg_id}")
+@router.put("/{wechat_msg_id}", response_model=SuccessResponse[WechatMsgResponse])
 async def modify_wechat_msg(
     token_schema: TokenSchema = Depends(get_token),
     wechat_msg_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -97,7 +99,7 @@ async def modify_wechat_msg(
     )
 
 
-@router.delete("/{wechat_msg_id}")
+@router.delete("/{wechat_msg_id}", response_model=SuccessResponse[CountResponse])
 async def delete_wechat_msg(
     token_schema: TokenSchema = Depends(get_token),
     wechat_msg_id: str = Path(..., regex="[0-9a-fA-F]{24}"),

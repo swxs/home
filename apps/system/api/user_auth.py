@@ -11,12 +11,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.user_auth import UserAuth
 from ..repositories.user_auth_repository import UserAuthRepository
+from ..schemas.response import CountResponse, UserAuthResponse, UserAuthSearchResponse
 from ..schemas.user_auth import UserAuthSchema, get_user_auth_schema
 
 router = APIRouter()
@@ -24,7 +26,7 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.system.api.user_auth")
 
 
-@router.get("/")
+@router.get("/", response_model=SuccessResponse[UserAuthSearchResponse])
 async def get_user_auth_list(
     token_schema: TokenSchema = Depends(get_token),
     user_auth_schema: UserAuthSchema = Depends(get_user_auth_schema),
@@ -44,7 +46,7 @@ async def get_user_auth_list(
     )
 
 
-@router.get("/{user_auth_id}")
+@router.get("/{user_auth_id}", response_model=SuccessResponse[UserAuthResponse])
 async def get_user_auth(
     token_schema: TokenSchema = Depends(get_token),
     user_auth_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -65,7 +67,7 @@ async def get_user_auth(
     )
 
 
-@router.post("/")
+@router.post("/", response_model=SuccessResponse[UserAuthResponse])
 async def create_user_auth(
     token_schema: TokenSchema = Depends(get_token),
     user_auth_schema: UserAuthSchema = Body(...),
@@ -83,7 +85,7 @@ async def create_user_auth(
     )
 
 
-@router.put("/{user_auth_id}")
+@router.put("/{user_auth_id}", response_model=SuccessResponse[UserAuthResponse])
 async def modify_user_auth(
     token_schema: TokenSchema = Depends(get_token),
     user_auth_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
@@ -102,7 +104,7 @@ async def modify_user_auth(
     )
 
 
-@router.delete("/{user_auth_id}")
+@router.delete("/{user_auth_id}", response_model=SuccessResponse[CountResponse])
 async def delete_user_auth(
     token_schema: TokenSchema = Depends(get_token),
     user_auth_id: str = Path(..., regex="[0-9a-fA-F]{24}"),

@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
-from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.pagination import PageSchema, get_pagination
+from web.schemas.response import SearchResponse, SuccessResponse
 from web.schemas.search import SearchSchema, get_search
 from web.schemas.token import TokenSchema, get_token
 
@@ -19,13 +20,14 @@ from web.schemas.token import TokenSchema, get_token
 from .. import password_lock_utils
 from ..models.password_lock import PasswordLock
 from ..schemas.password_lock import PasswordLockSchema, get_password_lock_schema
+from ..schemas.response import PasswordLockSearchResponse, PasswordResponse
 
 router = APIRouter()
 
 logger = logging.getLogger("main.apps.password_lock.api.searcher")
 
 
-@router.get("/self")
+@router.get("/self", response_model=SearchResponse[PasswordLockSearchResponse])
 async def get_password_lock_list(
     token_schema: TokenSchema = Depends(get_token),
     password_lock_schema: PasswordLockSchema = Depends(get_password_lock_schema),
@@ -53,7 +55,7 @@ async def get_password_lock_list(
     )
 
 
-@router.get("/self/{password_lock_id}")
+@router.get("/self/{password_lock_id}", response_model=SuccessResponse[PasswordResponse])
 async def get_password(
     token_schema: TokenSchema = Depends(get_token),
     password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),

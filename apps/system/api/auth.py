@@ -13,6 +13,7 @@ from web.dependencies.db import get_db, get_unit_worker
 from web.dependencies.unit_worker import UnitWorker
 from web.response import success
 from web.schemas.pagination import PageSchema
+from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema
 
 # 通用方法
@@ -29,6 +30,7 @@ from ..models.user import User
 from ..models.user_auth import UserAuth
 from ..repositories.user_auth_repository import UserAuthRepository
 from ..repositories.user_repository import UserRepository
+from ..schemas.response import TokenResponse, UserAuthResponse
 from ..schemas.user import UserSchema
 from ..schemas.user_auth import UserAuthSchema
 
@@ -37,7 +39,7 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.system.api.auth")
 
 
-@router.post("/refresh_token")
+@router.post("/refresh_token", response_model=SuccessResponse[TokenResponse])
 async def get_refresh_token(
     ttype: int = Body(..., embed=True),
     identifier: str = Body(..., embed=True),
@@ -70,7 +72,7 @@ async def get_refresh_token(
     )
 
 
-@router.post("/token")
+@router.post("/token", response_model=SuccessResponse[TokenResponse])
 async def get_token(
     refresh_token: str = Body(..., embed=True),
 ):
@@ -100,7 +102,7 @@ async def get_token(
     )
 
 
-@router.post("/signin")
+@router.post("/signin", response_model=SuccessResponse[UserAuthResponse])
 async def create_user_auth(
     user_auth_schema: UserAuthSchema = Body(...),
     unit_worker: UnitWorker = Depends(get_unit_worker),
