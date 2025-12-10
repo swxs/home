@@ -9,11 +9,11 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.search import SearchSchema, get_search
-from web.dependencies.token import TokenSchema, get_token
 from web.exceptions import Http400BadRequestException
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.search import SearchSchema, get_search
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from .. import password_lock_utils
@@ -45,15 +45,10 @@ async def get_password_lock_list(
             name_search=search_schema.search if search_schema.search else None,
         )
 
-    # 转换为 Schema
-    password_lock_list = []
-    for pl in result["data"]:
-        password_lock_list.append(PasswordLockSchema.model_validate(pl).model_dump())
-
     return success(
         {
-            "data": password_lock_list,
-            "pagination": result["pagination"].model_dump(),
+            "data": [PasswordLockSchema.model_validate(pl) for pl in result["data"]],
+            "pagination": result["pagination"],
         }
     )
 
@@ -69,12 +64,15 @@ async def get_password(
         # 使用Repository查找方法
         password_lock = await worker.repository.find_one(password_lock_id)
 
-    # 验证用户权限
+    if password_lock is None:
+        raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
+
     if str(password_lock.user_id) != token_schema.user_id:
-        raise Http400BadRequestException(Http400BadRequestException.NoResource, "无权访问该密码锁")
+        raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, "无权访问该密码")
 
     # 获取密码
-    password = await password_lock_utils.get_password(password_lock)
+    password_lock_schema = PasswordLockSchema.model_validate(password_lock)
+    password = await password_lock_utils.get_password(password_lock_schema)
 
     return success(
         {

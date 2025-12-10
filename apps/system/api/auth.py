@@ -8,12 +8,12 @@ import logging
 from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 
-from mysqlengine.repositories.unit_worker import UnitWorker
 from web import exceptions
 from web.dependencies.db import get_db, get_unit_worker
-from web.dependencies.pagination import PageSchema
-from web.dependencies.token import TokenSchema
+from web.dependencies.unit_worker import UnitWorker
 from web.response import success
+from web.schemas.pagination import PageSchema
+from web.schemas.token import TokenSchema
 
 # 通用方法
 from commons.Helpers import refresh_tokener, tokener
@@ -44,18 +44,14 @@ async def get_refresh_token(
 ):
     # 使用 Schema 构建查询条件
     user_auth_schema = UserAuthSchema(ttype=ttype, identifier=identifier, credential=credential)
-    page_schema = PageSchema(limit=1, skip=0, use_pager=False)
 
     # 使用Repository搜索方法
     async with unit_worker as uw:
         user_auth_repo = uw.get_repository(UserAuth)
-        result = await user_auth_repo.search(user_auth_schema, page_schema)
-        user_auth_list = result["data"]
+        user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
 
-    if not user_auth_list:
+    if not user_auth:
         raise exceptions.Http403ForbiddenException(exceptions.Http403ForbiddenException.PasswordError, "账号信息不正确")
-
-    user_auth = user_auth_list[0]
 
     # 生成jwt
     token_schema = TokenSchema(
@@ -115,15 +111,11 @@ async def create_user_auth(
         user = await user_repo.create_one(user_schema)
 
         # 创建用户认证信息
-        user_auth_data = user_auth_schema.model_dump()
-        user_auth_data["user_id"] = user.id
-        user_auth_schema_with_user_id = UserAuthSchema(**user_auth_data)
-        user_auth = await user_auth_repo.create_one(user_auth_schema_with_user_id)
-
-    user_auth_response = UserAuthSchema.model_validate(user_auth)
+        user_auth_schema.user_id = user.id
+        user_auth = await user_auth_repo.create_one(user_auth_schema)
 
     return success(
         {
-            "data": user_auth_response.model_dump(),
+            "data": UserAuthSchema.model_validate(user_auth),
         }
     )

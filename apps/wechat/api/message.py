@@ -23,10 +23,10 @@ from apps.system.consts import UserAuth_Ifverified, UserAuth_Ttype
 from apps.system.models.user_auth import UserAuth
 from apps.system.schemas.user_auth import UserAuthSchema
 from core import config
-from mysqlengine.repositories.unit_worker import UnitWorker
 from web.dependencies.db import get_db, get_unit_worker
-from web.dependencies.token import TokenSchema, get_token, get_token_by_openid
+from web.dependencies.unit_worker import UnitWorker
 from web.response import success
+from web.schemas.token import TokenSchema, get_token, get_token_by_openid
 
 # 本模块方法
 from ..messageContent import content_productor

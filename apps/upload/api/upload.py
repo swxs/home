@@ -11,9 +11,9 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
 from web.response import CustomFileresponse, success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 通用方法
 from commons.Helpers import oss2_helper

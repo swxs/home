@@ -9,9 +9,10 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
+from web.exceptions import Http400BadRequestException
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.wechat_msg import WechatMsg
@@ -33,13 +34,10 @@ async def get_wechat_msg_list(
     async with single_worker as worker:
         result = await worker.repository.search(wechat_msg_schema, page_schema)
 
-    # 转换为 Schema
-    wechat_msg_list = [WechatMsgSchema.model_validate(wm).model_dump() for wm in result["data"]]
-
     return success(
         {
-            "data": wechat_msg_list,
-            "pagination": result["pagination"].model_dump(),
+            "data": [WechatMsgSchema.model_validate(wm) for wm in result["data"]],
+            "pagination": result["pagination"],
         }
     )
 
@@ -54,12 +52,12 @@ async def get_wechat_msg(
     async with single_worker as worker:
         wechat_msg = await worker.repository.find_one(wechat_msg_id)
 
-    # 转换为 Schema
-    wechat_msg_response = WechatMsgSchema.model_validate(wechat_msg)
+    if wechat_msg is None:
+        raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
 
     return success(
         {
-            "data": wechat_msg_response.model_dump(),
+            "data": WechatMsgSchema.model_validate(wechat_msg),
         }
     )
 
@@ -74,11 +72,9 @@ async def create_wechat_msg(
     async with single_worker as worker:
         wechat_msg = await worker.repository.create_one(wechat_msg_schema)
 
-    wechat_msg_response = WechatMsgSchema.model_validate(wechat_msg)
-
     return success(
         {
-            "data": wechat_msg_response.model_dump(),
+            "data": WechatMsgSchema.model_validate(wechat_msg),
         }
     )
 
@@ -94,12 +90,9 @@ async def modify_wechat_msg(
     async with single_worker as worker:
         wechat_msg = await worker.repository.update_one(wechat_msg_id, wechat_msg_schema)
 
-    # 转换为 Schema
-    wechat_msg_response = WechatMsgSchema.model_validate(wechat_msg)
-
     return success(
         {
-            "data": wechat_msg_response.model_dump(),
+            "data": WechatMsgSchema.model_validate(wechat_msg),
         }
     )
 

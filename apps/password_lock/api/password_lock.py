@@ -9,10 +9,10 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
 from web.exceptions import Http400BadRequestException
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.password_lock import PasswordLock
@@ -35,13 +35,10 @@ async def get_password_lock_list(
     async with single_worker as worker:
         result = await worker.repository.search(password_lock_schema, page_schema)
 
-    # 转换为 Schema
-    password_lock_list = [PasswordLockSchema.model_validate(pl).model_dump() for pl in result["data"]]
-
     return success(
         {
-            "data": password_lock_list,
-            "pagination": result["pagination"].model_dump(),
+            "data": [PasswordLockSchema.model_validate(pl) for pl in result["data"]],
+            "pagination": result["pagination"],
         }
     )
 
@@ -56,12 +53,12 @@ async def get_password_lock(
     async with single_worker as worker:
         password_lock = await worker.repository.find_one(password_lock_id)
 
-    # 转换为 Schema
-    password_lock_response = PasswordLockSchema.model_validate(password_lock)
+    if password_lock is None:
+        raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
 
     return success(
         {
-            "data": password_lock_response.model_dump(),
+            "data": PasswordLockSchema.model_validate(password_lock),
         }
     )
 
@@ -76,11 +73,9 @@ async def create_password_lock(
     async with single_worker as worker:
         password_lock = await worker.repository.create_one(password_lock_schema)
 
-    password_lock_response = PasswordLockSchema.model_validate(password_lock)
-
     return success(
         {
-            "data": password_lock_response.model_dump(),
+            "data": PasswordLockSchema.model_validate(password_lock),
         }
     )
 
@@ -96,12 +91,9 @@ async def modify_password_lock(
     async with single_worker as worker:
         password_lock = await worker.repository.update_one(password_lock_id, password_lock_schema)
 
-    # 转换为 Schema
-    password_lock_response = PasswordLockSchema.model_validate(password_lock)
-
     return success(
         {
-            "data": password_lock_response.model_dump(),
+            "data": PasswordLockSchema.model_validate(password_lock),
         }
     )
 

@@ -7,11 +7,11 @@ import logging
 from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 
-from mysqlengine.repositories.unit_worker import UnitWorker
 from web.dependencies.db import get_unit_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
+from web.dependencies.unit_worker import UnitWorker
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.user import User

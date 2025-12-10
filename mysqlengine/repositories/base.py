@@ -2,15 +2,15 @@
 # @File    : repositories/base.py
 # @AUTH    : code_creater
 
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, Dict, Generic, Optional, Type, TypeVar
 
 from pydantic import BaseModel as PydanticBaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mysqlengine import baseModel
-from web.dependencies.pagination import PageSchema, PaginationSchema
 from web.exceptions import Http400BadRequestException
+from web.schemas.pagination import PageSchema, PaginationSchema
 
 T = TypeVar("T", bound=baseModel)
 

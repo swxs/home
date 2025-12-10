@@ -9,10 +9,10 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
 from web.exceptions import Http400BadRequestException
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.user import User
@@ -36,12 +36,10 @@ async def get_user_list(
         result = await worker.repository.search(user_schema, page_schema)
 
     # 转换为 Schema
-    user_list = [UserSchema.model_validate(user).model_dump() for user in result["data"]]
-
     return success(
         {
-            "data": user_list,
-            "pagination": result["pagination"].model_dump(),
+            "data": [UserSchema.model_validate(user) for user in result["data"]],
+            "pagination": result["pagination"],
         }
     )
 
@@ -56,12 +54,13 @@ async def get_user(
     async with single_worker as worker:
         user = await worker.repository.find_one(user_id)
 
-    # 转换为 Schema
-    user_response = UserSchema.model_validate(user)
+    if user is None:
+        raise Http400BadRequestException(Http400BadRequestException.NoResource, "用户不存在")
 
+    # 转换为 Schema
     return success(
         {
-            "data": user_response.model_dump(),
+            "data": UserSchema.model_validate(user),
         }
     )
 
@@ -76,11 +75,9 @@ async def create_user(
     async with single_worker as worker:
         user = await worker.repository.create_one(user_schema)
 
-    user_response = UserSchema.model_validate(user)
-
     return success(
         {
-            "data": user_response.model_dump(),
+            "data": UserSchema.model_validate(user),
         }
     )
 
@@ -97,11 +94,9 @@ async def modify_user(
         user = await worker.repository.update_one(user_id, user_schema)
 
     # 转换为 Schema
-    user_response = UserSchema.model_validate(user)
-
     return success(
         {
-            "data": user_response.model_dump(),
+            "data": UserSchema.model_validate(user),
         }
     )
 
@@ -114,10 +109,10 @@ async def delete_user(
 ):
     single_worker = await get_single_worker(db, User)
     async with single_worker as worker:
-        await worker.repository.delete_one(user_id)
+        count = await worker.repository.delete_one(user_id)
 
     return success(
         {
-            "count": 1,
+            "count": count,
         }
     )

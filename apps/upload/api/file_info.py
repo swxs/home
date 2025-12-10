@@ -9,9 +9,10 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
+from web.exceptions import Http400BadRequestException
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.file_info import FileInfo
@@ -33,13 +34,10 @@ async def get_file_info_list(
     async with single_worker as worker:
         result = await worker.repository.search(file_info_schema, page_schema)
 
-    # 转换为 Schema
-    file_info_list = [FileInfoSchema.model_validate(fi).model_dump() for fi in result["data"]]
-
     return success(
         {
-            "data": file_info_list,
-            "pagination": result["pagination"].model_dump(),
+            "data": [FileInfoSchema.model_validate(fi) for fi in result["data"]],
+            "pagination": result["pagination"],
         }
     )
 
@@ -54,12 +52,12 @@ async def get_file_info(
     async with single_worker as worker:
         file_info = await worker.repository.find_one(file_info_id)
 
-    # 转换为 Schema
-    file_info_response = FileInfoSchema.model_validate(file_info)
+    if file_info is None:
+        raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
 
     return success(
         {
-            "data": file_info_response.model_dump(),
+            "data": FileInfoSchema.model_validate(file_info),
         }
     )
 
@@ -74,11 +72,9 @@ async def create_file_info(
     async with single_worker as worker:
         file_info = await worker.repository.create_one(file_info_schema)
 
-    file_info_response = FileInfoSchema.model_validate(file_info)
-
     return success(
         {
-            "data": file_info_response.model_dump(),
+            "data": FileInfoSchema.model_validate(file_info),
         }
     )
 
@@ -94,12 +90,9 @@ async def modify_file_info(
     async with single_worker as worker:
         file_info = await worker.repository.update_one(file_info_id, file_info_schema)
 
-    # 转换为 Schema
-    file_info_response = FileInfoSchema.model_validate(file_info)
-
     return success(
         {
-            "data": file_info_response.model_dump(),
+            "data": FileInfoSchema.model_validate(file_info),
         }
     )
 

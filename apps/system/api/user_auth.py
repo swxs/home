@@ -9,10 +9,10 @@ from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from web.dependencies.db import get_db, get_single_worker
-from web.dependencies.pagination import PageSchema, PaginationSchema, get_pagination
-from web.dependencies.token import TokenSchema, get_token
 from web.exceptions import Http400BadRequestException
 from web.response import success
+from web.schemas.pagination import PageSchema, PaginationSchema, get_pagination
+from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.user_auth import UserAuth
@@ -36,12 +36,10 @@ async def get_user_auth_list(
         result = await worker.repository.search(user_auth_schema, page_schema)
 
     # 转换为 Schema
-    user_auth_list = [UserAuthSchema.model_validate(user_auth).model_dump() for user_auth in result["data"]]
-
     return success(
         {
-            "data": user_auth_list,
-            "pagination": result["pagination"].model_dump(),
+            "data": [UserAuthSchema.model_validate(user_auth) for user_auth in result["data"]],
+            "pagination": result["pagination"],
         }
     )
 
@@ -56,12 +54,13 @@ async def get_user_auth(
     async with single_worker as worker:
         user_auth = await worker.repository.find_one(user_auth_id)
 
-    # 转换为 Schema
-    user_auth_response = UserAuthSchema.model_validate(user_auth)
+    if user_auth is None:
+        raise Http400BadRequestException(Http400BadRequestException.NoResource, "用户认证信息不存在")
 
+    # 转换为 Schema
     return success(
         {
-            "data": user_auth_response.model_dump(),
+            "data": UserAuthSchema.model_validate(user_auth),
         }
     )
 
@@ -76,11 +75,10 @@ async def create_user_auth(
     async with single_worker as worker:
         user_auth = await worker.repository.create_one(user_auth_schema)
 
-    user_auth_response = UserAuthSchema.model_validate(user_auth)
-
+    # 转换为 Schema
     return success(
         {
-            "data": user_auth_response.model_dump(),
+            "data": UserAuthSchema.model_validate(user_auth),
         }
     )
 
@@ -97,11 +95,9 @@ async def modify_user_auth(
         user_auth = await worker.repository.update_one(user_auth_id, user_auth_schema)
 
     # 转换为 Schema
-    user_auth_response = UserAuthSchema.model_validate(user_auth)
-
     return success(
         {
-            "data": user_auth_response.model_dump(),
+            "data": UserAuthSchema.model_validate(user_auth),
         }
     )
 

@@ -6,8 +6,10 @@ from .http_404_not_found_exception import Http404NotFoundException
 from .http_500_internal_server_error_exception import (
     Http500InternalServerErrorException,
 )
+from .http_exception import BaseHttpException
 
 __all__ = [
+    "BaseHttpException",
     "Http400BadRequestException",
     "Http401UnauthorizedException",
     "Http403ForbiddenException",

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager
 
 from mysqlengine.repositories import BaseRepository
-from web.dependencies.pagination import PageSchema, PaginationSchema
+from web.schemas.pagination import PageSchema, PaginationSchema
 
 # 本模块方法
 from ..models.password_lock import PasswordLock

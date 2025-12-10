@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Optional
 
 from bson import ObjectId
-from pydantic import BaseModel as PydanticBaseModel
-from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,8 +10,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 from core import config
 from mysqlengine.fields import ObjectIdType
 from web.custom_types import objectId
-from web.dependencies.pagination import PageSchema, PaginationSchema
-from web.exceptions import Http400BadRequestException
 
 # 创建一个 SQLAlchemy的"引擎"
 engine = create_async_engine(

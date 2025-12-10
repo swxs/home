@@ -7,10 +7,9 @@ from urllib.parse import quote
 
 from bson import ObjectId
 from fastapi.responses import JSONResponse, Response
+from pydantic import BaseModel
 from starlette.background import BackgroundTask
 from starlette.types import Receive, Scope, Send
-
-from dao.BaseDocument import BaseDocument
 
 # 本模块方法
 from .exceptions.http_exception import BaseHttpException
@@ -19,8 +18,8 @@ logger = logging.getLogger("web.response")
 
 
 def encoder(obj):
-    if isinstance(obj, BaseDocument):
-        return obj.to_dict()
+    if isinstance(obj, BaseModel):
+        return obj.model_dump()
     elif isinstance(obj, ObjectId):
         return str(obj)
     elif isinstance(obj, datetime.datetime):
