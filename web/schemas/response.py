@@ -12,11 +12,3 @@ class SuccessResponse(BaseModel, Generic[T]):
     code: int = 0
     message: str = ""
     data: Optional[T] = None
-
-
-class SearchResponse(BaseModel, Generic[T]):
-    """搜索响应模型（带分页）"""
-
-    code: int = 0
-    message: str = ""
-    data: Optional[T] = None

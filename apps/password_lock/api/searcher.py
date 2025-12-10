@@ -12,7 +12,7 @@ from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
 from web.schemas.pagination import PageSchema, get_pagination
-from web.schemas.response import SearchResponse, SuccessResponse
+from web.schemas.response import SuccessResponse
 from web.schemas.search import SearchSchema, get_search
 from web.schemas.token import TokenSchema, get_token
 
@@ -27,7 +27,7 @@ router = APIRouter()
 logger = logging.getLogger("main.apps.password_lock.api.searcher")
 
 
-@router.get("/self", response_model=SearchResponse[PasswordLockSearchResponse])
+@router.get("/self", response_model=SuccessResponse[PasswordLockSearchResponse])
 async def get_password_lock_list(
     token_schema: TokenSchema = Depends(get_token),
     password_lock_schema: PasswordLockSchema = Depends(get_password_lock_schema),
