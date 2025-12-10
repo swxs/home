@@ -1,4 +1,4 @@
-from typing import Dict, Generic, Type
+from typing import Dict, Generic, Type, TypeVar, cast
 
 from sqlalchemy.exc import (
     DataError,
@@ -16,20 +16,23 @@ from mysqlengine.repositories.base import BaseRepository
 # 本模块方法
 from .convert_exception import _convert_db_exception
 
+T = TypeVar("T", bound=baseModel)
+
 
 class UnitWorker:
     """管理多个Repository和事务"""
 
     def __init__(self, db: AsyncSession):
         self.db = db
-        self._repositories: Dict[Type, BaseRepository] = {}
+        self._repositories: Dict[Type[baseModel], BaseRepository[baseModel]] = {}
         self._committed = False
 
-    def get_repository(self, model_type: type[baseModel]) -> BaseRepository[baseModel]:
+    def get_repository(self, model_type: Type[T]) -> BaseRepository[T]:
         """获取或创建Repository"""
         if model_type not in self._repositories:
             self._repositories[model_type] = repository_productor[model_type.__tablename__](model_type, self.db)
-        return self._repositories[model_type]
+        # 类型转换：我们知道存储的repository确实是BaseRepository[T]类型
+        return cast(BaseRepository[T], self._repositories[model_type])
 
     async def commit(self):
         """提交所有更改"""

@@ -86,7 +86,9 @@ sections = [
     'THIRDPARTY',
     'FIRSTPARTY',
     'COMMONS',
+    'APPS',
     'LOCALFOLDER',
 ]
 known_commons = ['commons']
+known_apps = ['apps']
 import_headings = { commons = "通用方法", localfolder = "本模块方法" }

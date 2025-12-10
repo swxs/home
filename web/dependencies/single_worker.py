@@ -1,4 +1,4 @@
-from typing import Dict, Generic, Optional, Type
+from typing import Dict, Generic, Optional, Type, TypeVar
 
 from sqlalchemy.exc import (
     DataError,
@@ -11,17 +11,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mysqlengine import baseModel
 from mysqlengine.repositories import repository_productor
+from mysqlengine.repositories.base import BaseRepository
 
 # 本模块方法
 from .convert_exception import _convert_db_exception
 
+T = TypeVar("T", bound=baseModel)
 
-class SingleWorker:
+
+class SingleWorker(Generic[T]):
     """管理单个Repository和事务"""
 
-    def __init__(self, db: AsyncSession, model_type: type[baseModel]):
+    def __init__(self, db: AsyncSession, model_type: Type[T]):
         self.db = db
-        self.repository = repository_productor[model_type.__tablename__](model_type, self.db)
+        self.repository: BaseRepository[T] = repository_productor[model_type.__tablename__](model_type, self.db)
         self._committed = False
 
     async def commit(self):

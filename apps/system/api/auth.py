@@ -27,6 +27,8 @@ from commons.Helpers.Helper_JWT import (
 # 本模块方法
 from ..models.user import User
 from ..models.user_auth import UserAuth
+from ..repositories.user_auth_repository import UserAuthRepository
+from ..repositories.user_repository import UserRepository
 from ..schemas.user import UserSchema
 from ..schemas.user_auth import UserAuthSchema
 
@@ -47,7 +49,7 @@ async def get_refresh_token(
 
     # 使用Repository搜索方法
     async with unit_worker as uw:
-        user_auth_repo = uw.get_repository(UserAuth)
+        user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
         user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
 
     if not user_auth:
@@ -105,8 +107,8 @@ async def create_user_auth(
 ):
     user_schema = UserSchema(username=f"user_{str(uuid.uuid4())[:6]}")
     async with unit_worker as uw:
-        user_repo = uw.get_repository(User)
-        user_auth_repo = uw.get_repository(UserAuth)
+        user_repo: UserRepository = uw.get_repository(User)
+        user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
         # 创建用户
         user = await user_repo.create_one(user_schema)
 

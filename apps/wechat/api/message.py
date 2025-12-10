@@ -2,6 +2,7 @@
 # @File    : api/message.py
 # @AUTH    : code_creater
 
+import uuid
 import logging
 from typing import Optional
 
@@ -18,19 +19,24 @@ from wechatpy.messages import BaseMessage, TextMessage
 from wechatpy.replies import TextReply
 from wechatpy.utils import check_signature
 
-from apps.system import consts
-from apps.system.consts import UserAuth_Ifverified, UserAuth_Ttype
-from apps.system.models.user_auth import UserAuth
-from apps.system.schemas.user_auth import UserAuthSchema
 from core import config
 from web.dependencies.db import get_db, get_unit_worker
 from web.dependencies.unit_worker import UnitWorker
 from web.response import success
 from web.schemas.token import TokenSchema, get_token, get_token_by_openid
 
+from apps.system import consts
+from apps.system.models.user import User
+from apps.system.models.user_auth import UserAuth
+from apps.system.repositories.user_auth_repository import UserAuthRepository
+from apps.system.repositories.user_repository import UserRepository
+from apps.system.schemas.user import UserSchema
+from apps.system.schemas.user_auth import UserAuthSchema
+
 # 本模块方法
 from ..messageContent import content_productor
 from ..models.wechat_msg import WechatMsg
+from ..repositories.wechat_msg_repository import WechatMsgRepository
 from ..schemas.wechat_msg import WechatMsgSchema
 from ..schemas.wechat_msg_test import WechatMsgTestSchema
 
@@ -85,7 +91,7 @@ async def post_message(
         event = None
 
     async with unit_worker as uw:
-        wechat_msg_repo = uw.get_repository(WechatMsg)
+        wechat_msg_repo: WechatMsgRepository = uw.get_repository(WechatMsg)
         await wechat_msg_repo.create_one(
             WechatMsgSchema(
                 msg_id=msg.id,
@@ -110,22 +116,8 @@ async def post_message(
     elif isinstance(msg, SubscribeEvent):
         try:
             async with unit_worker as uw:
-                user_auth_repo = uw.get_repository(UserAuth)
-                await user_auth_repo.create_one(
-                    UserAuthSchema(
-                        ttype=consts.UserAuth_Ttype.WECHAT,
-                        identifier=openid,
-                        credential=openid,
-                        ifverified=consts.UserAuth_Ifverified.VERIFIED,
-                    )
-                )
-        except Exception as e:
-            logger.info(f"openid: {openid} 创建用户信息失败！")
-            pass
-    elif isinstance(msg, UnsubscribeEvent):
-        try:
-            async with unit_worker as uw:
-                user_auth_repo = uw.get_repository(UserAuth)
+                user_repo: UserRepository = uw.get_repository(User)
+                user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
                 user_auth = await user_auth_repo.find_one_or_none(
                     UserAuthSchema(
                         ttype=consts.UserAuth_Ttype.WECHAT,
@@ -134,7 +126,42 @@ async def post_message(
                     )
                 )
                 if user_auth is None:
-                    raise Exception("用户信息不存在！")
+                    user = await user_repo.create_one(
+                        UserSchema(
+                            username=f"wecht_user_{str(uuid.uuid4())[:6]}",
+                        )
+                    )
+                    user_auth = await user_auth_repo.create_one(
+                        UserAuthSchema(
+                            user_id=user.id,
+                            ttype=consts.UserAuth_Ttype.WECHAT,
+                            identifier=openid,
+                            credential=openid,
+                            ifverified=consts.UserAuth_Ifverified.VERIFIED,
+                        )
+                    )
+                else:
+                    await user_auth_repo.update_one(
+                        user_auth.id,
+                        UserAuthSchema(
+                            ifverified=consts.UserAuth_Ifverified.VERIFIED,
+                        ),
+                    )
+        except Exception as e:
+            logger.info(f"openid: {openid} 创建用户信息失败！")
+            pass
+    elif isinstance(msg, UnsubscribeEvent):
+        try:
+            async with unit_worker as uw:
+                user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
+                user_auth = await user_auth_repo.find_one_or_none(
+                    UserAuthSchema(
+                        ttype=consts.UserAuth_Ttype.WECHAT,
+                        identifier=openid,
+                        credential=openid,
+                    )
+                )
+            if user_auth:
                 await user_auth_repo.update_one(
                     user_auth.id,
                     UserAuthSchema(

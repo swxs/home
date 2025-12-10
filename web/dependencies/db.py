@@ -1,4 +1,5 @@
 from csv import excel
+from typing import Type, TypeVar
 
 from fastapi.param_functions import Depends
 from sqlalchemy.exc import (
@@ -17,6 +18,8 @@ from ..exceptions import BaseHttpException
 from .convert_exception import _convert_db_exception
 from .single_worker import SingleWorker
 from .unit_worker import UnitWorker
+
+T = TypeVar("T", bound=baseModel)
 
 
 async def get_db():
@@ -39,8 +42,8 @@ async def get_db():
             await session.close()
 
 
-async def get_single_worker(db: AsyncSession, model_type: type[baseModel]) -> SingleWorker:
-    return SingleWorker(db, model_type)
+async def get_single_worker(db: AsyncSession, model_type: Type[T]) -> SingleWorker[T]:
+    return SingleWorker[T](db, model_type)
 
 
 # 依赖注入

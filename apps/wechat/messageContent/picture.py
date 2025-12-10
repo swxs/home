@@ -3,10 +3,10 @@ import uuid
 from bson import ObjectId
 from wechatpy.replies import ImageReply, TextReply
 
-from apps.system.repositories.user_repository import UserRepository
-
 # 通用方法
 from commons.Helpers import gumengya_async_helper, wechat_helper
+
+from apps.system.repositories.user_repository import UserRepository
 
 # 本模块方法
 from .content import Content
