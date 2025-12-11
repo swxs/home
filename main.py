@@ -6,10 +6,10 @@ from fastapi import FastAPI
 from starlette.exceptions import HTTPException
 
 import core
-from apps import api_router
-from web.exceptions.http_404_not_found_exception import Http404NotFoundException
 from web.handlers.unknown_exception_handler import unknown_exception_handler
 from web.handlers.unknown_http_handler import unknown_http_handler
+
+from apps import api_router
 
 logger = logging.getLogger("main")
 

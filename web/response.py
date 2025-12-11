@@ -14,7 +14,7 @@ from starlette.types import Receive, Scope, Send
 # 本模块方法
 from .exceptions.http_exception import BaseHttpException
 
-logger = logging.getLogger("web.response")
+logger = logging.getLogger("main.web.response")
 
 
 def encoder(obj):
