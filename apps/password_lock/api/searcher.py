@@ -66,11 +66,13 @@ async def get_password(
         # 使用Repository查找方法
         password_lock = await worker.repository.find_one(password_lock_id)
 
-    if password_lock is None:
-        raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
+        if password_lock is None:
+            raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
 
-    if str(password_lock.user_id) != token_schema.user_id:
-        raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, "无权访问该密码")
+        if str(password_lock.user_id) != token_schema.user_id:
+            raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, "无权访问该密码")
+
+        await worker.repository.update_one(password_lock_id, PasswordLockSchema(used=password_lock.used + 1))
 
     # 获取密码
     password_lock_schema = PasswordLockSchema.model_validate(password_lock)
