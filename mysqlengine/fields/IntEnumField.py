@@ -52,6 +52,14 @@ class IntEnumType(TypeDecorator):
     impl = sqlalchemy.types.SMALLINT  # tinyint为mysql独有的，所以这里采用smallint
     cache_ok = False  # 值为None不能生成cache_key，且会出现警告。调整为False
 
+    @property
+    def python_type(self):
+        """
+        返回 Python 类型，用于 sqladmin 等工具识别字段类型
+        IntEnumType 在 Python 中表现为整数
+        """
+        return int
+
     def __init__(self, choice: Type[IntEnum], *args, **kwargs):
         """
         初始化 IntEnumType

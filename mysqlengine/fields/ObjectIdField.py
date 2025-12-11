@@ -20,6 +20,14 @@ class ObjectIdType(TypeDecorator):
     impl = sqlalchemy.types.BINARY(12)
     cache_ok = True
 
+    @property
+    def python_type(self):
+        """
+        返回 Python 类型，用于 sqladmin 等工具识别字段类型
+        ObjectIdType 在 Python 中表现为字符串（十六进制）
+        """
+        return str
+
     def process_bind_param(self, value, dialect):
         if value is not None:
             if isinstance(value, ObjectId):
