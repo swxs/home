@@ -3,18 +3,23 @@
 # @AUTH    : code_creater
 
 import logging
+from datetime import datetime
 from typing import Optional
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Form, Header, Query, Request
 from fastapi.param_functions import Depends
-from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import core
 from web import exceptions
 from web.dependencies.db import get_db, get_single_worker, get_unit_worker
 from web.dependencies.unit_worker import UnitWorker
-from web.response import success
+from web.response import (
+    CORSJSONResponse,
+    CORSRedirectResponse,
+    CORSResponse,
+)
 from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
@@ -31,7 +36,11 @@ from ..repositories.oauth_authorization_code_repository import (
 from ..repositories.oauth_client_repository import OAuthClientRepository
 from ..repositories.user_repository import UserRepository
 from ..schemas.oauth import OAuthTokenRequest, OAuthTokenResponse, OAuthUserInfoResponse
+from ..schemas.oauth_authorization_code import (
+    OAuthAuthorizationCodeSchema,
+)
 from ..schemas.oauth_client import OAuthClientSchema
+from ..schemas.user import UserSchema
 from ..utils.oauth import (
     build_authorization_url,
     build_error_redirect_url,
@@ -43,6 +52,12 @@ from ..utils.oauth import (
 oauth_router = APIRouter(prefix="/oauth", tags=["oauth"])
 
 logger = logging.getLogger("main.apps.system.api.oauth")
+
+
+@oauth_router.options("/{path:path}")
+async def options_handler(path: str):
+    """处理 CORS 预检请求"""
+    return CORSResponse(status_code=200)
 
 
 @oauth_router.get("/authorize")
@@ -67,7 +82,7 @@ async def authorize(
             error_url = build_error_redirect_url(
                 redirect_uri, "unsupported_response_type", f"不支持的response_type: {response_type}", state
             )
-            return RedirectResponse(url=error_url)
+            return CORSRedirectResponse(url=error_url)
         raise exceptions.Http400BadRequestException(
             exceptions.Http400BadRequestException.InvalidParameter, f"不支持的response_type: {response_type}"
         )
@@ -80,7 +95,7 @@ async def authorize(
     if not oauth_client:
         if redirect_uri:
             error_url = build_error_redirect_url(redirect_uri, "invalid_client", "无效的客户端ID", state)
-            return RedirectResponse(url=error_url)
+            return CORSRedirectResponse(url=error_url)
         raise exceptions.Http400BadRequestException(
             exceptions.Http400BadRequestException.InvalidParameter, "无效的客户端ID"
         )
@@ -89,7 +104,7 @@ async def authorize(
     if oauth_client.is_active != 1:  # 1表示ACTIVE
         if redirect_uri:
             error_url = build_error_redirect_url(redirect_uri, "invalid_client", "客户端未激活", state)
-            return RedirectResponse(url=error_url)
+            return CORSRedirectResponse(url=error_url)
         raise exceptions.Http400BadRequestException(
             exceptions.Http400BadRequestException.InvalidParameter, "客户端未激活"
         )
@@ -98,7 +113,7 @@ async def authorize(
     if not validate_redirect_uri(oauth_client.redirect_uri, redirect_uri):
         if redirect_uri:
             error_url = build_error_redirect_url(redirect_uri, "invalid_request", "重定向URI不匹配", state)
-            return RedirectResponse(url=error_url)
+            return CORSRedirectResponse(url=error_url)
         raise exceptions.Http400BadRequestException(
             exceptions.Http400BadRequestException.InvalidParameter, "重定向URI不匹配"
         )
@@ -153,10 +168,8 @@ async def authorize(
         if state:
             params["state"] = state
 
-        from urllib.parse import urlencode
-
         separator = "&" if "?" in login_url else "?"
-        return RedirectResponse(url=f"{login_url}{separator}{urlencode(params)}")
+        return CORSRedirectResponse(url=f"{login_url}{separator}{urlencode(params)}")
 
     # 如果用户已登录但未确认，且confirm参数不为true，重定向到授权确认页面
     if confirm != "true":
@@ -183,20 +196,13 @@ async def authorize(
             "is_used": False,
         }
 
-        # 创建授权码记录
-        from pydantic import BaseModel
-
-        from apps.system.schemas.oauth_authorization_code import (
-            OAuthAuthorizationCodeSchema,
-        )
-
         auth_code = await auth_code_repo.create_one(OAuthAuthorizationCodeSchema(**auth_code_schema))
 
     logger.info(f"生成授权码: {code}, 客户端: {client_id}, 用户: {user_id}")
 
     # 重定向到客户端，带上授权码
     redirect_url = build_authorization_url(redirect_uri, code, state)
-    return RedirectResponse(url=redirect_url)
+    return CORSRedirectResponse(url=redirect_url)
 
 
 @oauth_router.post("/token")
@@ -224,21 +230,21 @@ async def token(
 
         if not oauth_client:
             # OAuth2.0标准错误响应格式
-            return JSONResponse(
+            return CORSJSONResponse(
                 content={"error": "invalid_client", "error_description": "无效的客户端ID"},
                 status_code=400,
             )
 
         # 验证客户端密钥
         if oauth_client.client_secret != client_secret:
-            return JSONResponse(
+            return CORSJSONResponse(
                 content={"error": "invalid_client", "error_description": "无效的客户端密钥"},
                 status_code=400,
             )
 
         # 验证客户端是否激活
         if oauth_client.is_active != 1:
-            return JSONResponse(
+            return CORSJSONResponse(
                 content={"error": "invalid_client", "error_description": "客户端未激活"},
                 status_code=400,
             )
@@ -246,7 +252,7 @@ async def token(
         if grant_type == "authorization_code":
             # 授权码模式
             if not code or not redirect_uri:
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_request", "error_description": "缺少必要的参数"},
                     status_code=400,
                 )
@@ -260,15 +266,11 @@ async def token(
             async with unit_worker as uw:
                 auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
 
-                from apps.system.schemas.oauth_authorization_code import (
-                    OAuthAuthorizationCodeSchema,
-                )
-
                 auth_code = await auth_code_repo.find_one_or_none(OAuthAuthorizationCodeSchema(code=code))
 
             if not auth_code:
                 logger.warning(f"授权码不存在: {code}")
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_grant", "error_description": "无效的授权码"},
                     status_code=400,
                 )
@@ -276,17 +278,14 @@ async def token(
             # 验证授权码是否已使用
             if auth_code.is_used:
                 logger.warning(f"授权码已使用: {code}")
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_grant", "error_description": "授权码已使用"},
                     status_code=400,
                 )
 
-            # 验证授权码是否过期
-            from datetime import datetime
-
             if auth_code.expires_at < datetime.utcnow():
                 logger.warning(f"授权码已过期: {code}, 过期时间: {auth_code.expires_at}")
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_grant", "error_description": "授权码已过期"},
                     status_code=400,
                 )
@@ -296,7 +295,7 @@ async def token(
                 logger.warning(
                     f"授权码与客户端不匹配: code={code}, code_client={auth_code.client_id}, request_client={client_id}"
                 )
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_grant", "error_description": "授权码与客户端不匹配"},
                     status_code=400,
                 )
@@ -304,7 +303,7 @@ async def token(
             # 验证redirect_uri是否匹配
             if not validate_redirect_uri(auth_code.redirect_uri, redirect_uri):
                 logger.warning(f"重定向URI不匹配: code_uri={auth_code.redirect_uri}, request_uri={redirect_uri}")
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_request", "error_description": "重定向URI不匹配"},
                     status_code=400,
                 )
@@ -312,9 +311,6 @@ async def token(
             # 标记授权码为已使用（在单独的事务中）
             async with unit_worker as uw:
                 auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
-                from apps.system.schemas.oauth_authorization_code import (
-                    OAuthAuthorizationCodeSchema,
-                )
 
                 await auth_code_repo.update_one(str(auth_code.id), OAuthAuthorizationCodeSchema(is_used=True))
                 # 提交事务
@@ -342,19 +338,17 @@ async def token(
 
             logger.info(f"准备返回token响应，数据键: {list(response_data.keys())}")
 
-            # 使用标准的JSONResponse，确保响应能正确返回
-            response = JSONResponse(
+            # 使用带 CORS 的 JSONResponse，确保响应能正确返回
+            logger.info(f"CORSJSONResponse已创建，准备返回")
+            return CORSJSONResponse(
                 content=response_data,
                 status_code=200,
             )
 
-            logger.info(f"JSONResponse已创建，准备返回")
-            return response
-
         elif grant_type == "refresh_token":
             # 刷新令牌模式
             if not refresh_token:
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_request", "error_description": "缺少refresh_token"},
                     status_code=400,
                 )
@@ -363,7 +357,7 @@ async def token(
                 header, payload = refresh_tokener.decode(refresh_token)
                 user_id = payload.get("user_id")
             except Exception as e:
-                return JSONResponse(
+                return CORSJSONResponse(
                     content={"error": "invalid_grant", "error_description": "无效的refresh_token"},
                     status_code=400,
                 )
@@ -375,7 +369,7 @@ async def token(
             logger.info(f"刷新token: 客户端={client_id}, 用户={user_id}")
 
             # OAuth2.0标准要求直接返回JSON，不使用包装格式
-            return JSONResponse(
+            return CORSJSONResponse(
                 content=OAuthTokenResponse(
                     access_token=access_token,
                     token_type="Bearer",
@@ -387,14 +381,14 @@ async def token(
             )
 
         else:
-            return JSONResponse(
+            return CORSJSONResponse(
                 content={"error": "unsupported_grant_type", "error_description": f"不支持的grant_type: {grant_type}"},
                 status_code=400,
             )
     except Exception as e:
         # 捕获所有异常并记录日志
         logger.exception(f"Token端点异常: {str(e)}")
-        return JSONResponse(
+        return CORSJSONResponse(
             content={"error": "server_error", "error_description": f"服务器内部错误: {str(e)}"},
             status_code=500,
         )
@@ -421,13 +415,12 @@ async def userinfo(
     if not user:
         raise exceptions.Http400BadRequestException(exceptions.Http400BadRequestException.NoResource, "用户不存在")
 
-    from apps.system.schemas.user import UserSchema
-
     user_schema = UserSchema.model_validate(user)
 
-    return success(
-        {
-            "user_id": str(user.id),
-            "username": user_schema.username,
-        }
+    return CORSJSONResponse(
+        content=OAuthUserInfoResponse(
+            user_id=str(user.id),
+            user_name=user_schema.username,
+        ).model_dump(exclude_none=True),
+        status_code=200,
     )

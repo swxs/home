@@ -6,7 +6,7 @@ import datetime
 from urllib.parse import quote
 
 from bson import ObjectId
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from pydantic import BaseModel
 from starlette.background import BackgroundTask
 from starlette.types import Receive, Scope, Send
@@ -50,6 +50,46 @@ class CustomJSONResponse(JSONResponse):
             separators=(",", ":"),
             cls=ComplexEncoder,
         ).encode("utf-8")
+
+
+def _add_cors_headers_to_response(response: Response) -> None:
+    """为响应添加 CORS 头的内部函数"""
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    # 注意：当 Access-Control-Allow-Origin 为 * 时，不能设置 Access-Control-Allow-Credentials 为 true
+
+
+class CORSResponse(Response):
+    """自动包含 CORS 头的 Response 基类"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _add_cors_headers_to_response(self)
+
+
+class CORSJSONResponse(JSONResponse):
+    """自动包含 CORS 头的 JSONResponse"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _add_cors_headers_to_response(self)
+
+
+class CORSRedirectResponse(RedirectResponse):
+    """自动包含 CORS 头的 RedirectResponse"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _add_cors_headers_to_response(self)
+
+
+class CORSCustomJSONResponse(CustomJSONResponse):
+    """自动包含 CORS 头的 CustomJSONResponse"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _add_cors_headers_to_response(self)
 
 
 class CustomFileresponse(Response):
