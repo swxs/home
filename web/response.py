@@ -55,8 +55,13 @@ class CustomJSONResponse(JSONResponse):
 def _add_cors_headers_to_response(response: Response) -> None:
     """为响应添加 CORS 头的内部函数"""
     response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    # 允许常见的请求头，包括表单提交所需的 Content-Type
+    response.headers["Access-Control-Allow-Headers"] = (
+        "Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token, X-XSRF-Token"
+    )
+    response.headers["Access-Control-Expose-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Max-Age"] = "3600"  # 预检请求缓存时间（秒）
     # 注意：当 Access-Control-Allow-Origin 为 * 时，不能设置 Access-Control-Allow-Credentials 为 true
 
 

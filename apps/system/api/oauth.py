@@ -55,9 +55,11 @@ logger = logging.getLogger("main.apps.system.api.oauth")
 
 
 @oauth_router.options("/{path:path}")
-async def options_handler(path: str):
+async def options_handler(path: str, request: Request = None):
     """处理 CORS 预检请求"""
-    return CORSResponse(status_code=200)
+    # 返回 204 No Content，这是 OPTIONS 预检请求的标准响应
+    response = CORSResponse(status_code=204)
+    return response
 
 
 @oauth_router.get("/authorize")
