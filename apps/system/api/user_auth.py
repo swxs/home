@@ -17,7 +17,6 @@ from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
 from ..models.user_auth import UserAuth
-from ..repositories.user_auth_repository import UserAuthRepository
 from ..schemas.response import CountResponse, UserAuthResponse, UserAuthSearchResponse
 from ..schemas.user_auth import UserAuthSchema, get_user_auth_schema
 

@@ -9,6 +9,7 @@ from fastapi import APIRouter
 
 # 本模块方法
 from .auth import router as auth_router
+from .oauth_client import router as oauth_client_router
 from .searcher import router as searcher_router
 from .user import router as user_router
 from .user_auth import router as user_auth_router
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/system", tags=["system"])
 
 router.include_router(prefix="/user", router=user_router)
 router.include_router(prefix="/user_auth", router=user_auth_router)
+router.include_router(prefix="/oauth_client", router=oauth_client_router)
 
 router.include_router(prefix="/auth", router=auth_router)
 router.include_router(prefix="/searcher", router=searcher_router)

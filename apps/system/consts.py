@@ -16,3 +16,8 @@ class UserAuth_Ttype(IntEnum):
 class UserAuth_Ifverified(IntEnum):
     VERIFIED = 1
     UNVERIFIED = 2
+
+
+class OAuthClient_IsActive(IntEnum):
+    ACTIVE = 1
+    INACTIVE = 2
