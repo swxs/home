@@ -236,6 +236,7 @@ async def github_callback(
             user_auth_schema = UserAuthSchema(
                 ttype=consts.UserAuth_Ttype.GITHUB,
                 identifier=github_id,
+                ifverified=consts.UserAuth_Ifverified.VERIFIED,
             )
             user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
 
@@ -243,9 +244,18 @@ async def github_callback(
                 # 用户已存在，直接登录
                 user = await user_repo.find_one(str(user_auth.user_id))
             else:
-                # 创建新用户
-                user_schema = UserSchema(username=github_username)
-                user = await user_repo.create_one(user_schema)
+                user_auth_schema = UserAuthSchema(
+                    ttype=consts.UserAuth_Ttype.EMAIL,
+                    identifier=github_email,
+                    ifverified=consts.UserAuth_Ifverified.VERIFIED,
+                )
+                email_user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
+                if email_user_auth:
+                    user = await user_repo.find_one(str(email_user_auth.user_id))
+                else:
+                    # 创建新用户
+                    user_schema = UserSchema(username=github_username)
+                    user = await user_repo.create_one(user_schema)
 
                 # 创建GitHub认证信息
                 user_auth_schema = UserAuthSchema(
