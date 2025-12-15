@@ -11,6 +11,7 @@ class UserAuth_Ttype(IntEnum):
     WECHAT = 2
     PHONE = 3
     EMAIL = 4
+    GITHUB = 5
 
 
 class UserAuth_Ifverified(IntEnum):
