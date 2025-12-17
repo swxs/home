@@ -14,7 +14,7 @@ from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
 from web.schemas.pagination import PageSchema, get_pagination
-from web.schemas.response import SuccessResponse
+from web.schemas.response import CountResponse, SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
@@ -26,7 +26,6 @@ from ..schemas.oauth_client import (
     OAuthClientSchema,
     get_oauth_client_schema,
 )
-from ..schemas.response import CountResponse
 
 router = APIRouter()
 

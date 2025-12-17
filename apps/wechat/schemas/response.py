@@ -21,7 +21,3 @@ class WechatMsgResponse(TypedDict):
 
 class WechatMsgTestResponse(TypedDict):
     reply: str
-
-
-class CountResponse(TypedDict):
-    count: int

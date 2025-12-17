@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar, TypedDict
 
 from pydantic import BaseModel
 
@@ -12,3 +12,7 @@ class SuccessResponse(BaseModel, Generic[T]):
     code: int = 0
     message: str = ""
     data: Optional[T] = None
+
+
+class CountResponse(TypedDict):
+    count: int

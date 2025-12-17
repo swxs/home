@@ -13,7 +13,7 @@ from web.dependencies.db import get_db, get_single_worker
 from web.exceptions import Http400BadRequestException
 from web.response import success
 from web.schemas.pagination import PageSchema, get_pagination
-from web.schemas.response import SuccessResponse
+from web.schemas.response import CountResponse, SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
 # 本模块方法
@@ -21,7 +21,6 @@ from ..models.password_lock import PasswordLock
 from ..repositories.password_lock_repository import PasswordLockRepository
 from ..schemas.password_lock import PasswordLockSchema, get_password_lock_schema
 from ..schemas.response import (
-    CountResponse,
     PasswordLockResponse,
     PasswordLockSearchResponse,
 )

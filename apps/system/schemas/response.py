@@ -20,11 +20,6 @@ class UserResponse(TypedDict):
     data: UserSchema
 
 
-class UserWithAuthSearchResponse(TypedDict):
-    data: List[UserAuthSchema]
-    pagination: PaginationSchema
-
-
 class UserAuthSearchResponse(TypedDict):
     data: List[UserAuthSchema]
     pagination: PaginationSchema
@@ -34,10 +29,11 @@ class UserAuthResponse(TypedDict):
     data: UserAuthSchema
 
 
+class UserWithAuthSearchResponse(TypedDict):
+    data: List[UserAuthSchema]
+    pagination: PaginationSchema
+
+
 class TokenResponse(TypedDict):
     token: str
     refresh_token: str
-
-
-class CountResponse(TypedDict):
-    count: int

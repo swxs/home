@@ -21,7 +21,3 @@ class FileInfoResponse(TypedDict):
 
 class FilePathResponse(TypedDict):
     path: str
-
-
-class CountResponse(TypedDict):
-    count: int

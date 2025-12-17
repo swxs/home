@@ -22,9 +22,5 @@ class PasswordLockResponse(TypedDict):
     data: PasswordLockSchema
 
 
-class CountResponse(TypedDict):
-    count: int
-
-
 class PasswordResponse(TypedDict):
     password: str
