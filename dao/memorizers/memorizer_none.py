@@ -1,2 +1,0 @@
-class NoneMemorizer:
-    name = "none"
