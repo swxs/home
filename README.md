@@ -23,6 +23,10 @@ uvicorn main:app --reload --port 8090
 - 临时文档
 - GitHub OAuth登录
 
+## 项目结构
+
+整体架构与各目录职责见 [CONTEXT.md](./CONTEXT.md)，便于大模型与开发者理解代码布局与依赖关系。各主要代码目录下另有 `README.md` 说明该目录用途与约定。
+
 ## GitHub OAuth 配置
 
 如需使用GitHub OAuth登录功能，请参考 [GitHub OAuth配置指南](./docs/GITHUB_OAUTH_SETUP.md) 获取Client ID和Client Secret。
