@@ -6,6 +6,7 @@ from .system.api import router as system_router
 from .system.api.oauth import oauth_router
 from .upload.api import router as upload_router
 from .wechat.api import router as wechat_router
+from .workflow.api import router as workflow_router
 
 api_router = APIRouter(prefix="/api", tags=["api"])
 
@@ -14,3 +15,4 @@ api_router.include_router(router=system_router)
 api_router.include_router(router=password_lock_router)
 api_router.include_router(router=wechat_router)
 api_router.include_router(router=upload_router)
+api_router.include_router(router=workflow_router)
