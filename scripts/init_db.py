@@ -7,6 +7,7 @@ from mysqlengine import Base
 def register_database():
     # 预先创建数据表
     from apps.password_lock.models import password_lock
+    from apps.sudoku.models import sudoku_completion, sudoku_puzzle
     from apps.system.models import (
         oauth_authorization_code,
         oauth_client,
