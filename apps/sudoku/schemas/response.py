@@ -8,11 +8,15 @@ from web.schemas.pagination import PaginationSchema
 
 # 本模块方法
 from .sudoku_completion import SudokuCompletionItemSchema
-from .sudoku_puzzle import SudokuPuzzleSchema
+from .sudoku_puzzle import SudokuPuzzleSchema, SudokuUploadPreviewData
 
 
 class SudokuPuzzleResponse(TypedDict):
     data: SudokuPuzzleSchema
+
+
+class SudokuUploadPreviewResponse(TypedDict):
+    data: SudokuUploadPreviewData
 
 
 class SudokuPuzzleSearchResponse(TypedDict):
