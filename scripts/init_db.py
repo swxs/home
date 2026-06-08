@@ -11,6 +11,7 @@ def register_database():
     from apps.system.models import (
         oauth_authorization_code,
         oauth_client,
+        oauth_user_grant,
         user,
         user_auth,
     )

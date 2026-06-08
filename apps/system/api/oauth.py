@@ -29,11 +29,13 @@ from commons.Helpers import refresh_tokener, tokener
 # 本模块方法
 from ..models.oauth_authorization_code import OAuthAuthorizationCode
 from ..models.oauth_client import OAuthClient
+from ..models.oauth_user_grant import OAuthUserGrant
 from ..models.user import User
 from ..repositories.oauth_authorization_code_repository import (
     OAuthAuthorizationCodeRepository,
 )
 from ..repositories.oauth_client_repository import OAuthClientRepository
+from ..repositories.oauth_user_grant_repository import OAuthUserGrantRepository
 from ..repositories.user_repository import UserRepository
 from ..schemas.oauth import OAuthTokenRequest, OAuthTokenResponse, OAuthUserInfoResponse
 from ..schemas.oauth_authorization_code import (
@@ -43,15 +45,51 @@ from ..schemas.oauth_client import OAuthClientSchema
 from ..schemas.user import UserSchema
 from ..utils.oauth import (
     build_authorization_url,
+    build_consent_redirect_url,
     build_error_redirect_url,
     generate_authorization_code,
     get_authorization_code_expires_at,
+    normalize_scope,
     validate_redirect_uri,
 )
 
 oauth_router = APIRouter(prefix="/oauth", tags=["oauth"])
 
 logger = logging.getLogger("main.apps.system.api.oauth")
+
+
+async def _issue_authorization_code(
+    db: AsyncSession,
+    user_id: str,
+    client_id: str,
+    redirect_uri: str,
+    scope: Optional[str],
+    state: Optional[str],
+) -> CORSRedirectResponse:
+    """生成授权码并重定向到客户端"""
+    code = generate_authorization_code()
+    expires_at = get_authorization_code_expires_at()
+
+    unit_worker = await get_unit_worker(db)
+    async with unit_worker as uw:
+        auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
+
+        auth_code_schema = {
+            "code": code,
+            "client_id": client_id,
+            "user_id": user_id,
+            "redirect_uri": redirect_uri,
+            "scope": scope,
+            "expires_at": expires_at,
+            "is_used": False,
+        }
+
+        await auth_code_repo.create_one(OAuthAuthorizationCodeSchema(**auth_code_schema))
+
+    logger.info(f"生成授权码: {code}, 客户端: {client_id}, 用户: {user_id}")
+
+    redirect_url = build_authorization_url(redirect_uri, code, state)
+    return CORSRedirectResponse(url=redirect_url)
 
 
 @oauth_router.options("/{path:path}")
@@ -173,38 +211,31 @@ async def authorize(
         separator = "&" if "?" in login_url else "?"
         return CORSRedirectResponse(url=f"{login_url}{separator}{urlencode(params)}")
 
-    # 如果用户已登录但未确认，且confirm参数不为true，重定向到授权确认页面
-    if confirm != "true":
-        # 这里可以重定向到授权确认页面，当前实现直接生成授权码
-        # 如果需要授权确认页面，可以重定向到openapi_auth的/authorize页面
-        pass
-
-    # 生成授权码
-    code = generate_authorization_code()
-    expires_at = get_authorization_code_expires_at()
-
-    # 保存授权码到数据库
+    normalized_scope = normalize_scope(scope)
     unit_worker = await get_unit_worker(db)
+    grant = None
     async with unit_worker as uw:
-        auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
+        grant_repo: OAuthUserGrantRepository = uw.get_repository(OAuthUserGrant)
+        grant = await grant_repo.find_by_user_client(user_id, client_id)
 
-        auth_code_schema = {
-            "code": code,
-            "client_id": client_id,
-            "user_id": user_id,
-            "redirect_uri": redirect_uri,
-            "scope": scope,
-            "expires_at": expires_at,
-            "is_used": False,
-        }
+    if confirm == "true":
+        async with unit_worker as uw:
+            grant_repo: OAuthUserGrantRepository = uw.get_repository(OAuthUserGrant)
+            await grant_repo.upsert(user_id, client_id, normalized_scope)
+            await uw.commit()
+        return await _issue_authorization_code(db, user_id, client_id, redirect_uri, scope, state)
 
-        auth_code = await auth_code_repo.create_one(OAuthAuthorizationCodeSchema(**auth_code_schema))
+    if grant and normalize_scope(grant.scope) == normalized_scope:
+        return await _issue_authorization_code(db, user_id, client_id, redirect_uri, scope, state)
 
-    logger.info(f"生成授权码: {code}, 客户端: {client_id}, 用户: {user_id}")
-
-    # 重定向到客户端，带上授权码
-    redirect_url = build_authorization_url(redirect_uri, code, state)
-    return CORSRedirectResponse(url=redirect_url)
+    consent_url = build_consent_redirect_url(
+        client_id=client_id,
+        redirect_uri=redirect_uri,
+        response_type=response_type,
+        scope=scope,
+        state=state,
+    )
+    return CORSRedirectResponse(url=consent_url)
 
 
 @oauth_router.post("/token")

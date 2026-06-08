@@ -15,7 +15,7 @@ DEFAULT_LOCAL = env.str("DEFAULT_LOCAL", "zh_CN")  # 默认语言
 
 JWT_SECRET_KEY = env.str("JWT_SECRET_KEY", "7f8512a4-afe7-4941-a0c0-62e75dc8edd4")  # 密钥
 JWT_TIMEOUT = env.int("JWT_TIMEOUT", 2 * 60 * 60)  # 超时时间，单位: s
-JWT_REFRESH_TIMEOUT = env.int("JWT_REFRESH_TIMEOUT", 7 * 24 * 60 * 60)  # 超时时间，单位: s
+JWT_REFRESH_TIMEOUT = env.int("JWT_REFRESH_TIMEOUT", 30 * 24 * 60 * 60)  # 超时时间，单位: s
 # 通用OAuth配置
 OAUTH2_LOGIN_URL = env.str("OAUTH2_LOGIN_URL", f"{SITE_PROTOCOL}://{SITE_DOMAIN}:{SITE_PORT}")
 # GitHub OAuth配置
