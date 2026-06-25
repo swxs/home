@@ -13,6 +13,7 @@ from web.schemas import BaseSchema
 from .. import consts
 
 
+# 说明：OAuthClientSchema 作为字段基类保留，并被作为「创建/查询/更新载荷」在 oauth 等处复用。
 class OAuthClientSchema(BaseSchema):
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
@@ -20,6 +21,18 @@ class OAuthClientSchema(BaseSchema):
     redirect_uri: Optional[str] = None
     user_id: Optional[objectId] = None
     is_active: Optional[consts.OAuthClient_IsActive] = None
+
+
+class OAuthClientFilter(OAuthClientSchema):
+    """列表查询过滤条件。"""
+
+
+class OAuthClientUpdate(OAuthClientSchema):
+    """更新入参。"""
+
+
+class OAuthClientOut(OAuthClientSchema):
+    """输出 DTO（注意：调用方需自行 pop client_secret，沿用现有行为）。"""
 
 
 class OAuthClientCreateSchema(BaseSchema):
@@ -41,13 +54,13 @@ class OAuthClientResponseSchema(BaseSchema):
     is_active: consts.OAuthClient_IsActive
 
 
-async def get_oauth_client_schema(
+async def get_oauth_client_filter(
     client_id: Optional[str] = Query(None),
     client_name: Optional[str] = Query(None),
     redirect_uri: Optional[str] = Query(None),
     user_id: Optional[str] = Query(None),
     is_active: Optional[int] = Query(None),
-):
+) -> OAuthClientFilter:
     params = {}
     if client_id is not None:
         params["client_id"] = client_id
@@ -60,4 +73,4 @@ async def get_oauth_client_schema(
     if is_active is not None:
         params["is_active"] = is_active
 
-    return OAuthClientSchema(**params)
+    return OAuthClientFilter(**params)

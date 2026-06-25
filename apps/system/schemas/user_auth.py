@@ -14,6 +14,7 @@ from web.schemas import BaseSchema
 from .. import consts
 
 
+# 说明：UserAuthSchema 作为字段基类保留，并被作为「创建/查询载荷」在 auth/oauth/wechat 等处复用。
 class UserAuthSchema(BaseSchema):
     user_id: Optional[objectId] = None
     ttype: Optional[consts.UserAuth_Ttype] = None
@@ -22,13 +23,29 @@ class UserAuthSchema(BaseSchema):
     ifverified: Optional[consts.UserAuth_Ifverified] = None
 
 
-async def get_user_auth_schema(
+class UserAuthFilter(UserAuthSchema):
+    """列表查询过滤条件。"""
+
+
+class UserAuthCreate(UserAuthSchema):
+    """创建入参。"""
+
+
+class UserAuthUpdate(UserAuthSchema):
+    """更新入参。"""
+
+
+class UserAuthOut(UserAuthSchema):
+    """输出 DTO。"""
+
+
+async def get_user_auth_filter(
     user_id: Optional[str] = Query(None),
     ttype: Optional[int] = Query(None),
     identifier: Optional[str] = Query(None),
     credential: Optional[str] = Query(None),
     ifverified: Optional[int] = Query(None),
-):
+) -> UserAuthFilter:
     params = {}
     if user_id is not None:
         params["user_id"] = user_id
@@ -41,4 +58,4 @@ async def get_user_auth_schema(
     if ifverified is not None:
         params["ifverified"] = ifverified
 
-    return UserAuthSchema(**params)
+    return UserAuthFilter(**params)

@@ -5,12 +5,10 @@
 from typing import Optional
 
 from pydantic import BaseModel as PydanticBaseModel
-from sqlalchemy import and_, asc, desc, func, or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import contains_eager
+from sqlalchemy import func, or_, select
 
 from mysqlengine.repositories import BaseRepository
-from web.schemas.pagination import PageSchema, PaginationSchema
+from web.schemas.pagination import PageSchema
 
 # 本模块方法
 from ..models.password_lock import PasswordLock
@@ -33,33 +31,22 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
         """
         搜索密码锁列表，支持名称模糊搜索
         """
-        # 构建查询条件
         query = select(PasswordLock)
         count_query = select(func.count()).select_from(PasswordLock)
 
-        # 应用过滤条件
-        filter_dict = schema.model_dump(exclude_unset=True, exclude_none=True)
-        for key, value in filter_dict.items():
-            if hasattr(PasswordLock, key):
-                query = query.where(getattr(PasswordLock, key) == value)
-                count_query = count_query.where(getattr(PasswordLock, key) == value)
+        # 应用等值过滤条件（复用基类逻辑）
+        query, count_query = self._apply_schema_filters(query, count_query, schema)
 
         # 应用名称模糊搜索
         if name_search:
-            query = query.where(
-                or_(
-                    PasswordLock.name.like(f"%{name_search}%"),
-                    PasswordLock.website.like(f"%{name_search}%"),
-                )
+            like_clause = or_(
+                PasswordLock.name.like(f"%{name_search}%"),
+                PasswordLock.website.like(f"%{name_search}%"),
             )
-            count_query = count_query.where(
-                or_(
-                    PasswordLock.name.like(f"%{name_search}%"),
-                    PasswordLock.website.like(f"%{name_search}%"),
-                )
-            )
+            query = query.where(like_clause)
+            count_query = count_query.where(like_clause)
 
-        # 应用排序
+        # 应用排序（支持 "-" 前缀降序）
         if page_schema.order_by:
             for order_field in page_schema.order_by:
                 if order_field.startswith("-"):
@@ -71,28 +58,7 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
                     if hasattr(PasswordLock, _order_field):
                         query = query.order_by(getattr(PasswordLock, _order_field).asc())
 
-        # 应用分页
-        if page_schema.use_pager and page_schema.limit > 0:
-            query = query.offset(page_schema.skip).limit(page_schema.limit)
+        # 应用分页（复用基类逻辑）
+        query = self._apply_pagination(query, page_schema)
 
-        # 执行查询
-        result = await self.db.execute(query)
-        instances = result.scalars().all()
-
-        # 获取总数
-        count_result = await self.db.execute(count_query)
-        total = count_result.scalar() or 0
-
-        # 构建分页信息
-        pagination = PaginationSchema(
-            total=total,
-            order_by=page_schema.order_by,
-            use_pager=page_schema.use_pager,
-            page=page_schema.page,
-            page_number=page_schema.page_number,
-        )
-
-        return {
-            "data": instances,
-            "pagination": pagination,
-        }
+        return await self._paginate_result(query, count_query, page_schema)

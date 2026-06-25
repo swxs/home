@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @FILE    : schemas/wechat_msg.py
+# @FILE    : schemas/wechat_msg_test.py
 # @AUTH    : model_creater
 
 import datetime

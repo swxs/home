@@ -2,27 +2,44 @@
 # @FILE    : schemas/wechat_msg.py
 # @AUTH    : model_creater
 
-import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 from fastapi import Query
 
 from web.schemas import BaseSchema
 
 
-class WechatMsgSchema(BaseSchema):
+class _WechatMsgFields(BaseSchema):
+    """微信消息字段集合，供各用途 schema 复用。"""
+
     msg_id: Optional[str] = None
     msg_type: Optional[str] = None
     msg_event: Optional[str] = None
     msg: Optional[str] = None
 
 
-async def get_wechat_msg_schema(
+class WechatMsgFilter(_WechatMsgFields):
+    """列表查询过滤条件。"""
+
+
+class WechatMsgCreate(_WechatMsgFields):
+    """创建入参。"""
+
+
+class WechatMsgUpdate(_WechatMsgFields):
+    """更新入参。"""
+
+
+class WechatMsgOut(_WechatMsgFields):
+    """输出 DTO。"""
+
+
+async def get_wechat_msg_filter(
     msg_id: Optional[str] = Query(None),
     msg_type: Optional[str] = Query(None),
     msg_event: Optional[str] = Query(None),
     msg: Optional[str] = Query(None),
-):
+) -> WechatMsgFilter:
     params = {}
     if msg_id is not None:
         params["msg_id"] = msg_id
@@ -33,4 +50,4 @@ async def get_wechat_msg_schema(
     if msg is not None:
         params["msg"] = msg
 
-    return WechatMsgSchema(**params)
+    return WechatMsgFilter(**params)

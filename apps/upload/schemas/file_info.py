@@ -2,15 +2,16 @@
 # @FILE    : schemas/file_info.py
 # @AUTH    : model_creater
 
-import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 from fastapi import Query
 
 from web.schemas import BaseSchema
 
 
-class FileInfoSchema(BaseSchema):
+class _FileInfoFields(BaseSchema):
+    """文件信息字段集合，供各用途 schema 复用。"""
+
     file_id: Optional[str] = None
     file_name: Optional[str] = None
     file_size: Optional[int] = None
@@ -18,13 +19,29 @@ class FileInfoSchema(BaseSchema):
     policy: Optional[int] = None
 
 
-async def get_file_info_schema(
+class FileInfoFilter(_FileInfoFields):
+    """列表查询过滤条件。"""
+
+
+class FileInfoCreate(_FileInfoFields):
+    """创建入参。"""
+
+
+class FileInfoUpdate(_FileInfoFields):
+    """更新入参。"""
+
+
+class FileInfoOut(_FileInfoFields):
+    """输出 DTO。"""
+
+
+async def get_file_info_filter(
     file_id: Optional[str] = Query(None),
     file_name: Optional[str] = Query(None),
     file_size: Optional[str] = Query(None),
     ext: Optional[str] = Query(None),
     policy: Optional[str] = Query(None),
-):
+) -> FileInfoFilter:
     params = {}
     if file_id is not None:
         params["file_id"] = file_id
@@ -37,4 +54,4 @@ async def get_file_info_schema(
     if policy is not None:
         params["policy"] = policy
 
-    return FileInfoSchema(**params)
+    return FileInfoFilter(**params)

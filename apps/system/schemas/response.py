@@ -7,30 +7,30 @@ from typing import Dict, List, TypedDict
 from web.schemas.pagination import PaginationSchema
 
 # 本模块方法
-from .user import UserSchema
-from .user_auth import UserAuthSchema
+from .user import UserOut
+from .user_auth import UserAuthOut
 
 
 class UserSearchResponse(TypedDict):
-    data: List[UserSchema]
+    data: List[UserOut]
     pagination: PaginationSchema
 
 
 class UserResponse(TypedDict):
-    data: UserSchema
+    data: UserOut
 
 
 class UserAuthSearchResponse(TypedDict):
-    data: List[UserAuthSchema]
+    data: List[UserAuthOut]
     pagination: PaginationSchema
 
 
 class UserAuthResponse(TypedDict):
-    data: UserAuthSchema
+    data: UserAuthOut
 
 
 class UserWithAuthSearchResponse(TypedDict):
-    data: List[UserAuthSchema]
+    data: List[UserAuthOut]
     pagination: PaginationSchema
 
 

@@ -182,10 +182,18 @@ class SudokuPuzzleCreateBody(BaseSchema):
         return self
 
 
-async def get_sudoku_puzzle_schema(
+class SudokuPuzzleFilter(SudokuPuzzleSchema):
+    """列表查询过滤条件（沿用 SudokuPuzzleSchema 的校验/序列化）。"""
+
+
+class SudokuPuzzleOut(SudokuPuzzleSchema):
+    """输出 DTO（沿用 SudokuPuzzleSchema 的校验/序列化）。"""
+
+
+async def get_sudoku_puzzle_filter(
     puzzle_date: Optional[str] = Query(None, description="谜题日期 YYYY/MM/DD"),
     difficulty: Optional[int] = Query(None),
-):
+) -> SudokuPuzzleFilter:
     params = {}
     if puzzle_date is not None:
         try:
@@ -195,4 +203,4 @@ async def get_sudoku_puzzle_schema(
             pass
     if difficulty is not None:
         params["difficulty"] = difficulty
-    return SudokuPuzzleSchema(**params)
+    return SudokuPuzzleFilter(**params)

@@ -7,16 +7,16 @@ from typing import Dict, List, TypedDict
 from web.schemas.pagination import PaginationSchema
 
 # 本模块方法
-from .wechat_msg import WechatMsgSchema
+from .wechat_msg import WechatMsgOut
 
 
 class WechatMsgSearchResponse(TypedDict):
-    data: List[WechatMsgSchema]
+    data: List[WechatMsgOut]
     pagination: PaginationSchema
 
 
 class WechatMsgResponse(TypedDict):
-    data: WechatMsgSchema
+    data: WechatMsgOut
 
 
 class WechatMsgTestResponse(TypedDict):

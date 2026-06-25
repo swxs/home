@@ -70,6 +70,47 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
+    def _apply_schema_filters(self, query, count_query, schema: PydanticBaseModel):
+        """
+        将 schema 的字段作为等值过滤条件应用到 query 与 count_query。
+        通过反射，不依赖具体表字段。子类可复用。
+        """
+        filter_dict = schema.model_dump(exclude_unset=True, exclude_none=True)
+        for key, value in filter_dict.items():
+            if hasattr(self.model, key):
+                query = query.where(getattr(self.model, key) == value)
+                count_query = count_query.where(getattr(self.model, key) == value)
+        return query, count_query
+
+    def _apply_pagination(self, query, page_schema: PageSchema):
+        """应用分页（offset/limit）。子类可复用。"""
+        if page_schema.use_pager and page_schema.limit > 0:
+            query = query.offset(page_schema.skip).limit(page_schema.limit)
+        return query
+
+    def _build_pagination(self, total: int, page_schema: PageSchema) -> PaginationSchema:
+        """构建分页信息。子类可复用（含自定义 join/行查询场景）。"""
+        return PaginationSchema(
+            total=total,
+            order_by=page_schema.order_by,
+            use_pager=page_schema.use_pager,
+            page=page_schema.page,
+            page_number=page_schema.page_number,
+        )
+
+    async def _paginate_result(self, query, count_query, page_schema: PageSchema) -> Dict[str, Any]:
+        """执行查询与计数，构建统一的 {data, pagination} 返回。子类可复用。"""
+        result = await self.db.execute(query)
+        instances = result.scalars().all()
+
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar() or 0
+
+        return {
+            "data": instances,
+            "pagination": self._build_pagination(total, page_schema),
+        }
+
     async def search(
         self,
         schema: PydanticBaseModel,
@@ -91,11 +132,7 @@ class BaseRepository(Generic[T]):
         count_query = select(func.count()).select_from(self.model)
 
         # 应用过滤条件（通过反射，不依赖具体字段）
-        filter_dict = schema.model_dump(exclude_unset=True, exclude_none=True)
-        for key, value in filter_dict.items():
-            if hasattr(self.model, key):
-                query = query.where(getattr(self.model, key) == value)
-                count_query = count_query.where(getattr(self.model, key) == value)
+        query, count_query = self._apply_schema_filters(query, count_query, schema)
 
         # 应用排序（通过反射）
         if page_schema.order_by:
@@ -104,30 +141,9 @@ class BaseRepository(Generic[T]):
                     query = query.order_by(getattr(self.model, order_field))
 
         # 应用分页
-        if page_schema.use_pager and page_schema.limit > 0:
-            query = query.offset(page_schema.skip).limit(page_schema.limit)
+        query = self._apply_pagination(query, page_schema)
 
-        # 执行查询
-        result = await self.db.execute(query)
-        instances = result.scalars().all()
-
-        # 获取总数
-        count_result = await self.db.execute(count_query)
-        total = count_result.scalar() or 0
-
-        # 构建分页信息
-        pagination = PaginationSchema(
-            total=total,
-            order_by=page_schema.order_by,
-            use_pager=page_schema.use_pager,
-            page=page_schema.page,
-            page_number=page_schema.page_number,
-        )
-
-        return {
-            "data": instances,
-            "pagination": pagination,
-        }
+        return await self._paginate_result(query, count_query, page_schema)
 
     async def create_one(
         self,

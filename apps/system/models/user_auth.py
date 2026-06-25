@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @FILE    : models/user.py
+# @FILE    : models/user_auth.py
 # @AUTH    : code_creater
 
 from typing import Optional

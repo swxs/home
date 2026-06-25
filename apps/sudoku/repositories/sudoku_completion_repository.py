@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 from sqlalchemy import func, select
 
 from mysqlengine.repositories import BaseRepository
-from web.schemas.pagination import PageSchema, PaginationSchema
+from web.schemas.pagination import PageSchema
 
 # 本模块方法
 from ..models.sudoku_completion import SudokuCompletion
@@ -91,21 +91,13 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
         count_result = await self.db.execute(count_query)
         total = count_result.scalar() or 0
 
-        if page_schema.use_pager and page_schema.limit > 0:
-            query = query.offset(page_schema.skip).limit(page_schema.limit)
+        # 复用基类分页 helper（本查询返回 join 行元组，故不走 _paginate_result）
+        query = self._apply_pagination(query, page_schema)
 
         result = await self.db.execute(query)
         rows = result.all()
 
-        pagination = PaginationSchema(
-            total=total,
-            order_by=page_schema.order_by,
-            use_pager=page_schema.use_pager,
-            page=page_schema.page,
-            page_number=page_schema.page_number,
-        )
-
         return {
             "data": rows,
-            "pagination": pagination,
+            "pagination": self._build_pagination(total, page_schema),
         }

@@ -2,8 +2,7 @@
 # @FILE    : schemas/password_lock.py
 # @AUTH    : model_creater
 
-import datetime
-from typing import Dict, List, NotRequired, Optional, TypedDict
+from typing import NotRequired, Optional, TypedDict
 
 from fastapi import Query
 
@@ -15,7 +14,9 @@ class PasswordLockCustom(TypedDict):
     password: NotRequired[str]
 
 
-class PasswordLockSchema(BaseSchema):
+class _PasswordLockFields(BaseSchema):
+    """密码锁字段集合，供各用途 schema 复用。"""
+
     user_id: Optional[objectId] = None
     name: Optional[str] = None
     key: Optional[str] = None
@@ -25,14 +26,30 @@ class PasswordLockSchema(BaseSchema):
     custom: Optional[PasswordLockCustom] = None
 
 
-async def get_password_lock_schema(
+class PasswordLockFilter(_PasswordLockFields):
+    """列表查询过滤条件。"""
+
+
+class PasswordLockCreate(_PasswordLockFields):
+    """创建入参。"""
+
+
+class PasswordLockUpdate(_PasswordLockFields):
+    """更新入参。"""
+
+
+class PasswordLockOut(_PasswordLockFields):
+    """输出 DTO。"""
+
+
+async def get_password_lock_filter(
     user_id: Optional[str] = Query(None),
     name: Optional[str] = Query(None),
     key: Optional[str] = Query(None),
     website: Optional[str] = Query(None),
     used: Optional[str] = Query(None),
     ttype: Optional[str] = Query(None),
-):
+) -> PasswordLockFilter:
     params = {}
     if user_id is not None:
         params["user_id"] = user_id
@@ -47,4 +64,4 @@ async def get_password_lock_schema(
     if ttype is not None:
         params["ttype"] = ttype
 
-    return PasswordLockSchema(**params)
+    return PasswordLockFilter(**params)
