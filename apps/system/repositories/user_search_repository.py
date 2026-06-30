@@ -4,22 +4,21 @@
 
 """聚合查询 Repository：分页查询 user，并在 SQL 层把认证信息拍平为字段。
 
-与表级 Repository（BaseRepository[T]，绑定单一 ORM 模型）不同，聚合 Repository
-跨多表取数、不继承 BaseRepository；通过 Repo(db) 复用表级 Repository 的分页能力。
+实现方式：继承 ``BaseRepository[User]``，覆盖 ``build_query`` 把每个拍平字段做成
+相关聚合子查询 ``MAX(UserAuth.identifier)``（按 ttype）内联到 user 查询，单条 SQL
+即完成「分页 user + 拍平认证」；过滤 / 排序 / 分页全部复用基类原语。
 
-取数策略：
-1. 复用 UserRepository.search 做过滤 / 排序 / 分页（分页落在 user 上，行数不被认证放大）；
-2. 对该页 user_id 用一次条件聚合（GROUP BY user_id）把不同 ttype 的认证拍平为
-   phone / email 等字段；同一用户同类型多条时取聚合后的一条。
-返回 (user, 拍平字段 dict) 列表 —— 不再返回原始认证列表，DTO 转换交给 service。
+- ``returns_scalars = False``：查询返回 (User, phone, email...) 行；
+- 每个用户取对应 ttype 认证的 identifier，无认证则为 NULL（=> None）；分页落在 user 上，行数不被认证放大；
+- ``search_with_auth`` 为薄封装：把 Row 重塑为 (User, {拍平字段}) 供 service 做 DTO 转换。
 只读聚合在同一 session 内查询天然一致，无需事务包装。
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
-from sqlalchemy import case, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select
 
+from mysqlengine.repositories import BaseRepository
 from web.schemas.pagination import PageSchema, PaginationSchema
 
 # 本模块方法
@@ -27,7 +26,6 @@ from .. import consts
 from ..models.user import User
 from ..models.user_auth import UserAuth
 from ..schemas.user import UserFilter
-from .user_repository import UserRepository
 
 # 拍平字段名 -> 对应认证类型（取该类型认证的 identifier）。
 # 新增可暴露字段时，这里与 UserWithAuthOut 同步加一行即可。
@@ -37,36 +35,34 @@ _FLATTEN_FIELDS: Dict[str, consts.UserAuth_Ttype] = {
 }
 
 
-class UserSearchRepository:
-    """User 聚合查询：返回 (User, 拍平字段) 与分页信息。"""
+class UserSearchRepository(BaseRepository[User]):
+    """User 聚合查询：单条 SQL 返回 user + 拍平认证字段。"""
 
-    def __init__(self, db: AsyncSession, user_repo: Optional[UserRepository] = None):
-        self.db = db
-        self.user_repo = user_repo or UserRepository(db)
+    model = User
+    name = "user_search"
 
-    async def _flatten_auth(self, user_ids: List[str]) -> Dict[str, Dict[str, Any]]:
-        """按 user_id 把认证拍平为 {user_id: {phone, email, ...}}。"""
-        if not user_ids:
-            return {}
+    filterable_fields = {"username", "description", "avatar"}
+    sortable_fields = {"id", "create_at", "update_at", "username"}
+    # build_query 附带拍平列，查询返回 Row 而非单一 ORM
+    returns_scalars = False
 
-        flat_cols = [
-            func.max(case((UserAuth.ttype == ttype, UserAuth.identifier))).label(name)
-            for name, ttype in _FLATTEN_FIELDS.items()
-        ]
-        query = (
-            select(UserAuth.user_id.label("user_id"), *flat_cols)
-            .where(UserAuth.user_id.in_(user_ids))
-            .group_by(UserAuth.user_id)
+    @staticmethod
+    def _flat_col(ttype: consts.UserAuth_Ttype, name: str):
+        """某 ttype 认证的代表 identifier（相关聚合子查询，无认证为 NULL）。"""
+        return (
+            select(func.max(UserAuth.identifier))
+            .where(UserAuth.user_id == User.id, UserAuth.ttype == ttype)
+            .correlate(User)
+            .scalar_subquery()
+            .label(name)
         )
-        result = await self.db.execute(query)
 
-        flat_map: Dict[str, Dict[str, Any]] = {}
-        for row in result.all():
-            mapping = row._mapping
-            flat_map[str(mapping["user_id"])] = {
-                name: mapping[name] for name in _FLATTEN_FIELDS
-            }
-        return flat_map
+    def build_query(self, filters: Dict[str, Any]):
+        flat = [self._flat_col(ttype, name) for name, ttype in _FLATTEN_FIELDS.items()]
+        return (
+            select(User, *flat),
+            select(func.count()).select_from(User),
+        )
 
     async def search_with_auth(
         self,
@@ -74,13 +70,9 @@ class UserSearchRepository:
         page_schema: PageSchema,
     ) -> Tuple[List[Tuple[User, Dict[str, Any]]], PaginationSchema]:
         """分页查询 user，并附带其拍平后的认证字段。"""
-        result = await self.user_repo.search(user_filter, page_schema)
-        user_list: List[User] = result["data"]
-        pagination: PaginationSchema = result["pagination"]
-
-        user_ids = [str(user.id) for user in user_list]
-        flat_map = await self._flatten_auth(user_ids)
-
-        empty = {name: None for name in _FLATTEN_FIELDS}
-        rows = [(user, flat_map.get(str(user.id), empty)) for user in user_list]
-        return rows, pagination
+        result = await self.search(user_filter, page_schema)
+        rows = [
+            (row[0], {name: row._mapping[name] for name in _FLATTEN_FIELDS})
+            for row in result["data"]
+        ]
+        return rows, result["pagination"]

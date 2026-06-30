@@ -17,3 +17,7 @@ class OAuthClientRepository(BaseRepository[OAuthClient]):
 
     model = OAuthClient
     name = "oauth_client"
+
+    filterable_fields = {"client_id", "client_name", "redirect_uri", "user_id", "is_active"}
+    # client_secret 为敏感字段，不开放排序
+    sortable_fields = {"id", "create_at", "update_at", "client_name", "is_active"}

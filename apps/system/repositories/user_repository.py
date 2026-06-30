@@ -19,6 +19,9 @@ class UserRepository(BaseRepository[User]):
     model = User
     name = "user"
 
+    filterable_fields = {"username", "description", "avatar"}
+    sortable_fields = {"id", "create_at", "update_at", "username"}
+
     # 如果需要User特定的方法，可以在这里添加
     # 例如：
     # async def find_by_username(self, username: str) -> Optional[User]:

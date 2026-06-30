@@ -19,6 +19,11 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
     model = SudokuCompletion
     name = "sudoku_completion"
 
+    filterable_fields = {"user_id", "puzzle_id"}
+    sortable_fields = {"id", "create_at", "update_at", "completed_at", "time_seconds"}
+    # search_by_user_with_puzzle_filter 关联 SudokuPuzzle，返回 (Completion, Puzzle) 行
+    returns_scalars = False
+
     async def find_by_user_and_puzzle(self, user_id: str, puzzle_id: str) -> Optional[SudokuCompletion]:
         stmt = select(SudokuCompletion).where(
             SudokuCompletion.user_id == user_id,
@@ -60,7 +65,10 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
         puzzle_date_from: Optional[datetime.date] = None,
         puzzle_date_to: Optional[datetime.date] = None,
     ) -> Dict[str, Any]:
-        """按用户查完成记录，可选按 puzzle_id、谜题日期范围过滤；与 SudokuPuzzle 关联以返回 puzzle_date、difficulty。"""
+        """按用户查完成记录，可选按 puzzle_id、谜题日期范围过滤；与 SudokuPuzzle 关联返回 puzzle_date、difficulty。
+
+        join 取数（返回 (Completion, Puzzle) 行）+ 范围过滤为本方法专有逻辑；分页复用基类 paginate。
+        """
         Completion = SudokuCompletion
         Puzzle = SudokuPuzzle
 
@@ -87,18 +95,10 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
             query = query.where(Puzzle.puzzle_date <= puzzle_date_to)
             count_query = count_query.where(Puzzle.puzzle_date <= puzzle_date_to)
 
-        query = query.order_by(Completion.completed_at.desc())
+        # 排序：显式 order_by 走基类白名单；缺省保持原行为按完成时间倒序
+        if page_schema.order_by:
+            query = self._apply_ordering(query, page_schema)
+        else:
+            query = query.order_by(Completion.completed_at.desc())
 
-        count_result = await self.db.execute(count_query)
-        total = count_result.scalar() or 0
-
-        # 复用基类分页 helper（本查询返回 join 行元组，故不走 _paginate_result）
-        query = self._apply_pagination(query, page_schema)
-
-        result = await self.db.execute(query)
-        rows = result.all()
-
-        return {
-            "data": rows,
-            "pagination": self._build_pagination(total, page_schema),
-        }
+        return await self.paginate(query, count_query, page_schema, scalars=False)

@@ -17,6 +17,9 @@ class SudokuPuzzleRepository(BaseRepository[SudokuPuzzle]):
     model = SudokuPuzzle
     name = "sudoku_puzzle"
 
+    filterable_fields = {"puzzle_date", "difficulty"}
+    sortable_fields = {"id", "create_at", "update_at", "puzzle_date", "difficulty"}
+
     async def find_by_date(self, puzzle_date: datetime.date) -> Optional[SudokuPuzzle]:
         stmt = select(SudokuPuzzle).where(SudokuPuzzle.puzzle_date == puzzle_date).limit(1)
         result = await self.db.execute(stmt)

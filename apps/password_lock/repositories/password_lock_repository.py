@@ -5,7 +5,7 @@
 from typing import Optional
 
 from pydantic import BaseModel as PydanticBaseModel
-from sqlalchemy import func, or_, select
+from sqlalchemy import or_
 
 from mysqlengine.repositories import BaseRepository
 from web.schemas.pagination import PageSchema
@@ -23,22 +23,27 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
     model = PasswordLock
     name = "password_lock"
 
+    filterable_fields = {"user_id", "name", "key", "website", "used", "ttype"}
+    # custom(JSON) 不入排序白名单
+    sortable_fields = {"id", "create_at", "update_at", "name", "website", "used"}
+
     async def search_with_name_like(
         self,
         schema: PydanticBaseModel,
         page_schema: PageSchema,
         name_search: Optional[str] = None,
     ):
-        """
-        搜索密码锁列表，支持名称模糊搜索
-        """
-        query = select(PasswordLock)
-        count_query = select(func.count()).select_from(PasswordLock)
+        """搜索密码锁列表，在等值过滤之上叠加 name/website 跨字段模糊搜索。
 
-        # 应用等值过滤条件（复用基类逻辑）
-        query, count_query = self._apply_schema_filters(query, count_query, schema)
+        过滤 / 排序 / 分页复用基类原语；模糊搜索为本方法专有逻辑。
+        """
+        filters = schema.model_dump(exclude_unset=True, exclude_none=True)
+        query, count_query = self.build_query(filters)
 
-        # 应用名称模糊搜索
+        # 白名单等值过滤（复用基类）
+        query, count_query = self._apply_filters(query, count_query, filters)
+
+        # name / website 跨字段模糊搜索（本方法专有）
         if name_search:
             like_clause = or_(
                 PasswordLock.name.like(f"%{name_search}%"),
@@ -47,19 +52,7 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
             query = query.where(like_clause)
             count_query = count_query.where(like_clause)
 
-        # 应用排序（支持 "-" 前缀降序）
-        if page_schema.order_by:
-            for order_field in page_schema.order_by:
-                if order_field.startswith("-"):
-                    _order_field = order_field[1:]
-                    if hasattr(PasswordLock, _order_field):
-                        query = query.order_by(getattr(PasswordLock, _order_field).desc())
-                else:
-                    _order_field = order_field
-                    if hasattr(PasswordLock, _order_field):
-                        query = query.order_by(getattr(PasswordLock, _order_field).asc())
+        # 排序（复用基类，支持 - 前缀降序 + 白名单）
+        query = self._apply_ordering(query, page_schema)
 
-        # 应用分页（复用基类逻辑）
-        query = self._apply_pagination(query, page_schema)
-
-        return await self._paginate_result(query, count_query, page_schema)
+        return await self.paginate(query, count_query, page_schema)

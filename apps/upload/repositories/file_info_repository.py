@@ -19,4 +19,7 @@ class FileInfoRepository(BaseRepository[FileInfo]):
     model = FileInfo
     name = "file_info"
 
+    filterable_fields = {"file_id", "file_name", "file_size", "ext", "policy"}
+    sortable_fields = {"id", "create_at", "update_at", "file_name", "file_size", "ext"}
+
     # 如果需要FileInfo特定的方法，可以在这里添加

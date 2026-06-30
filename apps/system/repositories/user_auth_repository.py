@@ -22,6 +22,10 @@ class UserAuthRepository(BaseRepository[UserAuth]):
     model = UserAuth
     name = "user_auth"
 
+    filterable_fields = {"user_id", "ttype", "identifier", "credential", "ifverified"}
+    # credential 为敏感凭证，不开放排序
+    sortable_fields = {"id", "create_at", "update_at", "user_id", "ttype", "ifverified"}
+
     async def find_by_user_ids(self, user_ids: List[str]) -> List[UserAuth]:
         """
         根据用户ID列表查找认证信息
