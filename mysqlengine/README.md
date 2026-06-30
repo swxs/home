@@ -15,7 +15,7 @@
 ## Key Conventions
 
 - 业务 ORM 模型继承 `mysqlengine.baseModel`，不直接继承 Base。
-- 会话通过 `web.dependencies.get_db` 注入；单表操作常用 `get_single_worker(db, Model)` 得到 SingleWorker，其内部使用 BaseRepository。
+- 会话通过 `web.dependencies.get_db` 注入；Repository 继承 `BaseRepository[Model]`，由 service 在构造函数显式持有（`self.repo = XxxRepository(db)`），写路径事务边界由 service 的 `async with transaction(self.db):` 统一管理（repo 只 flush、不 commit）。
 - Repository 与 `web.schemas.pagination.PageSchema`、业务 schema 配合做搜索与分页。
 
 ## Depends On
@@ -24,4 +24,4 @@
 
 ## Used By
 
-web（dependencies 中 get_db、SingleWorker/UnitWorker 使用 SessionLocal 与 baseModel）、apps 各子应用的 repositories 与 api。
+web（dependencies 中 get_db、transaction 使用 SessionLocal 与 baseModel）、apps 各子应用的 repositories 与 services。

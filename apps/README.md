@@ -6,22 +6,25 @@
 
 ## Structure
 
-各子应用采用统一分层：
+各子应用采用统一五层分层：
 
-- **api/**：FastAPI 路由（APIRouter），依赖 web（get_db、get_single_worker、exceptions、schemas）、本 app 的 models/repositories/schemas
+- **api/**：FastAPI 路由（APIRouter），依赖 web（get_db、exceptions、schemas），仅调用 service 并包装响应
+- **services/**：业务层，承载业务编排、归属授权、领域规则与事务边界（写路径用 `async with transaction(self.db):`）
 - **models/**：ORM 模型（继承 mysqlengine.baseModel）
-- **repositories/**：数据访问，继承或组合 mysqlengine.repositories.BaseRepository
-- **schemas/**：Pydantic 请求/响应模型与 Depends 用的工厂（如 get_xxx_schema）
+- **repositories/**：数据访问，继承或组合 mysqlengine.repositories.BaseRepository；只 flush、不 commit
+- **schemas/**：Pydantic 请求/响应模型与 Depends 用的工厂（如 get_xxx_filter）
+
+> 分层规范详见 [docs/architecture/layering.md](../docs/architecture/layering.md)。
 
 子应用列表：
 
 | 子应用        | 功能                                       |
 | ------------- | ------------------------------------------ |
 | password_lock | 密码管理                                   |
+| sudoku        | 数独题目与完成记录、图片解析               |
 | system        | 系统能力、用户等；含 OAuth（oauth_router） |
 | upload        | 上传                                       |
 | wechat        | 微信相关                                   |
-| workflow      | 工作流（图、技能、运行存储等）             |
 
 ## Key Conventions
 
