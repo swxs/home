@@ -16,6 +16,7 @@ class FileInfoRepository(BaseRepository[FileInfo]):
     可以在这里添加FileInfo特定的查询方法
     """
 
+    model = FileInfo
     name = "file_info"
 
     # 如果需要FileInfo特定的方法，可以在这里添加

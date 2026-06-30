@@ -20,6 +20,7 @@ class PasswordLockRepository(BaseRepository[PasswordLock]):
     可以在这里添加PasswordLock特定的查询方法
     """
 
+    model = PasswordLock
     name = "password_lock"
 
     async def search_with_name_like(

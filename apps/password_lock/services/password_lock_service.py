@@ -10,13 +10,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # 通用方法
 from commons.Helpers import encryption
-from web.dependencies.db import get_db, get_single_worker
+from web.dependencies.db import get_db
+from web.dependencies.transaction import transaction
 from web.exceptions import Http400BadRequestException
 from web.schemas.pagination import PageSchema
 
 # 本模块方法
 from .. import consts
-from ..models.password_lock import PasswordLock
+from ..repositories.password_lock_repository import PasswordLockRepository
 from ..schemas.password_lock import (
     PasswordLockCreate,
     PasswordLockFilter,
@@ -30,17 +31,16 @@ logger = logging.getLogger("main.apps.password_lock.services.password_lock_servi
 class PasswordLockService:
     """密码锁业务层：承载业务编排、归属授权、解密策略与事务边界。"""
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, repo: Optional[PasswordLockRepository] = None):
         self.db = db
+        self.repo = repo or PasswordLockRepository(db)
 
     async def list(
         self,
         filter_schema: PasswordLockFilter,
         page_schema: PageSchema,
     ) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            result = await worker.repository.search(filter_schema, page_schema)
+        result = await self.repo.search(filter_schema, page_schema)
 
         return {
             "data": [PasswordLockOut.model_validate(pl) for pl in result["data"]],
@@ -48,9 +48,7 @@ class PasswordLockService:
         }
 
     async def get(self, password_lock_id: str) -> PasswordLockOut:
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            password_lock = await worker.repository.find_one(password_lock_id)
+        password_lock = await self.repo.find_one(password_lock_id)
 
         if password_lock is None:
             raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
@@ -58,23 +56,20 @@ class PasswordLockService:
         return PasswordLockOut.model_validate(password_lock)
 
     async def create(self, schema: PasswordLockCreate) -> PasswordLockOut:
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            password_lock = await worker.repository.create_one(schema)
+        async with transaction(self.db):
+            password_lock = await self.repo.create_one(schema)
 
         return PasswordLockOut.model_validate(password_lock)
 
     async def update(self, password_lock_id: str, schema: PasswordLockUpdate) -> PasswordLockOut:
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            password_lock = await worker.repository.update_one(password_lock_id, schema)
+        async with transaction(self.db):
+            password_lock = await self.repo.update_one(password_lock_id, schema)
 
         return PasswordLockOut.model_validate(password_lock)
 
     async def delete(self, password_lock_id: str) -> int:
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            count = await worker.repository.delete_one(password_lock_id)
+        async with transaction(self.db):
+            count = await self.repo.delete_one(password_lock_id)
 
         return count
 
@@ -88,13 +83,11 @@ class PasswordLockService:
         # 设置用户ID过滤
         filter_schema.user_id = user_id
 
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            result = await worker.repository.search_with_name_like(
-                filter_schema,
-                page_schema,
-                name_search=name_search,
-            )
+        result = await self.repo.search_with_name_like(
+            filter_schema,
+            page_schema,
+            name_search=name_search,
+        )
 
         return {
             "data": [PasswordLockOut.model_validate(pl) for pl in result["data"]],
@@ -102,9 +95,8 @@ class PasswordLockService:
         }
 
     async def reveal_password(self, password_lock_id: str, user_id: str) -> Optional[str]:
-        single_worker = await get_single_worker(self.db, PasswordLock)
-        async with single_worker as worker:
-            password_lock = await worker.repository.find_one(password_lock_id)
+        async with transaction(self.db):
+            password_lock = await self.repo.find_one(password_lock_id)
 
             if password_lock is None:
                 raise Http400BadRequestException(Http400BadRequestException.NoResource, "数据不存在")
@@ -112,7 +104,7 @@ class PasswordLockService:
             if str(password_lock.user_id) != user_id:
                 raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, "无权访问该密码")
 
-            await worker.repository.update_one(
+            await self.repo.update_one(
                 password_lock_id, PasswordLockUpdate(used=password_lock.used + 1)
             )
 

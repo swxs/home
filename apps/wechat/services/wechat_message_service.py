@@ -13,12 +13,10 @@ from wechatpy.messages import TextMessage
 from wechatpy.replies import TextReply
 
 from web.dependencies.db import get_db
-from web.dependencies.unit_worker import UnitWorker
+from web.dependencies.transaction import transaction
 from web.schemas.token import TokenSchema
 
 from apps.system import consts
-from apps.system.models.user import User
-from apps.system.models.user_auth import UserAuth
 from apps.system.repositories.user_auth_repository import UserAuthRepository
 from apps.system.repositories.user_repository import UserRepository
 from apps.system.schemas.user import UserSchema
@@ -26,7 +24,6 @@ from apps.system.schemas.user_auth import UserAuthSchema
 
 # 本模块方法
 from ..messageContent import content_productor
-from ..models.wechat_msg import WechatMsg
 from ..repositories.wechat_msg_repository import WechatMsgRepository
 from ..schemas.wechat_msg import WechatMsgCreate
 
@@ -36,11 +33,22 @@ logger = logging.getLogger("main.apps.wechat.services.wechat_message_service")
 class WechatMessageService:
     """微信消息业务层：消息持久化、命令回复编排、关注/取关用户绑定（跨 system）与事务边界。
 
-    HTTP 专属逻辑（签名校验、AES 解密/加密、PlainTextResponse 构造）保留在 api 层。
+    跨模块多表写：直接持有 system 的 user / user_auth 表级 repo；每个逻辑写在各自的
+    transaction(db) 内提交。HTTP 专属逻辑（签名校验、AES 解密/加密、PlainTextResponse
+    构造）保留在 api 层。
     """
 
-    def __init__(self, db: AsyncSession):
+    def __init__(
+        self,
+        db: AsyncSession,
+        wechat_msg_repo: WechatMsgRepository | None = None,
+        user_repo: UserRepository | None = None,
+        user_auth_repo: UserAuthRepository | None = None,
+    ):
         self.db = db
+        self.wechat_msg_repo = wechat_msg_repo or WechatMsgRepository(db)
+        self.user_repo = user_repo or UserRepository(db)
+        self.user_auth_repo = user_auth_repo or UserAuthRepository(db)
 
     async def process(self, decrypted_xml, raw_xml, openid, token_schema: TokenSchema) -> str:
         """处理已解密的微信消息，返回未加密的回复 XML 字符串。"""
@@ -52,11 +60,8 @@ class WechatMessageService:
         else:
             event = None
 
-        unit_worker = UnitWorker(self.db)
-
-        async with unit_worker as uw:
-            wechat_msg_repo: WechatMsgRepository = uw.get_repository(WechatMsg)
-            await wechat_msg_repo.create_one(
+        async with transaction(self.db):
+            await self.wechat_msg_repo.create_one(
                 WechatMsgCreate(
                     msg_id=msg.id,
                     msg_type=msg.type,
@@ -76,10 +81,8 @@ class WechatMessageService:
 
         elif isinstance(msg, SubscribeEvent):
             try:
-                async with unit_worker as uw:
-                    user_repo: UserRepository = uw.get_repository(User)
-                    user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
-                    user_auth = await user_auth_repo.find_one_or_none(
+                async with transaction(self.db):
+                    user_auth = await self.user_auth_repo.find_one_or_none(
                         UserAuthSchema(
                             ttype=consts.UserAuth_Ttype.WECHAT,
                             identifier=openid,
@@ -87,12 +90,12 @@ class WechatMessageService:
                         )
                     )
                     if user_auth is None:
-                        user = await user_repo.create_one(
+                        user = await self.user_repo.create_one(
                             UserSchema(
                                 username=f"wecht_user_{str(uuid.uuid4())[:6]}",
                             )
                         )
-                        user_auth = await user_auth_repo.create_one(
+                        user_auth = await self.user_auth_repo.create_one(
                             UserAuthSchema(
                                 user_id=user.id,
                                 ttype=consts.UserAuth_Ttype.WECHAT,
@@ -102,36 +105,33 @@ class WechatMessageService:
                             )
                         )
                     else:
-                        await user_auth_repo.update_one(
+                        await self.user_auth_repo.update_one(
                             user_auth.id,
                             UserAuthSchema(
                                 ifverified=consts.UserAuth_Ifverified.VERIFIED,
                             ),
                         )
-            except Exception as e:
+            except Exception:
                 logger.info(f"openid: {openid} 创建用户信息失败！")
-                pass
         elif isinstance(msg, UnsubscribeEvent):
             try:
-                async with unit_worker as uw:
-                    user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
-                    user_auth = await user_auth_repo.find_one_or_none(
+                async with transaction(self.db):
+                    user_auth = await self.user_auth_repo.find_one_or_none(
                         UserAuthSchema(
                             ttype=consts.UserAuth_Ttype.WECHAT,
                             identifier=openid,
                             credential=openid,
                         )
                     )
-                if user_auth:
-                    await user_auth_repo.update_one(
-                        user_auth.id,
-                        UserAuthSchema(
-                            ifverified=consts.UserAuth_Ifverified.UNVERIFIED,
-                        ),
-                    )
-            except Exception as e:
+                    if user_auth:
+                        await self.user_auth_repo.update_one(
+                            user_auth.id,
+                            UserAuthSchema(
+                                ifverified=consts.UserAuth_Ifverified.UNVERIFIED,
+                            ),
+                        )
+            except Exception:
                 logger.info(f"openid: {openid} 解绑用户信息失败！")
-                pass
 
         reply = TextReply(content=content, message=msg)
         return reply.render()

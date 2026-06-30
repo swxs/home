@@ -15,4 +15,5 @@ class OAuthClientRepository(BaseRepository[OAuthClient]):
     OAuth客户端Repository
     """
 
+    model = OAuthClient
     name = "oauth_client"

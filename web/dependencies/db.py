@@ -1,7 +1,3 @@
-from csv import excel
-from typing import Type, TypeVar
-
-from fastapi.param_functions import Depends
 from sqlalchemy.exc import (
     DataError,
     DatabaseError,
@@ -9,17 +5,12 @@ from sqlalchemy.exc import (
     OperationalError,
     ProgrammingError,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from mysqlengine import SessionLocal, baseModel
+from mysqlengine import SessionLocal
 
 # 本模块方法
 from ..exceptions import BaseHttpException
 from .convert_exception import _convert_db_exception
-from .single_worker import SingleWorker
-from .unit_worker import UnitWorker
-
-T = TypeVar("T", bound=baseModel)
 
 
 async def get_db():
@@ -40,12 +31,3 @@ async def get_db():
         # 其他异常直接抛出，由全局异常处理器处理
         finally:
             await session.close()
-
-
-async def get_single_worker(db: AsyncSession, model_type: Type[T]) -> SingleWorker[T]:
-    return SingleWorker[T](db, model_type)
-
-
-# 依赖注入
-async def get_unit_worker(db: AsyncSession = Depends(get_db)) -> UnitWorker:
-    return UnitWorker(db)

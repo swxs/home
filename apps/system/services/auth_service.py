@@ -5,7 +5,7 @@
 import uuid
 import logging
 import secrets
-from typing import Any, Dict
+from typing import Dict, Optional
 from urllib.parse import urlencode
 
 import httpx
@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import core
 from web import exceptions
 from web.dependencies.db import get_db
-from web.dependencies.unit_worker import UnitWorker
+from web.dependencies.transaction import transaction
 from web.schemas.token import TokenSchema
 
 # 通用方法
@@ -26,11 +26,7 @@ from commons.Helpers.Helper_JWT import (
 )
 
 # 本模块方法
-from .. import consts
-from ..models.user import User
-from ..models.user_auth import UserAuth
-from ..repositories.user_auth_repository import UserAuthRepository
-from ..repositories.user_repository import UserRepository
+from ..repositories.user_identity_repository import UserIdentityRepository
 from ..schemas.user import UserSchema
 from ..schemas.user_auth import UserAuthOut, UserAuthSchema
 
@@ -40,21 +36,21 @@ logger = logging.getLogger("main.apps.system.services.auth_service")
 class AuthService:
     """认证业务层：refresh_token/token/signin、GitHub OAuth 登录与回调（含多表事务与外部 HTTP）。
 
-    RedirectResponse 等 HTTP 响应对象在 api 层构造，本层只返回业务数据。
+    身份查询/写入委托 UserIdentityRepository（返回 ORM、仅 flush）；事务边界在本层用
+    transaction(db) 显式控制，只读路径不包事务。RedirectResponse 等 HTTP 响应对象在
+    api 层构造，本层只返回业务数据。
     """
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, identity_repo: Optional[UserIdentityRepository] = None):
         self.db = db
+        self.identity_repo = identity_repo or UserIdentityRepository(db)
 
     async def refresh_token(self, ttype: int, identifier: str, credential: str) -> Dict[str, str]:
         # 使用 Schema 构建查询条件
         user_auth_schema = UserAuthSchema(ttype=ttype, identifier=identifier, credential=credential)
 
-        # 使用Repository搜索方法
-        unit_worker = UnitWorker(self.db)
-        async with unit_worker as uw:
-            user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
-            user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
+        # 单表只读：直接走 identity repo，不包事务
+        user_auth = await self.identity_repo.find_user_auth(user_auth_schema)
 
         if not user_auth:
             raise exceptions.Http403ForbiddenException(
@@ -99,16 +95,9 @@ class AuthService:
 
     async def signin(self, user_auth_schema: UserAuthSchema) -> UserAuthOut:
         user_schema = UserSchema(username=f"user_{str(uuid.uuid4())[:6]}")
-        unit_worker = UnitWorker(self.db)
-        async with unit_worker as uw:
-            user_repo: UserRepository = uw.get_repository(User)
-            user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
-            # 创建用户
-            user = await user_repo.create_one(user_schema)
 
-            # 创建用户认证信息
-            user_auth_schema.user_id = user.id
-            user_auth = await user_auth_repo.create_one(user_auth_schema)
+        async with transaction(self.db):
+            _user, user_auth = await self.identity_repo.create_user_with_auth(user_schema, user_auth_schema)
 
         return UserAuthOut.model_validate(user_auth)
 
@@ -194,46 +183,14 @@ class AuthService:
             github_username = user_data.get("login", f"github_{github_id}")
             github_email = user_data.get("email", "")
 
-            # 查找或创建用户
-            unit_worker = UnitWorker(self.db)
-            async with unit_worker as uw:
-                user_repo: UserRepository = uw.get_repository(User)
-                user_auth_repo: UserAuthRepository = uw.get_repository(UserAuth)
-
-                # 查找是否已有GitHub认证
-                user_auth_schema = UserAuthSchema(
-                    ttype=consts.UserAuth_Ttype.GITHUB,
-                    identifier=github_id,
-                    ifverified=consts.UserAuth_Ifverified.VERIFIED,
+            # 查找或创建用户（多表写在单一事务内）
+            async with transaction(self.db):
+                user = await self.identity_repo.resolve_or_create_github_user(
+                    github_id=github_id,
+                    github_username=github_username,
+                    github_email=github_email,
+                    access_token=access_token,
                 )
-                user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
-
-                if user_auth:
-                    # 用户已存在，直接登录
-                    user = await user_repo.find_one(str(user_auth.user_id))
-                else:
-                    user_auth_schema = UserAuthSchema(
-                        ttype=consts.UserAuth_Ttype.EMAIL,
-                        identifier=github_email,
-                        ifverified=consts.UserAuth_Ifverified.VERIFIED,
-                    )
-                    email_user_auth = await user_auth_repo.find_one_or_none(user_auth_schema)
-                    if email_user_auth:
-                        user = await user_repo.find_one(str(email_user_auth.user_id))
-                    else:
-                        # 创建新用户
-                        user_schema = UserSchema(username=github_username)
-                        user = await user_repo.create_one(user_schema)
-
-                    # 创建GitHub认证信息
-                    user_auth_schema = UserAuthSchema(
-                        user_id=user.id,
-                        ttype=consts.UserAuth_Ttype.GITHUB,
-                        identifier=github_id,
-                        credential=access_token,  # 存储access_token作为凭证
-                        ifverified=consts.UserAuth_Ifverified.VERIFIED,
-                    )
-                    await user_auth_repo.create_one(user_auth_schema)
 
             # 生成JWT token
             token_schema = TokenSchema(user_id=str(user.id))

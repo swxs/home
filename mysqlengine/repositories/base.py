@@ -19,18 +19,23 @@ class BaseRepository(Generic[T]):
     """
     通用Repository基类
     不依赖具体表结构，通过Generic和反射实现
+
+    子类需以类属性声明绑定的模型，例如::
+
+        class UserRepository(BaseRepository[User]):
+            model = User
     """
 
-    def __init__(self, model: Type[T], db: AsyncSession):
+    model: Type[T]
+
+    def __init__(self, db: AsyncSession):
         """
         初始化Repository
 
         Args:
-            model: 模型类（如User, UserAuth）
             db: 数据库会话
         """
         self.db = db
-        self.model = model
 
     async def find_one(self, id: str) -> Optional[T]:
         """

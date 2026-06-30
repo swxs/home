@@ -1,6 +1,5 @@
 # ignore
 logs/
-docs/
 static/dbback/
 .tox
 .idea

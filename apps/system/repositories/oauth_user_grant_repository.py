@@ -18,6 +18,7 @@ class OAuthUserGrantRepository(BaseRepository[OAuthUserGrant]):
     OAuth用户授权记录Repository
     """
 
+    model = OAuthUserGrant
     name = "oauth_user_grant"
 
     async def find_by_user_client(self, user_id: str, client_id: str) -> Optional[OAuthUserGrant]:

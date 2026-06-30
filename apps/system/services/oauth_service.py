@@ -12,7 +12,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import core
 from web import exceptions
-from web.dependencies.db import get_db, get_single_worker, get_unit_worker
+from web.dependencies.db import get_db
+from web.dependencies.transaction import transaction
 from web.response import (
     CORSJSONResponse,
     CORSRedirectResponse,
@@ -23,14 +24,12 @@ from web.schemas.token import TokenSchema
 from commons.Helpers import refresh_tokener, tokener
 
 # 本模块方法
-from ..models.oauth_authorization_code import OAuthAuthorizationCode
-from ..models.oauth_client import OAuthClient
-from ..models.oauth_user_grant import OAuthUserGrant
-from ..models.user import User
 from ..repositories.oauth_authorization_code_repository import (
     OAuthAuthorizationCodeRepository,
 )
+from ..repositories.oauth_client_repository import OAuthClientRepository
 from ..repositories.oauth_user_grant_repository import OAuthUserGrantRepository
+from ..repositories.user_repository import UserRepository
 from ..schemas.oauth import OAuthTokenResponse, OAuthUserInfoResponse
 from ..schemas.oauth_authorization_code import OAuthAuthorizationCodeSchema
 from ..schemas.oauth_client import OAuthClientSchema
@@ -55,8 +54,19 @@ class OAuthService:
     保留在 api 层并将解析出的 user_id 传入。
     """
 
-    def __init__(self, db: AsyncSession):
+    def __init__(
+        self,
+        db: AsyncSession,
+        client_repo: Optional[OAuthClientRepository] = None,
+        auth_code_repo: Optional[OAuthAuthorizationCodeRepository] = None,
+        grant_repo: Optional[OAuthUserGrantRepository] = None,
+        user_repo: Optional[UserRepository] = None,
+    ):
         self.db = db
+        self.client_repo = client_repo or OAuthClientRepository(db)
+        self.auth_code_repo = auth_code_repo or OAuthAuthorizationCodeRepository(db)
+        self.grant_repo = grant_repo or OAuthUserGrantRepository(db)
+        self.user_repo = user_repo or UserRepository(db)
 
     async def _issue_authorization_code(
         self,
@@ -70,21 +80,18 @@ class OAuthService:
         code = generate_authorization_code()
         expires_at = get_authorization_code_expires_at()
 
-        unit_worker = await get_unit_worker(self.db)
-        async with unit_worker as uw:
-            auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
+        auth_code_schema = {
+            "code": code,
+            "client_id": client_id,
+            "user_id": user_id,
+            "redirect_uri": redirect_uri,
+            "scope": scope,
+            "expires_at": expires_at,
+            "is_used": False,
+        }
 
-            auth_code_schema = {
-                "code": code,
-                "client_id": client_id,
-                "user_id": user_id,
-                "redirect_uri": redirect_uri,
-                "scope": scope,
-                "expires_at": expires_at,
-                "is_used": False,
-            }
-
-            await auth_code_repo.create_one(OAuthAuthorizationCodeSchema(**auth_code_schema))
+        async with transaction(self.db):
+            await self.auth_code_repo.create_one(OAuthAuthorizationCodeSchema(**auth_code_schema))
 
         logger.info(f"生成授权码: {code}, 客户端: {client_id}, 用户: {user_id}")
 
@@ -117,9 +124,7 @@ class OAuthService:
             )
 
         # 验证客户端
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            oauth_client = await worker.repository.find_one_or_none(OAuthClientSchema(client_id=client_id))
+        oauth_client = await self.client_repo.find_one_or_none(OAuthClientSchema(client_id=client_id))
 
         if not oauth_client:
             if redirect_uri:
@@ -164,17 +169,11 @@ class OAuthService:
             return CORSRedirectResponse(url=f"{login_url}{separator}{urlencode(params)}")
 
         normalized_scope = normalize_scope(scope)
-        unit_worker = await get_unit_worker(self.db)
-        grant = None
-        async with unit_worker as uw:
-            grant_repo: OAuthUserGrantRepository = uw.get_repository(OAuthUserGrant)
-            grant = await grant_repo.find_by_user_client(user_id, client_id)
+        grant = await self.grant_repo.find_by_user_client(user_id, client_id)
 
         if confirm == "true":
-            async with unit_worker as uw:
-                grant_repo: OAuthUserGrantRepository = uw.get_repository(OAuthUserGrant)
-                await grant_repo.upsert(user_id, client_id, normalized_scope)
-                await uw.commit()
+            async with transaction(self.db):
+                await self.grant_repo.upsert(user_id, client_id, normalized_scope)
             return await self._issue_authorization_code(user_id, client_id, redirect_uri, scope, state)
 
         if grant and normalize_scope(grant.scope) == normalized_scope:
@@ -203,9 +202,7 @@ class OAuthService:
             logger.info(f"Token请求开始: grant_type={grant_type}, client_id={client_id}")
 
             # 验证客户端
-            single_worker = await get_single_worker(self.db, OAuthClient)
-            async with single_worker as worker:
-                oauth_client = await worker.repository.find_one_or_none(OAuthClientSchema(client_id=client_id))
+            oauth_client = await self.client_repo.find_one_or_none(OAuthClientSchema(client_id=client_id))
 
             if not oauth_client:
                 # OAuth2.0标准错误响应格式
@@ -237,15 +234,11 @@ class OAuthService:
                     )
 
                 # 查找授权码
-                unit_worker = await get_unit_worker(self.db)
                 auth_code = None
                 user_id = None
                 scope = None
 
-                async with unit_worker as uw:
-                    auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
-
-                    auth_code = await auth_code_repo.find_one_or_none(OAuthAuthorizationCodeSchema(code=code))
+                auth_code = await self.auth_code_repo.find_one_or_none(OAuthAuthorizationCodeSchema(code=code))
 
                 if not auth_code:
                     logger.warning(f"授权码不存在: {code}")
@@ -288,12 +281,10 @@ class OAuthService:
                     )
 
                 # 标记授权码为已使用（在单独的事务中）
-                async with unit_worker as uw:
-                    auth_code_repo: OAuthAuthorizationCodeRepository = uw.get_repository(OAuthAuthorizationCode)
-
-                    await auth_code_repo.update_one(str(auth_code.id), OAuthAuthorizationCodeSchema(is_used=True))
-                    # 提交事务
-                    await uw.commit()
+                async with transaction(self.db):
+                    await self.auth_code_repo.update_one(
+                        str(auth_code.id), OAuthAuthorizationCodeSchema(is_used=True)
+                    )
 
                 # 保存user_id和scope以便在事务外使用
                 user_id = str(auth_code.user_id)
@@ -378,9 +369,7 @@ class OAuthService:
             raise exceptions.Http401UnauthorizedException(exceptions.Http401UnauthorizedException.TokenLost, "未登录")
 
         # 获取用户信息
-        single_worker = await get_single_worker(self.db, User)
-        async with single_worker as worker:
-            user = await worker.repository.find_one(token_schema.user_id)
+        user = await self.user_repo.find_one(token_schema.user_id)
 
         if not user:
             raise exceptions.Http400BadRequestException(exceptions.Http400BadRequestException.NoResource, "用户不存在")

@@ -14,6 +14,7 @@ from ..models.sudoku_puzzle import SudokuPuzzle
 
 
 class SudokuPuzzleRepository(BaseRepository[SudokuPuzzle]):
+    model = SudokuPuzzle
     name = "sudoku_puzzle"
 
     async def find_by_date(self, puzzle_date: datetime.date) -> Optional[SudokuPuzzle]:

@@ -10,12 +10,13 @@ from typing import Any, Dict, Optional
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db, get_single_worker
+from web.dependencies.db import get_db
+from web.dependencies.transaction import transaction
 from web.exceptions import Http400BadRequestException
 from web.schemas.pagination import PageSchema
 
 # 本模块方法
-from ..models.oauth_client import OAuthClient
+from ..repositories.oauth_client_repository import OAuthClientRepository
 from ..schemas.oauth_client import (
     OAuthClientCreateSchema,
     OAuthClientFilter,
@@ -40,13 +41,12 @@ def generate_client_secret() -> str:
 class OAuthClientService:
     """OAuth 客户端业务层：CRUD、密钥生成与字段暴露策略、事务边界。"""
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, repo: Optional[OAuthClientRepository] = None):
         self.db = db
+        self.repo = repo or OAuthClientRepository(db)
 
     async def list(self, filter_schema: OAuthClientFilter, page_schema: PageSchema) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            result = await worker.repository.search(filter_schema, page_schema)
+        result = await self.repo.search(filter_schema, page_schema)
 
         # 转换为 Schema，不返回client_secret
         data = []
@@ -62,9 +62,7 @@ class OAuthClientService:
         }
 
     async def get(self, oauth_client_id: str) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            oauth_client = await worker.repository.find_one(oauth_client_id)
+        oauth_client = await self.repo.find_one(oauth_client_id)
 
         if oauth_client is None:
             raise Http400BadRequestException(Http400BadRequestException.NoResource, "OAuth客户端不存在")
@@ -80,14 +78,13 @@ class OAuthClientService:
         create_schema: OAuthClientCreateSchema,
         token_user_id: Optional[str],
     ) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            # 生成client_id和client_secret
-            client_id = generate_client_id()
-            client_secret = generate_client_secret()
+        # 生成client_id和client_secret
+        client_id = generate_client_id()
+        client_secret = generate_client_secret()
 
+        async with transaction(self.db):
             # 检查client_id是否已存在（理论上不会，但为了安全）
-            existing_client = await worker.repository.find_one_or_none(OAuthClientSchema(client_id=client_id))
+            existing_client = await self.repo.find_one_or_none(OAuthClientSchema(client_id=client_id))
             if existing_client:
                 # 如果冲突，重新生成
                 client_id = generate_client_id()
@@ -101,7 +98,7 @@ class OAuthClientService:
                 user_id=create_schema.user_id or token_user_id,
             )
 
-            oauth_client = await worker.repository.create_one(oauth_client_schema)
+            oauth_client = await self.repo.create_one(oauth_client_schema)
 
         # 返回包含client_secret的响应（仅在创建时返回一次）
         response_data = OAuthClientResponseSchema.model_validate(oauth_client).model_dump()
@@ -111,23 +108,22 @@ class OAuthClientService:
         return response_data
 
     async def update(self, oauth_client_id: str, schema: OAuthClientUpdate) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            # 检查客户端是否存在
-            existing_client = await worker.repository.find_one(oauth_client_id)
-            if existing_client is None:
-                raise Http400BadRequestException(Http400BadRequestException.NoResource, "OAuth客户端不存在")
+        # 检查客户端是否存在
+        existing_client = await self.repo.find_one(oauth_client_id)
+        if existing_client is None:
+            raise Http400BadRequestException(Http400BadRequestException.NoResource, "OAuth客户端不存在")
 
-            # 移除不允许更新的字段
-            update_data = schema.model_dump(exclude_unset=True)
-            update_data.pop("client_id", None)
-            update_data.pop("client_secret", None)
-            update_data.pop("id", None)
+        # 移除不允许更新的字段
+        update_data = schema.model_dump(exclude_unset=True)
+        update_data.pop("client_id", None)
+        update_data.pop("client_secret", None)
+        update_data.pop("id", None)
 
-            # 创建更新用的Schema
-            update_schema = OAuthClientSchema(**update_data)
+        # 创建更新用的Schema
+        update_schema = OAuthClientSchema(**update_data)
 
-            oauth_client = await worker.repository.update_one(oauth_client_id, update_schema)
+        async with transaction(self.db):
+            oauth_client = await self.repo.update_one(oauth_client_id, update_schema)
 
         # 转换为 Schema，不返回client_secret
         client_dict = OAuthClientSchema.model_validate(oauth_client).model_dump()
@@ -136,28 +132,26 @@ class OAuthClientService:
         return client_dict
 
     async def delete(self, oauth_client_id: str, token_user_id: Optional[str]) -> int:
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            count = await worker.repository.delete_one(oauth_client_id)
+        async with transaction(self.db):
+            count = await self.repo.delete_one(oauth_client_id)
 
         logger.info(f"删除OAuth客户端: {oauth_client_id}, 用户: {token_user_id}")
 
         return count
 
     async def regenerate_secret(self, oauth_client_id: str, token_user_id: Optional[str]) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, OAuthClient)
-        async with single_worker as worker:
-            # 检查客户端是否存在
-            existing_client = await worker.repository.find_one(oauth_client_id)
-            if existing_client is None:
-                raise Http400BadRequestException(Http400BadRequestException.NoResource, "OAuth客户端不存在")
+        # 检查客户端是否存在
+        existing_client = await self.repo.find_one(oauth_client_id)
+        if existing_client is None:
+            raise Http400BadRequestException(Http400BadRequestException.NoResource, "OAuth客户端不存在")
 
-            # 生成新的client_secret
-            new_client_secret = generate_client_secret()
+        # 生成新的client_secret
+        new_client_secret = generate_client_secret()
 
-            # 更新client_secret
-            update_schema = OAuthClientSchema(client_secret=new_client_secret)
-            oauth_client = await worker.repository.update_one(oauth_client_id, update_schema)
+        # 更新client_secret
+        update_schema = OAuthClientSchema(client_secret=new_client_secret)
+        async with transaction(self.db):
+            oauth_client = await self.repo.update_one(oauth_client_id, update_schema)
 
         # 返回新的client_secret（仅在重新生成时返回一次）
         response_data = OAuthClientResponseSchema.model_validate(oauth_client).model_dump()

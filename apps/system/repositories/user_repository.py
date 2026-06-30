@@ -16,6 +16,7 @@ class UserRepository(BaseRepository[User]):
     可以在这里添加User特定的查询方法
     """
 
+    model = User
     name = "user"
 
     # 如果需要User特定的方法，可以在这里添加

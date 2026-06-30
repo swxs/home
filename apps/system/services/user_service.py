@@ -3,17 +3,18 @@
 # @AUTH    : code_creater
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db, get_single_worker
+from web.dependencies.db import get_db
+from web.dependencies.transaction import transaction
 from web.exceptions import Http400BadRequestException
 from web.schemas.pagination import PageSchema
 
 # 本模块方法
-from ..models.user import User
+from ..repositories.user_repository import UserRepository
 from ..schemas.user import UserCreate, UserFilter, UserOut, UserUpdate
 
 logger = logging.getLogger("main.apps.system.services.user_service")
@@ -22,13 +23,12 @@ logger = logging.getLogger("main.apps.system.services.user_service")
 class UserService:
     """用户业务层：CRUD 编排与事务边界。"""
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, repo: Optional[UserRepository] = None):
         self.db = db
+        self.repo = repo or UserRepository(db)
 
     async def list(self, filter_schema: UserFilter, page_schema: PageSchema) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, User)
-        async with single_worker as worker:
-            result = await worker.repository.search(filter_schema, page_schema)
+        result = await self.repo.search(filter_schema, page_schema)
 
         return {
             "data": [UserOut.model_validate(user) for user in result["data"]],
@@ -36,9 +36,7 @@ class UserService:
         }
 
     async def get(self, user_id: str) -> UserOut:
-        single_worker = await get_single_worker(self.db, User)
-        async with single_worker as worker:
-            user = await worker.repository.find_one(user_id)
+        user = await self.repo.find_one(user_id)
 
         if user is None:
             raise Http400BadRequestException(Http400BadRequestException.NoResource, "用户不存在")
@@ -46,23 +44,20 @@ class UserService:
         return UserOut.model_validate(user)
 
     async def create(self, schema: UserCreate) -> UserOut:
-        single_worker = await get_single_worker(self.db, User)
-        async with single_worker as worker:
-            user = await worker.repository.create_one(schema)
+        async with transaction(self.db):
+            user = await self.repo.create_one(schema)
 
         return UserOut.model_validate(user)
 
     async def update(self, user_id: str, schema: UserUpdate) -> UserOut:
-        single_worker = await get_single_worker(self.db, User)
-        async with single_worker as worker:
-            user = await worker.repository.update_one(user_id, schema)
+        async with transaction(self.db):
+            user = await self.repo.update_one(user_id, schema)
 
         return UserOut.model_validate(user)
 
     async def delete(self, user_id: str) -> int:
-        single_worker = await get_single_worker(self.db, User)
-        async with single_worker as worker:
-            count = await worker.repository.delete_one(user_id)
+        async with transaction(self.db):
+            count = await self.repo.delete_one(user_id)
 
         return count
 

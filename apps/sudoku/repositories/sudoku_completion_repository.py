@@ -16,6 +16,7 @@ from ..models.sudoku_puzzle import SudokuPuzzle
 
 
 class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
+    model = SudokuCompletion
     name = "sudoku_completion"
 
     async def find_by_user_and_puzzle(self, user_id: str, puzzle_id: str) -> Optional[SudokuCompletion]:

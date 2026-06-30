@@ -9,12 +9,13 @@ from typing import Any, Dict, Optional
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db, get_single_worker
+from web.dependencies.db import get_db
+from web.dependencies.transaction import transaction
 from web.exceptions import Http400BadRequestException
 from web.schemas.pagination import PageSchema
 
 # 本模块方法
-from ..models.sudoku_completion import SudokuCompletion
+from ..repositories.sudoku_completion_repository import SudokuCompletionRepository
 from ..schemas.sudoku_completion import (
     SudokuCompletionCreateSchema,
     SudokuCompletionItemSchema,
@@ -36,8 +37,9 @@ def _row_to_item(completion, puzzle) -> dict:
 class SudokuCompletionService:
     """数独完成记录业务层：登录校验、查询编排、upsert 与事务边界。"""
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, repo: Optional[SudokuCompletionRepository] = None):
         self.db = db
+        self.repo = repo or SudokuCompletionRepository(db)
 
     async def list_my(
         self,
@@ -65,15 +67,13 @@ class SudokuCompletionService:
             except ValueError:
                 pass
 
-        single_worker = await get_single_worker(self.db, SudokuCompletion)
-        async with single_worker as worker:
-            result = await worker.repository.search_by_user_with_puzzle_filter(
-                user_id=user_id,
-                page_schema=page_schema,
-                puzzle_id=puzzle_id,
-                puzzle_date_from=date_from,
-                puzzle_date_to=date_to,
-            )
+        result = await self.repo.search_by_user_with_puzzle_filter(
+            user_id=user_id,
+            page_schema=page_schema,
+            puzzle_id=puzzle_id,
+            puzzle_date_from=date_from,
+            puzzle_date_to=date_to,
+        )
 
         data_list = [_row_to_item(row[0], row[1]) for row in result["data"]]
         return {
@@ -88,9 +88,8 @@ class SudokuCompletionService:
                 "未登录",
             )
         now = datetime.datetime.now()
-        single_worker = await get_single_worker(self.db, SudokuCompletion)
-        async with single_worker as worker:
-            instance = await worker.repository.upsert_completion(
+        async with transaction(self.db):
+            instance = await self.repo.upsert_completion(
                 user_id=user_id,
                 puzzle_id=body.puzzle_id,
                 completed_at=now,

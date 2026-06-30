@@ -4,17 +4,18 @@
 
 import logging
 import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from web.dependencies.db import get_db, get_single_worker
+from web.dependencies.db import get_db
+from web.dependencies.transaction import transaction
 from web.exceptions import Http400BadRequestException
 from web.schemas.pagination import PageSchema
 
 # 本模块方法
-from ..models.sudoku_puzzle import SudokuPuzzle
+from ..repositories.sudoku_puzzle_repository import SudokuPuzzleRepository
 from ..schemas.sudoku_puzzle import (
     SudokuPuzzleCreateBody,
     SudokuPuzzleFilter,
@@ -33,13 +34,12 @@ PUZZLE_UPDATE_FIELDS = {"puzzle_date", "difficulty"}
 class SudokuPuzzleService:
     """数独谜题业务层：求解/校验领域编排、CRUD 与事务边界。"""
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, repo: Optional[SudokuPuzzleRepository] = None):
         self.db = db
+        self.repo = repo or SudokuPuzzleRepository(db)
 
     async def list(self, filter_schema: SudokuPuzzleFilter, page_schema: PageSchema) -> Dict[str, Any]:
-        single_worker = await get_single_worker(self.db, SudokuPuzzle)
-        async with single_worker as worker:
-            result = await worker.repository.search(filter_schema, page_schema)
+        result = await self.repo.search(filter_schema, page_schema)
 
         return {
             "data": [SudokuPuzzleOut.model_validate(p) for p in result["data"]],
@@ -71,9 +71,8 @@ class SudokuPuzzleService:
             puzzle_date=puzzle_date,
             difficulty=body.difficulty,
         )
-        single_worker = await get_single_worker(self.db, SudokuPuzzle)
-        async with single_worker as worker:
-            instance = await worker.repository.create_one(schema)
+        async with transaction(self.db):
+            instance = await self.repo.create_one(schema)
 
         return SudokuPuzzleOut.model_validate(instance)
 
@@ -85,9 +84,8 @@ class SudokuPuzzleService:
                 Http400BadRequestException.IllegalArgument,
                 "请提供 puzzle_date 或 difficulty",
             )
-        single_worker = await get_single_worker(self.db, SudokuPuzzle)
-        async with single_worker as worker:
-            instance = await worker.repository.find_one(puzzle_id)
+        async with transaction(self.db):
+            instance = await self.repo.find_one(puzzle_id)
             if instance is None:
                 raise Http400BadRequestException(
                     Http400BadRequestException.NoResource,
@@ -95,8 +93,8 @@ class SudokuPuzzleService:
                 )
             for name in to_apply:
                 setattr(instance, name, getattr(body, name))
-            await worker.db.flush()
-            await worker.db.refresh(instance)
+            await self.db.flush()
+            await self.db.refresh(instance)
 
         return SudokuPuzzleOut.model_validate(instance)
 
@@ -109,9 +107,7 @@ class SudokuPuzzleService:
                 "日期格式应为 YYYYMMDD",
             )
 
-        single_worker = await get_single_worker(self.db, SudokuPuzzle)
-        async with single_worker as worker:
-            instance = await worker.repository.find_by_date(d)
+        instance = await self.repo.find_by_date(d)
 
         if instance is None:
             raise Http400BadRequestException(
@@ -122,9 +118,7 @@ class SudokuPuzzleService:
         return SudokuPuzzleOut.model_validate(instance)
 
     async def get(self, puzzle_id: str) -> SudokuPuzzleOut:
-        single_worker = await get_single_worker(self.db, SudokuPuzzle)
-        async with single_worker as worker:
-            instance = await worker.repository.find_one(puzzle_id)
+        instance = await self.repo.find_one(puzzle_id)
 
         if instance is None:
             raise Http400BadRequestException(

@@ -15,4 +15,5 @@ class OAuthAuthorizationCodeRepository(BaseRepository[OAuthAuthorizationCode]):
     OAuth授权码Repository
     """
 
+    model = OAuthAuthorizationCode
     name = "oauth_authorization_code"

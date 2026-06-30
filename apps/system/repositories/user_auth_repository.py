@@ -19,6 +19,7 @@ class UserAuthRepository(BaseRepository[UserAuth]):
     可以在这里添加UserAuth特定的查询方法
     """
 
+    model = UserAuth
     name = "user_auth"
 
     async def find_by_user_ids(self, user_ids: List[str]) -> List[UserAuth]:

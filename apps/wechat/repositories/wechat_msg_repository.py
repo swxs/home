@@ -16,6 +16,7 @@ class WechatMsgRepository(BaseRepository[WechatMsg]):
     可以在这里添加WechatMsg特定的查询方法
     """
 
+    model = WechatMsg
     name = "wechat_msg"
 
     # 如果需要WechatMsg特定的方法，可以在这里添加
