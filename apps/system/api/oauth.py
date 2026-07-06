@@ -8,7 +8,11 @@ from typing import Optional
 from fastapi import APIRouter, Form, Query, Request
 from fastapi.param_functions import Depends
 
-from web.response import CORSResponse
+from web.response import (
+    CORSResponse,
+    CORSJSONResponse,
+    CORSRedirectResponse,
+)
 from web.schemas.response import SuccessResponse
 from web.schemas.token import TokenSchema, get_token
 
@@ -88,7 +92,7 @@ async def authorize(
     # 检查用户登录状态（通过token或cookie），三通道解析保留在 api 层
     user_id = _resolve_user_id_from_request(request)
 
-    return await service.authorize(
+    redirect_url = await service.authorize(
         client_id=client_id,
         redirect_uri=redirect_uri,
         response_type=response_type,
@@ -97,6 +101,7 @@ async def authorize(
         confirm=confirm,
         user_id=user_id,
     )
+    return CORSRedirectResponse(url=redirect_url)
 
 
 @oauth_router.post("/token")
@@ -114,7 +119,7 @@ async def token(
 
     用授权码换取访问令牌，或使用refresh_token刷新令牌
     """
-    return await service.token(
+    result = await service.token(
         grant_type=grant_type,
         code=code,
         redirect_uri=redirect_uri,
@@ -122,6 +127,7 @@ async def token(
         client_secret=client_secret,
         refresh_token=refresh_token,
     )
+    return CORSJSONResponse(content=result.content, status_code=result.status_code)
 
 
 @oauth_router.get("/userinfo", response_model=SuccessResponse[OAuthUserInfoResponse])
@@ -134,4 +140,5 @@ async def userinfo(
 
     获取当前登录用户的信息
     """
-    return await service.userinfo(token_schema)
+    result = await service.userinfo(token_schema)
+    return CORSJSONResponse(content=result.content, status_code=result.status_code)
