@@ -1,7 +1,8 @@
+import logging
 from typing import List, Optional
 
 import pydantic
-from fastapi import Header, Query
+from fastapi import Header, Query, Request
 from pydantic import BaseModel
 
 from apps.system import consts
@@ -20,6 +21,8 @@ from commons.Helpers.Helper_JWT import (
 
 # 本模块方法
 from ..exceptions.http_401_unauthorized_exception import Http401UnauthorizedException
+
+logger = logging.getLogger("main.web.schemas.token")
 
 
 class TokenSchema(pydantic.BaseModel):
@@ -60,3 +63,33 @@ async def get_token_by_openid(
             return TokenSchema(user_id=None)
     else:
         return TokenSchema(user_id=None)
+
+
+def _decode_user_id(token: Optional[str]) -> Optional[str]:
+    """解码单个 token 并取出 user_id，失败返回 None（区分过期/非法并记录日志）。"""
+    if not token:
+        return None
+    try:
+        _, payload = tokener.decode(token)
+        return payload.get("user_id")
+    except ExpiredSignatureError:
+        logger.info("optional auth: token 已过期，按未登录处理")
+        return None
+    except (InvalidSignatureError, DecodeError):
+        logger.warning("optional auth: token 非法，按未登录处理")
+        return None
+
+
+async def get_optional_user_id(request: Request) -> Optional[str]:
+    """软登录检测：Bearer / Cookie / Query 依次解析，失败返回 None。"""
+    auth_header = request.headers.get("Authorization", "")
+    sources = [
+        auth_header[7:] if auth_header.startswith("Bearer ") else None,
+        request.cookies.get("access_token"),
+        request.query_params.get("token"),
+    ]
+    for token in sources:
+        user_id = _decode_user_id(token)
+        if user_id:
+            return user_id
+    return None
