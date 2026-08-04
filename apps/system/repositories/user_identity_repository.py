@@ -9,7 +9,7 @@
 表级 repo 以 Repo(db) 构造（model 为类属性），可选注入便于单测。
 """
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,6 +54,62 @@ class UserIdentityRepository:
         user_auth_schema.user_id = user.id
         user_auth = await self.user_auth_repo.create_one(user_auth_schema)
         return user, user_auth
+
+    async def find_user_by_username(self, username: str) -> Optional[User]:
+        return await self.user_repo.find_one_or_none(UserSchema(username=username))
+
+    async def find_auths_by_user_id(self, user_id: str) -> List[UserAuth]:
+        return await self.user_auth_repo.find_by_user_ids([user_id])
+
+    async def create_user_with_password_and_email(
+        self,
+        username: str,
+        email: str,
+        password_hash: str,
+    ) -> Tuple[User, UserAuth, UserAuth]:
+        user = await self.user_repo.create_one(UserSchema(username=username))
+        password_auth = await self.user_auth_repo.create_one(
+            UserAuthSchema(
+                user_id=user.id,
+                ttype=consts.UserAuth_Ttype.PASSWORD,
+                identifier=username,
+                credential=password_hash,
+                ifverified=consts.UserAuth_Ifverified.UNVERIFIED,
+            )
+        )
+        email_auth = await self.user_auth_repo.create_one(
+            UserAuthSchema(
+                user_id=user.id,
+                ttype=consts.UserAuth_Ttype.EMAIL,
+                identifier=email,
+                credential=None,
+                ifverified=consts.UserAuth_Ifverified.UNVERIFIED,
+            )
+        )
+        return user, password_auth, email_auth
+
+    async def verify_user_auths(self, user_id: str) -> None:
+        auths = await self.find_auths_by_user_id(user_id)
+        for auth in auths:
+            if auth.ttype in (consts.UserAuth_Ttype.PASSWORD, consts.UserAuth_Ttype.EMAIL):
+                await self.user_auth_repo.update_one(
+                    str(auth.id),
+                    UserAuthSchema(ifverified=consts.UserAuth_Ifverified.VERIFIED),
+                )
+
+    async def update_password_credential(self, user_id: str, password_hash: str) -> None:
+        password_auth = await self.user_auth_repo.find_one_or_none(
+            UserAuthSchema(
+                user_id=user_id,
+                ttype=consts.UserAuth_Ttype.PASSWORD,
+            )
+        )
+        if password_auth is None:
+            return
+        await self.user_auth_repo.update_one(
+            str(password_auth.id),
+            UserAuthSchema(credential=password_hash),
+        )
 
     async def resolve_or_create_github_user(
         self,

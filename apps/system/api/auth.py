@@ -4,7 +4,7 @@
 
 import logging
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, BackgroundTasks, Body, Query
 from fastapi.param_functions import Depends
 from fastapi.responses import RedirectResponse
 
@@ -12,6 +12,14 @@ from web.response import success
 from web.schemas.response import SuccessResponse
 
 # 本模块方法
+from ..schemas.auth import (
+    ForgotPasswordRequest,
+    MessageResponse,
+    RegisterRequest,
+    ResendVerificationRequest,
+    ResetPasswordRequest,
+    VerifyEmailRequest,
+)
 from ..schemas.response import TokenResponse, UserAuthResponse
 from ..schemas.user_auth import UserAuthSchema
 from ..services.auth_service import AuthService, get_auth_service
@@ -48,6 +56,54 @@ async def signin(
 ):
     user_auth = await service.signin(user_auth_schema)
     return success({"data": user_auth})
+
+
+@router.post("/register", response_model=SuccessResponse[MessageResponse])
+async def register(
+    body: RegisterRequest,
+    background_tasks: BackgroundTasks,
+    service: AuthService = Depends(get_auth_service),
+):
+    result = await service.register(body.username, body.email, body.password, background_tasks)
+    return success(result)
+
+
+@router.post("/verify-email", response_model=SuccessResponse[MessageResponse])
+async def verify_email(
+    body: VerifyEmailRequest = Body(...),
+    service: AuthService = Depends(get_auth_service),
+):
+    result = await service.verify_email(body.token)
+    return success(result)
+
+
+@router.post("/resend-verification", response_model=SuccessResponse[MessageResponse])
+async def resend_verification(
+    body: ResendVerificationRequest,
+    background_tasks: BackgroundTasks,
+    service: AuthService = Depends(get_auth_service),
+):
+    result = await service.resend_verification(body.email, background_tasks)
+    return success(result)
+
+
+@router.post("/forgot-password", response_model=SuccessResponse[MessageResponse])
+async def forgot_password(
+    body: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    service: AuthService = Depends(get_auth_service),
+):
+    result = await service.forgot_password(body.username, body.email, background_tasks)
+    return success(result)
+
+
+@router.post("/reset-password", response_model=SuccessResponse[MessageResponse])
+async def reset_password(
+    body: ResetPasswordRequest = Body(...),
+    service: AuthService = Depends(get_auth_service),
+):
+    result = await service.reset_password(body.token, body.new_password)
+    return success(result)
 
 
 @router.get("/github/login")
