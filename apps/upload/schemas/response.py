@@ -8,6 +8,7 @@ from web.schemas.pagination import PaginationSchema
 
 # 本模块方法
 from .file_info import FileInfoOut
+from .file_share_link import FileShareLinkOut
 
 
 class FileInfoSearchResponse(TypedDict):
@@ -21,3 +22,16 @@ class FileInfoResponse(TypedDict):
 
 class FilePathResponse(TypedDict):
     path: str
+
+
+class FileLinkResponse(TypedDict):
+    url: str
+
+
+class FileShareLinkSearchResponse(TypedDict):
+    data: List[FileShareLinkOut]
+    pagination: PaginationSchema
+
+
+class FileShareLinkResponse(TypedDict):
+    data: FileShareLinkOut

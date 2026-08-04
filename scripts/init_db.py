@@ -15,7 +15,7 @@ def register_database():
         user,
         user_auth,
     )
-    from apps.upload.models import file_info
+    from apps.upload.models import file_info, file_share_link
     from apps.wechat.models import wechat_msg
     from apps.notify.email.models import email_send_record
 
