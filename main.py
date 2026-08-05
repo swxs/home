@@ -19,6 +19,14 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=core.config.CORS_ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
 app.add_exception_handler(HTTPException, unknown_http_handler)
 app.add_exception_handler(Exception, unknown_exception_handler)
 
