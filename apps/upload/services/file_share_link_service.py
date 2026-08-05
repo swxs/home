@@ -115,6 +115,11 @@ class FileShareLinkService:
         file_info = await self.file_info_repo.find_one(schema.file_info_id)
         if file_info is None:
             raise Http400BadRequestException(Http400BadRequestException.NoResource, "文件不存在")
+        if str(file_info.user_id) != user_id:
+            raise Http403ForbiddenException(
+                Http403ForbiddenException.PasswordError,
+                "无权分享该文件",
+            )
 
         payload = FileShareLinkPersist(
             **schema.model_dump(),

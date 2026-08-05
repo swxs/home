@@ -8,6 +8,7 @@ class Oss2Helper:
     def __init__(self, key_id=None, secret=None, host=None, bucket=None, root_dir="dev"):
         self.auth = oss2.Auth(key_id, secret)
         self.bucket = oss2.Bucket(self.auth, host, bucket)
+        self.bucket_name = bucket
         host = host.split("://", 1)[-1]
         self.host = f"https://{bucket}.{host}/"
         self.root = root_dir.strip("/")
@@ -45,7 +46,7 @@ class Oss2Helper:
             keys.append(obj.key)
         return keys
 
-    def upload(self, path, data, mode: str = "w"):
+    def upload(self, path, data, mode: str = "w", content_type: str = None):
         """
         @params path: 上传路径
         @params data: 上传数据
@@ -56,7 +57,8 @@ class Oss2Helper:
             result = self.bucket.head_object(path)
             self.bucket.append_object(path, result.content_length, data)
         elif mode == "w":
-            self.bucket.put_object(path, data)
+            headers = {"Content-Type": content_type} if content_type else None
+            self.bucket.put_object(path, data, headers=headers)
         return True
 
     def download(self, path) -> bytes:
@@ -79,10 +81,45 @@ class Oss2Helper:
         return result.read()
 
     def get_sign_download_path(self, path, filename, expires=3600):
+        return self.sign_get_url(path, filename, "attachment", expires)
+
+    def sign_put_url(
+        self,
+        path: str,
+        content_type: str,
+        content_md5: str,
+        expires: int = 600,
+    ) -> str:
+        """生成绑定 Content-Type 与 Content-MD5 的 PUT URL。"""
+        path = self._get_path(path)
+        headers = {
+            "Content-Type": content_type,
+            "Content-MD5": content_md5,
+        }
+        return self.bucket.sign_url(
+            "PUT",
+            path,
+            expires,
+            slash_safe=True,
+            headers=headers,
+        )
+
+    def sign_get_url(
+        self,
+        path: str,
+        filename: str,
+        disposition: str = "attachment",
+        expires: int = 3600,
+    ) -> str:
+        """生成 inline 或 attachment 的 GET URL。"""
+        if disposition not in {"inline", "attachment"}:
+            raise ValueError("disposition 仅支持 inline 或 attachment")
         path = self._get_path(path)
         content_disposition_filename = quote(filename)
         params = {
-            "response-content-disposition": f"attachment; filename*=utf-8''{content_disposition_filename}",
+            "response-content-disposition": (
+                f"{disposition}; filename*=utf-8''{content_disposition_filename}"
+            ),
         }
         url = self.bucket.sign_url("GET", path, expires, slash_safe=True, headers=None, params=params)
         return url
@@ -90,6 +127,16 @@ class Oss2Helper:
     def delete(self, path):
         path = self._get_path(path)
         self.bucket.delete_object(path)
+        return True
+
+    def copy(self, source_path: str, destination_path: str) -> bool:
+        source_path = self._get_path(source_path)
+        destination_path = self._get_path(destination_path)
+        self.bucket.copy_object(
+            self.bucket_name,
+            source_path,
+            destination_path,
+        )
         return True
 
     def sync(self, src_path: str, dst_path: str, remove: bool = False) -> int:

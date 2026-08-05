@@ -9,6 +9,10 @@ DEBUG = env.bool("DEBUG", False)
 SITE_PROTOCOL = env.str("SITE_PROTOCOL", "http")
 SITE_DOMAIN = env.str("SITE_DOMAIN", "127.0.0.1")
 SITE_PORT = env.int("SITE_PORT", 8090)
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS",
+    ["http://127.0.0.1:8084", "http://localhost:8084"],
+)
 
 XSRF = env.str("XSRF", "__xsrf")
 DEFAULT_LOCAL = env.str("DEFAULT_LOCAL", "zh_CN")  # 默认语言
@@ -66,6 +70,9 @@ OSS_ACCESS_KEY_SECRET = env.str("OSS_ACCESS_KEY_SECRET", "")
 OSS_HOST = env.str("OSS_HOST", "")
 OSS_BUCKET = env.str("OSS_BUCKET", "")
 OSS_ROOT_DIR = env.str("OSS_ROOT_DIR", "")
+UPLOAD_MAX_BYTES = env.int("UPLOAD_MAX_BYTES", 500 * 1024 * 1024)
+UPLOAD_PRESIGN_EXPIRES = env.int("UPLOAD_PRESIGN_EXPIRES", 10 * 60)
+DOWNLOAD_PRESIGN_EXPIRES = env.int("DOWNLOAD_PRESIGN_EXPIRES", 10 * 60)
 
 IMAGEURL_UID = env.str("IMAGEURL_UID", "")
 IMAGEURL_TOKEN = env.str("IMAGEURL_TOKEN", "")
