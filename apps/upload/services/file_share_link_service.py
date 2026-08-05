@@ -122,7 +122,10 @@ class FileShareLinkService:
             )
 
         payload = FileShareLinkPersist(
-            **schema.model_dump(),
+            file_info_id=schema.file_info_id,
+            name=schema.name,
+            description=schema.description,
+            expires_at=schema.expires_at,
             token=self._generate_token(),
             create_by=user_id,
             status=consts.ShareLinkStatus.ACTIVE,
