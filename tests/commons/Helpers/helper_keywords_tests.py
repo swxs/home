@@ -4,7 +4,7 @@
 # @Time    : 2018/11/12 18:17
 
 import unittest
-from commons.Helpers.Helper_keywords import Trie
+from home.commons.Helpers.Helper_keywords import Trie
 
 
 class KeywordsHelperTestCase(unittest.TestCase):

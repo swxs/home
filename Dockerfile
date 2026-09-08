@@ -24,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # 使用 uv run 运行 uvicorn
-CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "home.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -15,12 +15,12 @@ from typing import Any, Dict, List, Optional
 from bson import ObjectId
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.password_lock.models.password_lock import PasswordLock
-from apps.system.models.user import User
-from apps.system.models.user_auth import UserAuth
-from apps.upload.models.file_info import FileInfo
-from apps.wechat.models.wechat_msg import WechatMsg
-from mysqlengine import SessionLocal, baseModel
+from home.apps.password_lock.models.password_lock import PasswordLock
+from home.apps.system.models.user import User
+from home.apps.system.models.user_auth import UserAuth
+from home.apps.upload.models.file_info import FileInfo
+from home.apps.wechat.models.wechat_msg import WechatMsg
+from home.mysqlengine import SessionLocal, baseModel
 
 # 文件名到模型类的映射
 FILE_MODEL_MAP = {

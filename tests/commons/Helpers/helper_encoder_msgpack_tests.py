@@ -6,7 +6,7 @@
 
 import unittest
 import datetime
-from commons.Helpers.encoders.Helper_Encoder_Msgpack import dumps, loads
+from home.commons.Helpers.encoders.Helper_Encoder_Msgpack import dumps, loads
 
 
 class MsgpackEncoderHelperTestCase(unittest.TestCase):

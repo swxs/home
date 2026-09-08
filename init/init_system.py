@@ -2,12 +2,12 @@ import asyncio
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-import core
-from apps.memo.models.todo import Todo
-from apps.password_lock.models.password_lock import PasswordLock
-from apps.system.models.user import User
-from apps.system.models.user_auth import UserAuth
-from apps.wechat.models.wechat_msg import WechatMsg
+import home.core as core
+from home.apps.memo.models.todo import Todo
+from home.apps.password_lock.models.password_lock import PasswordLock
+from home.apps.system.models.user import User
+from home.apps.system.models.user_auth import UserAuth
+from home.apps.wechat.models.wechat_msg import WechatMsg
 
 core.mongodb_database.client = AsyncIOMotorClient(core.config.MONGODB_URI)
 

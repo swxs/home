@@ -12,12 +12,12 @@
 
 import unittest
 
-from apps.password_lock.repositories.password_lock_repository import PasswordLockRepository
-from apps.password_lock.schemas.password_lock import PasswordLockFilter
-from apps.sudoku.repositories.sudoku_completion_repository import SudokuCompletionRepository
-from apps.system.repositories.user_search_repository import UserSearchRepository
-from apps.system.schemas.user import UserFilter
-from web.schemas.pagination import PageSchema
+from home.apps.password_lock.repositories.password_lock_repository import PasswordLockRepository
+from home.apps.password_lock.schemas.password_lock import PasswordLockFilter
+from home.apps.sudoku.repositories.sudoku_completion_repository import SudokuCompletionRepository
+from home.apps.system.repositories.user_search_repository import UserSearchRepository
+from home.apps.system.schemas.user import UserFilter
+from home.web.schemas.pagination import PageSchema
 
 
 class _FakeResult:

@@ -17,9 +17,9 @@ import unittest
 from sqlalchemy import String, func, select
 from sqlalchemy.orm import Mapped, mapped_column
 
-from mysqlengine import baseModel
-from mysqlengine.repositories import BaseRepository
-from web.schemas.pagination import PageSchema
+from home.mysqlengine import baseModel
+from home.mysqlengine.repositories import BaseRepository
+from home.web.schemas.pagination import PageSchema
 
 
 class _FooModel(baseModel):

@@ -1,6 +1,6 @@
 # ignore
 logs/
-static/dbback/
+assets/static/dbback/
 .tox
 .idea
 .vscode/settings.json
@@ -106,3 +106,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+## LLM
+.scratch/

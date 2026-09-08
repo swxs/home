@@ -7,11 +7,11 @@ from unittest.mock import AsyncMock, MagicMock
 from bson import ObjectId
 from fastapi import BackgroundTasks
 
-from apps.notify.consts import EmailTemplateType
-from apps.system import consts
-from apps.system.services.auth_service import AuthService
-from apps.system.utils.password import hash_password
-from web import exceptions
+from home.apps.notify.consts import EmailTemplateType
+from home.apps.system import consts
+from home.apps.system.services.auth_service import AuthService
+from home.apps.system.utils.password import hash_password
+from home.web import exceptions
 
 USER_ID = str(ObjectId())
 

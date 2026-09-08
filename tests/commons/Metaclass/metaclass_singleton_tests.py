@@ -6,7 +6,7 @@
 import time
 import math
 import unittest
-from commons.Metaclass.Singleton import Singleton
+from home.commons.Metaclass.Singleton import Singleton
 
 
 class A(object, metaclass=Singleton):

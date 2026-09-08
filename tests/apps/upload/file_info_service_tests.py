@@ -1,12 +1,12 @@
 import unittest
 from types import SimpleNamespace
 
-from web.exceptions import Http403ForbiddenException
-from web.schemas.pagination import PageSchema
+from home.web.exceptions import Http403ForbiddenException
+from home.web.schemas.pagination import PageSchema
 
-from apps.upload.schemas.file_info import FileInfoFilter
-from apps.upload.services.file_info_service import FileInfoService
-from apps.upload.storage import build_object_key
+from home.apps.upload.schemas.file_info import FileInfoFilter
+from home.apps.upload.services.file_info_service import FileInfoService
+from home.apps.upload.storage import build_object_key
 
 
 USER_ID = "64f000000000000000000001"

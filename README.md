@@ -13,7 +13,7 @@ sh ./get_base.sh
 ## 启动项目
 
 ```
-uvicorn main:app --reload --port 8090
+uv run uvicorn home.main:app --reload --port 8090
 ```
 
 ## 主要功能
@@ -25,7 +25,7 @@ uvicorn main:app --reload --port 8090
 
 ## 项目结构
 
-整体架构与各目录职责见 [CONTEXT.md](./CONTEXT.md)，便于大模型与开发者理解代码布局与依赖关系。各主要代码目录下另有 `README.md` 说明该目录用途与约定。
+整体架构与各目录职责见 [CONTEXT.md](./CONTEXT.md) 与 [docs/architecture/project-overview.md](./docs/architecture/project-overview.md)。主应用代码位于 `src/home/`，爬虫位于 `spiders/`，静态资源位于 `assets/`。
 
 ## GitHub OAuth 配置
 

@@ -1,8 +1,8 @@
 # home 业务应用分层设计规范
 
-本规范定义 `apps/` 下各业务应用（app）的分层架构、各层职责、目录结构、数据流与编写约定。目标是让每个功能模块结构清晰、职责单一、可维护、可演进。以 `apps/password_lock` 作为落地样例。
+本规范定义 `src/home/apps/` 下各业务应用（app）的分层架构、各层职责、目录结构、数据流与编写约定。目标是让每个功能模块结构清晰、职责单一、可维护、可演进。以 `home.apps.password_lock` 作为落地样例。
 
-> 适用范围：`apps/` 下所有子应用。新增模块应遵循本规范；存量模块在改造时逐步对齐。
+> 适用范围：`src/home/apps/` 下所有子应用。新增模块应遵循本规范；存量模块在改造时逐步对齐。
 
 ---
 
@@ -32,26 +32,26 @@ api -> service -> repository -> model
 ## 2. 各层职责红线
 
 ### api（路由层 / controller）
-- 只做：解析与校验请求参数、依赖注入、调用 service、用 `web.response.success(...)` 包装响应、声明 `response_model`。
+- 只做：解析与校验请求参数、依赖注入、调用 service、用 `home.web.response.success(...)` 包装响应、声明 `response_model`。
 - 不做：直接开启事务 / 触碰 repository、归属授权判断、计数等副作用、领域规则。
 - 端点函数应「薄」：通常为「取参数 -> 调 service -> 包装返回」三步。
 
 ### service（业务层）
 - 只做：业务规则与领域逻辑、归属/权限授权、副作用编排（如使用计数自增）、解密/加密等策略、决定事务边界。
-- 事务边界：写操作用 `async with transaction(self.db):`（见 [`web/dependencies/transaction.py`](../../web/dependencies/transaction.py)）统一 commit / rollback 并转换数据库异常；只读操作不包事务（同一 session 内多次查询天然一致）。
+- 事务边界：写操作用 `async with transaction(self.db):`（见 [`src/home/web/dependencies/transaction.py`](../../src/home/web/dependencies/transaction.py)）统一 commit / rollback 并转换数据库异常；只读操作不包事务（同一 session 内多次查询天然一致）。
 - repo 持有：在构造函数里显式持有 `self.repo = XxxRepository(db)`，支持可选注入便于单测；不再使用 `SingleWorker` / `UnitWorker` / `get_repository` 这类服务定位器写法。
 - 通过依赖工厂 `get_xxx_service(db=Depends(get_db))` 注入到 api。
 - 不做：直接处理 HTTP 细节（status、header）、写裸 SQL。
 
 ### repository（数据访问层）
-- 只做：基于 SQLAlchemy 的查询与持久化，继承 `mysqlengine.repositories.BaseRepository`。
+- 只做：基于 SQLAlchemy 的查询与持久化，继承 `home.mysqlengine.repositories.BaseRepository`。
 - 复杂查询作为方法补充，但应尽量复用基类逻辑，避免复制过滤/排序/分页代码。
 - 过滤 / 排序 / 分页 / 自定义查询的统一写法见 [repository 查询层统一规范](../conventions/repository.md)（白名单、`build_query`、`paginate` 等）。
 - 一律**只 flush、不 commit**；事务边界永远在 service。
 - 不做：业务判断、权限校验。
 
 ### model（ORM 层）
-- 只做：表结构映射（继承 `mysqlengine.baseModel`）、字段、索引、约束。
+- 只做：表结构映射（继承 `home.mysqlengine.baseModel`）、字段、索引、约束。
 
 ### schema（数据契约层）
 - 只做：定义请求/响应的 Pydantic 数据契约，按用途拆分（见第 5 节）。
@@ -62,7 +62,7 @@ api -> service -> repository -> model
 ## 3. 标准目录结构
 
 ```
-apps/<app>/
+src/home/apps/<app>/
 ├── __init__.py
 ├── consts.py                 # 枚举/常量
 ├── api/                      # 路由层（薄）
@@ -85,7 +85,7 @@ apps/<app>/
     └── __init__.py
 ```
 
-说明：领域纯函数工具（无 HTTP、无 DB）可放在 service 内或独立 `utils/`（如 `apps/sudoku/utils/`）；不应再用浮在 app 根目录的 `<app>_utils.py` 承载业务逻辑。
+说明：领域纯函数工具（无 HTTP、无 DB）可放在 service 内或独立 `utils/`（如 `src/home/apps/sudoku/utils/`）；不应再用浮在 app 根目录的 `<app>_utils.py` 承载业务逻辑。
 
 ---
 
@@ -141,7 +141,7 @@ sequenceDiagram
 
 ## 7. password_lock 样例对照
 
-`apps/password_lock` 已按本规范落地，现状如下：
+`src/home/apps/password_lock` 已按本规范落地，现状如下：
 
 - `api/password_lock.py`、`api/searcher.py`：仅调用 `PasswordLockService`，函数体收敛为「调 service + success」。
 - `services/password_lock_service.py`：`PasswordLockService` 提供 `list/get/create/update/delete/search_self/reveal_password`；`reveal_password` 承接原 `searcher` 的查找 + 归属校验 + `used+1` + 解密（原 `password_lock_utils.get_password` 已并入 `_extract_password`），写路径用 `async with transaction(self.db):` 包裹。

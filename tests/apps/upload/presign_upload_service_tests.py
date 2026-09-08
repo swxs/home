@@ -1,14 +1,14 @@
 import unittest
 from types import SimpleNamespace
 
-from web.exceptions import Http400BadRequestException
+from home.web.exceptions import Http400BadRequestException
 
-from apps.upload.schemas.presign import (
+from home.apps.upload.schemas.presign import (
     PresignCompleteRequest,
     PresignUploadRequest,
 )
-from apps.upload.services.presign_upload_service import PresignUploadService
-from apps.upload.storage import build_object_key
+from home.apps.upload.services.presign_upload_service import PresignUploadService
+from home.apps.upload.storage import build_object_key
 
 
 USER_ID = "64f000000000000000000001"

@@ -20,11 +20,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from commons.Helpers import oss2_helper  # noqa: E402
-from mysqlengine import SessionLocal  # noqa: E402
+from home.commons.Helpers import oss2_helper  # noqa: E402
+from home.mysqlengine import SessionLocal  # noqa: E402
 
 # 脚本允许直接从仓库根目录运行。
-from apps.upload.storage import build_object_key  # noqa: E402
+from home.apps.upload.storage import build_object_key  # noqa: E402
 
 
 @dataclass

@@ -2,13 +2,13 @@
 
 本规范定义 `repositories/` 下数据访问层在「过滤 / 排序 / 分页 / 自定义查询」上的统一写法。目标是消除各 repo 各自手写过滤/排序/分页代码的混乱，做到「声明 + 复用」。
 
-> 适用范围：`apps/**/repositories/` 下所有 repository。新增遵循本规范；存量改造时对齐。
+> 适用范围：`src/home/apps/**/repositories/` 下所有 repository。新增遵循本规范；存量改造时对齐。
 
 ---
 
 ## 1. 核心理念：四段可组合原语
 
-`mysqlengine.repositories.BaseRepository` 提供四段原语，`search` 由它们组合而成：
+`home.mysqlengine.repositories.BaseRepository` 提供四段原语，`search` 由它们组合而成：
 
 ```mermaid
 flowchart LR

@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+# @File    : repositories/user_repository.py
+# @AUTH    : code_creater
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from home.mysqlengine.repositories import BaseRepository
+
+# 本模块方法
+from ..models.user import User
+
+
+class UserRepository(BaseRepository[User]):
+    """
+    用户Repository
+    可以在这里添加User特定的查询方法
+    """
+
+    model = User
+    name = "user"
+
+    filterable_fields = {"username", "description", "avatar"}
+    sortable_fields = {"id", "create_at", "update_at", "username"}
+
+    # 如果需要User特定的方法，可以在这里添加
+    # 例如：
+    # async def find_by_username(self, username: str) -> Optional[User]:
+    #     query = select(User).where(User.username == username)
+    #     result = await self.db.execute(query)
+    #     return result.scalar_one_or_none()

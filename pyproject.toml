@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "home"
 version = "0.1.0"
@@ -91,10 +95,7 @@ sections = [
     'STDLIB',
     'THIRDPARTY',
     'FIRSTPARTY',
-    'COMMONS',
-    'APPS',
     'LOCALFOLDER',
 ]
-known_commons = ['commons']
-known_apps = ['apps']
-import_headings = { commons = "通用方法", localfolder = "本模块方法" }
+known_first_party = ['home']
+import_headings = { localfolder = "本模块方法" }

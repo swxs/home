@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from commons.Helpers import RegEnum
-from commons.Helpers.Helper_validate import Validate
+from home.commons.Helpers import RegEnum
+from home.commons.Helpers.Helper_validate import Validate
 
 
 class ValidateHelperTestCase(unittest.TestCase):

@@ -12,13 +12,13 @@ import asyncio
 
 from sqlalchemy import select
 
-from apps.system import consts
-from apps.system.models.user import User
-from apps.system.models.user_auth import UserAuth
-from apps.system.repositories.user_auth_repository import UserAuthRepository
-from apps.system.schemas.user_auth import UserAuthSchema
-from mysqlengine import SessionLocal
-from web.dependencies.transaction import transaction
+from home.apps.system import consts
+from home.apps.system.models.user import User
+from home.apps.system.models.user_auth import UserAuth
+from home.apps.system.repositories.user_auth_repository import UserAuthRepository
+from home.apps.system.schemas.user_auth import UserAuthSchema
+from home.mysqlengine import SessionLocal
+from home.web.dependencies.transaction import transaction
 
 
 async def list_missing(db) -> None:

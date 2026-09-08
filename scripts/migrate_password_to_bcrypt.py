@@ -12,11 +12,11 @@ import asyncio
 
 from sqlalchemy import select
 
-from apps.system import consts
-from apps.system.models.user_auth import UserAuth
-from apps.system.utils.password import hash_password
-from mysqlengine import SessionLocal
-from web.dependencies.transaction import transaction
+from home.apps.system import consts
+from home.apps.system.models.user_auth import UserAuth
+from home.apps.system.utils.password import hash_password
+from home.mysqlengine import SessionLocal
+from home.web.dependencies.transaction import transaction
 
 
 def _is_bcrypt(credential: str) -> bool:

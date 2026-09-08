@@ -3,6 +3,11 @@
 
 import os
 import sys
+
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 import datetime
 import unittest
 import functools
@@ -57,7 +62,7 @@ def run_tests(target="shell"):
 
     # 构建测试用例集
     loader = MyLoader()
-    all_case = loader.discover('./', pattern='*_tests.py')
+    all_case = loader.discover('tests/', pattern='*_tests.py')
     for case in all_case:
         # 循环添加case到测试集合里面
         suite.addTests(case)
