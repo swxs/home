@@ -27,19 +27,24 @@ ENV PYTHONUNBUFFERED=1 \
     SITE_ROOT=/home
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo $TZ > /etc/timezone
+    && echo $TZ > /etc/timezone \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends gosu \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home appuser \
+    && mkdir -p /home/logs /home/temp \
+    && chown -R appuser:appuser /home
 
 COPY --from=builder /home/.venv /home/.venv
 COPY --from=builder /home/src /home/src
 COPY assets ./assets
 COPY logging.ini ./logging.ini
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-RUN useradd --create-home appuser \
-    && mkdir -p /home/logs /home/temp \
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
     && chown -R appuser:appuser /home
-
-USER appuser
 
 EXPOSE 8000
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["/home/.venv/bin/python3", "-m", "uvicorn", "home.main:app", "--host", "0.0.0.0", "--port", "8000"]
