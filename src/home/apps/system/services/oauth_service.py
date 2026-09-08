@@ -10,11 +10,10 @@ from urllib.parse import urlencode
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
 import home.core as core
 from home.web import exceptions
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.schemas.token import TokenSchema
 
 # 通用方法
@@ -61,17 +60,17 @@ class OAuthService:
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         client_repo: Optional[OAuthClientRepository] = None,
         auth_code_repo: Optional[OAuthAuthorizationCodeRepository] = None,
         grant_repo: Optional[OAuthUserGrantRepository] = None,
         user_repo: Optional[UserRepository] = None,
     ):
-        self.db = db
-        self.client_repo = client_repo or OAuthClientRepository(db)
-        self.auth_code_repo = auth_code_repo or OAuthAuthorizationCodeRepository(db)
-        self.grant_repo = grant_repo or OAuthUserGrantRepository(db)
-        self.user_repo = user_repo or UserRepository(db)
+        self.session = session
+        self.client_repo = client_repo or OAuthClientRepository(session)
+        self.auth_code_repo = auth_code_repo or OAuthAuthorizationCodeRepository(session)
+        self.grant_repo = grant_repo or OAuthUserGrantRepository(session)
+        self.user_repo = user_repo or UserRepository(session)
 
     async def _issue_authorization_code(
         self,
@@ -95,7 +94,7 @@ class OAuthService:
             "is_used": False,
         }
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             await self.auth_code_repo.create_one(OAuthAuthorizationCodeSchema(**auth_code_schema))
 
         logger.info(f"生成授权码: {code}, 客户端: {client_id}, 用户: {user_id}")
@@ -177,7 +176,7 @@ class OAuthService:
         grant = await self.grant_repo.find_by_user_client(user_id, client_id)
 
         if confirm == "true":
-            async with transaction(self.db):
+            async with transaction(self.session):
                 await self.grant_repo.upsert(user_id, client_id, normalized_scope)
             return await self._issue_authorization_code(user_id, client_id, redirect_uri, scope, state)
 
@@ -286,7 +285,7 @@ class OAuthService:
                     )
 
                 # 标记授权码为已使用（在单独的事务中）
-                async with transaction(self.db):
+                async with transaction(self.session):
                     await self.auth_code_repo.update_one(
                         str(auth_code.id), OAuthAuthorizationCodeSchema(is_used=True)
                     )
@@ -385,5 +384,5 @@ class OAuthService:
         )
 
 
-async def get_oauth_service(db: AsyncSession = Depends(get_db)) -> OAuthService:
-    return OAuthService(db)
+async def get_oauth_service(session: AsyncSession = Depends(get_session)) -> OAuthService:
+    return OAuthService(session)

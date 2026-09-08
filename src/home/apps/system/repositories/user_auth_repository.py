@@ -33,5 +33,5 @@ class UserAuthRepository(BaseRepository[UserAuth]):
         if not user_ids:
             return []
         query = select(UserAuth).where(UserAuth.user_id.in_(user_ids))
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return list[UserAuth](result.scalars().all())

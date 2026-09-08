@@ -7,9 +7,8 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema
 
@@ -28,9 +27,9 @@ logger = logging.getLogger("main.apps.system.services.user_auth_service")
 class UserAuthService:
     """用户认证业务层：CRUD 编排与事务边界。"""
 
-    def __init__(self, db: AsyncSession, repo: Optional[UserAuthRepository] = None):
-        self.db = db
-        self.repo = repo or UserAuthRepository(db)
+    def __init__(self, session: AsyncSession, repo: Optional[UserAuthRepository] = None):
+        self.session = session
+        self.repo = repo or UserAuthRepository(session)
 
     async def list(self, filter_schema: UserAuthFilter, page_schema: PageSchema) -> Dict[str, Any]:
         result = await self.repo.search(filter_schema, page_schema)
@@ -49,23 +48,23 @@ class UserAuthService:
         return UserAuthOut.model_validate(user_auth)
 
     async def create(self, schema: UserAuthCreate) -> UserAuthOut:
-        async with transaction(self.db):
+        async with transaction(self.session):
             user_auth = await self.repo.create_one(schema)
 
         return UserAuthOut.model_validate(user_auth)
 
     async def update(self, user_auth_id: str, schema: UserAuthUpdate) -> UserAuthOut:
-        async with transaction(self.db):
+        async with transaction(self.session):
             user_auth = await self.repo.update_one(user_auth_id, schema)
 
         return UserAuthOut.model_validate(user_auth)
 
     async def delete(self, user_auth_id: str) -> int:
-        async with transaction(self.db):
+        async with transaction(self.session):
             count = await self.repo.delete_one(user_auth_id)
 
         return count
 
 
-async def get_user_auth_service(db: AsyncSession = Depends(get_db)) -> UserAuthService:
-    return UserAuthService(db)
+async def get_user_auth_service(session: AsyncSession = Depends(get_session)) -> UserAuthService:
+    return UserAuthService(session)

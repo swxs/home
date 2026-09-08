@@ -12,14 +12,13 @@ import httpx
 from fastapi import BackgroundTasks
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
 import home.core as core
 from home.apps.notify.consts import EmailTemplateType, TokenPurpose
 from home.apps.notify.email.services.email_send_service import EmailSendService
 from home.apps.notify.utils.redis_client import RedisTokenStore
 from home.web import exceptions
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.schemas.token import TokenSchema
 
 # 通用方法
@@ -44,20 +43,20 @@ class AuthService:
     """认证业务层：refresh_token/token/signin、GitHub OAuth 登录与回调（含多表事务与外部 HTTP）。
 
     身份查询/写入委托 UserIdentityRepository（返回 ORM、仅 flush）；事务边界在本层用
-    transaction(db) 显式控制，只读路径不包事务。RedirectResponse 等 HTTP 响应对象在
+    transaction(session) 显式控制，只读路径不包事务。RedirectResponse 等 HTTP 响应对象在
     api 层构造，本层只返回业务数据。
     """
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         identity_repo: Optional[UserIdentityRepository] = None,
         email_service: Optional[EmailSendService] = None,
         token_store: Optional[RedisTokenStore] = None,
     ):
-        self.db = db
-        self.identity_repo = identity_repo or UserIdentityRepository(db)
-        self.email_service = email_service or EmailSendService(db)
+        self.session = session
+        self.identity_repo = identity_repo or UserIdentityRepository(session)
+        self.email_service = email_service or EmailSendService(session)
         self.token_store = token_store or RedisTokenStore()
 
     async def _require_email_verified(self, user_id: str) -> None:
@@ -138,7 +137,7 @@ class AuthService:
     async def signin(self, user_auth_schema: UserAuthSchema) -> UserAuthOut:
         user_schema = UserSchema(username=f"user_{str(uuid.uuid4())[:6]}")
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             _user, user_auth = await self.identity_repo.create_user_with_auth(user_schema, user_auth_schema)
 
         return UserAuthOut.model_validate(user_auth)
@@ -164,7 +163,7 @@ class AuthService:
             )
 
         password_hash = hash_password(password)
-        async with transaction(self.db):
+        async with transaction(self.session):
             user, _password_auth, _email_auth = await self.identity_repo.create_user_with_password_and_email(
                 username, email, password_hash
             )
@@ -181,7 +180,7 @@ class AuthService:
             )
 
         user_id = payload.get("user_id")
-        async with transaction(self.db):
+        async with transaction(self.session):
             await self.identity_repo.verify_user_auths(user_id)
 
         return MessageResponse(message="邮箱验证成功")
@@ -253,7 +252,7 @@ class AuthService:
 
         user_id = payload.get("user_id")
         password_hash = hash_password(new_password)
-        async with transaction(self.db):
+        async with transaction(self.session):
             await self.identity_repo.update_password_credential(user_id, password_hash)
 
         return MessageResponse(message="密码重置成功")
@@ -333,7 +332,7 @@ class AuthService:
             github_username = user_data.get("login", f"github_{github_id}")
             github_email = user_data.get("email", "")
 
-            async with transaction(self.db):
+            async with transaction(self.session):
                 user = await self.identity_repo.resolve_or_create_github_user(
                     github_id=github_id,
                     github_username=github_username,
@@ -363,5 +362,5 @@ class AuthService:
             )
 
 
-async def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
-    return AuthService(db)
+async def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
+    return AuthService(session)

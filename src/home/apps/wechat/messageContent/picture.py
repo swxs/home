@@ -19,7 +19,7 @@ class PictureContent(Content):
         content = f"您好，该功能暂未开发完成！"
 
         if token_schema.user_id:
-            user_repo = UserRepository(self.db)
+            user_repo = UserRepository(self.session)
             user = await user_repo.find_one(
                 token_schema.user_id,
             )

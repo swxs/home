@@ -23,7 +23,7 @@ class FileShareLinkRepository(BaseRepository[FileShareLink]):
 
     async def find_by_token(self, token: str) -> Optional[FileShareLink]:
         query = select(self.model).where(self.model.token == token)
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def revoke_active_for_file(self, file_info_id: str) -> int:
@@ -35,6 +35,6 @@ class FileShareLinkRepository(BaseRepository[FileShareLink]):
             )
             .values(status=ShareLinkStatus.REVOKED)
         )
-        result = await self.db.execute(statement)
-        await self.db.flush()
+        result = await self.session.execute(statement)
+        await self.session.flush()
         return result.rowcount

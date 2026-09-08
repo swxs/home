@@ -9,9 +9,8 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema
 
@@ -41,9 +40,9 @@ def generate_client_secret() -> str:
 class OAuthClientService:
     """OAuth 客户端业务层：CRUD、密钥生成与字段暴露策略、事务边界。"""
 
-    def __init__(self, db: AsyncSession, repo: Optional[OAuthClientRepository] = None):
-        self.db = db
-        self.repo = repo or OAuthClientRepository(db)
+    def __init__(self, session: AsyncSession, repo: Optional[OAuthClientRepository] = None):
+        self.session = session
+        self.repo = repo or OAuthClientRepository(session)
 
     async def list(self, filter_schema: OAuthClientFilter, page_schema: PageSchema) -> Dict[str, Any]:
         result = await self.repo.search(filter_schema, page_schema)
@@ -82,7 +81,7 @@ class OAuthClientService:
         client_id = generate_client_id()
         client_secret = generate_client_secret()
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             # 检查client_id是否已存在（理论上不会，但为了安全）
             existing_client = await self.repo.find_one_or_none(OAuthClientSchema(client_id=client_id))
             if existing_client:
@@ -122,7 +121,7 @@ class OAuthClientService:
         # 创建更新用的Schema
         update_schema = OAuthClientSchema(**update_data)
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             oauth_client = await self.repo.update_one(oauth_client_id, update_schema)
 
         # 转换为 Schema，不返回client_secret
@@ -132,7 +131,7 @@ class OAuthClientService:
         return client_dict
 
     async def delete(self, oauth_client_id: str, token_user_id: Optional[str]) -> int:
-        async with transaction(self.db):
+        async with transaction(self.session):
             count = await self.repo.delete_one(oauth_client_id)
 
         logger.info(f"删除OAuth客户端: {oauth_client_id}, 用户: {token_user_id}")
@@ -150,7 +149,7 @@ class OAuthClientService:
 
         # 更新client_secret
         update_schema = OAuthClientSchema(client_secret=new_client_secret)
-        async with transaction(self.db):
+        async with transaction(self.session):
             oauth_client = await self.repo.update_one(oauth_client_id, update_schema)
 
         # 返回新的client_secret（仅在重新生成时返回一次）
@@ -161,5 +160,5 @@ class OAuthClientService:
         return response_data
 
 
-async def get_oauth_client_service(db: AsyncSession = Depends(get_db)) -> OAuthClientService:
-    return OAuthClientService(db)
+async def get_oauth_client_service(session: AsyncSession = Depends(get_session)) -> OAuthClientService:
+    return OAuthClientService(session)

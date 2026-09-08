@@ -37,7 +37,7 @@ class FileInfoRepository(BaseRepository[FileInfo]):
         )
         if for_update:
             query = query.with_for_update()
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def find_by_user_content(
@@ -51,7 +51,7 @@ class FileInfoRepository(BaseRepository[FileInfo]):
             self.model.file_id == file_id,
             self.model.file_size == file_size,
         )
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def count_content_references(self, file_id: str, file_size: int) -> int:
@@ -59,4 +59,4 @@ class FileInfoRepository(BaseRepository[FileInfo]):
             self.model.file_id == file_id,
             self.model.file_size == file_size,
         )
-        return (await self.db.execute(query)).scalar() or 0
+        return (await self.session.execute(query)).scalar() or 0

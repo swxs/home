@@ -22,5 +22,5 @@ class SudokuPuzzleRepository(BaseRepository[SudokuPuzzle]):
 
     async def find_by_date(self, puzzle_date: datetime.date) -> Optional[SudokuPuzzle]:
         stmt = select(SudokuPuzzle).where(SudokuPuzzle.puzzle_date == puzzle_date).limit(1)
-        result = await self.db.execute(stmt)
+        result = await self.session.execute(stmt)
         return result.scalar_one_or_none()

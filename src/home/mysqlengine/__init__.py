@@ -32,6 +32,8 @@ SessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
+from home.mysqlengine.session import open_session, transaction  # noqa: E402
+
 
 # 我们将用这个类继承，来创建每个数据库模型或类（ORM 模型）
 Base = declarative_base()

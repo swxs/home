@@ -10,8 +10,8 @@ TEMPLATE = """\
 class Content:
     name = "/"
 
-    def __init__(self, db) -> None:
-        self.db = db
+    def __init__(self, session) -> None:
+        self.session = session
 
     async def get_reply(self, message, token_schema):
         return TextReply(content=TEMPLATE, message=message)

@@ -7,11 +7,10 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
 # 通用方法
 from home.commons.Helpers import encryption
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema
 
@@ -31,9 +30,9 @@ logger = logging.getLogger("main.apps.password_lock.services.password_lock_servi
 class PasswordLockService:
     """密码锁业务层：承载业务编排、归属授权、解密策略与事务边界。"""
 
-    def __init__(self, db: AsyncSession, repo: Optional[PasswordLockRepository] = None):
-        self.db = db
-        self.repo = repo or PasswordLockRepository(db)
+    def __init__(self, session: AsyncSession, repo: Optional[PasswordLockRepository] = None):
+        self.session = session
+        self.repo = repo or PasswordLockRepository(session)
 
     async def list(
         self,
@@ -56,19 +55,19 @@ class PasswordLockService:
         return PasswordLockOut.model_validate(password_lock)
 
     async def create(self, schema: PasswordLockCreate) -> PasswordLockOut:
-        async with transaction(self.db):
+        async with transaction(self.session):
             password_lock = await self.repo.create_one(schema)
 
         return PasswordLockOut.model_validate(password_lock)
 
     async def update(self, password_lock_id: str, schema: PasswordLockUpdate) -> PasswordLockOut:
-        async with transaction(self.db):
+        async with transaction(self.session):
             password_lock = await self.repo.update_one(password_lock_id, schema)
 
         return PasswordLockOut.model_validate(password_lock)
 
     async def delete(self, password_lock_id: str) -> int:
-        async with transaction(self.db):
+        async with transaction(self.session):
             count = await self.repo.delete_one(password_lock_id)
 
         return count
@@ -95,7 +94,7 @@ class PasswordLockService:
         }
 
     async def reveal_password(self, password_lock_id: str, user_id: str) -> Optional[str]:
-        async with transaction(self.db):
+        async with transaction(self.session):
             password_lock = await self.repo.find_one(password_lock_id)
 
             if password_lock is None:
@@ -126,5 +125,5 @@ class PasswordLockService:
         return password
 
 
-async def get_password_lock_service(db: AsyncSession = Depends(get_db)) -> PasswordLockService:
-    return PasswordLockService(db)
+async def get_password_lock_service(session: AsyncSession = Depends(get_session)) -> PasswordLockService:
+    return PasswordLockService(session)

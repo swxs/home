@@ -11,13 +11,12 @@ from typing import Optional, Tuple
 from fastapi import UploadFile
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
 
 # 通用方法
 from home.commons.Helpers import oss2_helper
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http403ForbiddenException
 
 # 本模块方法
@@ -33,9 +32,9 @@ logger = logging.getLogger("main.apps.upload.services.upload_service")
 class UploadService:
     """文件上传/下载业务层：封装 OSS 存储与文件记录的联动及事务边界。"""
 
-    def __init__(self, db: AsyncSession, repo: Optional[FileInfoRepository] = None):
-        self.db = db
-        self.repo = repo or FileInfoRepository(db)
+    def __init__(self, session: AsyncSession, repo: Optional[FileInfoRepository] = None):
+        self.session = session
+        self.repo = repo or FileInfoRepository(session)
 
     @staticmethod
     def _normalize_ext(ext: Optional[str]) -> str:
@@ -94,7 +93,7 @@ class UploadService:
             ext=os.path.splitext(filename)[1],
             policy=consts.FileInfo_Policy.ALIOSS,
         )
-        async with transaction(self.db):
+        async with transaction(self.session):
             file_info = await self.repo.create_one(file_info_schema)
 
         return FileInfoOut.model_validate(file_info)
@@ -126,7 +125,7 @@ class UploadService:
         return data, file_info.file_name, media_type, disposition
 
     async def delete(self, user_id: str, file_info_id: str) -> int:
-        service = FileInfoService(self.db, repo=self.repo, oss_helper=oss2_helper)
+        service = FileInfoService(self.session, repo=self.repo, oss_helper=oss2_helper)
         return await service.delete(user_id, file_info_id)
 
     async def signed_path(self, user_id: str, file_info_id: str) -> str:
@@ -138,5 +137,5 @@ class UploadService:
         )
 
 
-async def get_upload_service(db: AsyncSession = Depends(get_db)) -> UploadService:
-    return UploadService(db)
+async def get_upload_service(session: AsyncSession = Depends(get_session)) -> UploadService:
+    return UploadService(session)

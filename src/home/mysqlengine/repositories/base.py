@@ -43,14 +43,14 @@ class BaseRepository(Generic[T]):
     # search() 默认返回单一 ORM（scalars）；join 多实体场景置 False 返回 Row 元组。
     returns_scalars: ClassVar[bool] = True
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, session: AsyncSession):
         """
         初始化Repository
 
         Args:
-            db: 数据库会话
+            session: 数据库会话
         """
-        self.db = db
+        self.session = session
 
     async def find_one(self, id: str) -> Optional[T]:
         """
@@ -64,7 +64,7 @@ class BaseRepository(Generic[T]):
         """
         query = select(self.model).where(self.model.id == id)
 
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def find_one_or_none(self, schema: PydanticBaseModel) -> Optional[T]:
@@ -79,7 +79,7 @@ class BaseRepository(Generic[T]):
             if hasattr(self.model, key):
                 query = query.where(getattr(self.model, key) == value)
 
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     # ------------------------------------------------------------------
@@ -161,9 +161,9 @@ class BaseRepository(Generic[T]):
         """
         use_scalars = self.returns_scalars if scalars is None else scalars
 
-        total = (await self.db.execute(count_query)).scalar() or 0
+        total = (await self.session.execute(count_query)).scalar() or 0
         query = self._apply_pagination(query, page_schema)
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         data = result.scalars().all() if use_scalars else result.all()
 
         return {
@@ -204,9 +204,9 @@ class BaseRepository(Generic[T]):
             创建的资源实例
         """
         instance = self.model(**schema.model_dump())
-        self.db.add(instance)
-        await self.db.flush()
-        await self.db.refresh(instance)
+        self.session.add(instance)
+        await self.session.flush()
+        await self.session.refresh(instance)
         return instance
 
     async def update_one(
@@ -240,8 +240,8 @@ class BaseRepository(Generic[T]):
             if hasattr(instance, key):
                 setattr(instance, key, value)
 
-        await self.db.flush()
-        await self.db.refresh(instance)
+        await self.session.flush()
+        await self.session.refresh(instance)
         return instance
 
     async def delete_one(
@@ -259,6 +259,6 @@ class BaseRepository(Generic[T]):
             删除的行数
         """
         stmt = delete(self.model).where(self.model.id == id)
-        result = await self.db.execute(stmt)
-        await self.db.flush()
+        result = await self.session.execute(stmt)
+        await self.session.flush()
         return result.rowcount

@@ -38,10 +38,18 @@ api -> service -> repository -> model
 
 ### service（业务层）
 - 只做：业务规则与领域逻辑、归属/权限授权、副作用编排（如使用计数自增）、解密/加密等策略、决定事务边界。
-- 事务边界：写操作用 `async with transaction(self.db):`（见 [`src/home/web/dependencies/transaction.py`](../../src/home/web/dependencies/transaction.py)）统一 commit / rollback 并转换数据库异常；只读操作不包事务（同一 session 内多次查询天然一致）。
-- repo 持有：在构造函数里显式持有 `self.repo = XxxRepository(db)`，支持可选注入便于单测；不再使用 `SingleWorker` / `UnitWorker` / `get_repository` 这类服务定位器写法。
-- 通过依赖工厂 `get_xxx_service(db=Depends(get_db))` 注入到 api。
-- 不做：直接处理 HTTP 细节（status、header）、写裸 SQL。
+- 事务边界：写操作用 `async with transaction(self.session):`（见 [`src/home/web/dependencies/session.py`](../../src/home/web/dependencies/session.py)）统一 commit / rollback 并转换数据库异常；只读操作不包事务（同一 session 内多次查询天然一致）。
+- repo 持有：在构造函数里显式持有 `self.repo = XxxRepository(session)`，支持可选注入便于单测；不再使用 `SingleWorker` / `UnitWorker` / `get_repository` 这类服务定位器写法。
+- 通过依赖工厂 `get_xxx_service(session=Depends(get_session))` 注入到 api。
+- 不做：直接处理 HTTP 细节（status、header）、写裸 SQL；**不在同一文件混用 web 与 mysqlengine 两层 session**（见下文 `tasks/`）。
+
+### tasks（后台任务层）
+- 只做：脱离 HTTP 请求生命周期的异步任务（如 `BackgroundTasks.add_task`、未来 Celery/定时任务等）；自行 `open_session()` 管理 session，写路径用 `home.mysqlengine.transaction`。
+- 路径：`src/home/apps/<app>/tasks/`（子应用级）或 `src/home/apps/<app>/<module>/tasks/`（子模块级，如 `notify/email/tasks/`）。
+- 文件命名：`<action>_task.py`，导出顶层 async 函数（如 `send_email_record_task`），供 service 通过 `background_tasks.add_task(fn, ...)` 调度。
+- 只依赖：`mysqlengine`（`open_session`、`transaction`）、本 app 的 repository/schema/channel 等领域模块。
+- 禁止：import `home.web.dependencies.session`（HTTP 异常转换在此无意义）。
+- service 职责：在 HTTP 路径内完成必要写库（如创建 PENDING 记录）后，仅 `add_task` 调度 tasks 层函数，不内联后台逻辑。
 
 ### repository（数据访问层）
 - 只做：基于 SQLAlchemy 的查询与持久化，继承 `home.mysqlengine.repositories.BaseRepository`。
@@ -81,11 +89,16 @@ src/home/apps/<app>/
 │   ├── __init__.py
 │   ├── <resource>.py         # Filter/Create/Update/Out
 │   └── response.py           # 响应包装类型
+├── tasks/                    # 可选：后台任务（脱离 HTTP，仅用 mysqlengine session）
+│   ├── __init__.py
+│   └── <action>_task.py
 └── utils/                    # 可选：领域纯函数工具（无 HTTP、无 DB）
     └── __init__.py
 ```
 
-说明：领域纯函数工具（无 HTTP、无 DB）可放在 service 内或独立 `utils/`（如 `src/home/apps/sudoku/utils/`）；不应再用浮在 app 根目录的 `<app>_utils.py` 承载业务逻辑。
+子模块（如 `notify/email/`）可在模块内再设 `tasks/`，规则同上。
+
+说明：领域纯函数工具（无 HTTP、无 DB）可放在 service 内或独立 `utils/`（如 `src/home/apps/sudoku/utils/`）；不应再用浮在 app 根目录的 `<app>_utils.py` 承载业务逻辑。后台任务放 `tasks/`，样例见 [`notify/email/tasks/send_email_task.py`](../../src/home/apps/notify/email/tasks/send_email_task.py)。
 
 ---
 
@@ -102,7 +115,7 @@ sequenceDiagram
     participant R as repository
     C->>A: GET /.../self/{id}
     A->>S: reveal_password(id, user_id)
-    S->>T: async with transaction(self.db)
+    S->>T: async with transaction(self.session)
     S->>R: find_one(id)
     R-->>S: instance
     S->>S: 归属校验 + used+1 + 解密策略
@@ -113,7 +126,7 @@ sequenceDiagram
 ```
 
 要点：
-- 事务起止由 service 内的 `async with transaction(self.db):` 决定，提交发生在上下文正常退出时，异常路径自动 rollback 并转换数据库异常。
+- 事务起止由 service 内的 `async with transaction(self.session):` 决定，提交发生在上下文正常退出时，异常路径自动 rollback 并转换数据库异常。
 - 一个用例中的多次数据访问应包在同一 `transaction` 上下文中，保证原子性。
 
 ---
@@ -144,7 +157,7 @@ sequenceDiagram
 `src/home/apps/password_lock` 已按本规范落地，现状如下：
 
 - `api/password_lock.py`、`api/searcher.py`：仅调用 `PasswordLockService`，函数体收敛为「调 service + success」。
-- `services/password_lock_service.py`：`PasswordLockService` 提供 `list/get/create/update/delete/search_self/reveal_password`；`reveal_password` 承接原 `searcher` 的查找 + 归属校验 + `used+1` + 解密（原 `password_lock_utils.get_password` 已并入 `_extract_password`），写路径用 `async with transaction(self.db):` 包裹。
+- `services/password_lock_service.py`：`PasswordLockService` 提供 `list/get/create/update/delete/search_self/reveal_password`；`reveal_password` 承接原 `searcher` 的查找 + 归属校验 + `used+1` + 解密（原 `password_lock_utils.get_password` 已并入 `_extract_password`），写路径用 `async with transaction(self.session):` 包裹。
 - `repositories/password_lock_repository.py`：复用 `BaseRepository` 逻辑，去除 `search_with_name_like` 的重复实现。
 - `schemas/`：已拆分为 `PasswordLockFilter / Create / Update / Out`。
 

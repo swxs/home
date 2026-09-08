@@ -3,12 +3,14 @@ from typing import List, Optional
 
 import pydantic
 from fastapi import Header, Query, Request
+from fastapi.param_functions import Depends
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from home.apps.system import consts
 from home.apps.system.repositories.user_auth_repository import UserAuthRepository
 from home.apps.system.schemas.user_auth import UserAuthSchema
-from home.mysqlengine import SessionLocal
+from home.web.dependencies.session import get_session
 
 # 通用方法
 from home.commons.Helpers import refresh_tokener, tokener
@@ -45,24 +47,22 @@ async def get_token(
 
 
 async def get_token_by_openid(
+    session: AsyncSession = Depends(get_session),
     openid: Optional[str] = Query(None),
 ):
     if openid:
-        async with SessionLocal() as session:
-            user_auth_repo = UserAuthRepository(session)
-            user_auth = await user_auth_repo.find_one_or_none(
-                UserAuthSchema(
-                    ttype=consts.UserAuth_Ttype.WECHAT,
-                    identifier=openid,
-                    ifverified=consts.UserAuth_Ifverified.VERIFIED,
-                )
+        user_auth_repo = UserAuthRepository(session)
+        user_auth = await user_auth_repo.find_one_or_none(
+            UserAuthSchema(
+                ttype=consts.UserAuth_Ttype.WECHAT,
+                identifier=openid,
+                ifverified=consts.UserAuth_Ifverified.VERIFIED,
             )
+        )
         if user_auth:
             return TokenSchema(user_id=str(user_auth.user_id))
-        else:
-            return TokenSchema(user_id=None)
-    else:
         return TokenSchema(user_id=None)
+    return TokenSchema(user_id=None)
 
 
 def _decode_user_id(token: Optional[str]) -> Optional[str]:

@@ -17,15 +17,14 @@ from home.apps.system.models.user import User
 from home.apps.system.models.user_auth import UserAuth
 from home.apps.system.repositories.user_auth_repository import UserAuthRepository
 from home.apps.system.schemas.user_auth import UserAuthSchema
-from home.mysqlengine import SessionLocal
-from home.web.dependencies.transaction import transaction
+from home.mysqlengine import open_session, transaction
 
 
-async def list_missing(db) -> None:
-    users = (await db.execute(select(User))).scalars().all()
+async def list_missing(session) -> None:
+    users = (await session.execute(select(User))).scalars().all()
     for user in users:
         auths = (
-            await db.execute(select(UserAuth).where(UserAuth.user_id == user.id))
+            await session.execute(select(UserAuth).where(UserAuth.user_id == user.id))
         ).scalars().all()
         by_type = {a.ttype: a for a in auths}
         if consts.UserAuth_Ttype.PASSWORD in by_type and consts.UserAuth_Ttype.EMAIL not in by_type:
@@ -43,15 +42,15 @@ async def backfill(
     dry_run: bool = False,
     mark_verified: bool = True,
 ) -> None:
-    async with SessionLocal() as db:
+    async with open_session() as session:
         user = (
-            await db.execute(select(User).where(User.username == username))
+            await session.execute(select(User).where(User.username == username))
         ).scalar_one_or_none()
         if user is None:
             raise SystemExit(f"用户不存在: {username!r}")
 
         existing_email = (
-            await db.execute(
+            await session.execute(
                 select(UserAuth).where(
                     UserAuth.ttype == consts.UserAuth_Ttype.EMAIL,
                     UserAuth.identifier == email,
@@ -62,7 +61,7 @@ async def backfill(
             raise SystemExit(f"邮箱 {email!r} 已绑定其他用户")
 
         user_email_auth = (
-            await db.execute(
+            await session.execute(
                 select(UserAuth).where(
                     UserAuth.user_id == user.id,
                     UserAuth.ttype == consts.UserAuth_Ttype.EMAIL,
@@ -74,7 +73,7 @@ async def backfill(
             return
 
         password_auth = (
-            await db.execute(
+            await session.execute(
                 select(UserAuth).where(
                     UserAuth.user_id == user.id,
                     UserAuth.ttype == consts.UserAuth_Ttype.PASSWORD,
@@ -91,8 +90,8 @@ async def backfill(
         if dry_run:
             return
 
-        repo = UserAuthRepository(db)
-        async with transaction(db):
+        repo = UserAuthRepository(session)
+        async with transaction(session):
             email_auth = await repo.create_one(
                 UserAuthSchema(
                     user_id=user.id,
@@ -142,8 +141,8 @@ def main() -> None:
 
 
 async def _list_missing_wrapper() -> None:
-    async with SessionLocal() as db:
-        await list_missing(db)
+    async with open_session() as session:
+        await list_missing(session)
 
 
 if __name__ == "__main__":

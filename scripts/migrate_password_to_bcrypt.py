@@ -15,8 +15,7 @@ from sqlalchemy import select
 from home.apps.system import consts
 from home.apps.system.models.user_auth import UserAuth
 from home.apps.system.utils.password import hash_password
-from home.mysqlengine import SessionLocal
-from home.web.dependencies.transaction import transaction
+from home.mysqlengine import open_session, transaction
 
 
 def _is_bcrypt(credential: str) -> bool:
@@ -27,11 +26,11 @@ async def migrate(*, dry_run: bool = False, plaintext_filter: str | None = None)
     migrated = 0
     skipped = 0
 
-    async with SessionLocal() as db:
-        result = await db.execute(select(UserAuth).where(UserAuth.ttype == consts.UserAuth_Ttype.PASSWORD))
+    async with open_session() as session:
+        result = await session.execute(select(UserAuth).where(UserAuth.ttype == consts.UserAuth_Ttype.PASSWORD))
         rows = list(result.scalars().all())
 
-        async with transaction(db):
+        async with transaction(session):
             for row in rows:
                 cred = row.credential or ""
                 if _is_bcrypt(cred):

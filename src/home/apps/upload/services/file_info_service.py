@@ -7,10 +7,9 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
 from home.commons.Helpers import oss2_helper
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http403ForbiddenException
 from home.web.schemas.pagination import PageSchema
 
@@ -32,14 +31,14 @@ class FileInfoService:
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         repo: Optional[FileInfoRepository] = None,
         share_repo: Optional[FileShareLinkRepository] = None,
         oss_helper=None,
     ):
-        self.db = db
-        self.repo = repo or FileInfoRepository(db)
-        self.share_repo = share_repo or FileShareLinkRepository(db)
+        self.session = session
+        self.repo = repo or FileInfoRepository(session)
+        self.share_repo = share_repo or FileShareLinkRepository(session)
         self.oss = oss_helper or oss2_helper
 
     @staticmethod
@@ -80,14 +79,14 @@ class FileInfoService:
         file_info = await self.repo.find_owned(file_info_id, user_id)
         if file_info is None:
             raise self._forbidden()
-        async with transaction(self.db):
+        async with transaction(self.session):
             file_info = await self.repo.update_one(file_info_id, schema)
 
         return FileInfoOut.model_validate(file_info)
 
     async def delete(self, user_id: str, file_info_id: str) -> int:
         object_key = None
-        async with transaction(self.db):
+        async with transaction(self.session):
             file_info = await self.repo.find_owned(file_info_id, user_id, for_update=True)
             if file_info is None:
                 raise self._forbidden()
@@ -105,5 +104,5 @@ class FileInfoService:
         return count
 
 
-async def get_file_info_service(db: AsyncSession = Depends(get_db)) -> FileInfoService:
-    return FileInfoService(db)
+async def get_file_info_service(session: AsyncSession = Depends(get_session)) -> FileInfoService:
+    return FileInfoService(session)

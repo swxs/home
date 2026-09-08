@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session
 
-from home.web.dependencies.db import get_db
 from home.web.schemas.pagination import PageSchema
 
 # 本模块方法
@@ -29,11 +29,11 @@ class UserSearcherService:
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         search_repo: Optional[UserSearchRepository] = None,
     ):
-        self.db = db
-        self.search_repo = search_repo or UserSearchRepository(db)
+        self.session = session
+        self.search_repo = search_repo or UserSearchRepository(session)
 
     async def list_self(self, user_schema: UserFilter, page_schema: PageSchema) -> Dict[str, Any]:
         rows, pagination = await self.search_repo.search_with_auth(user_schema, page_schema)
@@ -51,5 +51,5 @@ class UserSearcherService:
         }
 
 
-async def get_user_searcher_service(db: AsyncSession = Depends(get_db)) -> UserSearcherService:
-    return UserSearcherService(db)
+async def get_user_searcher_service(session: AsyncSession = Depends(get_session)) -> UserSearcherService:
+    return UserSearcherService(session)

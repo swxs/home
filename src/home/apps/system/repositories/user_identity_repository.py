@@ -6,7 +6,7 @@
 
 与表级 Repository 不同，本聚合 Repository 跨多表取数/写入并返回 ORM 对象，
 仅做 flush（由 service 通过 transaction 统一 commit），事务边界永远在 service。
-表级 repo 以 Repo(db) 构造（model 为类属性），可选注入便于单测。
+表级 repo 以 Repo(session) 构造（model 为类属性），可选注入便于单测。
 """
 
 from typing import List, Optional, Tuple
@@ -28,13 +28,13 @@ class UserIdentityRepository:
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         user_repo: Optional[UserRepository] = None,
         user_auth_repo: Optional[UserAuthRepository] = None,
     ):
-        self.db = db
-        self.user_repo = user_repo or UserRepository(db)
-        self.user_auth_repo = user_auth_repo or UserAuthRepository(db)
+        self.session = session
+        self.user_repo = user_repo or UserRepository(session)
+        self.user_auth_repo = user_auth_repo or UserAuthRepository(session)
 
     async def find_user_auth(self, user_auth_schema: UserAuthSchema) -> Optional[UserAuth]:
         """按条件查询单条用户认证记录。"""

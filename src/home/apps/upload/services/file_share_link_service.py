@@ -10,9 +10,8 @@ from typing import Any, Dict, Optional, Tuple
 from fastapi import Request
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.exceptions.http_403_forbidden_exception import Http403ForbiddenException
 from home.web.schemas.pagination import PageSchema
@@ -38,15 +37,15 @@ class FileShareLinkService:
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         repo: Optional[FileShareLinkRepository] = None,
         file_info_repo: Optional[FileInfoRepository] = None,
         upload_service: Optional[UploadService] = None,
     ):
-        self.db = db
-        self.repo = repo or FileShareLinkRepository(db)
-        self.file_info_repo = file_info_repo or FileInfoRepository(db)
-        self.upload_service = upload_service or UploadService(db, self.file_info_repo)
+        self.session = session
+        self.repo = repo or FileShareLinkRepository(session)
+        self.file_info_repo = file_info_repo or FileInfoRepository(session)
+        self.upload_service = upload_service or UploadService(session, self.file_info_repo)
 
     @staticmethod
     def _generate_token() -> str:
@@ -131,7 +130,7 @@ class FileShareLinkService:
             status=consts.ShareLinkStatus.ACTIVE,
         )
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             link = await self.repo.create_one(payload)
 
         return await self._to_out(link, request)
@@ -140,7 +139,7 @@ class FileShareLinkService:
         link = await self.repo.find_one(link_id)
         self._assert_owner(link, user_id)
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             link = await self.repo.update_one(
                 link_id,
                 FileShareLinkUpdate(status=consts.ShareLinkStatus.REVOKED),
@@ -152,7 +151,7 @@ class FileShareLinkService:
         link = await self.repo.find_one(link_id)
         self._assert_owner(link, user_id)
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             count = await self.repo.delete_one(link_id)
 
         return count
@@ -167,6 +166,6 @@ class FileShareLinkService:
 
 
 async def get_file_share_link_service(
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
 ) -> FileShareLinkService:
-    return FileShareLinkService(db)
+    return FileShareLinkService(session)

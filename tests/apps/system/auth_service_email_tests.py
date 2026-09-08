@@ -23,12 +23,12 @@ class _FakeBackgroundTasks(BackgroundTasks):
 
 class AuthServiceEmailTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        self.db = AsyncMock()
+        self.session = AsyncMock()
         self.identity_repo = AsyncMock()
         self.email_service = AsyncMock()
         self.token_store = AsyncMock()
         self.service = AuthService(
-            self.db,
+            self.session,
             identity_repo=self.identity_repo,
             email_service=self.email_service,
             token_store=self.token_store,

@@ -20,7 +20,7 @@ from home.apps.system.models.user import User
 from home.apps.system.models.user_auth import UserAuth
 from home.apps.upload.models.file_info import FileInfo
 from home.apps.wechat.models.wechat_msg import WechatMsg
-from home.mysqlengine import SessionLocal, baseModel
+from home.mysqlengine import baseModel, open_session, transaction
 
 # 文件名到模型类的映射
 FILE_MODEL_MAP = {
@@ -102,7 +102,7 @@ def transform_mongodb_record(record: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def import_json_file(
-    file_path: Path, model_class: type[baseModel], db: AsyncSession, batch_size: int = 100
+    file_path: Path, model_class: type[baseModel], session: AsyncSession, batch_size: int = 100
 ) -> int:
     """
     导入单个JSON文件到数据库
@@ -110,7 +110,7 @@ async def import_json_file(
     Args:
         file_path: JSON文件路径
         model_class: 对应的模型类
-        db: 数据库会话
+        session: 数据库会话
         batch_size: 批量插入大小
 
     Returns:
@@ -167,24 +167,24 @@ async def import_json_file(
         if instances:
             try:
                 # 批量添加
-                db.add_all(instances)
-                await db.flush()
+                session.add_all(instances)
+                await session.flush()
                 imported_count += len(instances)
                 print(f"进度: {imported_count}/{total_records} 条记录已导入")
             except Exception as e:
                 print(f"错误: 批量插入失败: {str(e)}")
                 # 回滚当前批次
-                await db.rollback()
+                await session.rollback()
                 # 尝试逐条插入
                 for instance in instances:
                     try:
-                        db.add(instance)
-                        await db.flush()
+                        session.add(instance)
+                        await session.flush()
                         imported_count += 1
                     except Exception as inner_e:
                         print(f"警告: 单条插入失败 (ID: {getattr(instance, 'id', 'unknown')}): {str(inner_e)}")
                         skipped_count += 1
-                        await db.rollback()
+                        await session.rollback()
 
     print(f"\n文件 {file_path.name} 导入完成: 成功 {imported_count} 条, 跳过 {skipped_count} 条")
     return imported_count
@@ -212,7 +212,7 @@ async def import_all_files(data_dir: Path, batch_size: int = 100, skip_existing:
 
     print(f"找到 {len(json_files)} 个JSON文件")
 
-    async with SessionLocal() as db:
+    async with open_session() as session:
         total_imported = 0
 
         for json_file in json_files:
@@ -227,15 +227,15 @@ async def import_all_files(data_dir: Path, batch_size: int = 100, skip_existing:
 
             try:
                 # 导入文件
-                count = await import_json_file(json_file, model_class, db, batch_size)
+                count = await import_json_file(json_file, model_class, session, batch_size)
                 total_imported += count
 
                 # 提交当前文件的更改
-                await db.commit()
+                await session.commit()
                 print(f"✓ {file_name} 提交成功\n")
             except Exception as e:
                 print(f"错误: 导入 {file_name} 时发生错误: {str(e)}")
-                await db.rollback()
+                await session.rollback()
                 print(f"✗ {file_name} 已回滚\n")
 
         print(f"=" * 50)

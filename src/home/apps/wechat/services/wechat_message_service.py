@@ -7,13 +7,12 @@ import logging
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 from wechatpy import parse_message
 from wechatpy.events import BaseEvent, SubscribeEvent, UnsubscribeEvent
 from wechatpy.messages import TextMessage
 from wechatpy.replies import TextReply
 
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.schemas.token import TokenSchema
 
 from home.apps.system import consts
@@ -34,21 +33,21 @@ class WechatMessageService:
     """微信消息业务层：消息持久化、命令回复编排、关注/取关用户绑定（跨 system）与事务边界。
 
     跨模块多表写：直接持有 system 的 user / user_auth 表级 repo；每个逻辑写在各自的
-    transaction(db) 内提交。HTTP 专属逻辑（签名校验、AES 解密/加密、PlainTextResponse
+    transaction(session) 内提交。HTTP 专属逻辑（签名校验、AES 解密/加密、PlainTextResponse
     构造）保留在 api 层。
     """
 
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         wechat_msg_repo: WechatMsgRepository | None = None,
         user_repo: UserRepository | None = None,
         user_auth_repo: UserAuthRepository | None = None,
     ):
-        self.db = db
-        self.wechat_msg_repo = wechat_msg_repo or WechatMsgRepository(db)
-        self.user_repo = user_repo or UserRepository(db)
-        self.user_auth_repo = user_auth_repo or UserAuthRepository(db)
+        self.session = session
+        self.wechat_msg_repo = wechat_msg_repo or WechatMsgRepository(session)
+        self.user_repo = user_repo or UserRepository(session)
+        self.user_auth_repo = user_auth_repo or UserAuthRepository(session)
 
     async def process(self, decrypted_xml, raw_xml, openid, token_schema: TokenSchema) -> str:
         """处理已解密的微信消息，返回未加密的回复 XML 字符串。"""
@@ -60,7 +59,7 @@ class WechatMessageService:
         else:
             event = None
 
-        async with transaction(self.db):
+        async with transaction(self.session):
             await self.wechat_msg_repo.create_one(
                 WechatMsgCreate(
                     msg_id=msg.id,
@@ -73,7 +72,7 @@ class WechatMessageService:
         content = ""
 
         if isinstance(msg, TextMessage):
-            model = content_productor[msg.content](self.db)
+            model = content_productor[msg.content](self.session)
 
             reply = await model.get_reply(msg, token_schema)
 
@@ -81,7 +80,7 @@ class WechatMessageService:
 
         elif isinstance(msg, SubscribeEvent):
             try:
-                async with transaction(self.db):
+                async with transaction(self.session):
                     user_auth = await self.user_auth_repo.find_one_or_none(
                         UserAuthSchema(
                             ttype=consts.UserAuth_Ttype.WECHAT,
@@ -115,7 +114,7 @@ class WechatMessageService:
                 logger.info(f"openid: {openid} 创建用户信息失败！")
         elif isinstance(msg, UnsubscribeEvent):
             try:
-                async with transaction(self.db):
+                async with transaction(self.session):
                     user_auth = await self.user_auth_repo.find_one_or_none(
                         UserAuthSchema(
                             ttype=consts.UserAuth_Ttype.WECHAT,
@@ -144,5 +143,5 @@ class WechatMessageService:
         return reply
 
 
-async def get_wechat_message_service(db: AsyncSession = Depends(get_db)) -> WechatMessageService:
-    return WechatMessageService(db)
+async def get_wechat_message_service(session: AsyncSession = Depends(get_session)) -> WechatMessageService:
+    return WechatMessageService(session)

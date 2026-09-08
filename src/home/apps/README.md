@@ -8,8 +8,9 @@
 
 各子应用采用统一五层分层：
 
-- **api/**：FastAPI 路由（APIRouter），依赖 web（get_db、exceptions、schemas），仅调用 service 并包装响应
-- **services/**：业务层，承载业务编排、归属授权、领域规则与事务边界（写路径用 `async with transaction(self.db):`）
+- **api/**：FastAPI 路由（APIRouter），依赖 web（get_session、exceptions、schemas），仅调用 service 并包装响应
+- **services/**：业务层，承载业务编排、归属授权、领域规则与事务边界（写路径用 `async with transaction(self.session):`）；通过 `add_task` 调度 `tasks/` 中的后台任务
+- **tasks/**：可选，脱离 HTTP 的后台任务（仅用 `mysqlengine.open_session` / `transaction`）；路径见 [layering.md](../docs/architecture/layering.md)
 - **models/**：ORM 模型（继承 `home.mysqlengine.baseModel`）
 - **repositories/**：数据访问，继承或组合 `home.mysqlengine.repositories.BaseRepository`；只 flush、不 commit
 - **schemas/**：Pydantic 请求/响应模型与 Depends 用的工厂（如 get_xxx_filter）

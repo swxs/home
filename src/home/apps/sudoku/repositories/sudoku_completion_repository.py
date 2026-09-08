@@ -29,7 +29,7 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
             SudokuCompletion.user_id == user_id,
             SudokuCompletion.puzzle_id == puzzle_id,
         )
-        result = await self.db.execute(stmt)
+        result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def upsert_completion(
@@ -43,8 +43,8 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
         if existing:
             existing.completed_at = completed_at
             existing.time_seconds = time_seconds
-            await self.db.flush()
-            await self.db.refresh(existing)
+            await self.session.flush()
+            await self.session.refresh(existing)
             return existing
         instance = SudokuCompletion(
             user_id=user_id,
@@ -52,9 +52,9 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
             completed_at=completed_at,
             time_seconds=time_seconds,
         )
-        self.db.add(instance)
-        await self.db.flush()
-        await self.db.refresh(instance)
+        self.session.add(instance)
+        await self.session.flush()
+        await self.session.refresh(instance)
         return instance
 
     async def search_by_user_with_puzzle_filter(

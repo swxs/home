@@ -26,5 +26,5 @@ class UserRepository(BaseRepository[User]):
     # 例如：
     # async def find_by_username(self, username: str) -> Optional[User]:
     #     query = select(User).where(User.username == username)
-    #     result = await self.db.execute(query)
+    #     result = await self.session.execute(query)
     #     return result.scalar_one_or_none()

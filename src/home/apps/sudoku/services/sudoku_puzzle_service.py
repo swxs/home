@@ -8,9 +8,8 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema
 
@@ -34,9 +33,9 @@ PUZZLE_UPDATE_FIELDS = {"puzzle_date", "difficulty"}
 class SudokuPuzzleService:
     """数独谜题业务层：求解/校验领域编排、CRUD 与事务边界。"""
 
-    def __init__(self, db: AsyncSession, repo: Optional[SudokuPuzzleRepository] = None):
-        self.db = db
-        self.repo = repo or SudokuPuzzleRepository(db)
+    def __init__(self, session: AsyncSession, repo: Optional[SudokuPuzzleRepository] = None):
+        self.session = session
+        self.repo = repo or SudokuPuzzleRepository(session)
 
     async def list(self, filter_schema: SudokuPuzzleFilter, page_schema: PageSchema) -> Dict[str, Any]:
         result = await self.repo.search(filter_schema, page_schema)
@@ -71,7 +70,7 @@ class SudokuPuzzleService:
             puzzle_date=puzzle_date,
             difficulty=body.difficulty,
         )
-        async with transaction(self.db):
+        async with transaction(self.session):
             instance = await self.repo.create_one(schema)
 
         return SudokuPuzzleOut.model_validate(instance)
@@ -84,7 +83,7 @@ class SudokuPuzzleService:
                 Http400BadRequestException.IllegalArgument,
                 "请提供 puzzle_date 或 difficulty",
             )
-        async with transaction(self.db):
+        async with transaction(self.session):
             instance = await self.repo.find_one(puzzle_id)
             if instance is None:
                 raise Http400BadRequestException(
@@ -93,8 +92,8 @@ class SudokuPuzzleService:
                 )
             for name in to_apply:
                 setattr(instance, name, getattr(body, name))
-            await self.db.flush()
-            await self.db.refresh(instance)
+            await self.session.flush()
+            await self.session.refresh(instance)
 
         return SudokuPuzzleOut.model_validate(instance)
 
@@ -129,5 +128,5 @@ class SudokuPuzzleService:
         return SudokuPuzzleOut.model_validate(instance)
 
 
-async def get_sudoku_puzzle_service(db: AsyncSession = Depends(get_db)) -> SudokuPuzzleService:
-    return SudokuPuzzleService(db)
+async def get_sudoku_puzzle_service(session: AsyncSession = Depends(get_session)) -> SudokuPuzzleService:
+    return SudokuPuzzleService(session)

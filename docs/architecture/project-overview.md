@@ -38,7 +38,7 @@ home/
 | **home.core**    | `src/home/core/`  | 全局配置（config）、日志（logger）、路径（path）                                                                        |
 | **home.web**     | `src/home/web/`   | HTTP 层：异常体系、依赖注入、通用 schema、全局异常 handler、中间件                                                        |
 | **home.apps**    | `src/home/apps/`  | 业务应用集合，子应用挂载到 `/api`                                                                                       |
-| **home.mysqlengine** | `src/home/mysqlengine/` | 异步 SQLAlchemy 封装：Base、SessionLocal、baseModel、BaseRepository                                              |
+| **home.mysqlengine** | `src/home/mysqlengine/` | 异步 SQLAlchemy 封装：`session.py`（`open_session`、`transaction`）、Base、SessionLocal、baseModel、BaseRepository |
 | **home.commons** | `src/home/commons/` | 跨应用通用工具：Decorators、Helpers、Metaclass、Utils                                                               |
 | **init**         | `init/`           | 系统初始化脚本（遗留）                                                                                                  |
 | **scripts**      | `scripts/`        | 运维/数据脚本                                                                                                           |
@@ -72,6 +72,6 @@ OAuth 授权端点位于 `system` 下的 `oauth_router`，不是独立 app。
 - **home.core** 被所有包依赖，无业务依赖。
 - **home.mysqlengine** 依赖 core；被 web、apps 使用。
 - **home.web** 依赖 core、mysqlengine；被 apps 使用。
-- **home.apps** 依赖 web、mysqlengine（及部分 commons）。
+- **home.apps** 依赖 web、mysqlengine（及部分 commons）；`services/` 用 web session，`tasks/` 与 `scripts/` 用 mysqlengine session（分层规范见 [layering.md](layering.md)）。
 
 各目录更细的说明见对应目录下的 `README.md`。

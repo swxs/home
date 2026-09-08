@@ -74,7 +74,7 @@ class PasswordLockSearchTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(out["data"], ["pl1", "pl2"])
         self.assertEqual(out["pagination"].total, 2)
 
-        data_sql = repo.db.executed[1].lower()
+        data_sql = repo.session.executed[1].lower()
         self.assertIn("like", data_sql)          # name/website 模糊搜索
         self.assertIn("user_id", data_sql)        # 白名单等值过滤
 
@@ -88,7 +88,7 @@ class SudokuCompletionSearchTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(out["data"], [("c", "p")])
         self.assertEqual(out["pagination"].total, 1)
 
-        data_sql = repo.db.executed[1]
+        data_sql = repo.session.executed[1]
         self.assertIn("ORDER BY", data_sql)
         self.assertIn("DESC", data_sql)           # 缺省 completed_at 倒序
 
@@ -104,7 +104,7 @@ class UserSearchFlattenTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(rows, [(user, {"phone": "13800000000", "email": "x@e.com"})])
         self.assertEqual(pagination.total, 1)
 
-        data_sql = repo.db.executed[1].lower()
+        data_sql = repo.session.executed[1].lower()
         # 相关聚合子查询把认证 identifier 拍平为列
         self.assertIn("max(user_auth.identifier)", data_sql)
 

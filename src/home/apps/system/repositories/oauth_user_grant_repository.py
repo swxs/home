@@ -26,7 +26,7 @@ class OAuthUserGrantRepository(BaseRepository[OAuthUserGrant]):
             OAuthUserGrant.user_id == user_id,
             OAuthUserGrant.client_id == client_id,
         )
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def upsert(self, user_id: str, client_id: str, scope: str) -> OAuthUserGrant:

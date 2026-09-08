@@ -5,11 +5,10 @@ from typing import Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
 from home.commons.Helpers import oss2_helper
 from home.core import config
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 
 # 本模块方法
@@ -29,7 +28,7 @@ from .file_info_service import FileInfoService
 class PresignUploadService:
     def __init__(
         self,
-        db: AsyncSession,
+        session: AsyncSession,
         repo: Optional[FileInfoRepository] = None,
         oss_helper=None,
         *,
@@ -37,8 +36,8 @@ class PresignUploadService:
         upload_expires: int = config.UPLOAD_PRESIGN_EXPIRES,
         download_expires: int = config.DOWNLOAD_PRESIGN_EXPIRES,
     ):
-        self.db = db
-        self.repo = repo or FileInfoRepository(db)
+        self.session = session
+        self.repo = repo or FileInfoRepository(session)
         self.oss = oss_helper or oss2_helper
         self.upload_max_bytes = upload_max_bytes
         self.upload_expires = upload_expires
@@ -91,7 +90,7 @@ class PresignUploadService:
             policy=consts.FileInfo_Policy.ALIOSS,
         )
         try:
-            async with transaction(self.db):
+            async with transaction(self.session):
                 file_info = await self.repo.create_one(payload)
         except Http400BadRequestException:
             # 组合唯一约束负责消化并发 complete；事务回滚后读取胜出记录。
@@ -168,7 +167,7 @@ class PresignUploadService:
         disposition: str,
     ) -> PresignDownloadOut:
         file_info_service = FileInfoService(
-            self.db,
+            self.session,
             repo=self.repo,
             oss_helper=self.oss,
         )
@@ -183,6 +182,6 @@ class PresignUploadService:
 
 
 async def get_presign_upload_service(
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
 ) -> PresignUploadService:
-    return PresignUploadService(db)
+    return PresignUploadService(session)

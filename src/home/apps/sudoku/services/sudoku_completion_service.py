@@ -8,9 +8,8 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.dependencies.session import get_session, transaction
 
-from home.web.dependencies.db import get_db
-from home.web.dependencies.transaction import transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema
 
@@ -37,9 +36,9 @@ def _row_to_item(completion, puzzle) -> dict:
 class SudokuCompletionService:
     """数独完成记录业务层：登录校验、查询编排、upsert 与事务边界。"""
 
-    def __init__(self, db: AsyncSession, repo: Optional[SudokuCompletionRepository] = None):
-        self.db = db
-        self.repo = repo or SudokuCompletionRepository(db)
+    def __init__(self, session: AsyncSession, repo: Optional[SudokuCompletionRepository] = None):
+        self.session = session
+        self.repo = repo or SudokuCompletionRepository(session)
 
     async def list_my(
         self,
@@ -88,7 +87,7 @@ class SudokuCompletionService:
                 "未登录",
             )
         now = datetime.datetime.now()
-        async with transaction(self.db):
+        async with transaction(self.session):
             instance = await self.repo.upsert_completion(
                 user_id=user_id,
                 puzzle_id=body.puzzle_id,
@@ -99,5 +98,5 @@ class SudokuCompletionService:
         return SudokuCompletionItemSchema.model_validate(instance).model_dump(mode="json")
 
 
-async def get_sudoku_completion_service(db: AsyncSession = Depends(get_db)) -> SudokuCompletionService:
-    return SudokuCompletionService(db)
+async def get_sudoku_completion_service(session: AsyncSession = Depends(get_session)) -> SudokuCompletionService:
+    return SudokuCompletionService(session)
