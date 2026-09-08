@@ -1,27 +1,43 @@
-FROM python:3.13.11-bookworm
+# syntax=docker/dockerfile:1
 
-WORKDIR /home
+# ── Stage 1: 构建依赖 ──
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
-# 设置时区
-RUN echo 'Asia/Shanghai' > /etc/timezone \
-    && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+WORKDIR /app
 
-# 安装 uv
-RUN python -m pip install --upgrade pip \
-    && pip install uv
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
-# 先复制依赖文件，利用Docker缓存层
-COPY ./pyproject.toml ./pyproject.toml
-COPY ./uv.lock ./uv.lock
+COPY pyproject.toml uv.lock README.md ./
+RUN uv sync --frozen --no-dev --no-install-project
 
-# 安装依赖
-RUN uv sync
+COPY src ./src
+RUN uv sync --frozen --no-dev --no-editable
 
-# 复制所有项目文件
-COPY . .
+# ── Stage 2: 运行时 ──
+FROM python:3.13-slim-bookworm AS runtime
 
-# 暴露端口
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/app/.venv/bin:$PATH" \
+    TZ=Asia/Shanghai
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone
+
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/src /app/src
+COPY assets ./assets
+COPY logging.ini ./logging.ini
+
+RUN useradd --create-home appuser \
+    && mkdir -p /app/logs /app/temp \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
 EXPOSE 8000
 
-# 使用 uv run 运行 uvicorn
-CMD ["uv", "run", "uvicorn", "home.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "home.main:app", "--host", "0.0.0.0", "--port", "8000"]

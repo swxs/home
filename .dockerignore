@@ -5,6 +5,17 @@ static/dbback/
 .git
 .tox
 .vscode/settings.json
+.github/
+.cursor/
+.agents/
+.scratch/
+.ruff_cache/
+tests/
+spiders/
+scripts/
+init/
+temp/
+.pre-commit-config.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

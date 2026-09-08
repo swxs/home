@@ -39,6 +39,8 @@ dependencies = [
     "wechatpy>=1.8.18",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/home"]
 
 [dependency-groups]
 dev = [
