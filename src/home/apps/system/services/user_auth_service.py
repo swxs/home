@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -39,7 +40,7 @@ class UserAuthService:
             "pagination": result["pagination"],
         }
 
-    async def get(self, user_auth_id: str) -> UserAuthOut:
+    async def get(self, user_auth_id: objectId) -> UserAuthOut:
         user_auth = await self.repo.find_one(user_auth_id)
 
         if user_auth is None:
@@ -53,13 +54,13 @@ class UserAuthService:
 
         return UserAuthOut.model_validate(user_auth)
 
-    async def update(self, user_auth_id: str, schema: UserAuthUpdate) -> UserAuthOut:
+    async def update(self, user_auth_id: objectId, schema: UserAuthUpdate) -> UserAuthOut:
         async with transaction(self.session):
             user_auth = await self.repo.update_one(user_auth_id, schema)
 
         return UserAuthOut.model_validate(user_auth)
 
-    async def delete(self, user_auth_id: str) -> int:
+    async def delete(self, user_auth_id: objectId) -> int:
         async with transaction(self.session):
             count = await self.repo.delete_one(user_auth_id)
 

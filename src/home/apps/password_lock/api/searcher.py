@@ -8,10 +8,11 @@ from fastapi import APIRouter, Path
 from fastapi.param_functions import Depends
 
 from home.web.response import success
+from home.web.schemas.types import objectId
 from home.web.schemas.pagination import PageSchema, get_pagination
 from home.web.schemas.response import SuccessResponse
 from home.web.schemas.search import SearchSchema, get_search
-from home.web.schemas.token import TokenSchema, get_token
+from home.web.schemas.token import get_required_user_id
 
 # 本模块方法
 from ..schemas.password_lock import PasswordLockFilter, get_password_lock_filter
@@ -28,7 +29,7 @@ logger = logging.getLogger("main.apps.password_lock.api.searcher")
 
 @router.get("/self", response_model=SuccessResponse[PasswordLockSearchResponse])
 async def list_self_password_locks(
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     filter_schema: PasswordLockFilter = Depends(get_password_lock_filter),
     search_schema: SearchSchema = Depends(get_search),
     page_schema: PageSchema = Depends(get_pagination),
@@ -37,7 +38,7 @@ async def list_self_password_locks(
     result = await service.search_self(
         filter_schema,
         page_schema,
-        user_id=token_schema.user_id,
+        user_id=user_id,
         name_search=search_schema.search if search_schema.search else None,
     )
     return success(result)
@@ -45,9 +46,9 @@ async def list_self_password_locks(
 
 @router.get("/self/{password_lock_id}", response_model=SuccessResponse[PasswordResponse])
 async def get_self_password(
-    token_schema: TokenSchema = Depends(get_token),
-    password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    user_id: objectId = Depends(get_required_user_id),
+    password_lock_id: objectId = Path(...),
     service: PasswordLockService = Depends(get_password_lock_service),
 ):
-    password = await service.reveal_password(password_lock_id, token_schema.user_id)
+    password = await service.reveal_password(password_lock_id, user_id)
     return success({"password": password})

@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 # 通用方法
@@ -46,7 +47,7 @@ class PasswordLockService:
             "pagination": result["pagination"],
         }
 
-    async def get(self, password_lock_id: str) -> PasswordLockOut:
+    async def get(self, password_lock_id: objectId) -> PasswordLockOut:
         password_lock = await self.repo.find_one(password_lock_id)
 
         if password_lock is None:
@@ -60,13 +61,13 @@ class PasswordLockService:
 
         return PasswordLockOut.model_validate(password_lock)
 
-    async def update(self, password_lock_id: str, schema: PasswordLockUpdate) -> PasswordLockOut:
+    async def update(self, password_lock_id: objectId, schema: PasswordLockUpdate) -> PasswordLockOut:
         async with transaction(self.session):
             password_lock = await self.repo.update_one(password_lock_id, schema)
 
         return PasswordLockOut.model_validate(password_lock)
 
-    async def delete(self, password_lock_id: str) -> int:
+    async def delete(self, password_lock_id: objectId) -> int:
         async with transaction(self.session):
             count = await self.repo.delete_one(password_lock_id)
 
@@ -76,7 +77,7 @@ class PasswordLockService:
         self,
         filter_schema: PasswordLockFilter,
         page_schema: PageSchema,
-        user_id: str,
+        user_id: objectId,
         name_search: Optional[str] = None,
     ) -> Dict[str, Any]:
         # 设置用户ID过滤
@@ -93,7 +94,7 @@ class PasswordLockService:
             "pagination": result["pagination"],
         }
 
-    async def reveal_password(self, password_lock_id: str, user_id: str) -> Optional[str]:
+    async def reveal_password(self, password_lock_id: objectId, user_id: objectId) -> Optional[str]:
         async with transaction(self.session):
             password_lock = await self.repo.find_one(password_lock_id)
 

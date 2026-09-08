@@ -41,6 +41,8 @@ api -> service -> repository -> model
 - 事务边界：写操作用 `async with transaction(self.session):`（见 [`src/home/web/dependencies/session.py`](../../src/home/web/dependencies/session.py)）统一 commit / rollback 并转换数据库异常；只读操作不包事务（同一 session 内多次查询天然一致）。
 - repo 持有：在构造函数里显式持有 `self.repo = XxxRepository(session)`，支持可选注入便于单测；不再使用 `SingleWorker` / `UnitWorker` / `get_repository` 这类服务定位器写法。
 - 通过依赖工厂 `get_xxx_service(session=Depends(get_session))` 注入到 api。
+- 资源主键与用户 ID 在 service / repository 签名中使用 `home.web.schemas.types.objectId`（非裸 `str`）；HTTP Path 参数同样使用 `objectId = Path(...)`。
+- 需登录且必须带 `user_id` 的 api 使用 `user_id: objectId = Depends(get_required_user_id)`（见 `web/schemas/token.py`）；仅软登录场景用 `get_optional_user_id`。
 - 不做：直接处理 HTTP 细节（status、header）、写裸 SQL；**不在同一文件混用 web 与 mysqlengine 两层 session**（见下文 `tasks/`）。
 
 ### tasks（后台任务层）
@@ -56,6 +58,7 @@ api -> service -> repository -> model
 - 复杂查询作为方法补充，但应尽量复用基类逻辑，避免复制过滤/排序/分页代码。
 - 过滤 / 排序 / 分页 / 自定义查询的统一写法见 [repository 查询层统一规范](../conventions/repository.md)（白名单、`build_query`、`paginate` 等）。
 - 一律**只 flush、不 commit**；事务边界永远在 service。
+- 主键 / 外键 user_id 参数使用 `objectId`，与 api、schema 层类型一致（见 [`docs/conventions/types.md`](../conventions/types.md)）。
 - 不做：业务判断、权限校验。
 
 ### model（ORM 层）

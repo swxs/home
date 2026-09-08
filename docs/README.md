@@ -8,6 +8,7 @@
 - 想了解顶层包结构、子应用与依赖方向 -> [architecture/project-overview.md](architecture/project-overview.md)
 - 想了解 app 的五层架构、各层职责、目录结构、数据流与事务边界 -> [architecture/layering.md](architecture/layering.md)
 - 想了解 repository 查询层（过滤 / 排序 / 分页 / 自定义查询）的统一写法 -> [conventions/repository.md](conventions/repository.md)
+- 想了解 Path/Query/Body 复用类型（如 objectId）-> [conventions/types.md](conventions/types.md)
 - 想了解已记录的架构决策 -> [adr/](adr/)
 
 ## 目录约定

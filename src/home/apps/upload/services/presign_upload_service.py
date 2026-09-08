@@ -5,6 +5,7 @@ from typing import Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.commons.Helpers import oss2_helper
@@ -70,7 +71,7 @@ class PresignUploadService:
 
     async def _create_or_get(
         self,
-        user_id: str,
+        user_id: objectId,
         schema: PresignCompleteRequest | PresignUploadRequest,
     ) -> FileInfoOut:
         existing = await self.repo.find_by_user_content(
@@ -106,7 +107,7 @@ class PresignUploadService:
 
     async def presign_upload(
         self,
-        user_id: str,
+        user_id: objectId,
         schema: PresignUploadRequest,
     ) -> PresignUploadOut:
         self._validate_size(schema.file_size)
@@ -141,7 +142,7 @@ class PresignUploadService:
 
     async def complete(
         self,
-        user_id: str,
+        user_id: objectId,
         schema: PresignCompleteRequest,
     ) -> FileInfoOut:
         self._validate_size(schema.file_size)
@@ -162,8 +163,8 @@ class PresignUploadService:
 
     async def download(
         self,
-        user_id: str,
-        file_info_id: str,
+        user_id: objectId,
+        file_info_id: objectId,
         disposition: str,
     ) -> PresignDownloadOut:
         file_info_service = FileInfoService(

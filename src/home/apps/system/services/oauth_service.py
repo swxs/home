@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 import home.core as core
@@ -74,7 +75,7 @@ class OAuthService:
 
     async def _issue_authorization_code(
         self,
-        user_id: str,
+        user_id: objectId,
         client_id: str,
         redirect_uri: str,
         scope: Optional[str],
@@ -110,7 +111,7 @@ class OAuthService:
         scope: Optional[str],
         state: Optional[str],
         confirm: Optional[str],
-        user_id: Optional[str],
+        user_id: Optional[objectId],
     ) -> str:
         """OAuth2.0授权端点：处理授权请求，返回重定向 URL（Response 在 api 层构造）。
 

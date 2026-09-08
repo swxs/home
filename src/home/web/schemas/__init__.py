@@ -3,7 +3,7 @@ from typing import Optional
 
 import pydantic
 
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 
 
 class BaseSchema(pydantic.BaseModel):

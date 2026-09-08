@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from home.core import config
 from home.mysqlengine.fields import ObjectIdType
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 
 # 创建一个 SQLAlchemy的"引擎"
 engine = create_async_engine(

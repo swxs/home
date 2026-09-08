@@ -5,7 +5,7 @@
 from datetime import datetime
 from typing import Optional
 
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 from home.web.schemas import BaseSchema
 
 

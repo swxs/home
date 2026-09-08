@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -42,9 +43,9 @@ class SudokuCompletionService:
 
     async def list_my(
         self,
-        user_id: str,
+        user_id: objectId,
         page_schema: PageSchema,
-        puzzle_id: Optional[str] = None,
+        puzzle_id: Optional[objectId] = None,
         puzzle_date_from: Optional[str] = None,
         puzzle_date_to: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -80,7 +81,7 @@ class SudokuCompletionService:
             "pagination": result["pagination"],
         }
 
-    async def record(self, user_id: str, body: SudokuCompletionCreateSchema) -> dict:
+    async def record(self, user_id: objectId, body: SudokuCompletionCreateSchema) -> dict:
         if not user_id:
             raise Http400BadRequestException(
                 Http400BadRequestException.IllegalArgument,

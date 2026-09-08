@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional, Tuple
 from fastapi import Request
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -57,7 +58,7 @@ class FileShareLinkService:
         return f"{base}/api/upload/share/{token}"
 
     @staticmethod
-    def _assert_owner(link, user_id: str) -> None:
+    def _assert_owner(link, user_id: objectId) -> None:
         if link is None or str(link.create_by) != user_id:
             raise Http403ForbiddenException(
                 Http403ForbiddenException.PasswordError,
@@ -87,7 +88,7 @@ class FileShareLinkService:
 
     async def list_my(
         self,
-        user_id: str,
+        user_id: objectId,
         filter_schema: FileShareLinkFilter,
         page_schema: PageSchema,
         request: Request,
@@ -100,14 +101,14 @@ class FileShareLinkService:
             "pagination": result["pagination"],
         }
 
-    async def get_my(self, user_id: str, link_id: str, request: Request) -> FileShareLinkOut:
+    async def get_my(self, user_id: objectId, link_id: objectId, request: Request) -> FileShareLinkOut:
         link = await self.repo.find_one(link_id)
         self._assert_owner(link, user_id)
         return await self._to_out(link, request)
 
     async def create(
         self,
-        user_id: str,
+        user_id: objectId,
         schema: FileShareLinkCreate,
         request: Request,
     ) -> FileShareLinkOut:
@@ -135,7 +136,7 @@ class FileShareLinkService:
 
         return await self._to_out(link, request)
 
-    async def revoke(self, user_id: str, link_id: str, request: Request) -> FileShareLinkOut:
+    async def revoke(self, user_id: objectId, link_id: objectId, request: Request) -> FileShareLinkOut:
         link = await self.repo.find_one(link_id)
         self._assert_owner(link, user_id)
 
@@ -147,7 +148,7 @@ class FileShareLinkService:
 
         return await self._to_out(link, request)
 
-    async def delete(self, user_id: str, link_id: str) -> int:
+    async def delete(self, user_id: objectId, link_id: objectId) -> int:
         link = await self.repo.find_one(link_id)
         self._assert_owner(link, user_id)
 

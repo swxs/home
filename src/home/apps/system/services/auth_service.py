@@ -12,6 +12,7 @@ import httpx
 from fastapi import BackgroundTasks
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 import home.core as core
@@ -59,7 +60,7 @@ class AuthService:
         self.email_service = email_service or EmailSendService(session)
         self.token_store = token_store or RedisTokenStore()
 
-    async def _require_email_verified(self, user_id: str) -> None:
+    async def _require_email_verified(self, user_id: objectId) -> None:
         email_auth = await self.identity_repo.find_user_auth(
             UserAuthSchema(
                 user_id=user_id,
@@ -72,7 +73,7 @@ class AuthService:
                 "邮箱未验证，请先完成邮箱验证",
             )
 
-    async def _issue_tokens(self, user_id: str) -> Dict[str, str]:
+    async def _issue_tokens(self, user_id: objectId) -> Dict[str, str]:
         token_schema = TokenSchema(user_id=str(user_id))
         token = tokener.encode(**token_schema.model_dump())
         refresh_token = refresh_tokener.encode(**token_schema.model_dump())
@@ -81,7 +82,7 @@ class AuthService:
     async def _send_verification_email(
         self,
         background_tasks: BackgroundTasks,
-        user_id: str,
+        user_id: objectId,
         email: str,
     ) -> None:
         token = secrets.token_urlsafe(32)

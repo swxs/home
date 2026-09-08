@@ -6,8 +6,9 @@ from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 
 from home.web.response import success
+from home.web.schemas.types import objectId
 from home.web.schemas.response import SuccessResponse
-from home.web.schemas.token import TokenSchema, get_token
+from home.web.schemas.token import get_required_user_id
 
 # 本模块方法
 from ..schemas.presign import (
@@ -28,20 +29,20 @@ router = APIRouter()
 @router.post("/upload", response_model=SuccessResponse[PresignUploadOut])
 async def presign_upload(
     schema: PresignUploadRequest = Body(...),
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     service: PresignUploadService = Depends(get_presign_upload_service),
 ):
-    result = await service.presign_upload(token_schema.user_id, schema)
+    result = await service.presign_upload(user_id, schema)
     return success(result)
 
 
 @router.post("/complete", response_model=SuccessResponse[FileInfoResponse])
 async def complete_upload(
     schema: PresignCompleteRequest = Body(...),
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     service: PresignUploadService = Depends(get_presign_upload_service),
 ):
-    file_info = await service.complete(token_schema.user_id, schema)
+    file_info = await service.complete(user_id, schema)
     return success({"data": file_info})
 
 
@@ -50,13 +51,13 @@ async def complete_upload(
     response_model=SuccessResponse[PresignDownloadOut],
 )
 async def presign_download(
-    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    file_info_id: objectId = Path(...),
     disposition: Literal["inline", "attachment"] = Query("inline"),
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     service: PresignUploadService = Depends(get_presign_upload_service),
 ):
     result = await service.download(
-        token_schema.user_id,
+        user_id,
         file_info_id,
         disposition,
     )

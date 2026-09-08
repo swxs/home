@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -39,7 +40,7 @@ class WechatMsgService:
             "pagination": result["pagination"],
         }
 
-    async def get(self, wechat_msg_id: str) -> WechatMsgOut:
+    async def get(self, wechat_msg_id: objectId) -> WechatMsgOut:
         wechat_msg = await self.repo.find_one(wechat_msg_id)
 
         if wechat_msg is None:
@@ -53,13 +54,13 @@ class WechatMsgService:
 
         return WechatMsgOut.model_validate(wechat_msg)
 
-    async def update(self, wechat_msg_id: str, schema: WechatMsgUpdate) -> WechatMsgOut:
+    async def update(self, wechat_msg_id: objectId, schema: WechatMsgUpdate) -> WechatMsgOut:
         async with transaction(self.session):
             wechat_msg = await self.repo.update_one(wechat_msg_id, schema)
 
         return WechatMsgOut.model_validate(wechat_msg)
 
-    async def delete(self, wechat_msg_id: str) -> int:
+    async def delete(self, wechat_msg_id: objectId) -> int:
         async with transaction(self.session):
             count = await self.repo.delete_one(wechat_msg_id)
 

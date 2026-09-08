@@ -11,6 +11,7 @@ from typing import Optional, Tuple
 from fastapi import UploadFile
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -67,7 +68,7 @@ class UploadService:
             return consts.AccessMode.INLINE
         return consts.AccessMode.DOWNLOAD
 
-    async def upload_file(self, user_id: str, file: UploadFile) -> FileInfoOut:
+    async def upload_file(self, user_id: objectId, file: UploadFile) -> FileInfoOut:
         """兼容旧中转上传端点；新客户端应使用 Presigned 直传。"""
         data = await file.read()
         file_id = hashlib.md5(data).hexdigest()
@@ -98,7 +99,7 @@ class UploadService:
 
         return FileInfoOut.model_validate(file_info)
 
-    async def _find_owned(self, user_id: str, file_info_id: str):
+    async def _find_owned(self, user_id: objectId, file_info_id: objectId):
         file_info = await self.repo.find_owned(file_info_id, user_id)
         if file_info is None:
             raise Http403ForbiddenException(
@@ -107,14 +108,14 @@ class UploadService:
             )
         return file_info
 
-    async def download(self, user_id: str, file_info_id: str) -> Tuple[bytes, str]:
+    async def download(self, user_id: objectId, file_info_id: objectId) -> Tuple[bytes, str]:
         file_info = await self._find_owned(user_id, file_info_id)
         data = oss2_helper.download(build_object_key(file_info.file_id, file_info.file_size))
         return data, file_info.file_name
 
     async def access(
         self,
-        file_info_id: str,
+        file_info_id: objectId,
         mode: Optional[str] = None,
     ) -> Tuple[bytes, str, str, str]:
         file_info = await self.repo.find_one(file_info_id)
@@ -124,11 +125,11 @@ class UploadService:
         disposition = "inline" if access_mode == consts.AccessMode.INLINE else "attachment"
         return data, file_info.file_name, media_type, disposition
 
-    async def delete(self, user_id: str, file_info_id: str) -> int:
+    async def delete(self, user_id: objectId, file_info_id: objectId) -> int:
         service = FileInfoService(self.session, repo=self.repo, oss_helper=oss2_helper)
         return await service.delete(user_id, file_info_id)
 
-    async def signed_path(self, user_id: str, file_info_id: str) -> str:
+    async def signed_path(self, user_id: objectId, file_info_id: objectId) -> str:
         file_info = await self._find_owned(user_id, file_info_id)
 
         return oss2_helper.get_sign_download_path(

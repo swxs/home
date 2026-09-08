@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 from home.mysqlengine.repositories import BaseRepository
 from home.web.schemas.pagination import PageSchema
 
+from home.web.schemas.types import objectId
 # 本模块方法
 from ..models.sudoku_completion import SudokuCompletion
 from ..models.sudoku_puzzle import SudokuPuzzle
@@ -24,7 +25,7 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
     # search_by_user_with_puzzle_filter 关联 SudokuPuzzle，返回 (Completion, Puzzle) 行
     returns_scalars = False
 
-    async def find_by_user_and_puzzle(self, user_id: str, puzzle_id: str) -> Optional[SudokuCompletion]:
+    async def find_by_user_and_puzzle(self, user_id: objectId, puzzle_id: objectId) -> Optional[SudokuCompletion]:
         stmt = select(SudokuCompletion).where(
             SudokuCompletion.user_id == user_id,
             SudokuCompletion.puzzle_id == puzzle_id,
@@ -34,8 +35,8 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
 
     async def upsert_completion(
         self,
-        user_id: str,
-        puzzle_id: str,
+        user_id: objectId,
+        puzzle_id: objectId,
         completed_at: datetime.datetime,
         time_seconds: Optional[int] = None,
     ) -> SudokuCompletion:
@@ -59,9 +60,9 @@ class SudokuCompletionRepository(BaseRepository[SudokuCompletion]):
 
     async def search_by_user_with_puzzle_filter(
         self,
-        user_id: str,
+        user_id: objectId,
         page_schema: PageSchema,
-        puzzle_id: Optional[str] = None,
+        puzzle_id: Optional[objectId] = None,
         puzzle_date_from: Optional[datetime.date] = None,
         puzzle_date_to: Optional[datetime.date] = None,
     ) -> Dict[str, Any]:

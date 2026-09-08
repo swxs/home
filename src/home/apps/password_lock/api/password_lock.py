@@ -8,9 +8,10 @@ from fastapi import APIRouter, Body, Path
 from fastapi.param_functions import Depends
 
 from home.web.response import success
+from home.web.schemas.types import objectId
 from home.web.schemas.pagination import PageSchema, get_pagination
 from home.web.schemas.response import CountResponse, SuccessResponse
-from home.web.schemas.token import TokenSchema, get_token
+from home.web.schemas.token import get_required_user_id
 
 # 本模块方法
 from ..schemas.password_lock import (
@@ -35,7 +36,7 @@ logger = logging.getLogger("main.apps.password_lock.api.password_lock")
 
 @router.get("/", response_model=SuccessResponse[PasswordLockSearchResponse])
 async def get_password_lock_list(
-    token_schema: TokenSchema = Depends(get_token),
+    _user_id: objectId = Depends(get_required_user_id),
     filter_schema: PasswordLockFilter = Depends(get_password_lock_filter),
     page_schema: PageSchema = Depends(get_pagination),
     service: PasswordLockService = Depends(get_password_lock_service),
@@ -46,8 +47,8 @@ async def get_password_lock_list(
 
 @router.get("/{password_lock_id}", response_model=SuccessResponse[PasswordLockResponse])
 async def get_password_lock(
-    token_schema: TokenSchema = Depends(get_token),
-    password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    _user_id: objectId = Depends(get_required_user_id),
+    password_lock_id: objectId = Path(...),
     service: PasswordLockService = Depends(get_password_lock_service),
 ):
     password_lock = await service.get(password_lock_id)
@@ -56,7 +57,7 @@ async def get_password_lock(
 
 @router.post("/", response_model=SuccessResponse[PasswordLockResponse])
 async def create_password_lock(
-    token_schema: TokenSchema = Depends(get_token),
+    _user_id: objectId = Depends(get_required_user_id),
     password_lock_schema: PasswordLockCreate = Body(...),
     service: PasswordLockService = Depends(get_password_lock_service),
 ):
@@ -66,8 +67,8 @@ async def create_password_lock(
 
 @router.put("/{password_lock_id}", response_model=SuccessResponse[PasswordLockResponse])
 async def modify_password_lock(
-    token_schema: TokenSchema = Depends(get_token),
-    password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    _user_id: objectId = Depends(get_required_user_id),
+    password_lock_id: objectId = Path(...),
     password_lock_schema: PasswordLockUpdate = Body(...),
     service: PasswordLockService = Depends(get_password_lock_service),
 ):
@@ -77,8 +78,8 @@ async def modify_password_lock(
 
 @router.delete("/{password_lock_id}", response_model=SuccessResponse[CountResponse])
 async def delete_password_lock(
-    token_schema: TokenSchema = Depends(get_token),
-    password_lock_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    _user_id: objectId = Depends(get_required_user_id),
+    password_lock_id: objectId = Path(...),
     service: PasswordLockService = Depends(get_password_lock_service),
 ):
     count = await service.delete(password_lock_id)

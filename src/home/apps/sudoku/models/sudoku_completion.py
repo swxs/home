@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from home.mysqlengine import baseModel
 from home.mysqlengine.fields import ObjectIdType
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 
 
 class SudokuCompletion(baseModel):

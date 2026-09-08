@@ -15,6 +15,7 @@ from home.web.response import (
 )
 from home.web.schemas.response import SuccessResponse
 from home.web.schemas.token import TokenSchema, get_token, get_optional_user_id
+from home.web.schemas.types import objectId
 
 # 本模块方法
 from ..schemas.oauth import OAuthUserInfoResponse
@@ -41,7 +42,7 @@ async def authorize(
     scope: Optional[str] = Query(None),
     state: Optional[str] = Query(None),
     confirm: Optional[str] = Query(None),  # 用户确认授权
-    user_id: Optional[str] = Depends(get_optional_user_id),
+    user_id: Optional[objectId] = Depends(get_optional_user_id),
     service: OAuthService = Depends(get_oauth_service),
 ):
     """

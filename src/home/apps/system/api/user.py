@@ -8,9 +8,10 @@ from fastapi import APIRouter, Body, Path
 from fastapi.param_functions import Depends
 
 from home.web.response import success
+from home.web.schemas.types import objectId
 from home.web.schemas.pagination import PageSchema, get_pagination
 from home.web.schemas.response import CountResponse, SuccessResponse
-from home.web.schemas.token import TokenSchema, get_token
+from home.web.schemas.token import get_required_user_id
 
 # 本模块方法
 from ..schemas.response import UserResponse, UserSearchResponse
@@ -24,7 +25,7 @@ logger = logging.getLogger("main.apps.system.api.user")
 
 @router.get("/", response_model=SuccessResponse[UserSearchResponse])
 async def get_user_list(
-    token_schema: TokenSchema = Depends(get_token),
+    _user_id: objectId = Depends(get_required_user_id),
     user_schema: UserFilter = Depends(get_user_filter),
     page_schema: PageSchema = Depends(get_pagination),
     service: UserService = Depends(get_user_service),
@@ -35,8 +36,8 @@ async def get_user_list(
 
 @router.get("/{user_id}", response_model=SuccessResponse[UserResponse])
 async def get_user(
-    token_schema: TokenSchema = Depends(get_token),
-    user_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    _user_id: objectId = Depends(get_required_user_id),
+    user_id: objectId = Path(...),
     service: UserService = Depends(get_user_service),
 ):
     user = await service.get(user_id)
@@ -45,7 +46,7 @@ async def get_user(
 
 @router.post("/", response_model=SuccessResponse[UserResponse])
 async def create_user(
-    token_schema: TokenSchema = Depends(get_token),
+    _user_id: objectId = Depends(get_required_user_id),
     user_schema: UserCreate = Body(...),
     service: UserService = Depends(get_user_service),
 ):
@@ -55,8 +56,8 @@ async def create_user(
 
 @router.put("/{user_id}", response_model=SuccessResponse[UserResponse])
 async def modify_user(
-    token_schema: TokenSchema = Depends(get_token),
-    user_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    _user_id: objectId = Depends(get_required_user_id),
+    user_id: objectId = Path(...),
     user_schema: UserUpdate = Body(...),
     service: UserService = Depends(get_user_service),
 ):
@@ -66,8 +67,8 @@ async def modify_user(
 
 @router.delete("/{user_id}", response_model=SuccessResponse[CountResponse])
 async def delete_user(
-    token_schema: TokenSchema = Depends(get_token),
-    user_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    _user_id: objectId = Depends(get_required_user_id),
+    user_id: objectId = Path(...),
     service: UserService = Depends(get_user_service),
 ):
     count = await service.delete(user_id)

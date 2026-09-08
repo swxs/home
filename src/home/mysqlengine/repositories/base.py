@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from home.mysqlengine import baseModel
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema, PaginationSchema
+from home.web.schemas.types import objectId
 
 T = TypeVar("T", bound=baseModel)
 
@@ -52,7 +53,7 @@ class BaseRepository(Generic[T]):
         """
         self.session = session
 
-    async def find_one(self, id: str) -> Optional[T]:
+    async def find_one(self, id: objectId) -> Optional[T]:
         """
         根据ID查找单个资源
 
@@ -211,7 +212,7 @@ class BaseRepository(Generic[T]):
 
     async def update_one(
         self,
-        id: str,
+        id: objectId,
         schema: PydanticBaseModel,
     ) -> T:
         """
@@ -246,7 +247,7 @@ class BaseRepository(Generic[T]):
 
     async def delete_one(
         self,
-        id: str,
+        id: objectId,
     ):
         """
         删除单个资源

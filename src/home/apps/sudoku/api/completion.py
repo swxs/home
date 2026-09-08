@@ -11,7 +11,8 @@ from fastapi.param_functions import Depends
 from home.web.response import success
 from home.web.schemas.pagination import PageSchema, get_pagination
 from home.web.schemas.response import SuccessResponse
-from home.web.schemas.token import TokenSchema, get_token
+from home.web.schemas.types import objectId
+from home.web.schemas.token import get_required_user_id
 
 # 本模块方法
 from ..schemas.response import SudokuCompletionSearchResponse
@@ -27,7 +28,7 @@ logger = logging.getLogger("main.apps.sudoku.api.completion")
 
 @router.get("/me", response_model=SuccessResponse[SudokuCompletionSearchResponse])
 async def get_my_completions(
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     page_schema: PageSchema = Depends(get_pagination),
     puzzle_id: Optional[str] = Query(None, description="谜题ID"),
     puzzle_date_from: Optional[str] = Query(None, description="谜题日期起 YYYY-MM-DD"),
@@ -35,7 +36,7 @@ async def get_my_completions(
     service: SudokuCompletionService = Depends(get_sudoku_completion_service),
 ):
     result = await service.list_my(
-        user_id=token_schema.user_id,
+        user_id=user_id,
         page_schema=page_schema,
         puzzle_id=puzzle_id,
         puzzle_date_from=puzzle_date_from,
@@ -47,8 +48,8 @@ async def get_my_completions(
 @router.post("/", response_model=SuccessResponse[dict])
 async def record_completion(
     body: SudokuCompletionCreateSchema,
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     service: SudokuCompletionService = Depends(get_sudoku_completion_service),
 ):
-    item = await service.record(token_schema.user_id, body)
+    item = await service.record(user_id, body)
     return success({"data": item})

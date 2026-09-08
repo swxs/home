@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi import Query
 
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 from home.web.schemas import BaseSchema
 
 # 本模块方法

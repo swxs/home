@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -60,7 +61,7 @@ class OAuthClientService:
             "pagination": result["pagination"],
         }
 
-    async def get(self, oauth_client_id: str) -> Dict[str, Any]:
+    async def get(self, oauth_client_id: objectId) -> Dict[str, Any]:
         oauth_client = await self.repo.find_one(oauth_client_id)
 
         if oauth_client is None:
@@ -75,7 +76,7 @@ class OAuthClientService:
     async def create(
         self,
         create_schema: OAuthClientCreateSchema,
-        token_user_id: Optional[str],
+        token_user_id: Optional[objectId],
     ) -> Dict[str, Any]:
         # 生成client_id和client_secret
         client_id = generate_client_id()
@@ -106,7 +107,7 @@ class OAuthClientService:
 
         return response_data
 
-    async def update(self, oauth_client_id: str, schema: OAuthClientUpdate) -> Dict[str, Any]:
+    async def update(self, oauth_client_id: objectId, schema: OAuthClientUpdate) -> Dict[str, Any]:
         # 检查客户端是否存在
         existing_client = await self.repo.find_one(oauth_client_id)
         if existing_client is None:
@@ -130,7 +131,7 @@ class OAuthClientService:
 
         return client_dict
 
-    async def delete(self, oauth_client_id: str, token_user_id: Optional[str]) -> int:
+    async def delete(self, oauth_client_id: objectId, token_user_id: Optional[objectId]) -> int:
         async with transaction(self.session):
             count = await self.repo.delete_one(oauth_client_id)
 
@@ -138,7 +139,7 @@ class OAuthClientService:
 
         return count
 
-    async def regenerate_secret(self, oauth_client_id: str, token_user_id: Optional[str]) -> Dict[str, Any]:
+    async def regenerate_secret(self, oauth_client_id: objectId, token_user_id: Optional[objectId]) -> Dict[str, Any]:
         # 检查客户端是否存在
         existing_client = await self.repo.find_one(oauth_client_id)
         if existing_client is None:

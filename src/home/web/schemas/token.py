@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import pydantic
 from fastapi import Header, Query, Request
@@ -11,6 +11,7 @@ from home.apps.system import consts
 from home.apps.system.repositories.user_auth_repository import UserAuthRepository
 from home.apps.system.schemas.user_auth import UserAuthSchema
 from home.web.dependencies.session import get_session
+from home.web.schemas.types import objectId, validate_object_id
 
 # 通用方法
 from home.commons.Helpers import refresh_tokener, tokener
@@ -28,7 +29,7 @@ logger = logging.getLogger("main.web.schemas.token")
 
 
 class TokenSchema(pydantic.BaseModel):
-    user_id: Optional[str] = None
+    user_id: Optional[objectId] = None
 
 
 async def get_token(
@@ -38,12 +39,19 @@ async def get_token(
         raise Http401UnauthorizedException(Http401UnauthorizedException.TokenLost, "token不存在")
     token = Authorization[7:]
     try:
-        header, payload = tokener.decode(token)
-    except (InvalidSignatureError, DecodeError):
-        raise Http401UnauthorizedException(Http401UnauthorizedException.TokenIllegal, "token不合法")
-    except ExpiredSignatureError:
-        raise Http401UnauthorizedException(Http401UnauthorizedException.TokenTimeout, "token已过期")
+        _, payload = tokener.decode(token)
+    except (InvalidSignatureError, DecodeError) as exc:
+        raise Http401UnauthorizedException(Http401UnauthorizedException.TokenIllegal, "token不合法") from exc
+    except ExpiredSignatureError as exc:
+        raise Http401UnauthorizedException(Http401UnauthorizedException.TokenTimeout, "token已过期") from exc
     return TokenSchema(**payload)
+
+
+async def get_required_user_id(token_schema: TokenSchema = Depends(get_token)) -> objectId:
+    """已登录用户的 user_id；缺失时 401。"""
+    if token_schema.user_id is None:
+        raise Http401UnauthorizedException(Http401UnauthorizedException.TokenLost, "token不存在")
+    return token_schema.user_id
 
 
 async def get_token_by_openid(
@@ -60,27 +68,33 @@ async def get_token_by_openid(
             )
         )
         if user_auth:
-            return TokenSchema(user_id=str(user_auth.user_id))
+            return TokenSchema(user_id=user_auth.user_id)
         return TokenSchema(user_id=None)
     return TokenSchema(user_id=None)
 
 
-def _decode_user_id(token: Optional[str]) -> Optional[str]:
+def _decode_user_id(token: Optional[str]) -> Optional[objectId]:
     """解码单个 token 并取出 user_id，失败返回 None（区分过期/非法并记录日志）。"""
     if not token:
         return None
     try:
         _, payload = tokener.decode(token)
-        return payload.get("user_id")
+        user_id = payload.get("user_id")
+        if not user_id:
+            return None
+        return validate_object_id(user_id)
     except ExpiredSignatureError:
         logger.info("optional auth: token 已过期，按未登录处理")
         return None
     except (InvalidSignatureError, DecodeError):
         logger.warning("optional auth: token 非法，按未登录处理")
         return None
+    except ValueError:
+        logger.warning("optional auth: token user_id 非法，按未登录处理")
+        return None
 
 
-async def get_optional_user_id(request: Request) -> Optional[str]:
+async def get_optional_user_id(request: Request) -> Optional[objectId]:
     """软登录检测：Bearer / Cookie / Query 依次解析，失败返回 None。"""
     auth_header = request.headers.get("Authorization", "")
     sources = [

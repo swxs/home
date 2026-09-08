@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.commons.Helpers import oss2_helper
@@ -50,7 +51,7 @@ class FileInfoService:
 
     async def list(
         self,
-        user_id: str,
+        user_id: objectId,
         filter_schema: FileInfoFilter,
         page_schema: PageSchema,
     ) -> Dict[str, Any]:
@@ -62,7 +63,7 @@ class FileInfoService:
             "pagination": result["pagination"],
         }
 
-    async def get(self, user_id: str, file_info_id: str) -> FileInfoOut:
+    async def get(self, user_id: objectId, file_info_id: objectId) -> FileInfoOut:
         file_info = await self.repo.find_owned(file_info_id, user_id)
 
         if file_info is None:
@@ -72,8 +73,8 @@ class FileInfoService:
 
     async def update(
         self,
-        user_id: str,
-        file_info_id: str,
+        user_id: objectId,
+        file_info_id: objectId,
         schema: FileInfoUpdate,
     ) -> FileInfoOut:
         file_info = await self.repo.find_owned(file_info_id, user_id)
@@ -84,7 +85,7 @@ class FileInfoService:
 
         return FileInfoOut.model_validate(file_info)
 
-    async def delete(self, user_id: str, file_info_id: str) -> int:
+    async def delete(self, user_id: objectId, file_info_id: objectId) -> int:
         object_key = None
         async with transaction(self.session):
             file_info = await self.repo.find_owned(file_info_id, user_id, for_update=True)

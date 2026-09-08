@@ -1,3 +1,4 @@
+from home.web.schemas.types import objectId
 # -*- coding: utf-8 -*-
 """邮件发送后台任务：脱离 HTTP 请求生命周期，仅使用 mysqlengine session 原语。"""
 
@@ -14,7 +15,7 @@ logger = logging.getLogger("main.apps.notify.email.tasks.send_email_task")
 
 
 async def send_email_record_task(
-    record_id: str,
+    record_id: objectId,
     to: str,
     subject: str,
     html_body: str,

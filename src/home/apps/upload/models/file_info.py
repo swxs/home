@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from home.mysqlengine import baseModel
 from home.mysqlengine.fields import IntEnumType, ObjectIdType
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 
 # 本模块方法
 from .. import consts

@@ -3,12 +3,11 @@
 # @AUTH    : code_creater
 
 import logging
-from typing import Annotated
-
-from fastapi import APIRouter, Path, Query
+from fastapi import APIRouter, Body, Path, Query
 from fastapi.param_functions import Depends
 
 from home.web.response import success
+from home.web.schemas.types import objectId
 from home.web.schemas.pagination import PageSchema, get_pagination
 from home.web.schemas.response import SuccessResponse
 
@@ -54,8 +53,8 @@ async def create_puzzle(
 
 @router.patch("/{puzzle_id}", response_model=SuccessResponse[SudokuPuzzleResponse])
 async def update_puzzle(
-    puzzle_id: Annotated[str, Path(regex="[0-9a-fA-F]{24}")],
-    body: SudokuPuzzlePatchBody,
+    puzzle_id: objectId = Path(...),
+    body: SudokuPuzzlePatchBody = Body(...),
     service: SudokuPuzzleService = Depends(get_sudoku_puzzle_service),
 ):
     """更新谜题日期、难度（可按字段部分更新；显式 null 可清空）。"""
@@ -74,7 +73,7 @@ async def get_puzzle_by_date(
 
 @router.get("/{puzzle_id}", response_model=SuccessResponse[SudokuPuzzleResponse])
 async def get_puzzle(
-    puzzle_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
+    puzzle_id: objectId = Path(...),
     service: SudokuPuzzleService = Depends(get_sudoku_puzzle_service),
 ):
     instance = await service.get(puzzle_id)

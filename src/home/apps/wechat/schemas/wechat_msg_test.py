@@ -9,7 +9,7 @@ import pydantic
 from bson import ObjectId
 from fastapi import Body, Query
 
-from home.web.custom_types import objectId
+from home.web.schemas.types import objectId
 
 
 class WechatMsgTestSchema(pydantic.BaseModel):

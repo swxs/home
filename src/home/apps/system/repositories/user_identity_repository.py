@@ -13,6 +13,7 @@ from typing import List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from home.web.schemas.types import objectId
 # 本模块方法
 from .. import consts
 from ..models.user import User
@@ -40,7 +41,7 @@ class UserIdentityRepository:
         """按条件查询单条用户认证记录。"""
         return await self.user_auth_repo.find_one_or_none(user_auth_schema)
 
-    async def find_user(self, user_id: str) -> Optional[User]:
+    async def find_user(self, user_id: objectId) -> Optional[User]:
         """按主键查询用户。"""
         return await self.user_repo.find_one(user_id)
 
@@ -58,7 +59,7 @@ class UserIdentityRepository:
     async def find_user_by_username(self, username: str) -> Optional[User]:
         return await self.user_repo.find_one_or_none(UserSchema(username=username))
 
-    async def find_auths_by_user_id(self, user_id: str) -> List[UserAuth]:
+    async def find_auths_by_user_id(self, user_id: objectId) -> List[UserAuth]:
         return await self.user_auth_repo.find_by_user_ids([user_id])
 
     async def create_user_with_password_and_email(
@@ -88,7 +89,7 @@ class UserIdentityRepository:
         )
         return user, password_auth, email_auth
 
-    async def verify_user_auths(self, user_id: str) -> None:
+    async def verify_user_auths(self, user_id: objectId) -> None:
         auths = await self.find_auths_by_user_id(user_id)
         for auth in auths:
             if auth.ttype in (consts.UserAuth_Ttype.PASSWORD, consts.UserAuth_Ttype.EMAIL):
@@ -97,7 +98,7 @@ class UserIdentityRepository:
                     UserAuthSchema(ifverified=consts.UserAuth_Ifverified.VERIFIED),
                 )
 
-    async def update_password_credential(self, user_id: str, password_hash: str) -> None:
+    async def update_password_credential(self, user_id: objectId, password_hash: str) -> None:
         password_auth = await self.user_auth_repo.find_one_or_none(
             UserAuthSchema(
                 user_id=user_id,

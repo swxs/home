@@ -1,3 +1,4 @@
+from home.web.schemas.types import objectId
 # -*- coding: utf-8 -*-
 # @File    : api/upload.py
 # @AUTH    : code_creater
@@ -9,7 +10,7 @@ from fastapi.param_functions import Depends
 
 from home.web.response import CustomFileresponse, success
 from home.web.schemas.response import CountResponse, SuccessResponse
-from home.web.schemas.token import TokenSchema, get_token
+from home.web.schemas.token import get_required_user_id
 
 # 本模块方法
 from ..schemas.response import FileInfoResponse, FilePathResponse
@@ -27,30 +28,30 @@ logger = logging.getLogger("main.apps.upload.api.upload")
 )
 async def upload_file(
     file: UploadFile,
-    token_schema: TokenSchema = Depends(get_token),
+    user_id: objectId = Depends(get_required_user_id),
     service: UploadService = Depends(get_upload_service),
 ):
-    file_info = await service.upload_file(token_schema.user_id, file)
+    file_info = await service.upload_file(user_id, file)
     return success({"data": file_info})
 
 
 @router.get("/path/{file_info_id}", response_model=SuccessResponse[FilePathResponse], deprecated=True)
 async def path(
-    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
-    token_schema: TokenSchema = Depends(get_token),
+    file_info_id: objectId = Path(...),
+    user_id: objectId = Depends(get_required_user_id),
     service: UploadService = Depends(get_upload_service),
 ):
-    signed = await service.signed_path(token_schema.user_id, file_info_id)
+    signed = await service.signed_path(user_id, file_info_id)
     return success({"path": signed})
 
 
 @router.get("/{file_info_id}")
 async def download_file(
-    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
-    token_schema: TokenSchema = Depends(get_token),
+    file_info_id: objectId = Path(...),
+    user_id: objectId = Depends(get_required_user_id),
     service: UploadService = Depends(get_upload_service),
 ) -> CustomFileresponse:
-    data, filename = await service.download(token_schema.user_id, file_info_id)
+    data, filename = await service.download(user_id, file_info_id)
     return CustomFileresponse(data=data, filename=filename)
 
 
@@ -60,9 +61,9 @@ async def download_file(
     deprecated=True,
 )
 async def delete_file(
-    file_info_id: str = Path(..., regex="[0-9a-fA-F]{24}"),
-    token_schema: TokenSchema = Depends(get_token),
+    file_info_id: objectId = Path(...),
+    user_id: objectId = Depends(get_required_user_id),
     service: UploadService = Depends(get_upload_service),
 ):
-    count = await service.delete(token_schema.user_id, file_info_id)
+    count = await service.delete(user_id, file_info_id)
     return success({"count": count})

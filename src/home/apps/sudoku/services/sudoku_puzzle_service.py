@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from home.web.schemas.types import objectId
 from home.web.dependencies.session import get_session, transaction
 
 from home.web.exceptions import Http400BadRequestException
@@ -75,7 +76,7 @@ class SudokuPuzzleService:
 
         return SudokuPuzzleOut.model_validate(instance)
 
-    async def update(self, puzzle_id: str, body: SudokuPuzzlePatchBody) -> SudokuPuzzleOut:
+    async def update(self, puzzle_id: objectId, body: SudokuPuzzlePatchBody) -> SudokuPuzzleOut:
         """更新谜题日期、难度（可按字段部分更新；显式 null 可清空）。"""
         to_apply = PUZZLE_UPDATE_FIELDS & body.model_fields_set
         if not to_apply:
@@ -116,7 +117,7 @@ class SudokuPuzzleService:
 
         return SudokuPuzzleOut.model_validate(instance)
 
-    async def get(self, puzzle_id: str) -> SudokuPuzzleOut:
+    async def get(self, puzzle_id: objectId) -> SudokuPuzzleOut:
         instance = await self.repo.find_one(puzzle_id)
 
         if instance is None:

@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 
 from home.mysqlengine.repositories import BaseRepository
 
+from home.web.schemas.types import objectId
 # 本模块方法
 from ..models.file_info import FileInfo
 
@@ -26,8 +27,8 @@ class FileInfoRepository(BaseRepository[FileInfo]):
 
     async def find_owned(
         self,
-        file_info_id: str,
-        user_id: str,
+        file_info_id: objectId,
+        user_id: objectId,
         *,
         for_update: bool = False,
     ) -> Optional[FileInfo]:
@@ -42,7 +43,7 @@ class FileInfoRepository(BaseRepository[FileInfo]):
 
     async def find_by_user_content(
         self,
-        user_id: str,
+        user_id: objectId,
         file_id: str,
         file_size: int,
     ) -> Optional[FileInfo]:

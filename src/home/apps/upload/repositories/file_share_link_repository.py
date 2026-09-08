@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from home.mysqlengine.repositories import BaseRepository
 
+from home.web.schemas.types import objectId
 # 本模块方法
 from ..models.file_share_link import FileShareLink
 from ..consts import ShareLinkStatus
@@ -26,7 +27,7 @@ class FileShareLinkRepository(BaseRepository[FileShareLink]):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def revoke_active_for_file(self, file_info_id: str) -> int:
+    async def revoke_active_for_file(self, file_info_id: objectId) -> int:
         statement = (
             update(self.model)
             .where(
