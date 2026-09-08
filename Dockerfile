@@ -17,24 +17,25 @@ RUN uv sync --frozen --no-dev --no-editable
 # ── Stage 2: 运行时 ──
 FROM python:3.13-slim-bookworm AS runtime
 
-WORKDIR /app
+WORKDIR /home
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/app/.venv/bin:$PATH" \
-    TZ=Asia/Shanghai
+    PATH="/home/.venv/bin:$PATH" \
+    TZ=Asia/Shanghai \
+    SITE_ROOT=/home
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone
 
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/src /app/src
+COPY --from=builder /app/.venv /home/.venv
+COPY --from=builder /app/src /home/src
 COPY assets ./assets
 COPY logging.ini ./logging.ini
 
 RUN useradd --create-home appuser \
-    && mkdir -p /app/logs /app/temp \
-    && chown -R appuser:appuser /app
+    && mkdir -p /home/logs /home/temp \
+    && chown -R appuser:appuser /home
 
 USER appuser
 

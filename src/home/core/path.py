@@ -2,7 +2,20 @@ import os
 
 from home.commons.Utils.path_utils import get_dir_path
 
-SITE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+def _resolve_site_root() -> str:
+    if site_root := os.environ.get("SITE_ROOT"):
+        return site_root
+    return os.path.dirname(
+        os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__))
+            )
+        )
+    )
+
+
+SITE_ROOT = _resolve_site_root()
 
 LOG_PATH = get_dir_path(SITE_ROOT, "logs")
 STATIC_PATH = get_dir_path(SITE_ROOT, "assets", "static")

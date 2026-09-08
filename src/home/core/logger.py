@@ -1,4 +1,7 @@
 import logging
 import logging.config
+import os
 
-logging.config.fileConfig('logging.ini')
+from home.core.path import SITE_ROOT
+
+logging.config.fileConfig(os.path.join(SITE_ROOT, "logging.ini"))
