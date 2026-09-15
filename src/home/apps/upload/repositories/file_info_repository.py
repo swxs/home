@@ -7,8 +7,8 @@ from typing import Optional
 from sqlalchemy import func, select
 
 from home.mysqlengine.repositories import BaseRepository
-
 from home.web.schemas.types import objectId
+
 # 本模块方法
 from ..models.file_info import FileInfo
 
@@ -56,8 +56,12 @@ class FileInfoRepository(BaseRepository[FileInfo]):
         return result.scalar_one_or_none()
 
     async def count_content_references(self, file_id: str, file_size: int) -> int:
-        query = select(func.count()).select_from(self.model).where(
-            self.model.file_id == file_id,
-            self.model.file_size == file_size,
+        query = (
+            select(func.count())
+            .select_from(self.model)
+            .where(
+                self.model.file_id == file_id,
+                self.model.file_size == file_size,
+            )
         )
         return (await self.session.execute(query)).scalar() or 0

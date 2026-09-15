@@ -12,9 +12,13 @@
 
 import unittest
 
-from home.apps.password_lock.repositories.password_lock_repository import PasswordLockRepository
+from home.apps.password_lock.repositories.password_lock_repository import (
+    PasswordLockRepository,
+)
 from home.apps.password_lock.schemas.password_lock import PasswordLockFilter
-from home.apps.sudoku.repositories.sudoku_completion_repository import SudokuCompletionRepository
+from home.apps.sudoku.repositories.sudoku_completion_repository import (
+    SudokuCompletionRepository,
+)
 from home.apps.system.repositories.user_search_repository import UserSearchRepository
 from home.apps.system.schemas.user import UserFilter
 from home.web.schemas.pagination import PageSchema
@@ -75,8 +79,8 @@ class PasswordLockSearchTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(out["pagination"].total, 2)
 
         data_sql = repo.session.executed[1].lower()
-        self.assertIn("like", data_sql)          # name/website 模糊搜索
-        self.assertIn("user_id", data_sql)        # 白名单等值过滤
+        self.assertIn("like", data_sql)  # name/website 模糊搜索
+        self.assertIn("user_id", data_sql)  # 白名单等值过滤
 
 
 class SudokuCompletionSearchTestCase(unittest.IsolatedAsyncioTestCase):
@@ -90,7 +94,7 @@ class SudokuCompletionSearchTestCase(unittest.IsolatedAsyncioTestCase):
 
         data_sql = repo.session.executed[1]
         self.assertIn("ORDER BY", data_sql)
-        self.assertIn("DESC", data_sql)           # 缺省 completed_at 倒序
+        self.assertIn("DESC", data_sql)  # 缺省 completed_at 倒序
 
 
 class UserSearchFlattenTestCase(unittest.IsolatedAsyncioTestCase):

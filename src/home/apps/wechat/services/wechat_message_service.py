@@ -2,24 +2,23 @@
 # @File    : services/wechat_message_service.py
 # @AUTH    : code_creater
 
-import uuid
 import logging
+import uuid
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from home.web.dependencies.session import get_session, transaction
 from wechatpy import parse_message
 from wechatpy.events import BaseEvent, SubscribeEvent, UnsubscribeEvent
 from wechatpy.messages import TextMessage
 from wechatpy.replies import TextReply
-
-from home.web.schemas.token import TokenSchema
 
 from home.apps.system import consts
 from home.apps.system.repositories.user_auth_repository import UserAuthRepository
 from home.apps.system.repositories.user_repository import UserRepository
 from home.apps.system.schemas.user import UserSchema
 from home.apps.system.schemas.user_auth import UserAuthSchema
+from home.web.dependencies.session import get_session, transaction
+from home.web.schemas.token import TokenSchema
 
 # 本模块方法
 from ..messageContent import content_productor

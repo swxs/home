@@ -1,8 +1,3 @@
-from home.web.schemas.types import objectId
-# -*- coding: utf-8 -*-
-# @File    : api/upload.py
-# @AUTH    : code_creater
-
 import logging
 
 from fastapi import APIRouter, Path, UploadFile
@@ -11,10 +6,16 @@ from fastapi.param_functions import Depends
 from home.web.response import CustomFileresponse, success
 from home.web.schemas.response import CountResponse, SuccessResponse
 from home.web.schemas.token import get_required_user_id
+from home.web.schemas.types import objectId
 
 # 本模块方法
 from ..schemas.response import FileInfoResponse, FilePathResponse
 from ..services.upload_service import UploadService, get_upload_service
+
+# -*- coding: utf-8 -*-
+# @File    : api/upload.py
+# @AUTH    : code_creater
+
 
 router = APIRouter()
 

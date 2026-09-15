@@ -7,10 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 
 import home.core as core
+from home.apps import api_router
 from home.web.handlers.unknown_exception_handler import unknown_exception_handler
 from home.web.handlers.unknown_http_handler import unknown_http_handler
-
-from home.apps import api_router
 
 logger = logging.getLogger("main")
 

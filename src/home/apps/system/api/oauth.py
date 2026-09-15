@@ -9,12 +9,12 @@ from fastapi import APIRouter, Form, Query, Request
 from fastapi.param_functions import Depends
 
 from home.web.response import (
-    CORSResponse,
     CORSJSONResponse,
     CORSRedirectResponse,
+    CORSResponse,
 )
 from home.web.schemas.response import SuccessResponse
-from home.web.schemas.token import TokenSchema, get_token, get_optional_user_id
+from home.web.schemas.token import TokenSchema, get_optional_user_id, get_token
 from home.web.schemas.types import objectId
 
 # 本模块方法

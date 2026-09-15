@@ -5,9 +5,9 @@
 从MongoDB导出的JSON文件批量导入到MySQL数据库
 """
 
-import os
-import json
 import asyncio
+import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional

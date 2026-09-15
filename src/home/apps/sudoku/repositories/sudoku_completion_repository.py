@@ -9,8 +9,8 @@ from sqlalchemy import func, select
 
 from home.mysqlengine.repositories import BaseRepository
 from home.web.schemas.pagination import PageSchema
-
 from home.web.schemas.types import objectId
+
 # 本模块方法
 from ..models.sudoku_completion import SudokuCompletion
 from ..models.sudoku_puzzle import SudokuPuzzle

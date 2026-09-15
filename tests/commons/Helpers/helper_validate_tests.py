@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+
 from home.commons.Helpers import RegEnum
 from home.commons.Helpers.Helper_validate import Validate
 

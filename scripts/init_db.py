@@ -6,6 +6,7 @@ from home.mysqlengine import Base
 
 def register_database():
     # 预先创建数据表
+    from home.apps.notify.email.models import email_send_record
     from home.apps.password_lock.models import password_lock
     from home.apps.sudoku.models import sudoku_completion, sudoku_puzzle
     from home.apps.system.models import (
@@ -17,7 +18,6 @@ def register_database():
     )
     from home.apps.upload.models import file_info, file_share_link
     from home.apps.wechat.models import wechat_msg
-    from home.apps.notify.email.models import email_send_record
 
     if config.MYSQL_USERNAME and config.MYSQL_PASSWORD:
         MYSQL_URL = f"mariadb+pymysql://{config.MYSQL_USERNAME}:{config.MYSQL_PASSWORD}@{config.MYSQL_HOST}:{config.MYSQL_PORT}/{config.MYSQL_DATABASE}?charset=utf8mb4"

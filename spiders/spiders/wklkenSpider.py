@@ -4,11 +4,11 @@
 # @Time    : 2018/1/31 23:51
 
 import datetime
+
 import scrapy
-from scrapy import Request
-from scrapy import Selector
-from model_spider.model_spider.items import ArticalItem
 from apps.utils.artical import Artical
+from model_spider.model_spider.items import ArticalItem
+from scrapy import Request, Selector
 
 
 class WklkenSpider(scrapy.Spider):
@@ -22,11 +22,11 @@ class WklkenSpider(scrapy.Spider):
 
     custom_settings = {
         # item处理管道
-        'ITEM_PIPELINES': {},
+        "ITEM_PIPELINES": {},
     }
 
     def get_url(self, selector):
-        return selector.css('a.title::attr(href)').extract_first()
+        return selector.css("a.title::attr(href)").extract_first()
 
     def is_yestaerday_artical(self, time):
         return (
@@ -36,11 +36,11 @@ class WklkenSpider(scrapy.Spider):
     # 默认response处理函数
     def parse(self, response):
         sel = Selector(text=response.body)
-        next_page_list = sel.css('p.paginator>a::attr(href)').extract()
+        next_page_list = sel.css("p.paginator>a::attr(href)").extract()
         for next_page in next_page_list:
             yield Request(next_page, method="GET", callback=self.parse)
 
-        artical_html_list = sel.css('li.article')
+        artical_html_list = sel.css("li.article")
         for artical_html in artical_html_list:
             artical_sel = Selector(text=artical_html.extract())
             artical_item = ArticalItem()
@@ -50,11 +50,11 @@ class WklkenSpider(scrapy.Spider):
     def content_parse(self, response):
         artical_sel = Selector(text=response.body)
         artical_item = ArticalItem()
-        artical_item["title"] = artical_sel.css('article#article>section#header>h1::text').extract_first()
-        artical_item["summary"] = artical_sel.css('article#article>section#header>h1::text').extract_first()
+        artical_item["title"] = artical_sel.css("article#article>section#header>h1::text").extract_first()
+        artical_item["summary"] = artical_sel.css("article#article>section#header>h1::text").extract_first()
         artical_item["author"] = "wklken"
         artical_item["source"] = response.url
-        artical_item["content"] = artical_sel.css('article#article>section#content').extract_first()
+        artical_item["content"] = artical_sel.css("article#article>section#content").extract_first()
 
         Artical.create(
             **dict(

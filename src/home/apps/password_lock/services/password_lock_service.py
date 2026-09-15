@@ -7,13 +7,13 @@ from typing import Any, Dict, Optional
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from home.web.schemas.types import objectId
-from home.web.dependencies.session import get_session, transaction
 
 # 通用方法
 from home.commons.Helpers import encryption
+from home.web.dependencies.session import get_session, transaction
 from home.web.exceptions import Http400BadRequestException
 from home.web.schemas.pagination import PageSchema
+from home.web.schemas.types import objectId
 
 # 本模块方法
 from .. import consts
@@ -104,9 +104,7 @@ class PasswordLockService:
             if str(password_lock.user_id) != user_id:
                 raise Http400BadRequestException(Http400BadRequestException.IllegalArgument, "无权访问该密码")
 
-            await self.repo.update_one(
-                password_lock_id, PasswordLockUpdate(used=password_lock.used + 1)
-            )
+            await self.repo.update_one(password_lock_id, PasswordLockUpdate(used=password_lock.used + 1))
 
         # 获取密码
         password_lock_out = PasswordLockOut.model_validate(password_lock)

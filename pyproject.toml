@@ -87,8 +87,6 @@ line-ending = "auto"
 
 [tool.isort]
 profile = "black"
-length_sort_straight = true
-length_sort_sections = ["fastapi", "wechatpy"]
 case_sensitive = true
 group_by_package = true
 combine_as_imports = true

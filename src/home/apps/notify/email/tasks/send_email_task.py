@@ -1,11 +1,12 @@
-from home.web.schemas.types import objectId
 # -*- coding: utf-8 -*-
 """邮件发送后台任务：脱离 HTTP 请求生命周期，仅使用 mysqlengine session 原语。"""
 
 import logging
 
 from home.mysqlengine import open_session, transaction
+from home.web.schemas.types import objectId
 
+# 本模块方法
 from ...consts import EmailSendStatus
 from ..channel import send_email
 from ..repositories.email_send_record_repository import EmailSendRecordRepository

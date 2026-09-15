@@ -3,22 +3,22 @@
 # @AUTH    : code_creater
 
 import logging
-from typing import Optional
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
 from urllib.parse import urlencode
 
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from home.web.schemas.types import objectId
-from home.web.dependencies.session import get_session, transaction
 
 import home.core as core
-from home.web import exceptions
-from home.web.schemas.token import TokenSchema
 
 # 通用方法
 from home.commons.Helpers import refresh_tokener, tokener
+from home.web import exceptions
+from home.web.dependencies.session import get_session, transaction
+from home.web.schemas.token import TokenSchema
+from home.web.schemas.types import objectId
 
 # 本模块方法
 from ..repositories.oauth_authorization_code_repository import (
@@ -287,9 +287,7 @@ class OAuthService:
 
                 # 标记授权码为已使用（在单独的事务中）
                 async with transaction(self.session):
-                    await self.auth_code_repo.update_one(
-                        str(auth_code.id), OAuthAuthorizationCodeSchema(is_used=True)
-                    )
+                    await self.auth_code_repo.update_one(str(auth_code.id), OAuthAuthorizationCodeSchema(is_used=True))
 
                 # 保存user_id和scope以便在事务外使用
                 user_id = str(auth_code.user_id)
@@ -352,7 +350,10 @@ class OAuthService:
 
             else:
                 return OAuthJSONResult(
-                    content={"error": "unsupported_grant_type", "error_description": f"不支持的grant_type: {grant_type}"},
+                    content={
+                        "error": "unsupported_grant_type",
+                        "error_description": f"不支持的grant_type: {grant_type}",
+                    },
                     status_code=400,
                 )
         except Exception as e:

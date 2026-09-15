@@ -20,11 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from home.commons.Helpers import oss2_helper  # noqa: E402
-from home.mysqlengine import open_session, transaction  # noqa: E402
-
 # 脚本允许直接从仓库根目录运行。
 from home.apps.upload.storage import build_object_key  # noqa: E402
+from home.commons.Helpers import oss2_helper  # noqa: E402
+from home.mysqlengine import open_session, transaction  # noqa: E402
 
 
 @dataclass
@@ -79,10 +78,7 @@ async def _ensure_nullable_user_id(session) -> None:
     if await _column_exists(session, "user_id"):
         return
     await session.execute(
-        text(
-            "ALTER TABLE file_info "
-            "ADD COLUMN user_id BINARY(12) NULL COMMENT '所属用户ID' AFTER id"
-        )
+        text("ALTER TABLE file_info ADD COLUMN user_id BINARY(12) NULL COMMENT '所属用户ID' AFTER id")
     )
     await session.commit()
 
@@ -101,15 +97,11 @@ async def _load_rows(session, *, has_user_id: bool):
 def _validate_size(oss_helper, key: str, expected_size: int) -> None:
     _, _, actual_size = oss_helper.get_file_meta(key)
     if actual_size != expected_size:
-        raise ValueError(
-            f"OSS 对象大小不一致: key={key}, expected={expected_size}, actual={actual_size}"
-        )
+        raise ValueError(f"OSS 对象大小不一致: key={key}, expected={expected_size}, actual={actual_size}")
 
 
 async def _finalize_schema(session) -> None:
-    null_count = (
-        await session.execute(text("SELECT COUNT(*) FROM file_info WHERE user_id IS NULL"))
-    ).scalar()
+    null_count = (await session.execute(text("SELECT COUNT(*) FROM file_info WHERE user_id IS NULL"))).scalar()
     if null_count:
         raise RuntimeError(f"仍有 {null_count} 条 FileInfo 未设置 user_id，不能收紧约束")
 
@@ -128,24 +120,14 @@ async def _finalize_schema(session) -> None:
     names = {row["Key_name"] for row in indexes}
     if "uq_file_info_user_content" not in names:
         await session.execute(
-            text(
-                "ALTER TABLE file_info ADD CONSTRAINT uq_file_info_user_content "
-                "UNIQUE (user_id, file_id, file_size)"
-            )
+            text("ALTER TABLE file_info ADD CONSTRAINT uq_file_info_user_content UNIQUE (user_id, file_id, file_size)")
         )
     if "idx_file_info_user_id" not in names:
         await session.execute(text("CREATE INDEX idx_file_info_user_id ON file_info (user_id)"))
     if "idx_file_info_content" not in names:
-        await session.execute(
-            text("CREATE INDEX idx_file_info_content ON file_info (file_id, file_size)")
-        )
+        await session.execute(text("CREATE INDEX idx_file_info_content ON file_info (file_id, file_size)"))
 
-    await session.execute(
-        text(
-            "ALTER TABLE file_info MODIFY COLUMN "
-            "user_id BINARY(12) NOT NULL COMMENT '所属用户ID'"
-        )
-    )
+    await session.execute(text("ALTER TABLE file_info MODIFY COLUMN user_id BINARY(12) NOT NULL COMMENT '所属用户ID'"))
     await session.commit()
 
 
@@ -221,16 +203,12 @@ async def migrate(
             await _finalize_schema(session)
 
     action = "would migrate" if dry_run else "migrated"
-    print(
-        f"Done: {action}={stats.migrated}, skipped={stats.skipped}, failed={stats.failed}"
-    )
+    print(f"Done: {action}={stats.migrated}, skipped={stats.skipped}, failed={stats.failed}")
     return stats
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Migrate FileInfo ownership and OSS object keys"
-    )
+    parser = argparse.ArgumentParser(description="Migrate FileInfo ownership and OSS object keys")
     parser.add_argument("--user-id", required=True, help="历史文件归属的 User ObjectId")
     parser.add_argument("--dry-run", action="store_true", help="仅校验和打印，不写库或 OSS")
     args = parser.parse_args()

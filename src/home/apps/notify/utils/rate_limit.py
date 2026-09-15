@@ -3,6 +3,7 @@
 import home.core as core
 from home.web import exceptions
 
+# 本模块方法
 from .redis_client import get_redis
 
 

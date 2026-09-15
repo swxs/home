@@ -9,8 +9,8 @@ import pydantic
 from bson import ObjectId
 from fastapi import Query
 
-from home.web.schemas.types import objectId
 from home.web.schemas import BaseSchema
+from home.web.schemas.types import objectId
 
 
 # 说明：UserSchema 作为字段基类保留，并被作为「创建/查询载荷」在 auth/oauth/wechat 等处复用。

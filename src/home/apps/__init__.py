@@ -1,13 +1,13 @@
 from fastapi import APIRouter
 
 # 本模块方法
+from .notify.api import router as notify_router
 from .password_lock.api import router as password_lock_router
 from .sudoku.api import router as sudoku_router
 from .system.api import router as system_router
 from .system.api.oauth import oauth_router
 from .upload.api import router as upload_router
 from .wechat.api import router as wechat_router
-from .notify.api import router as notify_router
 
 api_router = APIRouter(prefix="/api", tags=["api"])
 

@@ -3,9 +3,10 @@
 # @AUTH    : swxs
 # @Time    : 2018/7/18 15:51
 
-import time
 import math
+import time
 import unittest
+
 from home.commons.Metaclass.Singleton import Singleton
 
 
@@ -30,7 +31,7 @@ class A(object, metaclass=Singleton):
 
 class B(object):
     def __new__(cls, *args):
-        singleton = cls.__dict__.get('__singleton__')
+        singleton = cls.__dict__.get("__singleton__")
         if singleton is not None:
             return singleton
         cls.__singleton__ = singleton = super(B, cls).__new__(cls)

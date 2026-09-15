@@ -1,12 +1,10 @@
 import unittest
 
+from home.apps.upload.storage import build_object_key
 from scripts.migrate_file_info_storage import (
     _validate_size,
     build_legacy_object_key,
 )
-
-from home.apps.upload.storage import build_object_key
-
 
 MD5 = "D41D8CD98F00B204E9800998ECF8427E"
 

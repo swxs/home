@@ -1,10 +1,10 @@
 from bson import ObjectId
 from wechatpy.replies import TextReply
 
+from home.apps.system.repositories.user_repository import UserRepository
+
 # 通用方法
 from home.commons.Helpers import reader_async_helper
-
-from home.apps.system.repositories.user_repository import UserRepository
 
 # 本模块方法
 from .content import Content

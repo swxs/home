@@ -12,15 +12,11 @@ import httpx
 from fastapi import BackgroundTasks
 from fastapi.param_functions import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from home.web.schemas.types import objectId
-from home.web.dependencies.session import get_session, transaction
 
 import home.core as core
 from home.apps.notify.consts import EmailTemplateType, TokenPurpose
 from home.apps.notify.email.services.email_send_service import EmailSendService
 from home.apps.notify.utils.redis_client import RedisTokenStore
-from home.web import exceptions
-from home.web.schemas.token import TokenSchema
 
 # 通用方法
 from home.commons.Helpers import refresh_tokener, tokener
@@ -28,6 +24,10 @@ from home.commons.Helpers.Helper_JWT import (
     ExpiredSignatureError,
     InvalidSignatureError,
 )
+from home.web import exceptions
+from home.web.dependencies.session import get_session, transaction
+from home.web.schemas.token import TokenSchema
+from home.web.schemas.types import objectId
 
 # 本模块方法
 from .. import consts
@@ -100,9 +100,7 @@ class AuthService:
         )
 
     async def refresh_token(self, ttype: int, identifier: str, credential: str) -> Dict[str, str]:
-        user_auth = await self.identity_repo.find_user_auth(
-            UserAuthSchema(ttype=ttype, identifier=identifier)
-        )
+        user_auth = await self.identity_repo.find_user_auth(UserAuthSchema(ttype=ttype, identifier=identifier))
 
         if not user_auth or not verify_password(credential, user_auth.credential or ""):
             raise exceptions.Http403ForbiddenException(
@@ -155,9 +153,7 @@ class AuthService:
                 exceptions.Http409ConflictException.ResourceConflict,
                 "用户名已存在",
             )
-        if await self.identity_repo.find_user_auth(
-            UserAuthSchema(ttype=consts.UserAuth_Ttype.EMAIL, identifier=email)
-        ):
+        if await self.identity_repo.find_user_auth(UserAuthSchema(ttype=consts.UserAuth_Ttype.EMAIL, identifier=email)):
             raise exceptions.Http409ConflictException(
                 exceptions.Http409ConflictException.ResourceConflict,
                 "邮箱已被注册",

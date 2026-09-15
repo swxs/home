@@ -12,8 +12,10 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from home.mysqlengine.session import open_session as _open_session
-from home.mysqlengine.session import transaction as _db_transaction
+from home.mysqlengine.session import (
+    open_session as _open_session,
+    transaction as _db_transaction,
+)
 
 # 本模块方法
 from ..exceptions import (
