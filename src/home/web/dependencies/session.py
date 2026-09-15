@@ -73,7 +73,10 @@ def _convert_db_exception(exc: Exception) -> Exception:
 
 
 async def get_session():
-    """FastAPI 依赖：请求级 session 分发，并将 DB 异常转为 HTTP 异常。"""
+    """FastAPI 依赖：请求级 session 分发，并将 DB 异常转为 HTTP 异常。
+
+    Session 生命周期由 ``mysqlengine.open_session`` 负责（退出时 close），此处不再重复 close。
+    """
     async with _open_session() as session:
         try:
             yield session
@@ -81,13 +84,14 @@ async def get_session():
             raise _convert_db_exception(exc) from exc
         except BaseHttpException as exc:
             raise exc
-        finally:
-            await session.close()
 
 
 @asynccontextmanager
 async def transaction(session: AsyncSession):
-    """写路径事务边界（HTTP 场景）：commit / rollback + DB 异常转换。"""
+    """写路径事务边界（HTTP 场景）：commit / rollback + DB 异常转换。
+
+    嵌套与调用约定见 ``home.mysqlengine.session.transaction`` 的 docstring，HTTP 层同样适用。
+    """
     try:
         async with _db_transaction(session):
             yield session
