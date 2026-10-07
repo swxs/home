@@ -26,7 +26,6 @@ home/
 ├── spiders/           # Scrapy 爬虫（独立子项目）
 ├── tests/             # 单元测试
 ├── scripts/           # 运维脚本
-├── init/              # 遗留初始化脚本
 ├── logs/  temp/       # 运行时目录
 └── docs/
 ```
@@ -40,7 +39,6 @@ home/
 | **home.apps**    | `src/home/apps/`  | 业务应用集合，子应用挂载到 `/api`                                                                                       |
 | **home.mysqlengine** | `src/home/mysqlengine/` | 异步 SQLAlchemy 封装：`session.py`（`open_session`、`transaction`）、Base、SessionLocal、baseModel、BaseRepository |
 | **home.commons** | `src/home/commons/` | 跨应用通用工具：Decorators、Helpers、Metaclass、Utils                                                               |
-| **init**         | `init/`           | 系统初始化脚本（遗留）                                                                                                  |
 | **scripts**      | `scripts/`        | 运维/数据脚本                                                                                                           |
 | **tests**        | `tests/`          | 测试                                                                                                                    |
 | **docs**         | `docs/`           | 工程规范文档                                                                                                            |
